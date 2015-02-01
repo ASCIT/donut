@@ -15,17 +15,20 @@ app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
 app.register_blueprint(example.blueprint, url_prefix='/example')
 
 # Create database engine object.
-# TODO: Fix after set up database.
+# TODO##DatabaseWork: We currently don't have a database set up, so we can't
+# reference sqlalchemy yet. However, it serves as a good example implementation.
 # engine = create_engine(config.DB_URI, convert_unicode=True)
 
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
+  # TODO#DatabaseWork uncomment this line
   # g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
+  # TODO#DatabaseWork uncomment these lines
   # if g.db != None:
   #  g.db.close()
 
