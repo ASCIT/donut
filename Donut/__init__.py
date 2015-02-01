@@ -1,10 +1,10 @@
-from flask import Flask, g
-from sqlalchemy import create_engine
+import flask
+import sqlalchemy
 
 from Donut import config, constants
 from Donut.modules import example
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 app.debug = False
 app.secret_key = config.SECRET_KEY
 
@@ -17,20 +17,20 @@ app.register_blueprint(example.blueprint, url_prefix='/example')
 # Create database engine object.
 # TODO##DatabaseWork: We currently don't have a database set up, so we can't
 # reference sqlalchemy yet. However, it serves as a good example implementation.
-# engine = create_engine(config.DB_URI, convert_unicode=True)
+# engine = sqlalchemy.create_engine(config.DB_URI, convert_unicode=True)
 
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
   # TODO#DatabaseWork uncomment this line
-  # g.db = engine.connect()
+  # flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
   # TODO#DatabaseWork uncomment these lines
-  # if g.db != None:
-  #  g.db.close()
+  # if flask.g.db != None:
+  #  flask.g.db.close()
 
 # After initialization, import the routes.
 from Donut import routes

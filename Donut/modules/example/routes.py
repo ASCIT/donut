@@ -1,8 +1,8 @@
-from flask import render_template
+import flask
 
 from Donut.modules.example import blueprint
 
 @blueprint.route('/')
 def home():
   """Loads an example page."""
-  return render_template('example_index.html')
+  return flask.render_template('example_index.html')
