@@ -1,4 +1,4 @@
-# donut-python
+# donut-python [![Build Status][travis-image]][travis-url]
 The repository for Donut.
 
 # Instructions
@@ -22,3 +22,6 @@ Finally, you can start the server:
 ```
 $ python run_server.py
 ```
+
+[travis-url]: https://travis-ci.org/ASCIT/donut-python
+[travis-image]: https://travis-ci.org/ASCIT/donut-python.svg
