@@ -1,12 +1,16 @@
 import flask
 import sqlalchemy
+import os
 
-from Donut import config, constants
+from Donut import constants
 from Donut.modules import example
 
 app = flask.Flask(__name__)
 app.debug = False
-app.secret_key = config.SECRET_KEY
+
+# Get app config, if we're not testing on travis.
+if 'TRAVIS' not in os.environ:
+  app.config.from_object('Donut.config')
 
 # Maximum file upload size, in bytes.
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
@@ -17,7 +21,7 @@ app.register_blueprint(example.blueprint, url_prefix='/example')
 # Create database engine object.
 # TODO##DatabaseWork: We currently don't have a database set up, so we can't
 # reference sqlalchemy yet. However, it serves as a good example implementation.
-# engine = sqlalchemy.create_engine(config.DB_URI, convert_unicode=True)
+# engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
 
 @app.before_request
 def before_request():
