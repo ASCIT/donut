@@ -1,6 +1,6 @@
 import flask
 
-from Donut.tests.fixtures import *
+from Donut.tests.fixtures import client
 from Donut import app
 
 def testHome(client):
