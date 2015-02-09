@@ -23,4 +23,4 @@ $ pip install -r requirements.txt
 - To run the test suite: `$ py.test .`
 
 [travis-url]: https://travis-ci.org/ASCIT/donut-python
-[travis-image]: https://travis-ci.org/ASCIT/donut-python.svg
+[travis-image]: https://travis-ci.org/ASCIT/donut-python.svg?branch=master
