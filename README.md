@@ -9,6 +9,7 @@ git clone https://github.com/ASCIT/donut-python.git ~/donut
 ```
 - Set up your virtualenv:
 ```
+mkdir virtualenvs (if you haven't already)
 cd ~/virtualenvs
 virtualenv donut
 source ~/virtualenvs/donut/bin/activate
