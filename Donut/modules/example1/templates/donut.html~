@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Template</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">DONUT</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ASCIT <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Campus Positions</a></li>
+                <li><a href="#">Clubs</a></li>
+                <li><a href="#">Contacts</a></li>
+                <li><a href="#">Documents</a></li>
+                <li><a href="#">Suggestions</a></li>
+              </ul>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">User Services <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">ARC Feedback</a></li>
+                <li><a href="#">Calendar</a></li>
+                <li><a href="#">Course Reviews</a></li>
+                <li><a href="#">Course Scheduler</a></li>
+                <li><a href="#">Directory</a></li>
+                <li><a href="#">Marketplace</a></li>
+                <li><a href="#">Newsgroups</a></li>
+                <li><a href="#">Room Reservations</a></li>
+                <li><a href="#">Surveys and Voting</a></li>
+              </ul>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Committees <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">ARC</a></li>
+                <li><a href="#">BoC</a></li>
+                <li><a href="#">CRC</a></li>
+                <li><a href="#">IHC</a></li>
+                <li><a href="#">ESC</a></li>
+              </ul>
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Publications <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">The Tech</a></li>
+                <li><a href="#">little T</a></li>
+                <li><a href="#">Big T</a></li>
+                <li><a href="#">Totem</a></li>
+              </ul>
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">New Account</a></li>
+                <li><a href="#">Recover Password</a></li>
+              </ul>
+            </li>
+            <li>
+                <form action="#">
+                    <button class="btn pull-right navbar-btn">Log In</button>
+                </form>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>caltech donut</h1>
+        <p>Welcome to Donut, the official website of the Associated Students of the California Institute of Technology. We provide unique services on behalf of the student body in an effort to better communication and make services accessible to all students.<p>
+
+        <p>If you're a guest or prospective student, you might consider looking into our publications or ASCIT documents in the left-hand sidebar to get a better idea of who we are. You can also email the board of directors from the suggestions page if you'd like more information.
+        If you're a student or on campus, you can explore more features, such as the undergraduate directory search or course review system.<p>
+
+        <p>And of course, if you have any questions/comments/concerns/jokes you'd like the site admins to know, don't hesitate to contact us below.<p>
+
+        Sincerely, 
+        Donut Devteam
+
+        </p>
+      </div>
+
+
+
+      
+
+
+      
+
+
+      
+
+     
+
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="./assets/js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
