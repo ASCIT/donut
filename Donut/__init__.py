@@ -16,7 +16,6 @@ if 'TRAVIS' not in os.environ:
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
 
 # Load blueprint modules
-app.register_blueprint(example1.blueprint, url_prefix='/example1')
 app.register_blueprint(example.blueprint, url_prefix='/example')
 
 # Create database engine object.
