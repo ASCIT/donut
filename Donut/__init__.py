@@ -3,7 +3,7 @@ import sqlalchemy
 import os
 
 from Donut import constants
-from Donut.modules import example, example1
+from Donut.modules import example 
 
 app = flask.Flask(__name__)
 app.debug = False
