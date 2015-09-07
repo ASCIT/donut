@@ -10,6 +10,9 @@ __pycache__/
 # Backup files
 *~
 
+# Swap files
+*.swp
+
 # Distribution / packaging
 .Python
 env/
