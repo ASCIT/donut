@@ -3,5 +3,5 @@
 # settings enabled.
 from Donut import app, config
 
-port = getattr(config, 'PORT', 5000)
+port = getattr(config, 'PORT', 5050)
 app.run(debug=True, port=port)

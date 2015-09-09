@@ -1,3 +1,74 @@
-<div id="header">
-  This is a header!
+<div id=""header">
+     <!-- Fixed navbar -->
+     <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for("home") }}">DONUT</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="{{ url_for("home") }}">Home</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ASCIT <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Campus Positions</a></li>
+                            <li><a href="#">Clubs</a></li>
+                            <li><a href="{{ url_for("contact") }}">Contacts</a></li>
+                            <li><a href="#">Documents</a></li>
+                            <li><a href="#">Suggestions</a></li>
+                        </ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">User Services <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">ARC Feedback</a></li>
+                            <li><a href="#">Calendar</a></li>
+                            <li><a href="#">Course Reviews</a></li>
+                            <li><a href="#">Course Scheduler</a></li>
+                            <li><a href="#">Directory</a></li>
+                            <li><a href="#">Marketplace</a></li>
+                            <li><a href="#">Newsgroups</a></li>
+                            <li><a href="#">Room Reservations</a></li>
+                            <li><a href="#">Surveys and Voting</a></li>
+                        </ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Committees <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">ARC</a></li>
+                            <li><a href="#">BoC</a></li>
+                            <li><a href="#">CRC</a></li>
+                            <li><a href="#">IHC</a></li>
+                            <li><a href="#">ESC</a></li>
+                        </ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Publications <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">The Tech</a></li>
+                            <li><a href="#">little T</a></li>
+                            <li><a href="#">Big T</a></li>
+                            <li><a href="#">Totem</a></li>
+                        </ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">New Account</a></li>
+                            <li><a href="#">Recover Password</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <form action="#">
+                            <button class="btn pull-right navbar-btn">Log In</button>
+                        </form>
+                    </li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
 </div>
+
+
