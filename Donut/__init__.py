@@ -28,14 +28,14 @@ app.register_blueprint(example.blueprint, url_prefix='/example')
 def before_request():
   """Logic executed before request is processed."""
   # TODO#DatabaseWork uncomment this line
-  flask.g.db = engine.connect()
+# flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
   # TODO#DatabaseWork uncomment these lines
-  if flask.g.db != None:
-   flask.g.db.close()
+# if flask.g.db != None:
+#  flask.g.db.close()
 
 # After initialization, import the routes.
 from Donut import routes
