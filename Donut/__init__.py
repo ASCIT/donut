@@ -19,25 +19,19 @@ if 'TRAVIS' not in os.environ:
 # Maximum file upload size, in bytes.
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
 app.secret_key = app.config['SECRET_KEY']
-# Load blueprint modules
-# app.register_blueprint(example.blueprint, url_prefix='/example')
 
-# Create database engine object.
-# TODO##DatabaseWork: We currently don't have a database set up, so we can't
-# reference sqlalchemy yet. However, it serves as a good example implementation.
+# Load blueprint modules
 
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
-  if 'DB_URI' in app.config
+  if 'DB_URI' in app.config:
     engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
-    # TODO#DatabaseWork uncomment this line
     flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
-  # TODO#DatabaseWork uncomment these lines
   db = getattr(flask.g, 'db', None)
   if db is not None:
    db.close()
