@@ -29,17 +29,21 @@ app.secret_key = app.config['SECRET_KEY']
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
-  # engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
+  if 'TRAVIS' in os.environ:
+      return
+  engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
   # TODO#DatabaseWork uncomment this line
-  # flask.g.db = engine.connect()
+  flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
   # TODO#DatabaseWork uncomment these lines
-  # db = getattr(flask.g, 'db', None)
-  # if db is not None:
-   # db.close()
+  if 'TRAVIS' in os.environ:
+      return
+  db = getattr(flask.g, 'db', None)
+  if db is not None:
+   db.close()
 
    # Error handlers
 @app.errorhandler(httplib.NOT_FOUND)
@@ -52,15 +56,15 @@ def access_forbidden(error):
   """ Handles a 403 access forbidden error. """
   return flask.render_template("403.html"), httplib.FORBIDDEN
 
-# @app.errorhandler(httplib.INTERNAL_SERVER_ERROR)
-# def internal_server_error(error):
-#   """
-#   Handles a 500 internal server error response. This error is usually the
-#   result of an improperly configured server or bugs in the actual codebase
-#   (user errors should be handled gracefully), so IMSS must be notified if this
-#   error occurs.
-#   """
-#   return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
+@app.errorhandler(httplib.INTERNAL_SERVER_ERROR)
+def internal_server_error(error):
+  """
+  Handles a 500 internal server error response. This error is usually the
+  result of an improperly configured server or bugs in the actual codebase
+  (user errors should be handled gracefully), so IMSS must be notified if this
+  error occurs.
+  """
+  return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
 
 # After initialization, import the routes.
 from Donut import routes
