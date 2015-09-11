@@ -7,7 +7,7 @@ import httplib
 import datetime
 
 from Donut import constants
-from Donut.modules import example 
+from Donut.modules import example
 
 app = flask.Flask(__name__)
 app.debug = False
@@ -29,17 +29,17 @@ app.register_blueprint(example.blueprint, url_prefix='/example')
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
-  engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
+  # engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
   # TODO#DatabaseWork uncomment this line
-  flask.g.db = engine.connect()
+  # flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
   # TODO#DatabaseWork uncomment these lines
-  db = getattr(flask.g, 'db', None)
-  if db is not None:
-   db.close()
+  # db = getattr(flask.g, 'db', None)
+  # if db is not None:
+   # db.close()
 
    # Error handlers
 @app.errorhandler(httplib.NOT_FOUND)
