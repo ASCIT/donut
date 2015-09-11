@@ -1,5 +1,4 @@
 import flask
-
 from Donut import app
 
 @app.route('/')
