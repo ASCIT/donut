@@ -29,18 +29,15 @@ app.secret_key = app.config['SECRET_KEY']
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""
-  if 'TRAVIS' in os.environ:
-      return
-  engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
-  # TODO#DatabaseWork uncomment this line
-  flask.g.db = engine.connect()
+  if 'DB_URI' in app.config
+    engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
+    # TODO#DatabaseWork uncomment this line
+    flask.g.db = engine.connect()
 
 @app.teardown_request
 def teardown_request(exception):
   """Logic executed after every request is finished."""
   # TODO#DatabaseWork uncomment these lines
-  if 'TRAVIS' in os.environ:
-      return
   db = getattr(flask.g, 'db', None)
   if db is not None:
    db.close()
