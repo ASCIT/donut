@@ -51,6 +51,7 @@ def access_forbidden(error):
   """ Handles a 403 access forbidden error. """
   return flask.render_template("403.html"), httplib.FORBIDDEN
 
+"""
 @app.errorhandler(httplib.INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
   """
@@ -61,5 +62,6 @@ def internal_server_error(error):
   """
   return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
 
+"""
 # After initialization, import the routes.
 from Donut import routes
