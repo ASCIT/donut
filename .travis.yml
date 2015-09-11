@@ -6,8 +6,6 @@ services: mysql
 env:
   - FLASK=0.10.1
 before_install:
-    # sudo apt-get build-dep python-mysqldb
-    # sudo apt-get install libmysqlclient18=10.1.7-maria-1~precise
     sudo apt-get install libmariadbclient-dev
 install: "pip install -r requirements.txt"
 addons:
