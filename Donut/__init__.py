@@ -6,7 +6,6 @@ import traceback
 import httplib
 import datetime
 
-from Donut import config
 from Donut import constants
 
 app = flask.Flask(__name__)
