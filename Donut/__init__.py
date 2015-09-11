@@ -36,7 +36,7 @@ def teardown_request(exception):
   if db is not None:
    db.close()
 
-   # Error handlers
+# Error handlers
 @app.errorhandler(httplib.NOT_FOUND)
 def page_not_found(error):
   """ Handles a 404 page not found error. """
@@ -50,10 +50,7 @@ def access_forbidden(error):
 @app.errorhandler(httplib.INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
   """
-  Handles a 500 internal server error response. This error is usually the
-  result of an improperly configured server or bugs in the actual codebase
-  (user errors should be handled gracefully), so IMSS must be notified if this
-  error occurs.
+  Handles a 500 internal server error response. 
   """
   return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
 
