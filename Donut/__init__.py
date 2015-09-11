@@ -22,6 +22,11 @@ app.secret_key = app.config['SECRET_KEY']
 
 # Load blueprint modules
 
+# Create database engine object.
+# TODO ##DatabaseWork: We currently don't have a database set up, so we can't
+# reference sqlalchemy yet. However, it serves as a good example implementation.
+# engine = sqlalchemy.create_engine(app.config['DB_URI'], convert_unicode=True)
+
 @app.before_request
 def before_request():
   """Logic executed before request is processed."""

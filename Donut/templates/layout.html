@@ -2,7 +2,8 @@
 <html lang="en">
     <head>
         <title>Donut</title>
-        <link rel="stylesheet" type="text/css"
+        
+        <link rel="stylesheet" type="text/css" 
               href="{{ url_for('static', filename='css/style.css') }}" />
         {# Google Fonts #}
         <link href='https://fonts.googleapis.com/css?family=EB+Garamond|Roboto' rel='stylesheet' type='text/css'>
@@ -22,7 +23,7 @@
         {% block head %}
         {% endblock head %}
     </head>
-        <body style="padding-top: 65px">
+        <body>
             {% include "includes/header.html" %}
             <div id="content">
                 <div id="content-body">
@@ -39,7 +40,6 @@
             </div>
             {% include "includes/footer.html" %}
             {# Bootstrap core JavaScript
-    ================================================== #}
             {# Placed at the end of the document so the pages load faster #}
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
