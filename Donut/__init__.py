@@ -10,7 +10,6 @@ from Donut import constants
 
 app = flask.Flask(__name__)
 app.debug = False
-app.secret_key = config.SECRET_KEY
 
 # Get app config, if we're not testing on travis.
 if 'TRAVIS' not in os.environ:
@@ -18,7 +17,7 @@ if 'TRAVIS' not in os.environ:
 
 # Maximum file upload size, in bytes.
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
-
+app.secret_key = app.config['SECRET_KEY']
 # Load blueprint modules
 # app.register_blueprint(example.blueprint, url_prefix='/example')
 
