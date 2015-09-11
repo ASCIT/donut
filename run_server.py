@@ -3,5 +3,8 @@
 # settings enabled.
 from Donut import app, config
 
-port = getattr(config, 'PORT', 5050)
-app.run(debug=True, port=port)
+if __name__ == "__main__":
+    port = getattr(config, 'PORT', 5050)
+    debug = getattr(config, 'DEBUG', True)
+    app.run(debug=debug, port=port)
+
