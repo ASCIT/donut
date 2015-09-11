@@ -3,9 +3,11 @@ python:
   - "2.6"
   - "2.7"
 services: mysql
-env: 
+env:
   - FLASK=0.10.1
+before_install:
+    sudo apt-get install libmysqlclient-dev
 install: "pip install -r requirements.txt"
-addons: 
+addons:
   mariadb: 10.1
 script: "py.test ."
