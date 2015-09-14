@@ -4,7 +4,7 @@ import os
 import pdb
 
 from Donut import constants
-from Donut.modules import example 
+from Donut.modules import example, auth 
 
 app = flask.Flask(__name__)
 app.debug = False
@@ -18,6 +18,8 @@ app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
 
 # Load blueprint modules
 app.register_blueprint(example.blueprint, url_prefix='/example')
+
+app.register_blueprint(auth.blueprint)
 
 # Create database engine object.
 # TODO ##DatabaseWork: We currently don't have a database set up, so we can't
