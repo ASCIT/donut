@@ -23,8 +23,11 @@ app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
 app.secret_key = app.config['SECRET_KEY']
 
 # Load blueprint modules
+<<<<<<< HEAD
 
 app.register_blueprint(auth.blueprint)
+=======
+>>>>>>> aa1f5766431deff413da9854886e81c66d2d4355
 
 # Create database engine object.
 # TODO ##DatabaseWork: We currently don't have a database set up, so we can't
