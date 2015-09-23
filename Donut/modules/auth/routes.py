@@ -1,5 +1,4 @@
 import flask
-
 from Donut import constants
 from Donut.modules.auth import blueprint
 
@@ -14,3 +13,15 @@ def login_submit():
     # TODO: Add login logic.
     flask.flash('Incorrect username or password. Please try again!')
     return flask.redirect(flask.url_for('auth.login'))
+
+@blueprint.route('/userreg')
+def user_reg():
+	return flask.render_template('userreg.html')
+
+@blueprint.route('/userreg/submit', methods = ['POST'])
+def user_reg_submit():
+	return ""
+
+@blueprint.route('/recover', methods = ['POST'])
+def recover():
+	return ""
