@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    if args.port:
+    if args.port is not None:
         port = args.port
     else:
         port = getattr(config, 'PORT', 5000)
