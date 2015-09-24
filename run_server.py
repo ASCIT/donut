@@ -5,14 +5,17 @@ from Donut import app, config
 import argparse
 
 parser = argparse.ArgumentParser(description='Set up development server.')
-parser.add_argument('port_num', metavar='port_num', type=int, 
+parser.add_argument('-p', '--port', metavar='port', type=int, 
                     help='Port on which to run server.')
 
 args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    port = getattr(config, 'PORT', args.port_num)
+    if args.port:
+        port = args.port
+    else:
+        port = getattr(config, 'PORT', 5000)
     debug = getattr(config, 'DEBUG', True)
     app.run(debug=debug, port=port)
 
