@@ -1,7 +1,7 @@
 # Note: this file is only used for testing locally. The production environment
 # uses wsgi to start up, and bypasses this file. So we are free to have debug
 # settings enabled.
-from Donut import app, config
+from donut import app, config
 import argparse
 
 parser = argparse.ArgumentParser(description='Set up development server.')

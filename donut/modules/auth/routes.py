@@ -1,6 +1,6 @@
 import flask
-from Donut import constants
-from Donut.modules.auth import blueprint
+from donut import constants
+from donut.modules.auth import blueprint
 
 @blueprint.route('/login')
 def login():
