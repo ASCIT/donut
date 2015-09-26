@@ -1,4 +1,5 @@
-Donut/config.py
+donut/config.py
+donut/config_py3.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -6,6 +7,12 @@ __pycache__/
 
 # C extensions
 *.so
+
+# Backup files
+*~
+
+# Swap files
+*.swp
 
 # Distribution / packaging
 .Python
