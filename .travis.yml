@@ -6,7 +6,7 @@ env:
   - FLASK=0.10.1
 before_install:
     sudo apt-get install libmariadbclient-dev
-install: "pip install -r requirements.txt"
+install: "pip install -r requirements.txt --allow-external mysql-connector-python"
 addons:
   mariadb: 10.1
 script: "py.test ."
