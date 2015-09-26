@@ -1,4 +1,5 @@
 donut/config.py
+donut/config_py3.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
