@@ -1,6 +1,6 @@
 import pytest
 
-from Donut import app
+from donut import app
 
 @pytest.fixture
 def client():
