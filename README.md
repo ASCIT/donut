@@ -1,11 +1,11 @@
-# donut-python [![Build Status][travis-image]][travis-url]
+# donut [![Build Status][travis-image]][travis-url]
 The repository for Donut. Written using Python/Flask and powered by PostgreSQL.
 
 # Setting up your environment
 - You should already have SSH access to the development server.
 - Clone the repository:
 ```
-git clone https://github.com/ASCIT/donut-python.git ~/donut
+git clone https://github.com/ASCIT/donut.git ~/donut
 ```
 - Set up your virtualenv:
 ```
@@ -34,5 +34,5 @@ python run_server.py
 ```
 You can visit the test site by going to [localhost:9001](http://localhost:9001) (or whichever port you decided to forward) in your local browser.
 
-[travis-url]: https://travis-ci.org/ASCIT/donut-python
-[travis-image]: https://travis-ci.org/ASCIT/donut-python.svg?branch=master
+[travis-url]: https://travis-ci.org/ASCIT/donut
+[travis-image]: https://travis-ci.org/ASCIT/donut.svg?branch=master
