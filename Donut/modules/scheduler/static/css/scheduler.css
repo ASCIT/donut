@@ -1,0 +1,614 @@
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+}
+
+a:link      {color: #000; text-decoration: none;}
+a:visited   {color: #000; text-decoration: none;}
+a:hover     {color: #000; text-decoration: underline;}
+
+#top_bar_wrapper {
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    width: 1020px;
+    height: 40px;
+}
+
+#top_bar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 40px;
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+
+    /*background: #F7661E;*/
+
+    /* IE10 Consumer Preview */
+    background-image: -ms-linear-gradient(top, #F7661E 0%, #FFD79C 100%);
+    /* Mozilla Firefox */
+    background-image: -moz-linear-gradient(top, #F7661E 0%, #FFD79C 100%);
+    /* Opera */
+    background-image: -o-linear-gradient(top, #F7661E 0%, #FFD79C 100%);
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #F7661E), color-stop(1, #FFD79C));
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-linear-gradient(top, #F7661E 0%, #FFD79C 100%);
+    /* W3C Markup, IE10 Release Preview */
+    background-image: linear-gradient(to bottom, #F7661E 0%, #FFD79C 100%);
+
+    z-index: 3;
+}
+
+#title_wrapper {
+    position: absolute;
+    top: 0px;
+    left: 330px;
+    width: 400px;
+    height: 40px;
+}
+
+#title {
+    position: absolute;
+    top: 0px;
+    left: 34%;
+    width: 42%;
+    height: 40px;
+    background: url('../images/title.png') no-repeat;
+    background-size: contain;
+}
+
+#calendar {
+    position: absolute;
+    top: 40px;
+    left: calc(30% + 5px);
+    height: 760px;
+    width: calc(70% - 5px);
+}
+
+#day_row_wrapper {
+    position: absolute;
+    top: 40px;
+    left: 285px;
+    min-width: 740px;
+    height: 40px;
+}
+
+#day_row {
+    position: absolute;
+    top: 0px;
+    left: 8%;
+    width: 92%;
+    height: 40px;
+    background: #eee;
+    font-weight: bold;
+    line-height: 40px;
+}
+
+.day_title {
+    float: left;
+    height: inherit;
+    width: calc(20% - 3px);
+    text-align: center;
+    border-bottom: 1px solid #aaa;
+}
+
+#time_column_wrapper {
+    position: absolute;
+    top: 80px;
+    left: 289px;
+    height: 690px;
+    width: 60px;
+}
+
+#time_column {
+    position: absolute;
+    top: 40px;
+    left: 0%;
+    height: 720px;
+    width: 8%;
+    overflow: hidden;
+    padding-right: 5px;
+    padding-top: 24px;
+    border-right: 1px solid #aaa;
+    background: #eee;
+    text-align: right;
+}
+
+.time_title {
+    height: 50px;
+    line-height: 0;
+}
+
+#calendar_corner_wrapper {
+    position: absolute;
+    top: 40px;
+    left: 289px;
+    width: 60px;
+    height: 40px;
+}
+
+#calendar_corner {
+    position: absolute;
+    top: 0px;
+    left: 0%;
+    width: 8%;
+    height: 40px;
+    background: #ddd;
+    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    font-weight: bold;
+}
+
+#calendar_corner_title {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    text-align: center;
+}
+
+#calendar_corner_content {
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    width: 50%;
+    height: 20px;
+    text-align: center;
+}
+
+#calendar_body {
+    position: absolute;
+    top: 40px;
+    left: 8%;
+    height: 720px;
+    width: 92%;
+    overflow: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.day_grid {
+    position: relative;
+    float: left;
+    width: 20%;
+    height: 825px;
+    background: url('../images/calendar_grid.png') 0px 24px;
+    border-right: 1px solid #aaa;
+}
+
+
+.calendar_course_box {
+    position: absolute;
+    padding: 5px;
+    width: 135px;
+    height: 50px;
+    background-color: rgba(0,255,0,0.25);
+    border: 1px solid #00ff00;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    word-wrap: break-word;
+    overflow: hidden;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+.calendar_course_box_x {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    background: url('x_alt.png') no-repeat;
+    display: none;
+    cursor: pointer;
+}
+
+#stale_sections {
+    position: absolute;
+    height: 22px;
+    top: 1px;
+    border-color: rgb(0, 128, 255);
+    text-align: center;
+    width: 500%;
+    left: 0%;
+    background-color: red; z-index: 2;
+}
+
+#stale_sections_box_x {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    background: url('x_alt.png') no-repeat;
+    display: block;
+    cursor: pointer;
+}
+
+#divider_wrapper {
+    position: absolute;
+    left: 285px;
+    top: 40px;
+    width: 5px;
+    height: 730px;
+}
+
+#divider {
+    position: absolute;
+    left: 30%;
+    top: 40px;
+    width: 5px;
+    height: 760px;
+    background-color: #F7661E;
+}
+
+.button_enabled {
+    color: #000;
+}
+
+.button_disabled {
+    color: #8B8383 !important;
+    text-decoration: none !important;
+}
+
+
+.search_fixed {
+    position: absolute;
+    left: 50px;
+    width: 300px;
+}
+
+#search_bar_wrapper {
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    height: 40px;
+    width: 300px;
+    padding-left: 2px;
+}
+
+#search_bar {
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    height: 40px;
+    width: 30%;
+    padding-left: 2px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px #F7661E;
+    line-height: 40px;
+    z-index: 3;
+}
+
+#link_bar {
+    left: 950px;
+    top: 5px;
+    height: 40px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px #F7661E;
+    line-height: 40px;
+    z-index: 3;
+}
+
+#tool_bar a {
+    margin-left: 20px;
+}
+
+#tool_bar_wrapper {
+    float: right;
+    height: 40px;
+    padding-right: 10px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px #F7661E;
+    line-height: 40px;
+    z-index: 3;
+    font-size: 110%;
+}
+
+#tool_bar {
+    float: right;
+    height: 40px;
+    padding-right: 10px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px #F7661E;
+    line-height: 40px;
+    z-index: 3;
+    font-size: 110%;
+}
+
+#search_query_box {
+    width: 58%;
+    margin-right: 5px;
+}
+
+#search_button {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+    background: url('../images/search_icon.png') no-repeat 0px 1px;
+    border: 0;
+    cursor: pointer;
+}
+
+#search_button:hover {
+    background-position: 1px 0px;
+}
+
+#search_box {
+    margin-top: 0px;
+    top: 40px;
+    padding-bottom: 30px;
+    background: #FFD79C;
+    border-bottom: 1px solid #aaa;
+    z-index: 2;
+}
+
+#search_box_button {
+    position: absolute;
+    bottom: 0px;
+    width: 300px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+#search_box_button:hover {
+    background: #FEA;
+}
+#course_list_message {
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#course_list_box_wrapper {
+    position: absolute;
+    top: 10px;
+    left: 5px;
+    bottom: 10px;
+    width: 280px;
+    height: 730px;
+}
+
+#course_list_box {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    bottom: 10px;
+    width: 30%;
+    height: 760px;
+    overflow: auto;
+    background: #ffffff;
+    z-index: 1;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#course_list_loading {
+    display: none;
+    position: absolute;
+    top: 20px;
+    bottom: 0px;
+    width: 100%;
+    background: #ffffff;
+    text-align: center;
+    z-index: 2;
+}
+
+.course_box {
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid #aaa;
+    /*border-right: 1px solid #aaa;*/
+
+    /* IE10 Consumer Preview */
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #EEEEEE 100%);
+
+    /* Mozilla Firefox */
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #EEEEEE 100%);
+
+    /* Opera */
+    background-image: -o-linear-gradient(top, #FFFFFF 0%, #EEEEEE 100%);
+
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #FFFFFF), color-stop(1, #EEEEEE));
+
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #EEEEEE 100%);
+
+    /* W3C Markup, IE10 Release Preview */
+    background-image: linear-gradient(to bottom, #FFFFFF 0%, #EEEEEE 100%);
+}
+
+.course_box_hover {
+    /* IE10 Consumer Preview */
+    background-image: -ms-linear-gradient(top, #FFFFFF 0%, #DDDDDD 100%);
+
+    /* Mozilla Firefox */
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #DDDDDD 100%);
+
+    /* Opera */
+    background-image: -o-linear-gradient(top, #FFFFFF 0%, #DDDDDD 100%);
+
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #FFFFFF), color-stop(1, #DDDDDD));
+
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-linear-gradient(top, #FFFFFF 0%, #DDDDDD 100%);
+
+    /* W3C Markup, IE10 Release Preview */
+    background-image: linear-gradient(to bottom, #FFFFFF 0%, #DDDDDD 100%);
+}
+
+.course_title {
+    padding-left: 5px;
+    line-height: 25px;
+    background-color: rgba(0,255,0,0.5);
+    font-size: 125%;
+    font-weight: bold;
+    /*border-top: 4px solid #00ff00;*/
+}
+
+.course_desc {
+    margin: 5px;
+    padding-bottom: 5px;
+    word-wrap: break-word;
+    border-bottom: 1px solid #ccc;
+}
+
+.section {
+    position: relative;
+    padding: 2px 5px 0px 5px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+
+.section_hover {
+    background: #ffffff;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    cursor: pointer;
+    color: #000080;
+}
+
+.section input {
+    margin: 0px 5px 0px 0px;
+    padding: 0px;
+    cursor: pointer;
+}
+.section div {
+    vertical-align: top;
+    font-size: 90%;
+    display: inline-block;
+}
+.section_number {
+    width: 20px;
+}
+
+.section_instructor {
+    width: 100px;
+}
+
+.section_times {
+}
+
+.more_sections_link {
+    width: 100%;
+    text-align: right;
+    font-size: 75%;
+}
+.more_sections_link:hover {
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.section_image {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    width: 12px;
+    height: 100%;
+    background: url('plus.png') no-repeat center;
+}
+
+#left_gutter {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    width: 50px;
+    border-right: 1px solid #aaa;
+    background: #eee;
+}
+
+#scheduler {
+    position: relative;
+    height: 800px;
+    width: 100%;
+    font: 13px/1.231 sans-serif;
+
+}
+
+#widecolumn-contents {
+    margin: 0px;
+}
+
+#top-bar {
+    box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+
+}
+
+#sidecolumn {
+    box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+}
+
+#mainbody {
+    padding-top: 0px;
+}
+
+#footer {
+    width: 100%;
+    margin-top: 0em;
+    padding-top: 2em;
+    padding-bottom: 1em;
+    padding-left: 10%;
+    padding-right: 10%;
+
+
+    /* IE10 Consumer Preview */
+    background-image: -ms-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
+    /* Mozilla Firefox */
+    background-image: -moz-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
+    /* Opera */
+    background-image: -o-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
+    /* Webkit (Safari/Chrome 10) */
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #F7661E), color-stop(1, #FFD79C));
+    /* Webkit (Chrome 11+) */
+    background-image: -webkit-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
+    /* W3C Markup, IE10 Release Preview */
+    background-image: linear-gradient(to top, #F7661E 0%, #FFD79C 100%);
+
+    -webkit-border-bottom-left-radius: 10px;
+    -webkit-border-bottom-right-radius: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    -moz-border-radius-bottomright: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#footer p{
+    color: #000;
+}
+
+#footer ul{
+    border-top: 1px solid #000;
+}

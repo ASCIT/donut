@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('scheduler.static', filename='css/scheduler.css') }}" />
+
+    <div id="scheduler">
+        <div id="calendar">
+            <div id="calendar_body">
+                <div class="day_grid" id="day_grid_M">
+
+                </div>
+                <div class="day_grid" id="day_grid_T"></div>
+                <div class="day_grid" id="day_grid_W"></div>
+                <div class="day_grid" id="day_grid_R"></div>
+                <div class="day_grid" id="day_grid_F"></div>
+            </div>
+
+            <div id="time_column">
+                <div class="time_title">8 am</div>
+                <div class="time_title">9 am</div>
+                <div class="time_title">10 am</div>
+                <div class="time_title">11 am</div>
+                <div class="time_title">12 pm</div>
+                <div class="time_title">1 pm</div>
+                <div class="time_title">2 pm</div>
+                <div class="time_title">3 pm</div>
+                <div class="time_title">4 pm</div>
+                <div class="time_title">5 pm</div>
+                <div class="time_title">6 pm</div>
+                <div class="time_title">7 pm</div>
+                <div class="time_title">8 pm</div>
+                <div class="time_title">9 pm</div>
+                <div class="time_title">10 pm</div>
+                <div class="time_title">11 pm</div>
+            </div>
+
+
+            <div id="day_row">
+                <div class="day_title">Monday (M)</div>
+                <div class="day_title">Tuesday (T)</div>
+                <div class="day_title">Wednesday (W)</div>
+                <div class="day_title">Thursday (R)</div>
+                <div class="day_title">Friday (F)</div>
+                <div style="float: left; width: 15px; border-bottom: none"></div>
+                <div style="clear: both"></div>
+            </div>
+
+
+            <div id="calendar_corner">
+                <div id="calendar_corner_title">Units</div>
+                <div id="calendar_corner_content"></div>
+            </div>
+
+        </div>
+
+        <div id="schedules"></div>
+
+        <div id="top_bar">
+
+            <div id="title"></div>
+
+
+
+            <div id="tool_bar">
+                    <a id="save_button" class="button_disabled">Save</a>
+                <a id="clear_button" class="button_disabled">Clear All</a>
+            </div>
+
+        </div>
+
+
+        <div id="divider"></div>
+
+        <form action="" method="get" id="search_form" name="search_form">
+
+            <div id="search_bar">
+                Search:
+                <input type="text" name="query" id="search_query_box"/>
+                <input type="submit" name="submit" id="search_button" value=""/>
+            </div>
+
+            <div id="search_box_button">
+                <a href="#" id="search_box_button_text">Show advanced options</a>
+            </div>
+
+            <div id="course_list_box">
+                <div id="course_list">
+                </div>
+                <div id="course_list_loading">
+                    <img src="{{ url_for('scheduler.static', filename='images/loading.gif') }}" /><br />
+                    Searching...
+                </div>
+            </div>
+
+        </form>
+
+
+
+    </div>
+
+
+
+{% endblock body %}
