@@ -4,22 +4,9 @@
     -webkit-box-sizing: border-box;
 }
 
-body {
-    margin: 0px;
-    padding: 0px;
-}
-
 a:link      {color: #000; text-decoration: none;}
 a:visited   {color: #000; text-decoration: none;}
 a:hover     {color: #000; text-decoration: underline;}
-
-#top_bar_wrapper {
-    position: absolute;
-    top: 0px;
-    left: 5px;
-    width: 1020px;
-    height: 40px;
-}
 
 #top_bar {
     position: absolute;
@@ -52,14 +39,6 @@ a:hover     {color: #000; text-decoration: underline;}
     z-index: 3;
 }
 
-#title_wrapper {
-    position: absolute;
-    top: 0px;
-    left: 330px;
-    width: 400px;
-    height: 40px;
-}
-
 #title {
     position: absolute;
     top: 0px;
@@ -76,14 +55,6 @@ a:hover     {color: #000; text-decoration: underline;}
     left: calc(30% + 5px);
     height: 760px;
     width: calc(70% - 5px);
-}
-
-#day_row_wrapper {
-    position: absolute;
-    top: 40px;
-    left: 285px;
-    min-width: 740px;
-    height: 40px;
 }
 
 #day_row {
@@ -105,14 +76,6 @@ a:hover     {color: #000; text-decoration: underline;}
     border-bottom: 1px solid #aaa;
 }
 
-#time_column_wrapper {
-    position: absolute;
-    top: 80px;
-    left: 289px;
-    height: 690px;
-    width: 60px;
-}
-
 #time_column {
     position: absolute;
     top: 40px;
@@ -130,14 +93,6 @@ a:hover     {color: #000; text-decoration: underline;}
 .time_title {
     height: 50px;
     line-height: 0;
-}
-
-#calendar_corner_wrapper {
-    position: absolute;
-    top: 40px;
-    left: 289px;
-    width: 60px;
-    height: 40px;
 }
 
 #calendar_corner {
@@ -242,14 +197,6 @@ a:hover     {color: #000; text-decoration: underline;}
     cursor: pointer;
 }
 
-#divider_wrapper {
-    position: absolute;
-    left: 285px;
-    top: 40px;
-    width: 5px;
-    height: 730px;
-}
-
 #divider {
     position: absolute;
     left: 30%;
@@ -273,15 +220,6 @@ a:hover     {color: #000; text-decoration: underline;}
     position: absolute;
     left: 50px;
     width: 300px;
-}
-
-#search_bar_wrapper {
-    position: absolute;
-    top: 0px;
-    left: 5px;
-    height: 40px;
-    width: 300px;
-    padding-left: 2px;
 }
 
 #search_bar {
@@ -311,18 +249,6 @@ a:hover     {color: #000; text-decoration: underline;}
 
 #tool_bar a {
     margin-left: 20px;
-}
-
-#tool_bar_wrapper {
-    float: right;
-    height: 40px;
-    padding-right: 10px;
-    color: #fff;
-    font-weight: bold;
-    text-shadow: 1px 1px #F7661E;
-    line-height: 40px;
-    z-index: 3;
-    font-size: 110%;
 }
 
 #tool_bar {
@@ -381,15 +307,6 @@ a:hover     {color: #000; text-decoration: underline;}
     padding: 10px;
     text-align: center;
     font-weight: bold;
-}
-
-#course_list_box_wrapper {
-    position: absolute;
-    top: 10px;
-    left: 5px;
-    bottom: 10px;
-    width: 280px;
-    height: 730px;
 }
 
 #course_list_box {
@@ -537,78 +454,8 @@ a:hover     {color: #000; text-decoration: underline;}
     background: url('plus.png') no-repeat center;
 }
 
-#left_gutter {
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    width: 50px;
-    border-right: 1px solid #aaa;
-    background: #eee;
-}
-
 #scheduler {
     position: relative;
     height: 800px;
     width: 100%;
     font: 13px/1.231 sans-serif;
-
-}
-
-#widecolumn-contents {
-    margin: 0px;
-}
-
-#top-bar {
-    box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-
-}
-
-#sidecolumn {
-    box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-}
-
-#mainbody {
-    padding-top: 0px;
-}
-
-#footer {
-    width: 100%;
-    margin-top: 0em;
-    padding-top: 2em;
-    padding-bottom: 1em;
-    padding-left: 10%;
-    padding-right: 10%;
-
-
-    /* IE10 Consumer Preview */
-    background-image: -ms-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
-    /* Mozilla Firefox */
-    background-image: -moz-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
-    /* Opera */
-    background-image: -o-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
-    /* Webkit (Safari/Chrome 10) */
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #F7661E), color-stop(1, #FFD79C));
-    /* Webkit (Chrome 11+) */
-    background-image: -webkit-linear-gradient(bottom, #F7661E 0%, #FFD79C 100%);
-    /* W3C Markup, IE10 Release Preview */
-    background-image: linear-gradient(to top, #F7661E 0%, #FFD79C 100%);
-
-    -webkit-border-bottom-left-radius: 10px;
-    -webkit-border-bottom-right-radius: 10px;
-    -moz-border-radius-bottomleft: 10px;
-    -moz-border-radius-bottomright: 10px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-#footer p{
-    color: #000;
-}
-
-#footer ul{
-    border-top: 1px solid #000;
-}

@@ -1,5 +1,5 @@
 
-var colors = ['255, 0, 0', '0, 255, 0', '0, 0, 255', 
+var colors = ['255, 0, 0', '0, 255, 0', '0, 0, 255',
               '255, 255, 0', '255, 0, 255', '0, 255, 255',
               '255, 128, 0', '255, 0, 128', '0, 255, 128',
               '128, 255, 0', '128, 0, 255', '0, 128, 255'];
@@ -17,7 +17,7 @@ function Course(id, course_id, name, text, units) {
     this.color = courseColor(name);
 }
 function CourseBox(course, day, start, end, om) {
-    this.id = 'calendar_course_' 
+    this.id = 'calendar_course_'
         + course.id + day.toString() + start.toString() + om.toString();
     this.course = course;
     this.day = day;
@@ -58,13 +58,13 @@ function clearAll() {
 
 var timer = null;
 function save() {
-    
+
     savedCourses = {};
-    
+
     jQuery.extend(savedCourses, allCourses);
-    
+
     updateSaveButton();
-    
+
     var courses = '';
     var firstCourse = true;
     for (var id in allCourses) {
@@ -76,7 +76,7 @@ function save() {
         {
             courses += ',';
         }
-        
+
         courses += id;
     }
     var link = window.location.href.split('?')[0] + '?courses=' + courses;
@@ -90,20 +90,20 @@ function save() {
 }
 
 function addCourse(id, course_id, name, text, units, times, doSave, loadingFromDatabase) {
-    
+
     if (typeof(units) === "string")
     {
         units = parseUnitsString(units);
     }
-    
+
     if (typeof(loadingFromDatabase) === "undefined")
     {
         loadingFromDatabase = false;
     }
-    
+
     var course = new Course(id, course_id, name, text, units);
     allCourses[id] = course;
-    
+
     if (loadingFromDatabase)
     {
         savedCourses[id] = course;
@@ -116,10 +116,10 @@ function addCourse(id, course_id, name, text, units, times, doSave, loadingFromD
             addCourseBox(course, day, start, end, om);
         }
     }
-    
+
     updateSaveButton();
     updateClearAllButton();
-    
+
     totalUnits += units;
     document.getElementById('calendar_corner_content').innerHTML = totalUnits;
 }
@@ -154,7 +154,7 @@ function removeCourse(id, doSave) {
             reflowCourses(day);
         }
     }
-    
+
     updateSaveButton();
     updateClearAllButton();
 }
@@ -163,12 +163,12 @@ function isEqual(list1, list2)
 {
     var length1 = Object.keys(list1).length;
     var length2 = Object.keys(list2).length;
-    
+
     if (length1 !== length2)
     {
         return false;
     }
-    
+
     for (var id in allCourses)
     {
         if (!(id in savedCourses))
@@ -176,20 +176,20 @@ function isEqual(list1, list2)
             return false;
         }
     }
-    
+
     return true;
 }
 
 function updateSaveButton()
 {
     var saveButton = document.getElementById("save_button");
-    
+
     if (!isEqual(allCourses, savedCourses))
     {
         $(saveButton).removeClass("button_disabled");
         $(saveButton).attr("href", "javascript:save()");
     }
-    
+
     else
     {
         $(saveButton).addClass("button_disabled");
@@ -200,15 +200,15 @@ function updateSaveButton()
 function updateClearAllButton()
 {
     var clearButton = document.getElementById("clear_button");
-    
+
     var numberOfCourses = Object.keys(allCourses).length;
-    
+
     if (numberOfCourses != 0)
     {
         $(clearButton).removeClass("button_disabled");
         $(clearButton).attr("href", "javascript:clearAll()");
     }
-    
+
     else
     {
         $(clearButton).addClass("button_disabled");
@@ -224,7 +224,7 @@ function parseTimeString(time_string) {
         var split = strings[i].split(' ');
         var days = split[0];
         var start = parseInt(split[1].replace(':', ''), 10);
-        var end = parseInt(split[3].replace(':', ''), 10); 
+        var end = parseInt(split[3].replace(':', ''), 10);
         var om = false;
         if (days.indexOf('OM,') != -1) {
             om = true;
@@ -243,7 +243,7 @@ function parseTimeString(time_string) {
 
 function parseUnitsString(units_string) {
     units = 0;
-    
+
     if (units_string === "+")
     {
         return units;
@@ -265,7 +265,7 @@ function addCourseBox(course, day, start, end, om) {
     var courseBox = new CourseBox(course, day, start, end, om);
     courseBoxes[day].push(courseBox);
     courseBoxes[day].sort(courseBoxSort);
-    
+
     var id = courseBox.id;
     $('#day_grid_' + day).append(
         '<div class="calendar_course_box" id="' + id + '"></div>');
@@ -339,8 +339,8 @@ function reflowCourses(day){
                         break;
                     }
                 }
-                
-                if (addedCourse < 0 || 
+
+                if (addedCourse < 0 ||
                         courseBox.index > courseBoxes[day][addedCourse].index) {
                     // if cannot expand, reset to rightmost
                     addedCourse = allTimes[i][2];
@@ -364,7 +364,7 @@ function reflowCourses(day){
                     var id = courseBoxes[day][addedCourse].id;
                     $('#' + id).css('width', "" + courseBox.index_width * extra * width + "%");
                 }
-                if (addedCourse >= 0 && courseBoxes[day][allTimes[i][2]].index 
+                if (addedCourse >= 0 && courseBoxes[day][allTimes[i][2]].index
                         >= courseBoxes[day][addedCourse].index){
                     addedCourse = -1;
                 }
@@ -389,7 +389,7 @@ function loadCourseHtml() {
         var html = courseHtmlQueue.shift();
         var courseBox = $(html).hide();
         $('#course_list').append(courseBox);
-        
+
         var courseTitle = courseBox.children('.course_title');
         var color = courseColor(courseTitle.html());
         courseTitle.css('background-color', 'rgba(' + color + ', 0.25)');
@@ -504,28 +504,28 @@ window.onbeforeunload = function() {
 }
 
 $(document).ready(function() {
-    
+
     var widthString = window.getComputedStyle($("#scheduler")[0]).width;
     var widthSub = widthString.substring(0, widthString.length - 2);
     var width = parseInt(widthSub);
-    var fontSize = (width - 144.5) / 49.5;
+    var fontSize = (width - 144.5) / 59.5;
     $("#scheduler").css("fontSize", "" + fontSize + "px");
-    
+
     $("#calendar_body").scroll(function(event) {
         $("#day_row").css("margin-left", -$("#calendar_body").scrollLeft());
         $("#time_column").scrollTop($("#calendar_body").scrollTop());
     });
-    
+
     $(window).resize(function(event) {
         var widthString = window.getComputedStyle($("#scheduler")[0]).width;
         var widthSub = widthString.substring(0, widthString.length - 2);
         var width = parseInt(widthSub);
-        var fontSize = (width - 144.5) / 49.5;
+        var fontSize = (width - 144.5) / 59.5;
         $("#scheduler").css("fontSize", "" + fontSize + "px");
     });
 
     // calendar hover
-    $('#calendar_body').on('mouseover mouseout', '.calendar_course_box', 
+    $('#calendar_body').on('mouseover mouseout', '.calendar_course_box',
         function(event) {
             var box_id = $(this).attr('class').split(' ')[1];
             var id = parseInt(box_id.split('_')[2]); // calendar_course_#
@@ -537,19 +537,19 @@ $(document).ready(function() {
             }
         }
     );
-    
+
     // calendar click
     $('#calendar_body').on('click', '.calendar_course_box', function(event) {
         var box_id = $(this).attr('class').split(' ')[1];
         var course_id = parseInt(box_id.split('_')[3]); // calendar_course_#
-        
+
         var elementId = "course_" + course_id;
-        
+
         $("#course_list_box").animate({"scrollTop": $("#course_list_box").scrollTop() + $("#" + elementId).position().top}, "slow");
     });
-    
+
     // search course hover
-    $('#course_list').on('mouseover mouseout', '.course_box', 
+    $('#course_list').on('mouseover mouseout', '.course_box',
         function(event) {
             var id = parseInt($(this).attr('id').split('_')[1]);  // course_#
             courseHover(id, event.type == 'mouseover');
@@ -564,22 +564,22 @@ $(document).ready(function() {
     );
 
     // calendar click
-    $('#calendar_body').on('click', '.calendar_course_box_x', 
+    $('#calendar_body').on('click', '.calendar_course_box_x',
         function(event) {
             event.stopPropagation();
-            var classList = $(this).parent().attr('class').split(/\s+/); 
+            var classList = $(this).parent().attr('class').split(/\s+/);
             var id = parseInt(classList[1].split('_')[2]); // calendar_course_#
             sectionHover(id, false, true);
             removeCourse(id, true);
         }
     );
-    
-    $('#stale_sections_box_x').on('click', 
+
+    $('#stale_sections_box_x').on('click',
         function(event) {
             document.getElementById('stale_sections').style.display = "none";
         }
     );
-    
+
     // add or remove course on click
     $('#course_list').on('click', '.section',
         function(event) {
@@ -595,11 +595,11 @@ $(document).ready(function() {
                     + section.children('.section_number').html();
                 var times = parseTimeString(section.children('.section_times').html());
                 var units = parseUnitsString(course_box.children('.course_units').text());
-                
+
                 var courseIdString = course_box.attr('id');
                 var courseIdArray = courseIdString.split('_');
                 var courseId = parseInt(courseIdArray[1]);
-                
+
                 addCourse(id, courseId, name, text, units, times, true);
                 sectionHover(id, true, false);
                 section.children('.section_image').css('background-image', "url('x.png')");
@@ -611,24 +611,24 @@ $(document).ready(function() {
             }
         }
     );
-    
+
     $('#course_list').on('click', '.course_box', function(event) {
         var course_box = $(this);
         var link = course_box.find('.more_sections_link');
         var sectionsPreview = link.siblings('.more_sections_preview');
         var sections = link.siblings('.more_sections');
-        
+
         if (!(sections.is(':visible')))
-        {        
+        {
             sectionsPreview.slideDown('fast');
             link.html('&#9650;');
             sectionsPreview.slideUp('fast');
-            link.html('&#9660;');        
+            link.html('&#9660;');
         }
-        
+
     });
-            
-            
+
+
 
     // show hidden sections
     $('#course_list').on('click', '.more_sections_link',
@@ -637,7 +637,7 @@ $(document).ready(function() {
             var link = $(this);
             var sections = link.siblings('.more_sections');
             var sectionsPreview = link.siblings('.more_sections_preview');
-            
+
             if (sectionsPreview.is(':visible'))
             {
                 sectionsPreview.slideUp();
@@ -664,7 +664,7 @@ $(document).ready(function() {
         },
         function () {
             $("#search_box").stop().animate({marginTop: (-sb_height + 30) + 'px'}, 200);
-            //$("#course_list_box").stop().animate({marginTop: '30px'}, 200);            
+            //$("#course_list_box").stop().animate({marginTop: '30px'}, 200);
             $("#search_box_button_text").text('Show advanced options');
         }
     );
@@ -684,7 +684,4 @@ $(document).ready(function() {
     });
 
     $('#search_form').submit();
-
-    $('.has_tip').tooltipsy();
 });
-
