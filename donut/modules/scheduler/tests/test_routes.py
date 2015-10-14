@@ -1,7 +1,7 @@
 import flask
 
-from Donut.tests.fixtures import client
-from Donut import app
+from donut.tests.fixtures import client
+from donut import app
 
 def testHome(client):
   rv = client.get(flask.url_for('scheduler.home'))
