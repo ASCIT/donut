@@ -7,9 +7,9 @@
 
 		<form class = "form-horizontal" name = "user_reg" action = "{{url_for('auth.user_reg_submit')}}" method = "post">
 			
-			<p>Caltech Undergrads and members of the Caltech Community can apply for an account on the ASCIT web services system. To get an account you merely need to fill out the form below, be sure to follow the directions that appear below each field.</p>
+			<p>Caltech Undergrads can apply for an account on the ASCIT web services system. To get an account you merely need to fill out the form below. Be sure to follow the directions that appear below each field.</p>
+                        <p style="color: red; font-weight: bold"> *Note: If you are not a Caltech undergrad, you cannot create an account on Donut. We sometimes grant exceptions to this - please email us at devteam@donut.caltech.edu with your reasons for needing an account.</p>
 
-			<p>*Note: If you are not a current undergrad, please directly email devteam@donut.caltech.edu for account creation assistance.</p>
 
 			<p>If you have already created an account and you forgot your password, you can <a href = "{{url_for('auth.recover')}}"> recover your password </a>.</p>
 
