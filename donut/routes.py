@@ -1,5 +1,5 @@
 import flask
-from Donut import app
+from donut import app
 
 @app.route('/')
 def home():

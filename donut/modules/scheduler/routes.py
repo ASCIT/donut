@@ -1,6 +1,6 @@
 import flask
 
-from Donut.modules.scheduler import blueprint, helpers
+from donut.modules.scheduler import blueprint, helpers
 import pdb
 
 @blueprint.route('/')

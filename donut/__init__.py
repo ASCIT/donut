@@ -6,15 +6,15 @@ import traceback
 import httplib
 import datetime
 
-from Donut import constants
-from Donut.modules import scheduler 
+from donut import constants
+from donut.modules import scheduler 
 
 app = flask.Flask(__name__)
 app.debug = False
 
 # Get app config, if we're not testing on travis.
 if 'TRAVIS' not in os.environ:
-  app.config.from_object('Donut.config')
+  app.config.from_object('donut.config')
 
 # Maximum file upload size, in bytes.
 app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
@@ -62,4 +62,4 @@ def internal_server_error(error):
   return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
 
 # After initialization, import the routes.
-from Donut import routes
+from donut import routes
