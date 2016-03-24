@@ -11,7 +11,8 @@ git clone https://github.com/ASCIT/donut.git ~/donut
 ```
 mkdir virtualenvs (if you haven't already)
 cd ~/virtualenvs
-virtualenv [-p /usr/local/bin/python3.5] donut (depending on which version of Python you want to install)
+virtualenv [-p /usr/local/bin/python3.5] donut 
+    (The -p part depends on which version of Python you want to install. You shouldn't have to set this.)
 source ~/virtualenvs/donut/bin/activate
 ```
 - The last command activates the virtualenv, so that your python packages are managed on a per-project basis by the virtual environment instead of using the global python installation. You may want to create an alias in your `~/.bashrc` file since this must be executed every time you want to start development. If you want to leave the virtual environment, use the `deactivate` command.
