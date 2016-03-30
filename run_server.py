@@ -6,7 +6,7 @@ import argparse
 import donut
 from donut import app
 
-parser = argparse.ArgumentParser(description="Set up development server.")
+parser = argparse.ArgumentParser(description="Run development server.")
 parser.add_argument("-e", "--env", default="dev")
 parser.add_argument("-p", "--port", metavar="port", type=int, default=5000,
                     help="Port on which to run server.")
