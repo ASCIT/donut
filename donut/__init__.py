@@ -6,24 +6,49 @@ import traceback
 import httplib
 import datetime
 
+try:
+  from donut import config
+except ImportError:
+  from donut import default_config as config
 from donut import constants
-
 from donut.modules import auth
 
 app = flask.Flask(__name__)
-app.debug = False
-
-# Get app config, if we're not testing on travis.
-if 'TRAVIS' not in os.environ:
-  app.config.from_object('donut.config')
-
-# Maximum file upload size, in bytes.
-app.config['MAX_CONTENT_LENGTH'] = constants.MAX_CONTENT_LENGTH
-app.secret_key = app.config['SECRET_KEY']
 
 # Load blueprint modules
 app.register_blueprint(auth.blueprint)
 
+def init(environment_name):
+  """Initializes the application with configuration variables and routes.
+
+  This function MUST be called before the server can be run.
+
+  Args:
+    environment_name: this must be either "prod", "dev", or "test".
+
+  Returns:
+    None
+  """
+  if environment_name == "prod" and hasattr(config, "PROD"):
+    environment = config.PROD
+  elif environment_name == "dev" and hasattr(config, "DEV"):
+    environment = config.DEV
+  elif environment_name == "test" and hasattr(config, "TEST"):
+    environment = config.TEST
+  else:
+    raise ValueError("Illegal environment name.")
+  # Initialize configuration variables.
+  app.config["DB_URI"] = environment.db_uri
+  app.config["DEBUG"] = environment.debug
+  app.config["SECRET_KEY"] = environment.secret_key
+
+  # Maximum file upload size, in bytes.
+  app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH
+
+  # Update jinja global functions
+  app.jinja_env.globals.update(
+      current_year=lambda: datetime.datetime.now().year)
+  
 # Create database engine object.
 @app.before_request
 def before_request():

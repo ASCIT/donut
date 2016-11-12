@@ -1,17 +1,18 @@
-# donut-python [![Build Status][travis-image]][travis-url]
-The repository for Donut. Written using Python/Flask and powered by PostgreSQL.
+# donut [![Build Status][travis-image]][travis-url]
+The repository for Donut. Written using Python/Flask and powered by MariaDB.
 
 # Setting up your environment
 - You should already have SSH access to the development server.
 - Clone the repository:
 ```
-git clone https://github.com/ASCIT/donut-python.git ~/donut
+git clone https://github.com/ASCIT/donut.git ~/donut
 ```
 - Set up your virtualenv:
 ```
 mkdir virtualenvs (if you haven't already)
 cd ~/virtualenvs
-virtualenv donut
+virtualenv [-p /usr/local/bin/python3.5] donut 
+    (The -p part depends on which version of Python you want to install. You shouldn't have to set this.)
 source ~/virtualenvs/donut/bin/activate
 ```
 - The last command activates the virtualenv, so that your python packages are managed on a per-project basis by the virtual environment instead of using the global python installation. You may want to create an alias in your `~/.bashrc` file since this must be executed every time you want to start development. If you want to leave the virtual environment, use the `deactivate` command.
@@ -34,5 +35,5 @@ python run_server.py
 ```
 You can visit the test site by going to [localhost:9001](http://localhost:9001) (or whichever port you decided to forward) in your local browser.
 
-[travis-url]: https://travis-ci.org/ASCIT/donut-python
-[travis-image]: https://travis-ci.org/ASCIT/donut-python.svg?branch=master
+[travis-url]: https://travis-ci.org/ASCIT/donut
+[travis-image]: https://travis-ci.org/ASCIT/donut.svg?branch=master
