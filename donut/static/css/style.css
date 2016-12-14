@@ -5,6 +5,10 @@ body {
   padding: 20px;
 }
 
+#header {
+  margin-bottom: 50px;
+}
+
 #footer {
   width: 100%;
   display: table;
