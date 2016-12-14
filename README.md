@@ -11,7 +11,7 @@ git clone https://github.com/ASCIT/donut.git ~/donut
 ```
 mkdir virtualenvs (if you haven't already)
 cd ~/virtualenvs
-virtualenv [-p /usr/local/bin/python3.5] donut 
+virtualenv [-p /usr/local/bin/python] donut 
     (The -p part depends on which version of Python you want to install. You shouldn't have to set this.)
 source ~/virtualenvs/donut/bin/activate
 ```

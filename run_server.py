@@ -11,9 +11,7 @@ parser.add_argument("-e", "--env", default="dev")
 parser.add_argument("-p", "--port", metavar="port", type=int, default=5000,
                     help="Port on which to run server.")
 
-
 if __name__ == "__main__":
-    args = parser.parse_args()
-    donut.init(args.env)
-    app.run(port=args.port)
-
+  args = parser.parse_args()
+  donut.init(args.env)
+  app.run(port=args.port)
