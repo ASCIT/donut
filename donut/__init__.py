@@ -62,7 +62,7 @@ def teardown_request(exception):
   """Logic executed after every request is finished."""
   db = getattr(flask.g, 'db', None)
   if db is not None:
-   db.close()
+    db.close()
 
 # Error handlers
 @app.errorhandler(httplib.NOT_FOUND)
