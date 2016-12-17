@@ -1,21 +1,22 @@
-
 body {
-    padding-top: 65px;
-    background-image: url(http://www.lafeens.com/wp-content/uploads/2012/12/donuts_background-e1355174695278.jpg);
-    background-size: cover;
-    padding: 20px;
+  padding-top: 65px;
+  background-size: cover;
+  padding: 20px;
+}
+
+#header {
+  margin-bottom: 50px;
 }
 
 #footer {
-    width: 100%;
-    display: table;
-    text-align: center;
-    background-color: orange;
-    //background-color: rgba(255, 0, 0, 1);
+  width: 100%;
+  display: table;
+  text-align: center;
+  background-color: orange;
 }
 
 #copyright {
-    padding: 15px;
+  padding: 15px;
 }
 
 .message {
