@@ -39,8 +39,7 @@ def handle_create_account(user_id, username, password, password2, birthday):
   # Insert new values into the database. Because the password is updated in a
   # separate step, we must use a transaction to execute this query.
   transaction = flask.g.db.begin()
-  # try:
-  if True:
+  try:
     # Insert the new row into users.
     query = sqlalchemy.text("""
       INSERT INTO users (user_id, username, password_hash)
@@ -59,12 +58,10 @@ def handle_create_account(user_id, username, password, password2, birthday):
       """)
     flask.g.db.execute(query, birthday=birthday, user_id=user_id)
     transaction.commit()
-  """
   except Exception:
     transaction.rollback()
-    flask.flash("An unexpected error occurred. Please find an IMSS rep.")
+    flask.flash("An unexpected error occurred. Please contact devteam@donut.caltech.edu.")
     return False
-  """
   # Email the user.
   query = sqlalchemy.text("""
     SELECT first_name, email
