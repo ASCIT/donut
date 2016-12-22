@@ -249,7 +249,7 @@ def update_last_login(username):
   """Updates the last login time for the user."""
   query = sqlalchemy.text("""
     UPDATE users
-    SET lastlogin=NOW()
+    SET last_login=NOW()
     WHERE username=:u
     """)
   flask.g.db.execute(query, u=username)
@@ -301,6 +301,7 @@ def get_permissions(username):
   Returns a list with all of the permissions available to the user.
   A list is returned because Python sets cannot be stored in cookie data.
   """
+  return list([])
   query = sqlalchemy.text("""
     (SELECT permission_id
       FROM users
@@ -342,14 +343,11 @@ def generate_admin_links():
       flask.url_for('admin.add_members', _external=True)))
     links.append(AdminLink('Manage positions',
       flask.url_for('admin.manage_positions', _external=True)))
-  if check_permission(Permissions.HASSLE):
-    links.append(AdminLink('Room hassle',
-      flask.url_for('hassle.run_hassle', _external=True)))
   if check_permission(Permissions.ROTATION):
     links.append(AdminLink('Rotation',
       flask.url_for('rotation.show_portal', _external=True)))
   if check_permission(Permissions.EMAIL):
     links.append(AdminLink('Mailing lists',
       # This one needs to be hard coded.
-      "https://ruddock.caltech.edu/mailman/admin"))
+      "https://donut.caltech.edu/mailman/admin"))
   return links
