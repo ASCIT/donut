@@ -54,16 +54,15 @@ def handle_forgotten_password(username, email):
   """
   # Check username, email pair.
   query = sqlalchemy.text("""
-    SELECT user_id, name, email
+    SELECT user_id, first_name, email
     FROM members
-      NATURAL JOIN members_extra
       NATURAL JOIN users
     WHERE username = :u
     """)
   result = flask.g.db.execute(query, u=username).first()
 
   if result is not None and email == result['email']:
-    name = result['name']
+    name = result['first_name']
     user_id = result['user_id']
     # Generate a reset key for the user.
     reset_key = auth_utils.generate_reset_key()
@@ -113,7 +112,6 @@ def handle_password_reset(username, new_password, new_password2):
   query = sqlalchemy.text("""
     SELECT name, email
     FROM members
-      NATURAL JOIN members_extra
       NATURAL JOIN users
     WHERE username = :u
     """)
