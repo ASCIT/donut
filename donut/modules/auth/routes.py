@@ -45,10 +45,11 @@ def forgot_password_submit():
   email = flask.request.form.get('email', None)
 
   if helpers.handle_forgotten_password(username, email):
-    flask.flash("An email with a recovery link has been sent. If you no longer have access to your email (alums), please contact an IMSS rep to recover your account.")
+    flask.flash("An email with a recovery link has been sent. If you no longer have access to your email (alums),"
+                " please contact devteam@donut.caltech.edu to recover your account.")
     return flask.redirect(flask.url_for('auth.login'))
   else:
-    flask.flash("Incorrect username and/or email. If you continue to have issues with account recovery, contact an IMSS rep.")
+    flask.flash("Incorrect username and/or email. If you continue to have issues with account recovery, contact devteam@donut.caltech.edu.")
     return flask.redirect(flask.url_for('auth.forgot_password'))
 
 @blueprint.route('/login/reset/<reset_key>')
@@ -56,7 +57,8 @@ def reset_password(reset_key):
   """Checks the reset key. If successful, displays the password reset prompt."""
   username = auth_utils.check_reset_key(reset_key)
   if username is None:
-    flask.flash('Invalid request. If your link has expired, then you will need to generate a new one. If you continue to encounter problems, please find an IMSS rep.')
+    flask.flash('Invalid request. If your link has expired, then you will need to generate a new one. '
+                'If you continue to encounter problems, please contact devteam@donut.caltech.edu.')
     return flask.redirect(flask.url_for('auth.forgot_password'))
   return flask.render_template('reset_password.html', username=username,
       reset_key=reset_key)
