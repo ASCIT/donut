@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h2>Create An Account</h2>
+<p style="color: red">All fields are required.</p>
+
+<form action="{{ url_for('account.create_account_submit', create_account_key=key) }}" method="post">
+  <p>Choose a username and password.</p>
+  <table class="form">
+    <tr>
+      <td>Username</td>
+      <td><input type="text" name="username" /></td>
+    </tr>
+    <tr>
+      <td>Password</td>
+      <td><input type="password" name="password" /></td>
+    </tr>
+    <tr>
+      <td>Confirm password</td>
+      <td><input type="password" name="password2" /></td>
+    </tr>
+  </table>
+  <p>Please fill in/verify your personal information.</p>
+  <table class="form">
+    <tr>
+      <td>First Name</td>
+      <td>{{ user_data['first_name'] }}</td>
+    </tr>
+    <tr>
+      <td>Last Name</td>
+      <td>{{ user_data['last_name'] }}</td>
+    </tr>
+    <tr>
+      <td>Matriculation Year</td>
+      <td>{{ user_data['entry_year'] }}</td>
+    </tr>
+    <tr>
+      <td>Graduation Year</td>
+      <td>{{ user_data['graduation_year'] }}</td>
+    </tr>
+    <tr>
+      <td>Email</td>
+      <td>{{ user_data['email'] }}</td>
+    </tr>
+    <tr>
+      <td>Birthday</td>
+      <td><input type="text" name="birthday" placeholder="YYYY-MM-DD" /></td>
+    </tr>
+  </table>
+  <button type="submit">Submit</button>
+</form>
+{% endblock body %}

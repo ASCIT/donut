@@ -11,11 +11,13 @@ try:
 except ImportError:
   from donut import default_config as config
 from donut import constants
+from donut.modules import account
 from donut.modules import auth
 
 app = flask.Flask(__name__)
 
 # Load blueprint modules
+app.register_blueprint(account.blueprint)
 app.register_blueprint(auth.blueprint)
 
 def init(environment_name):
