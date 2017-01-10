@@ -110,7 +110,7 @@ def handle_password_reset(username, new_password, new_password2):
   flask.g.db.execute(query, u=username)
   # Get the user's email.
   query = sqlalchemy.text("""
-    SELECT name, email
+    SELECT first_name, email
     FROM members
       NATURAL JOIN users
     WHERE username = :u
@@ -118,7 +118,7 @@ def handle_password_reset(username, new_password, new_password2):
   result = flask.g.db.execute(query, u=username).first()
   # Send confirmation email to user.
   email = result['email']
-  name = result['name']
+  name = result['first_name']
   msg = email_templates.ResetPasswordSuccessfulEmail.format(name)
   subject = "Password reset successful"
   email_utils.send_email(email, msg, subject)
