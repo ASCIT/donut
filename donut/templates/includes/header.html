@@ -56,14 +56,26 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#">New Account</a></li>
-                            <li><a href="#">Recover Password</a></li>
+                            <li><a href="{{ url_for('account.request_account') }}">New Account</a></li>
+                            <li><a href="{{ url_for('auth.forgot_password') }}">Recover Password</a></li>
                         </ul>
                     </li>
+                    {% if 'username' not in session %}
                     <li>
                         <form action="{{ url_for('auth.login') }}">
                             <button class="btn pull-right navbar-btn">Log In</button>
                         </form>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="#">Greetings, {{ session['username'] }}</a>
+                    </li>
+                    <li>
+                        <form action="{{ url_for('auth.logout') }}">
+                            <button class="btn pull-right navbar-btn">Logout</button>
+                        </form>
+                    </li>
+                    {% endif %}
                     </li>
                 </ul>
             </div><!--/.nav-collapse -->
