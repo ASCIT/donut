@@ -1,6 +1,6 @@
+DROP TABLE IF EXISTS marketplace_images;
 DROP TABLE IF EXISTS marketplace_items;
 DROP TABLE IF EXISTS marketplace_categories;
-DROP TABLE IF EXISTS marketplace_images;
 DROP TABLE IF EXISTS marketplace_textbooks;
 
 CREATE TABLE marketplace_textbooks (
@@ -25,7 +25,7 @@ CREATE TABLE marketplace_items (
 
 	item_id INT NOT NULL,
 	cat_id INT NOT NULL,
-	inum INT NOT NULL,
+	user_id INT NOT NULL,
 	item_title VARCHAR(255) NOT NULL,
 	item_details TEXT,
 	item_condition VARCHAR(20),
@@ -37,7 +37,7 @@ CREATE TABLE marketplace_items (
 	textbook_isbn VARCHAR(13),
 PRIMARY KEY(item_id),
 FOREIGN KEY(cat_id) REFERENCES marketplace_categories(cat_id),
-/*FOREIGN KEY(inum) REFERENCES inums(inum),*/
+FOREIGN KEY(user_id) REFERENCES users(user_id),
 FOREIGN KEY(textbook_id) REFERENCES marketplace_textbooks(textbook_id)
 );
 
