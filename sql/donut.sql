@@ -112,7 +112,7 @@ CREATE TABLE positions (
     org_id   INT         NOT NULL,
     pos_id   INT         NOT NULL AUTO_INCREMENT,
     pos_name VARCHAR(32) NOT NULL,
-    PRIMARY KEY (org_id, pos_id),
+    PRIMARY KEY (pos_id),
     FOREIGN KEY (org_id) REFERENCES organizations(org_id)
 );
 
