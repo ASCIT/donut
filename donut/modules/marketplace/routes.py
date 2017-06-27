@@ -14,7 +14,7 @@ def category():
     pass
 
 @blueprint.route('/marketplace/<string:category_id>/<string:query>')
-def category():
+def query():
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
     pass
