@@ -14,6 +14,7 @@ from donut import constants
 from donut.modules import account
 from donut.modules import auth
 from donut.modules import core
+from donut.modules import scheduler
 
 app = flask.Flask(__name__)
 
@@ -21,6 +22,7 @@ app = flask.Flask(__name__)
 app.register_blueprint(account.blueprint)
 app.register_blueprint(auth.blueprint)
 app.register_blueprint(core.blueprint)
+app.register_blueprint(scheduler.blueprint, url_prefix='/scheduler')
 
 def init(environment_name):
   """Initializes the application with configuration variables and routes.
