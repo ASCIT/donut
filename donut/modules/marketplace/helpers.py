@@ -1,5 +1,6 @@
 import flask
 import sqlalchemy
+from datetime import date, datetime
 
 def get_marketplace_items_list_data(fields=None, attrs={}):
     """
@@ -16,9 +17,9 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
                 columnname:columnvalue.
     """
     all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
-         "item_images", "item_condition", "item_price", "item_timestamp",
-         "item_active", "textbook_id", "textbook_isbn", "textbook_version"]
-    default_fields = ["item_id", "cat_id", ]
+                             "item_condition", "item_price", "item_timestamp", "item_active",
+                             "textbook_id", "textbook_edition", "textbook_isbn"]
+    default_fields = all_returnable_fields
     if fields == None:
         fields = default_fields
     else:
@@ -34,7 +35,22 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
+    sanitized_res = []
+
+    for res in result:
+        temp_row = []
+        for data in res:
+            print(type(data))
+            if isinstance(data, (datetime, date)):
+                temp_row.append(data.isoformat())
+            else:
+                try:
+                    temp_row.append(float(data))
+                except:
+                    temp_row.append(data)
+        sanitized_res.append(temp_row)
     
     # Return the row in the form of a of dict
-    result = { f:t for f,t in zip(fields, result) }
+    result = [{ f:t for f,t in zip(fields, res) } for res in sanitized_res]
+ 
     return result

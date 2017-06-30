@@ -37,7 +37,7 @@ CREATE TABLE marketplace_items (
 	textbook_isbn VARCHAR(13),
 PRIMARY KEY(item_id),
 FOREIGN KEY(cat_id) REFERENCES marketplace_categories(cat_id),
-FOREIGN KEY(user_id) REFERENCES users(user_id),
+FOREIGN KEY(user_id) REFERENCES members(user_id),
 FOREIGN KEY(textbook_id) REFERENCES marketplace_textbooks(textbook_id)
 );
 
