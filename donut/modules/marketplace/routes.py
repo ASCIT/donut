@@ -18,11 +18,11 @@ def query(category_id, query):
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
     if category_id == "all":
-        return flask.render_template('search.html')
+        return helpers.render_top_marketplace_bar('search.html', cat_id=category_id)
     else:
         try:
             cat_id_num = int(category_id)
-            return flask.render_template('search.html')
+            return helpers.render_top_marketplace_bar('search.html', cat_id=category_id)
         except ValueError:
             return flask.render_template('404.html')
 

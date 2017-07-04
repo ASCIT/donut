@@ -2,6 +2,29 @@ import flask
 import sqlalchemy
 from datetime import date, datetime
 
+
+def render_top_marketplace_bar(template_url, **kwargs):
+    """
+    Provides an easy way for routing functions to pass the variables required for
+    rendering the marketplace's top bar to render_template.  Basically chains
+    some other arguments on to the render call.
+
+    Arguments:
+        template_url: The url which is being rendered.
+        **kwargs: The variables which are used to render the rest of the page.
+
+    Returns:
+        The result of render_template(): Whatever magic Flask does to render the
+                                         final page.
+    """
+    query = sqlalchemy.sql.select(["cat_title"]).select_from(sqlalchemy.text("marketplace_categories"))
+    result = flask.g.db.execute(query)
+    categories = []
+    for column in result:
+        categories.append(column[0])
+    return flask.render_template(template_url, cats=categories, **kwargs)
+
+
 def get_marketplace_items_list_data(fields=None, attrs={}):
     """
     Queries the database and returns list of member data constrained by the 
