@@ -2,12 +2,15 @@ import flask
 import sqlalchemy
 from datetime import date, datetime
 
+import routes
+
 
 def render_top_marketplace_bar(template_url, **kwargs):
     """
     Provides an easy way for routing functions to pass the variables required for
     rendering the marketplace's top bar to render_template.  Basically chains
-    some other arguments on to the render call.
+    some other arguments on to the render call, namely the list of marketplace
+    categories, the list urls to categories, and the width of each url column.
 
     Arguments:
         template_url: The url which is being rendered.
@@ -19,10 +22,54 @@ def render_top_marketplace_bar(template_url, **kwargs):
     """
     query = sqlalchemy.sql.select(["cat_title"]).select_from(sqlalchemy.text("marketplace_categories"))
     result = flask.g.db.execute(query)
+
+    # Convert result, in the form of a strange SQL object, into an array,
+    # so that we can retrieve the length without having to execute a special
+    # length query or anything.
+    # Also make an array of the urls for each category.
     categories = []
+    urls = []
     for column in result:
         categories.append(column[0])
-    return flask.render_template(template_url, cats=categories, **kwargs)
+        urls.append(flask.url_for(".category", category_id=len(categories)))
+
+    # Get number of rows and columns to display categories nicely. This is a
+    # little tricky - we want to aim for a table with either 4 categories or 5
+    # categories per row, with the last row catching the remainder. However, we
+    # want to avoid having exactly 1 category in the remainder row if possible.
+    num_cats = len(categories);
+    num_cols = num_cats
+    if num_cats <= 5:
+        num_cols = num_cats
+    elif num_cats % 5 == 0:
+        num_cols = 5
+    elif num_cats % 4 == 0:
+        num_cols = 4
+    elif num_cats % 5 == 4:
+        num_cols = 5
+    elif num_cats % 4 == 3:
+        num_cols = 4
+    elif num_cats % 5 != 1:
+        num_cols = 5
+    elif num_cats % 4 != 1:
+        num_cols = 4
+    else:
+        num_cols = 5
+
+    num_rows = num_cats // num_cols
+
+    # Break categories into a 2d array so that it's easy to arrange in rows
+    # in the html file.
+    cats2d = [[]] * num_rows
+    for cat_index in range(len(categories)):
+        cats2d[cat_index / num_cols].append(categories[cat_index])
+
+    # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
+    width = "width: " + str(100.0 / (num_cols)) + "%"
+
+    # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
+    # function, on to Flask in order to render the top bar and the rest of the content.
+    return flask.render_template(template_url, cats=cats2d, urls=urls, width=width, **kwargs)
 
 
 def get_marketplace_items_list_data(fields=None, attrs={}):
@@ -60,6 +107,9 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     result = flask.g.db.execute(s, attrs).fetchall()
     sanitized_res = []
 
+    # Sanitize the data to be able to JSONify it
+    # Probably will remove this when we get the real tables working, since
+    # we really don't need a REST API, but for now it's good to see that the code is working
     for res in result:
         temp_row = []
         for data in res:
