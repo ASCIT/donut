@@ -74,7 +74,7 @@ def render_top_marketplace_bar(template_url, **kwargs):
 
 def get_marketplace_items_list_data(fields=None, attrs={}):
     """
-    Queries the database and returns list of member data constrained by the 
+    Queries the database and returns list of member data constrained by the
     specified attributes.
 
     Arguments:
@@ -83,7 +83,7 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
         attrs:  The attributes of the members to filter for.
     Returns:
         result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of dicts with key:value of 
+                attributes. In the form of a list of dicts with key:value of
                 columnname:columnvalue.
     """
     all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
@@ -98,8 +98,8 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items"))
-    
-    # Build the WHERE clause 
+
+    # Build the WHERE clause
     for key, value in attrs.items():
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
@@ -115,15 +115,15 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
         for data in res:
             print(type(data))
             if isinstance(data, (datetime, date)):
-                temp_row.append(data.isoformat())
+                temp_row.append(data.strftime("%m/%d/%y"))
             else:
                 try:
                     temp_row.append(float(data))
                 except:
                     temp_row.append(data)
         sanitized_res.append(temp_row)
-    
+
     # Return the row in the form of a of dict
     result = [{ f:t for f,t in zip(fields, res) } for res in sanitized_res]
- 
+
     return result

@@ -2,10 +2,11 @@
 {% block body %}
 
 <div class="container">
+    <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
     <div class="col-md-4 col-md-offset-4">
         <div class="text-center jumbotron">
             <h2>Marketplace</h2>
-            <div class="row mp-nav-div" style="border-top: 2px solid #DB6600;border-bottom: 2px solid #DB6600;">
+            <div class="row mp-nav-div" style="border-top: 2px solid black;border-bottom: 2px solid black;">
                 <table class="mp-nav" style="width:100%">
                     <tbody>
                         {% for i in range(cats|length) %}
@@ -22,17 +23,45 @@
             </div>
             <br>
             <div>
-                <input placeholder="Search for an item">
-                <select>
-                    {% for i in range(cats|length) %}
-                        {% for j in range(cats[i]|length) %}
-                        <option value={{ i*cats[0]|length+j }}>{{ cats[i][j] }}</a>
+                <form action={{ url_for(".query", category_id=cat, query=q) }} method="get">
+                    <input placeholder="Search for an item" name="q">
+                    <select name="cat">
+                        {% for i in range(cats|length) %}
+                            {% for j in range(cats[i]|length) %}
+                            <option {% if i*cats[0]|length+j+1 == cat_id %} selected {% endif%}
+                                    value={{ i*cats[0]|length+j+1 }}>
+                                {{ cats[i][j] }}
+                            </option>
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
-                </select>
-                <button>Search</button>
+                    </select>
+                    <button>Search</button>
+                </form>
             </div>
         </div>
+    </div>
+    <div>
+        <table style="width:100%;min-width:590px" class="sortable">
+            <thead>
+                <tr>
+                    <th><b>Item</b></th>
+                    <th><b>Price</b></th>
+                    <th><b>Sold By</b></th>
+                    <th><b>Date</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in datalist %}
+                    <tr>
+                        {% for j in i %}
+                            <td>
+                                {{ j }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
