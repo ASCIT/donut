@@ -26,12 +26,9 @@ def render_top_marketplace_bar(template_url, **kwargs):
     # Convert result, in the form of a strange SQL object, into an array,
     # so that we can retrieve the length without having to execute a special
     # length query or anything.
-    # Also make an array of the urls for each category.
     categories = []
-    urls = []
     for column in result:
         categories.append(column[0])
-        urls.append(flask.url_for(".category", category_id=len(categories)))
 
     # Get number of rows and columns to display categories nicely. This is a
     # little tricky - we want to aim for a table with either 4 categories or 5
@@ -69,7 +66,7 @@ def render_top_marketplace_bar(template_url, **kwargs):
 
     # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
     # function, on to Flask in order to render the top bar and the rest of the content.
-    return flask.render_template(template_url, cats=cats2d, urls=urls, width=width, **kwargs)
+    return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
 
 
 def get_marketplace_items_list_data(fields=None, attrs={}):
@@ -113,7 +110,6 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     for res in result:
         temp_row = []
         for data in res:
-            print(type(data))
             if isinstance(data, (datetime, date)):
                 temp_row.append(data.strftime("%m/%d/%y"))
             else:
