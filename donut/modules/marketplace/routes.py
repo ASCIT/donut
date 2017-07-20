@@ -51,11 +51,16 @@ def query():
                 templist.append(data[field])
             datalist.append(templist)
 
-        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num)
+        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=fields)
 
     except ValueError:
         # not a number? something's wrong
         return flask.render_template('404.html')
+
+
+@blueprint.route('/marketplace/sell')
+def sell():
+    return helpers.render_top_marketplace_bar('sell.html')
 
 
 @blueprint.route('/1/marketplace_items')
@@ -75,4 +80,3 @@ def get_marketplace_items_list():
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
 
     return json.dumps(helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs))
-
