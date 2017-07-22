@@ -107,11 +107,13 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     # Sanitize the data to be able to JSONify it
     # Probably will remove this when we get the real tables working, since
     # we really don't need a REST API, but for now it's good to see that the code is working
-    for res in result:
+    for item_listing in result:
         temp_row = []
-        for data in res:
+        for data in item_listing:
             if isinstance(data, (datetime, date)):
                 temp_row.append(data.strftime("%m/%d/%y"))
+            elif data == None:
+                temp_row.append("")
             else:
                 try:
                     temp_row.append(float(data))
@@ -121,5 +123,35 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
     # Return the row in the form of a of dict
     result = [{ f:t for f,t in zip(fields, res) } for res in sanitized_res]
+    print(get_textbook_info_from_textbook_id(1))
 
     return result
+
+
+def get_name_from_user_id(user_id):
+    """
+    Queries the database and returns the full name (first and last) of the user with the specified user id (NOT UID).
+
+    Arguments:
+        user_id: The user id of the requested user (NOT UID).
+    Returns:
+        result: A string of the user's full name.
+                (first + " " + last)
+    """
+    query = sqlalchemy.text("""SELECT first_name, last_name FROM members WHERE user_id=:user_id""")
+    result = flask.g.db.execute(query, user_id=user_id).first()
+    return " ".join(result)
+
+
+def get_textbook_info_from_textbook_id(textbook_id):
+    """
+    Queries the database and returns the title and author of the textbook with the specified id.
+
+    Arguments:
+        textbok_id: The id of the requested textbook.
+    Returns:
+        result: A list of the textbook title and author.
+    """
+    query = sqlalchemy.text("""SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id""")
+    result = flask.g.db.execute(query, textbook_id=textbook_id).first()
+    return list(result)

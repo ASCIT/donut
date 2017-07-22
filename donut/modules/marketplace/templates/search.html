@@ -3,7 +3,7 @@
 {% include "topbar.html" %}
 
 <div>
-    <table style="width:100%;min-width:590px" class="sortable text-center">
+    <table style="width:100%;min-width:590px" class="sortable text-center" border=1 frame=void rules=rows>
         <thead>
             <tr>
             {% for i in headers %}
@@ -12,7 +12,7 @@
             </tr>
         </thead>
         <tbody>
-            <!-- display data in main table -->
+            <!-- display data in one main table -->
             {% for i in datalist %}
                 <tr>
                     {% for j in i %}

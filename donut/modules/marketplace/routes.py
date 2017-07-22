@@ -28,7 +28,7 @@ def query():
     category_id = flask.request.args["cat"]
     query = flask.request.args["q"]
 
-    fields = ["item_title", "item_price", "user_id", "item_timestamp"]
+    fields = ["item_title", "textbook_id", "item_price", "user_id", "item_timestamp"]
     # Create a dict of the passed in attributes which are filterable
     filterable_attrs = ["item_id", "cat_id", "user_id", "item_title",
             "item_details", "item_images", "item_condition",
