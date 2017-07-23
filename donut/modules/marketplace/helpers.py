@@ -104,26 +104,29 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     result = flask.g.db.execute(s, attrs).fetchall()
     sanitized_res = []
 
-    # Sanitize the data to be able to JSONify it
-    # Probably will remove this when we get the real tables working, since
-    # we really don't need a REST API, but for now it's good to see that the code is working
+    # Format the data, parsing the timestamps and converting the ids to
+    # actual information
     for item_listing in result:
         temp_row = []
-        for data in item_listing:
-            if isinstance(data, (datetime, date)):
-                temp_row.append(data.strftime("%m/%d/%y"))
-            elif data == None:
+        item_listing = list(item_listing)
+        for i in range(len(item_listing)):
+            data = item_listing[i]
+            if data == None:
                 temp_row.append("")
             else:
-                try:
-                    temp_row.append(float(data))
-                except:
+                if fields[i] == "item_timestamp":
+                    temp_row.append(data.strftime("%m/%d/%y"))
+                elif fields[i] == "user_id":
+                    temp_row.append(get_name_from_user_id(int(data)))
+                elif fields[i] == "textbook_id":
+                    temp_row.append(get_textbook_info_from_textbook_id(int(data))[0])
+                    # [0] is the textbook title, while [1] is the author name
+                else:
                     temp_row.append(data)
         sanitized_res.append(temp_row)
 
     # Return the row in the form of a of dict
     result = [{ f:t for f,t in zip(fields, res) } for res in sanitized_res]
-    print(get_textbook_info_from_textbook_id(1))
 
     return result
 
