@@ -17,7 +17,17 @@ def category():
 
     category_id = flask.request.args["cat"]
 
-    return helpers.render_top_marketplace_bar('search.html', cat_id=category_id)
+    fields = []
+    if helpers.get_category_name_from_id(category_id) == "Textbooks":
+        fields = ["textbook_id", "textbook_author", "textbook_edition", "item_price", "user_id", "item_timestamp"]
+    else:
+        fields = ["item_title", "item_price", "user_id", "item_timestamp"]
+
+    datalist = helpers.get_marketplace_items_list_data(fields=fields, attrs={"cat_id": category_id})
+
+    headers = helpers.process_category_headers(fields)
+
+    return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=category_id, headers=headers)
 
 
 @blueprint.route('/marketplace/search')
@@ -28,12 +38,12 @@ def query():
     category_id = flask.request.args["cat"]
     query = flask.request.args["q"]
 
-    fields = ["item_title", "textbook_id", "item_price", "user_id", "item_timestamp"]
+    fields = ["cat_id", "item_title", "textbook_id", "item_price", "user_id", "item_timestamp"]
     # Create a dict of the passed in attributes which are filterable
     filterable_attrs = ["item_id", "cat_id", "user_id", "item_title",
             "item_details", "item_images", "item_condition",
             "item_price", "item_timestamp", "item_active",
-            "textbook_id", "textbook_isbn", "textbook_version"]
+            "textbook_id", "textbook_isbn", "textbook_edition"]
     attrs = { tup:flask.request.args[tup]
             for tup in flask.request.args if tup in filterable_attrs }
     if category_id == "all":
@@ -42,14 +52,7 @@ def query():
     # now, the category id had better be a number
     try:
         cat_id_num = int(category_id)
-        datadump = helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs)
-        datalist = []
-        # make datadump a 2d list instead of a dict
-        for data in datadump:
-            templist = []
-            for field in fields:
-                templist.append(data[field])
-            datalist.append(templist)
+        datalist = helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs)
 
         return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=fields)
 
@@ -71,7 +74,7 @@ def get_marketplace_items_list():
     filterable_attrs = ["item_id", "cat_id", "user_id", "item_title",
             "item_details", "item_images", "item_condition",
             "item_price", "item_timestamp", "item_active",
-            "textbook_id", "textbook_isbn", "textbook_version"]
+            "textbook_id", "textbook_isbn", "textbook_edition"]
     attrs = { tup:flask.request.args[tup]
             for tup in flask.request.args if tup in filterable_attrs }
     # Get the fields to return if they were passed in

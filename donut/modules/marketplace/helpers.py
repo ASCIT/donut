@@ -69,6 +69,43 @@ def render_top_marketplace_bar(template_url, **kwargs):
     return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
 
 
+
+
+def process_category_headers(fields):
+    """
+    Converts fields from sql headers to English.
+
+    Arguments:
+        fields: the list of fields that will be changed into the headers that are returned
+
+    Returns:
+        headers: the list of headers that will become the headers of the tables
+    """
+    headers = []
+    for i in fields:
+        if i == "item_title":
+            headers.append("Item")
+        elif i == "item_price":
+            headers.append("Price")
+        elif i == "user_id":
+            headers.append("Sold by")
+        elif i == "item_timestamp":
+            headers.append("Date")
+        elif i == "textbook_id":
+            headers.append("Title")
+        elif i == "textbook_author":
+            headers.append("Author")
+        elif i == "textbook_edition":
+            headers.append("Edition")
+    return headers
+
+
+def process_search_data(fields, data):
+    return (fields, data)
+
+
+
+
 def get_marketplace_items_list_data(fields=None, attrs={}):
     """
     Queries the database and returns list of member data constrained by the
@@ -87,14 +124,29 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
                              "item_condition", "item_price", "item_timestamp", "item_active",
                              "textbook_id", "textbook_edition", "textbook_isbn"]
     default_fields = all_returnable_fields
+
+    # Okay I couldn't think of a better way to do this.
+    # The problem is that if we're requesting, say, textbook_author,
+    # which isn't in marketplace_items but instead in marketplace_books,
+    # the query with sql.select(fields) won't work.
+    # So here's my solution.
+    # This code only puts the legit fields into the query, and then
+    # does some magic in the "case statement" later to fill in those rows.
+    # The one major downside of this is that it prevents the error message
+    # "Invalid field" from being shown, but it makes up for that by just
+    # not having any results in that category when it's returned, so
+    # it should be pretty obvious if a category is typoed or mistaken.
+    query_fields = []
+
     if fields == None:
-        fields = default_fields
+        query_fields = fields = default_fields
     else:
-        if any(f not in all_returnable_fields for f in fields):
-            return "Invalid field"
+        for f in fields:
+            if f in all_returnable_fields:
+                query_fields.append(f)
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items"))
+    s = sqlalchemy.sql.select(query_fields).select_from(sqlalchemy.text("marketplace_items"))
 
     # Build the WHERE clause
     for key, value in attrs.items():
@@ -109,26 +161,61 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     for item_listing in result:
         temp_row = []
         item_listing = list(item_listing)
-        for i in range(len(item_listing)):
-            data = item_listing[i]
+        field_index = 0
+        for data in item_listing:
             if data == None:
                 temp_row.append("")
             else:
-                if fields[i] == "item_timestamp":
+                if fields[field_index] == "item_timestamp":
                     temp_row.append(data.strftime("%m/%d/%y"))
-                elif fields[i] == "user_id":
+                elif fields[field_index] == "user_id":
                     temp_row.append(get_name_from_user_id(int(data)))
-                elif fields[i] == "textbook_id":
-                    temp_row.append(get_textbook_info_from_textbook_id(int(data))[0])
-                    # [0] is the textbook title, while [1] is the author name
+                elif fields[field_index] == "textbook_id":
+                    temp_row += (get_textbook_info_from_textbook_id(int(data)))
+                    field_index += 1
+                    # [0] is the textbook title, and [1] is the author name
+                    # SO ALWAYS PUT THE TITLE FIRST IN CATEGORIES
+                    # hngggg this design
+                    # there's two fields of information in this one piece of data so we also increment field_index
+                elif fields[field_index] == "textbook_edition":
+                    temp_row.append(process_edition(data))
                 else:
                     temp_row.append(data)
+            field_index += 1
         sanitized_res.append(temp_row)
 
-    # Return the row in the form of a of dict
-    result = [{ f:t for f,t in zip(fields, res) } for res in sanitized_res]
+    # Return the 2d array of arrays
+    return sanitized_res
 
-    return result
+
+def process_edition(edition):
+    """
+    Turns a string with an edition in it into a processed string.
+    Turns "1.0" into "1st", "2017.0" into "2017", and "International"
+    into "International".  So it doesn't do a whole lot, but what it
+    does do, it does well.
+
+    Arguments:
+        edition: The edition string.
+    Returns:
+        edition: The processed edition string.
+    """
+
+    try:
+        edition = int(edition)
+        if edition < 1000:
+            # it's probably an edition, not a year
+            if edition == 1:
+                return "1st"
+            if edition == 2:
+                return "2nd"
+            if edition == 3:
+                return "3rd"
+            return str(edition) + "th"
+        else:
+            return str(edition)
+    except ValueError:
+        return edition
 
 
 def get_name_from_user_id(user_id):
@@ -158,3 +245,17 @@ def get_textbook_info_from_textbook_id(textbook_id):
     query = sqlalchemy.text("""SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id""")
     result = flask.g.db.execute(query, textbook_id=textbook_id).first()
     return list(result)
+
+
+def get_category_name_from_id(cat_id):
+    """
+    Queries the database and returns the name of the category with the specified id.
+
+    Arguments:
+        cat_id: The id of the requested category.
+    Returns:
+        result: A string with the name of the category.
+    """
+    query = sqlalchemy.text("""SELECT cat_title FROM marketplace_categories WHERE cat_id=:cat_id""")
+    result = flask.g.db.execute(query, cat_id=cat_id).first()
+    return result[0]
