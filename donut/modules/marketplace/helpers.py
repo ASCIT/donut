@@ -91,7 +91,7 @@ def process_category_headers(fields):
             headers.append("Sold by")
         elif i == "item_timestamp":
             headers.append("Date")
-        elif i == "textbook_id":
+        elif i == "textbook_title":
             headers.append("Title")
         elif i == "textbook_author":
             headers.append("Author")
@@ -122,39 +122,28 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     """
     all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
                              "item_condition", "item_price", "item_timestamp", "item_active",
-                             "textbook_id", "textbook_edition", "textbook_isbn"]
+                             "textbook_title", "textbook_author", "textbook_edition", "textbook_isbn"]
     default_fields = all_returnable_fields
 
-    # Okay I couldn't think of a better way to do this.
-    # The problem is that if we're requesting, say, textbook_author,
-    # which isn't in marketplace_items but instead in marketplace_books,
-    # the query with sql.select(fields) won't work.
-    # So here's my solution.
-    # This code only puts the legit fields into the query, and then
-    # does some magic in the "case statement" later to fill in those rows.
-    # The one major downside of this is that it prevents the error message
-    # "Invalid field" from being shown, but it makes up for that by just
-    # not having any results in that category when it's returned, so
-    # it should be pretty obvious if a category is typoed or mistaken.
-    query_fields = []
-
     if fields == None:
-        query_fields = fields = default_fields
+        fields = default_fields
     else:
-        for f in fields:
-            if f in all_returnable_fields:
-                query_fields.append(f)
+        if any(f not in all_returnable_fields for f in fields):
+            return "Invalid field"
+
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(query_fields).select_from(sqlalchemy.text("marketplace_items"))
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items NATURAL JOIN marketplace_textbooks"))
 
     # Build the WHERE clause
     for key, value in attrs.items():
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
+    print str(s)
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
     sanitized_res = []
+    print(result)
 
     # Format the data, parsing the timestamps and converting the ids to
     # actual information
@@ -170,13 +159,6 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
                     temp_row.append(data.strftime("%m/%d/%y"))
                 elif fields[field_index] == "user_id":
                     temp_row.append(get_name_from_user_id(int(data)))
-                elif fields[field_index] == "textbook_id":
-                    temp_row += (get_textbook_info_from_textbook_id(int(data)))
-                    field_index += 1
-                    # [0] is the textbook title, and [1] is the author name
-                    # SO ALWAYS PUT THE TITLE FIRST IN CATEGORIES
-                    # hngggg this design
-                    # there's two fields of information in this one piece of data so we also increment field_index
                 elif fields[field_index] == "textbook_edition":
                     temp_row.append(process_edition(data))
                 else:

@@ -19,7 +19,7 @@ def category():
 
     fields = []
     if helpers.get_category_name_from_id(category_id) == "Textbooks":
-        fields = ["textbook_id", "textbook_author", "textbook_edition", "item_price", "user_id", "item_timestamp"]
+        fields = ["textbook_title", "textbook_author", "textbook_edition", "item_price", "user_id", "item_timestamp"]
     else:
         fields = ["item_title", "item_price", "user_id", "item_timestamp"]
 
@@ -38,12 +38,12 @@ def query():
     category_id = flask.request.args["cat"]
     query = flask.request.args["q"]
 
-    fields = ["cat_id", "item_title", "textbook_id", "item_price", "user_id", "item_timestamp"]
+    fields = ["cat_id", "item_title", "textbook_title", "item_price", "user_id", "item_timestamp"]
     # Create a dict of the passed in attributes which are filterable
     filterable_attrs = ["item_id", "cat_id", "user_id", "item_title",
             "item_details", "item_images", "item_condition",
             "item_price", "item_timestamp", "item_active",
-            "textbook_id", "textbook_isbn", "textbook_edition"]
+            "textbook_id", "textbook_isbn", "textbook_edition", "textbook_title"]
     attrs = { tup:flask.request.args[tup]
             for tup in flask.request.args if tup in filterable_attrs }
     if category_id == "all":
