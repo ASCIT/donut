@@ -139,11 +139,9 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
     for key, value in attrs.items():
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
-    print str(s)
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
     sanitized_res = []
-    print(result)
 
     # Format the data, parsing the timestamps and converting the ids to
     # actual information
