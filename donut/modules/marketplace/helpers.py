@@ -97,13 +97,9 @@ def process_category_headers(fields):
             headers.append("Author")
         elif i == "textbook_edition":
             headers.append("Edition")
+        elif i == "cat_id":
+            headers.append("Category")
     return headers
-
-
-def process_search_data(fields, data):
-    return (fields, data)
-
-
 
 
 def get_marketplace_items_list_data(fields=None, attrs={}):
@@ -133,7 +129,7 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items NATURAL JOIN marketplace_textbooks"))
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items INNER JOIN marketplace_textbooks"))
 
     # Build the WHERE clause
     for key, value in attrs.items():
@@ -159,6 +155,8 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
                     temp_row.append(get_name_from_user_id(int(data)))
                 elif fields[field_index] == "textbook_edition":
                     temp_row.append(process_edition(data))
+                elif fields[field_index] == "cat_id":
+                    temp_row.append(get_category_name_from_id(int(data)))
                 else:
                     temp_row.append(data)
             field_index += 1
@@ -166,6 +164,41 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
     # Return the 2d array of arrays
     return sanitized_res
+
+
+def merge_titles(datalist, fields):
+    """
+    Takes datalist and merges the two columns, item_title and textbook_title.
+
+    Arguments:
+        datalist: a 2d list of data, with columns determined by fields
+        fields: the column titles from the SQL tables
+
+    Returns:
+        datalist: the original table, but with the two columns merged
+        fields: the column titles similarly merged together into item_title
+    """
+    item_index = -1
+    textbook_index = -1
+    for i in range(len(fields)):
+        if fields[i] == "item_title":
+            item_index = i
+        if fields[i] == "textbook_title":
+            textbook_index = i
+
+    if item_index == -1 or textbook_index == -1:
+        # can't merge, since the two columns aren't there
+        # shouldn't happen, but good to be sure
+        return (datalist, fields)
+
+    for row_index in range(len(datalist)):
+        row = datalist[row_index]
+        if row[item_index] == "":
+            row[item_index] = row[textbook_index]
+        del row[textbook_index]
+        datalist[row_index] = row
+    del fields[textbook_index]
+    return (datalist, fields)
 
 
 def process_edition(edition):

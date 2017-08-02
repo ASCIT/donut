@@ -53,8 +53,10 @@ def query():
     try:
         cat_id_num = int(category_id)
         datalist = helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs)
+        (datalist, fields) = helpers.merge_titles(datalist, fields)
+        headers = helpers.process_category_headers(fields)
 
-        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=fields)
+        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers)
 
     except ValueError:
         # not a number? something's wrong
