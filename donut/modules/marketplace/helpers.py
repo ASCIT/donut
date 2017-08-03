@@ -1,8 +1,25 @@
 import flask
 import sqlalchemy
-from datetime import date, datetime
+import re
 
 import routes
+
+# taken from donut-legacy, which was apparently taken from a CS11
+# C++ assignment by dkong
+skip_words = ["a", "all", "am", "an", "and", "are", "as", "at",
+        "be", "been", "but", "by",
+        "did", "do",
+        "for", "from",
+        "had", "has", "have", "he", "her", "hers", "him", "his",
+        "i", "if", "in", "into", "is", "it", "its",
+        "me", "my",
+        "not",
+        "of", "on", "or",
+        "so",
+        "that", "the", "their", "them", "they", "this", "to",
+        "up", "us",
+        "was", "we", "what", "who", "why", "will", "with",
+        "you", "your"]
 
 
 def render_top_marketplace_bar(template_url, **kwargs):
@@ -67,8 +84,6 @@ def render_top_marketplace_bar(template_url, **kwargs):
     # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
     # function, on to Flask in order to render the top bar and the rest of the content.
     return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
-
-
 
 
 def process_category_headers(fields):
@@ -201,6 +216,43 @@ def merge_titles(datalist, fields):
     return (datalist, fields)
 
 
+def tokenize_query(query):
+    """
+    Turns a string with a query into a list of tokens that represent the query.
+    """
+    return
+
+def validate_isbn(isbn):
+    """
+    Determines whether an ISBN is valid or not.  Works with ISBN-10 and ISBN-13,
+    validating the length of the string and the check digit as well.
+
+    Arguments:
+        isbn: The ISBN, in the form of a string.
+    Returns:
+        valid: Whether or not the isbn is valid.
+    """
+    if type(isbn) != str:
+        return False
+
+    # hyphens are annoying but there should never be one at start or end,
+    # nor should there be two in a row.
+    if isbn[0] == "-" or isbn[-1] == "-" or "--" in isbn:
+        return False
+
+    # now that we've done that we can remove them
+    isbn.replace("-", "")
+
+    # regexes shamelessly copypasted
+    # the ISBN-10 can have an x at the end (but the ISBN-13 can't)
+    if re.match("^[0-9]{9}[0-9x]$", isbn, re.IGNORECASE) != None:
+        return True
+    elif re.match("^[0-9]{13}$", isbn, re.IGNORECASE) != None:
+        return True
+    return False
+
+
+
 def process_edition(edition):
     """
     Turns a string with an edition in it into a processed string.
@@ -218,12 +270,16 @@ def process_edition(edition):
         edition = int(edition)
         if edition < 1000:
             # it's probably an edition, not a year
-            if edition == 1:
-                return "1st"
-            if edition == 2:
-                return "2nd"
-            if edition == 3:
-                return "3rd"
+
+            # if the tens digit is 1, it's always "th"
+            if (edition / 10) % 10 == 1:
+                return str(edition) + "th"
+            if edition%10 == 1:
+                return str(edition) + "st"
+            if edition%10 == 2:
+                return str(edition) + "nd"
+            if edition%10 == 3:
+                return str(edition) + "rd"
             return str(edition) + "th"
         else:
             return str(edition)
