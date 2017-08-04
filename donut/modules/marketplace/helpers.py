@@ -2,6 +2,8 @@ import flask
 import sqlalchemy
 import re
 
+from donut.modules.core.helpers import get_member_data
+
 import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
@@ -51,18 +53,10 @@ def render_top_marketplace_bar(template_url, **kwargs):
     # little tricky - we want to aim for a table with either 4 categories or 5
     # categories per row, with the last row catching the remainder. However, we
     # want to avoid having exactly 1 category in the remainder row if possible.
+    # Thus we do our best to prevent num_cats % num_cols from being 1.
     num_cats = len(categories);
-    num_cols = num_cats
     if num_cats <= 5:
         num_cols = num_cats
-    elif num_cats % 5 == 0:
-        num_cols = 5
-    elif num_cats % 4 == 0:
-        num_cols = 4
-    elif num_cats % 5 == 4:
-        num_cols = 5
-    elif num_cats % 4 == 3:
-        num_cols = 4
     elif num_cats % 5 != 1:
         num_cols = 5
     elif num_cats % 4 != 1:
@@ -220,7 +214,31 @@ def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
     """
-    return
+    global skip_words
+    tokens = []
+
+    query = query.split()
+    # Validate ISBNs before we remove hyphens
+    for token_index in range(len(query)):
+        token = query[token_index]
+        if(validate_isbn(token)):
+            tokens.append(token)
+            del query[token_index]
+
+    query = " ".join(query)
+    # Remove punctuation
+    punctuation = [",", ".", "-", "_", "!", ";", ":", "/", "\\"]
+    for p in punctuation:
+        query = query.replace(p, " ")
+    query = query.split()
+
+    # if any of the words in query are in our skip_words, don't add them
+    # to tokens
+    for token in query:
+        if True:
+            pass
+
+    return tokens
 
 def validate_isbn(isbn):
     """
@@ -297,9 +315,9 @@ def get_name_from_user_id(user_id):
         result: A string of the user's full name.
                 (first + " " + last)
     """
-    query = sqlalchemy.text("""SELECT first_name, last_name FROM members WHERE user_id=:user_id""")
+    query = sqlalchemy.text("""SELECT full_name FROM members_full_name WHERE user_id=:user_id""")
     result = flask.g.db.execute(query, user_id=user_id).first()
-    return " ".join(result)
+    return result[0]
 
 
 def get_textbook_info_from_textbook_id(textbook_id):
