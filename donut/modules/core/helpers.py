@@ -28,6 +28,9 @@ def get_member_data(user_id, fields=None):
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
 
+    # Build the WHERE clause
+    s = s.where(sqlalchemy.text("user_id = " + str(user_id)))
+
     # Execute the query
     result = flask.g.db.execute(s, user_id=user_id).first()
     
@@ -98,6 +101,9 @@ def get_organization_data(org_id, fields=None):
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
+
+    # Build the WHERE clause
+    s = s.where(sqlalchemy.text("org_id = " + str(org_id)))
 
     # Execute the query
     result = flask.g.db.execute(s, org_id=org_id).first()
