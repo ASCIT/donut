@@ -13,11 +13,13 @@
         </thead>
         <tbody>
             <!-- display data in one main table -->
-            {% for i in datalist %}
+            {% for i in range(datalist|length) %}
                 <tr>
-                    {% for j in i %}
+                    {% for j in range(datalist[i]|length) %}
                         <td>
-                            {{ j }}
+                            {% if links[i][j] != 0 %} <a> {% endif %}
+                            {{ datalist[i][j] }}
+                            {% if links[i][j] != 0 %} </a> {% endif %}
                         </td>
                     {% endfor %}
                 </tr>

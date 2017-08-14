@@ -80,6 +80,176 @@ def render_top_marketplace_bar(template_url, **kwargs):
     return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
 
 
+def generate_search_table(fields=None, attrs={}):
+    """
+    Provides a centralized way to generate the 2d array of cells that is displayed
+    in a table, along with all the stuff that needs to be packaged with it.  Calls
+    a few functions further down to get the data, merge some columns, and rename
+    the headers.
+
+    Arguments:
+        fields: A list of the fields that are requested to be in the table.  For
+                example: ["cat_id", "item_title", "textbook_title", "item_price",
+                ...]
+
+        attrs: A map of fields to values that make up conditions on the fields.
+               For example, {"cat_id":1} will only return results for which the
+               category id is 1.
+
+    Returns:
+        result: The 2d array that was requested.
+
+        headers: The English-ified headers for each column.
+
+        links: A 2d array that, in each cell, gives the url of the link that
+               clicking on the corresponding cell in result should yield.  If none,
+               the cell will contain the number 0 instead.
+    """
+
+    # we need the item_id to generate the urls that clicking on the item title
+    # should go to.
+    # also, we add it to the front so that we can get the id before we need to use
+    # it (i.e., when we're adding it to links)
+    fields = ["item_id"] + fields
+
+    result = get_marketplace_items_list_data(fields, attrs)
+    (result, fields) = merge_titles(result, fields)
+
+    sanitized_res = []
+    links = []
+
+    # Format the data, parsing the timestamps and converting the ids to
+    # actual information
+    for item_listing in result:
+        temp_res_row = []
+        temp_link_row = []
+        item_listing = list(item_listing)
+        field_index = 0
+        for data in item_listing:
+            added_link = False
+            if data == None:
+                temp_res_row.append("")
+            else:
+                if fields[field_index] == "item_timestamp":
+                    temp_res_row.append(data.strftime("%m/%d/%y"))
+
+                elif fields[field_index] == "user_id":
+                    temp_link_row.append("")
+                    added_link = True
+
+                    temp_res_row.append(get_name_from_user_id(int(data)))
+
+                elif fields[field_index] == "textbook_edition":
+                    temp_res_row.append(process_edition(data))
+
+                elif fields[field_index] == "cat_id":
+                    temp_res_row.append(get_category_name_from_id(int(data)))
+
+                elif fields[field_index] == "item_title" or fields[field_index] == "textbook_title":
+                    temp_link_row.append("")
+                    # it'll be a url_for for some route (that I haven't
+                    # implemented yet but whatever)
+                    #
+                    added_link = True
+
+                    temp_res_row.append(data)
+
+                else:
+                    temp_res_row.append(data)
+
+            if not added_link:
+                temp_link_row.append(0)
+            field_index += 1
+
+        # strip off the item_id column we added at the beginning of the function
+        temp_res_row = temp_res_row[1:]
+        temp_link_row = temp_link_row[1:]
+
+        # add our temporary rows to the real 2d arrays that we'll return
+        sanitized_res.append(temp_res_row)
+        links.append(temp_link_row)
+
+    fields = fields[1:] # strip off the item_id column we added at the beginning
+
+    headers = process_category_headers(fields)
+
+    return (sanitized_res, headers, links)
+
+
+def get_marketplace_items_list_data(fields=None, attrs={}):
+    """
+    Queries the database and returns list of member data constrained by the
+    specified attributes.
+
+    Arguments:
+        fields: The fields to return. If None specified, then default_fields
+                are used.
+        attrs:  The attributes of the members to filter for.
+    Returns:
+        result: The fields and corresponding values of members with desired
+                attributes. In the form of a list of lists.
+    """
+    all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
+                             "item_condition", "item_price", "item_timestamp", "item_active",
+                             "textbook_title", "textbook_author", "textbook_edition", "textbook_isbn"]
+    default_fields = all_returnable_fields
+
+    if fields == None:
+        fields = default_fields
+    else:
+        if any(f not in all_returnable_fields for f in fields):
+            return "Invalid field"
+
+
+    # Build the SELECT and FROM clauses
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items INNER JOIN marketplace_textbooks"))
+
+    # Build the WHERE clause
+    for key, value in attrs.items():
+        s = s.where(sqlalchemy.text(key + "= :" + key))
+
+    # Execute the query
+    result = flask.g.db.execute(s, attrs).fetchall()
+    # Return the list of lists
+    for i in range(len(result)):
+        result[i] = list(result[i])
+    return result
+
+
+def merge_titles(datalist, fields):
+    """
+    Takes datalist and merges the two columns, item_title and textbook_title.
+
+    Arguments:
+        datalist: a 2d list of data, with columns determined by fields
+        fields: the column titles from the SQL tables
+
+    Returns:
+        datalist: the original table, but with the two columns merged
+        fields: the column titles similarly merged together into item_title
+    """
+    item_index = -1
+    textbook_index = -1
+    for i in range(len(fields)):
+        if fields[i] == "item_title":
+            item_index = i
+        if fields[i] == "textbook_title":
+            textbook_index = i
+
+    if item_index == -1 or textbook_index == -1:
+        # can't merge, since the two columns aren't there
+        return (datalist, fields)
+
+    for row_index in range(len(datalist)):
+        row = datalist[row_index]
+        if row[item_index] == "":
+            row[item_index] = row[textbook_index]
+        del row[textbook_index]
+        datalist[row_index] = row
+    del fields[textbook_index]
+    return (datalist, fields)
+
+
 def process_category_headers(fields):
     """
     Converts fields from sql headers to English.
@@ -109,105 +279,6 @@ def process_category_headers(fields):
         elif i == "cat_id":
             headers.append("Category")
     return headers
-
-
-def get_marketplace_items_list_data(fields=None, attrs={}):
-    """
-    Queries the database and returns list of member data constrained by the
-    specified attributes.
-
-    Arguments:
-        fields: The fields to return. If None specified, then default_fields
-                are used.
-        attrs:  The attributes of the members to filter for.
-    Returns:
-        result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of dicts with key:value of
-                columnname:columnvalue.
-    """
-    all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
-                             "item_condition", "item_price", "item_timestamp", "item_active",
-                             "textbook_title", "textbook_author", "textbook_edition", "textbook_isbn"]
-    default_fields = all_returnable_fields
-
-    if fields == None:
-        fields = default_fields
-    else:
-        if any(f not in all_returnable_fields for f in fields):
-            return "Invalid field"
-
-
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items INNER JOIN marketplace_textbooks"))
-
-    # Build the WHERE clause
-    for key, value in attrs.items():
-        s = s.where(sqlalchemy.text(key + "= :" + key))
-
-    # Execute the query
-    result = flask.g.db.execute(s, attrs).fetchall()
-    sanitized_res = []
-
-    # Format the data, parsing the timestamps and converting the ids to
-    # actual information
-    for item_listing in result:
-        temp_row = []
-        item_listing = list(item_listing)
-        field_index = 0
-        for data in item_listing:
-            if data == None:
-                temp_row.append("")
-            else:
-                if fields[field_index] == "item_timestamp":
-                    temp_row.append(data.strftime("%m/%d/%y"))
-                elif fields[field_index] == "user_id":
-                    temp_row.append(get_name_from_user_id(int(data)))
-                elif fields[field_index] == "textbook_edition":
-                    temp_row.append(process_edition(data))
-                elif fields[field_index] == "cat_id":
-                    temp_row.append(get_category_name_from_id(int(data)))
-                else:
-                    temp_row.append(data)
-            field_index += 1
-        sanitized_res.append(temp_row)
-
-    # Return the 2d array of arrays
-    return sanitized_res
-
-
-def merge_titles(datalist, fields):
-    """
-    Takes datalist and merges the two columns, item_title and textbook_title.
-
-    Arguments:
-        datalist: a 2d list of data, with columns determined by fields
-        fields: the column titles from the SQL tables
-
-    Returns:
-        datalist: the original table, but with the two columns merged
-        fields: the column titles similarly merged together into item_title
-    """
-    item_index = -1
-    textbook_index = -1
-    for i in range(len(fields)):
-        if fields[i] == "item_title":
-            item_index = i
-        if fields[i] == "textbook_title":
-            textbook_index = i
-
-    if item_index == -1 or textbook_index == -1:
-        # can't merge, since the two columns aren't there
-        # shouldn't happen, but good to be sure
-        return (datalist, fields)
-
-    for row_index in range(len(datalist)):
-        row = datalist[row_index]
-        if row[item_index] == "":
-            row[item_index] = row[textbook_index]
-        del row[textbook_index]
-        datalist[row_index] = row
-    del fields[textbook_index]
-    return (datalist, fields)
 
 
 def tokenize_query(query):

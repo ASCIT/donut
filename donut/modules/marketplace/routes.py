@@ -23,11 +23,12 @@ def category():
     else:
         fields = ["item_title", "item_price", "user_id", "item_timestamp"]
 
-    datalist = helpers.get_marketplace_items_list_data(fields=fields, attrs={"cat_id": category_id})
+    #datalist = helpers.generate_table_data(fields=fields, attrs={"cat_id": category_id})
 
-    headers = helpers.process_category_headers(fields)
+    #headers = helpers.process_category_headers(fields)
+    (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs={"cat_id": category_id})
 
-    return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=category_id, headers=headers)
+    return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=category_id, headers=headers, links=links)
 
 
 @blueprint.route('/marketplace/search')
@@ -48,15 +49,18 @@ def query():
             for tup in flask.request.args if tup in filterable_attrs }
     if category_id == "all":
         category_id = 0
+    else:
+        attrs["cat_id"] = category_id
+        # only pass in the cat_id to get_marketplace_items_list_data if it's not
+        # "all", because cat_id (and everything in attrs) goes into a WHERE
+        # clause, and not specifying is the same as selecting all.
 
     # now, the category id had better be a number
     try:
         cat_id_num = int(category_id)
-        datalist = helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs)
-        (datalist, fields) = helpers.merge_titles(datalist, fields)
-        headers = helpers.process_category_headers(fields)
+        (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs=attrs)
 
-        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers)
+        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers, links=links)
 
     except ValueError:
         # not a number? something's wrong
