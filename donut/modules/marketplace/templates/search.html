@@ -17,7 +17,7 @@
                 <tr>
                     {% for j in range(datalist[i]|length) %}
                         <td>
-                            {% if links[i][j] != 0 %} <a> {% endif %}
+                            {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
                             {{ datalist[i][j] }}
                             {% if links[i][j] != 0 %} </a> {% endif %}
                         </td>

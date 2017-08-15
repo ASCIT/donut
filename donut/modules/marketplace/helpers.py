@@ -125,16 +125,25 @@ def generate_search_table(fields=None, attrs={}):
         temp_link_row = []
         item_listing = list(item_listing)
         field_index = 0
+        item_id = -1
         for data in item_listing:
             added_link = False
             if data == None:
                 temp_res_row.append("")
             else:
-                if fields[field_index] == "item_timestamp":
+                if fields[field_index] == "item_id":
+                    # store the item_id (which will be the first item in each row
+                    # [because we added it to the front of the fields list])
+                    # so that we can use it to generate the links for each item
+                    item_id = int(data)
+                    temp_res_row.append(data)
+
+                elif fields[field_index] == "item_timestamp":
                     temp_res_row.append(data.strftime("%m/%d/%y"))
 
                 elif fields[field_index] == "user_id":
-                    temp_link_row.append("")
+                    temp_link_row.append(flask.url_for("core.get_members", user_id=int(data)))
+                    # TODO: update when stalker is working
                     added_link = True
 
                     temp_res_row.append(get_name_from_user_id(int(data)))
@@ -146,12 +155,9 @@ def generate_search_table(fields=None, attrs={}):
                     temp_res_row.append(get_category_name_from_id(int(data)))
 
                 elif fields[field_index] == "item_title" or fields[field_index] == "textbook_title":
-                    temp_link_row.append("")
-                    # it'll be a url_for for some route (that I haven't
-                    # implemented yet but whatever)
-                    #
+                    temp_link_row.append(flask.url_for(".marketplace"))
+                    # TODO: update when I implement looking at items
                     added_link = True
-
                     temp_res_row.append(data)
 
                 else:
