@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <!-- SECTION 1 OF SELLING: CATEGORY SELECT -->
+    <h3>Create a new item</h3>
+    <br>
+    Please select a category for your item.
+    <br>
+    <br>
+    <form action={{ url_for(".sell") }} method='post'>
+        <select name="cat_id">
+            {% for i in range(cats|length) %}
+                {% for j in range(cats[i]|length) %}
+                    <option value={{ i*cats[0]|length+j+1 }}>
+                        <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
+                        {{ cats[i][j] }}
+                    </option>
+                {% endfor %}
+            {% endfor %}
+        </select>
+        <button>Continue</button>
+    </form>
+</div>
+<br>
+
+{% endblock %}

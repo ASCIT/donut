@@ -24,7 +24,7 @@ skip_words = ["a", "all", "am", "an", "and", "are", "as", "at",
         "you", "your"]
 
 
-def render_top_marketplace_bar(template_url, **kwargs):
+def render_with_top_marketplace_bar(template_url, **kwargs):
     """
     Provides an easy way for routing functions to pass the variables required for
     rendering the marketplace's top bar to render_template.  Basically chains
@@ -39,15 +39,14 @@ def render_top_marketplace_bar(template_url, **kwargs):
         The result of render_template(): Whatever magic Flask does to render the
                                          final page.
     """
-    query = sqlalchemy.sql.select(["cat_title"]).select_from(sqlalchemy.text("marketplace_categories"))
-    result = flask.g.db.execute(query)
+    # Get category titles
 
-    # Convert result, in the form of a strange SQL object, into an array,
-    # so that we can retrieve the length without having to execute a special
-    # length query or anything.
-    categories = []
-    for column in result:
-        categories.append(column[0])
+    fields=["cat_title"]
+    categories = list(get_table_list_data("marketplace_categories", fields))
+    # get_table_list_data always returns a list of lists, but we know that
+    # each list is only one element long, and we only want a list of strings.
+    for i in range(len(categories)):
+        categories[i] = categories[i][0]
 
     # Get number of rows and columns to display categories nicely. This is a
     # little tricky - we want to aim for a table with either 4 categories or 5
@@ -106,20 +105,20 @@ def generate_search_table(fields=None, attrs={}):
                the cell will contain the number 0 instead.
     """
 
-    # we need the item_id to generate the urls that clicking on the item title
+    # We need the item_id to generate the urls that clicking on the item title
     # should go to.
-    # also, we add it to the front so that we can get the id before we need to use
+    # Also, we add it to the front so that we can get the id before we need to use
     # it (i.e., when we're adding it to links)
     fields = ["item_id"] + fields
 
-    result = get_marketplace_items_list_data(fields, attrs)
+    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs)
     (result, fields) = merge_titles(result, fields)
 
     sanitized_res = []
     links = []
 
-    # Format the data, parsing the timestamps and converting the ids to
-    # actual information
+    # Format the data, parsing the timestamps, converting the ids to actual
+    # information, and adding links
     for item_listing in result:
         temp_res_row = []
         temp_link_row = []
@@ -182,12 +181,15 @@ def generate_search_table(fields=None, attrs={}):
     return (sanitized_res, headers, links)
 
 
-def get_marketplace_items_list_data(fields=None, attrs={}):
+def get_table_list_data(tables, fields=None, attrs={}):
     """
-    Queries the database and returns list of member data constrained by the
-    specified attributes.
+    Queries the database (specifically, table <table>) and returns list of member data
+    constrained by the specified attributes.
 
     Arguments:
+        tables: The tables to query.  If it's only one, it can be just a string,
+                but if it's more than one, it can be in a list, whereupon they will
+                be INNER JOINED in order to query all of them at the same time.
         fields: The fields to return. If None specified, then default_fields
                 are used.
         attrs:  The attributes of the members to filter for.
@@ -195,9 +197,17 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
     """
-    all_returnable_fields = ["item_id", "cat_id", "user_id", "item_title", "item_details",
-                             "item_condition", "item_price", "item_timestamp", "item_active",
-                             "textbook_title", "textbook_author", "textbook_edition", "textbook_isbn"]
+    if type(tables) == str:
+        tables = [tables]
+
+    column_query = sqlalchemy.sql.select([sqlalchemy.text("COLUMN_NAME")]).select_from(
+                   sqlalchemy.text("INFORMATION_SCHEMA.COLUMNS"))
+    column_query = column_query.where(sqlalchemy.text("TABLE_NAME IN :tables"))
+    all_returnable_fields_temp = list(flask.g.db.execute(column_query, tables=tuple(tables)))
+    all_returnable_fields = []
+    for field in all_returnable_fields_temp:
+        all_returnable_fields += list(field)
+
     default_fields = all_returnable_fields
 
     if fields == None:
@@ -208,7 +218,7 @@ def get_marketplace_items_list_data(fields=None, attrs={}):
 
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("marketplace_items INNER JOIN marketplace_textbooks"))
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(" INNER JOIN ".join(tables)))
 
     # Build the WHERE clause
     for key, value in attrs.items():

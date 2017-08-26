@@ -7,8 +7,9 @@ from donut.modules.marketplace import blueprint, helpers
 def marketplace():
     """Display marketplace page."""
 
-    return helpers.render_top_marketplace_bar('marketplace.html', cat_id=0)
-    # cat_id = 0 indicates "all categories", which is the default
+    return helpers.render_with_top_marketplace_bar('marketplace.html', cat_id=0)
+    # cat_id = 0 indicates that the select object should be set to "all
+    # categories", which is the default
 
 
 @blueprint.route('/marketplace/view')
@@ -28,7 +29,7 @@ def category():
     #headers = helpers.process_category_headers(fields)
     (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs={"cat_id": category_id})
 
-    return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=category_id, headers=headers, links=links)
+    return helpers.render_with_top_marketplace_bar('search.html', datalist=datalist, cat_id=category_id, headers=headers, links=links)
 
 
 @blueprint.route('/marketplace/search')
@@ -60,16 +61,82 @@ def query():
         cat_id_num = int(category_id)
         (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs=attrs)
 
-        return helpers.render_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers, links=links)
+        return helpers.render_with_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers, links=links)
 
     except ValueError:
         # not a number? something's wrong
         return flask.render_template('404.html')
 
 
-@blueprint.route('/marketplace/sell')
+@blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
-    return helpers.render_top_marketplace_bar('sell.html')
+    if flask.request.method == 'GET':
+        # you can only GET the main category select page, from the topbar
+        # so render and return it
+        return helpers.render_with_top_marketplace_bar('sell_cat.html')
+
+    # PAGES
+    # -----
+    # 1:  Select a category (default first page)
+    # 10: Select a textbook (special, appears between pages 1 and 2 if the category is 'Textbooks')
+    # 2:  Input information about the listing
+    # 3:  Confirm that info is correct
+    # 4:  Add data to database, show success message
+
+    page = 1 # default is first page; category select page
+    if "page" in flask.request.form:
+        # but if we pass it in, get it
+        page = flask.request.form["page"]
+
+    if not page in [1, 10, 2, 3, 4]:
+        flask.flash('Invalid page')
+
+
+    # STATES
+    # ------
+    # blank: defaults to new
+    # new:   making a new listing
+    # edit:  editing an old listing
+
+    state = "new" # if state isn't in request.args, it's new
+    if "state" in flask.request.args:
+        # but if it's there, get it
+        state = flask.request.args["state"]
+
+    if not state in ["new", "edit"]:
+        flask.flash('Invalid state')
+
+
+    # prev_page is used for the back button
+    prev_page = None
+    if "prev_page" in flask.request.form:
+        prev_page = flask.request.form["prev_page"]
+        if not prev_page in [1, 10, 2, 3, 4]:
+            flask.flash('Invalid page')
+
+
+    # cat_id
+    cat_id = None
+    if "cat_id" in flask.request.form:
+        cat_id = flask.request.form["cat_id"]
+        if cat_id not in helpers.get_table_list_data("marketplace_categories",
+                ["cat_id"]):
+            flask.flash('Invalid category')
+    else:
+        if page > 1:
+            flask.flash('Category must be selected')
+
+    if "action" in flask.request.form:
+        if flask.request.form["action"] == "add_textbook":
+            # only called on the textbook_select page; page 10
+            if page != 10:
+                flask.flash('Invalid action')
+
+    if page == 1:
+        return helpers.render_with_top_marketplace_bar('sell_cat.html')
+    if page == 10:
+        return helpers.render_with_top_marketplace_bar('sell.html')
+
 
 
 @blueprint.route('/1/marketplace_items')
