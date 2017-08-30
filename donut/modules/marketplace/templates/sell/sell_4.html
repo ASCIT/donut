@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <!-- SECTION 4 OF SELLING: SUBMIT -->
+    <p>PAGE 4</p>
+    {% if state == "new" %}
+    <h3>Create a new item</h3>
+    {% else %}
+    <h3>Modify an existing item</h3>
+    {% endif %}
+    <br>
+    Please select a category for your item.
+    <br>
+    <br>
+    <form action={{ url_for(".sell") }} method='post'>
+        <select name="cat_id">
+            {% for i in range(cats|length) %}
+                {% for j in range(cats[i]|length) %}
+                    <option value={{ i*cats[0]|length+j+1 }}>
+                        <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
+                        {{ cats[i][j] }}
+                    </option>
+                {% endfor %}
+            {% endfor %}
+        </select>
+        <button name="page" value=2>Continue</button>
+    </form>
+</div>
+<br>
+
+{% endblock %}

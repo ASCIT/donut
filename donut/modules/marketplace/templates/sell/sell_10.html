@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <!-- SECTION 10 OF SELLING: TEXTBOOK SELECT -->
+    <p>PAGE 10</p>
+    {% if state == "new" %}
+    <h3>Create a new item</h3>
+    {% else %}
+    <h3>Modify an existing item</h3>
+    {% endif %}
+    <br>
+    Please find and select your textbook from the list below.
+    <br>
+    <br>
+    <form action={{ url_for(".sell") }} method='post'>
+        <input id="tb-search" type="text" maxlength=255 size=60 placeholder="Search for a book.">
+        <div class="scrollbox">
+            <table class="sortable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                    </tr>
+                </thead>
+            <select name="cat_id">
+                {% for i in range(cats|length) %}
+                    {% for j in range(cats[i]|length) %}
+                        <option value={{ i*cats[0]|length+j+1 }}>
+                            <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
+                            {{ cats[i][j] }}
+                        </option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+            </table>
+        </div>
+        <button name="page" value=2>Continue</button>
+    </form>
+</div>
+<br>
+
+{% endblock %}
