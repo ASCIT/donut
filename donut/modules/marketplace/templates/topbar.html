@@ -5,7 +5,7 @@
             <h2>Marketplace</h2>
             <div>
                 <a href={{ url_for(".marketplace") }}> Home </a> |
-                <a href={{ url_for(".sell") }} method='post'> Sell an item </a>
+                <a href={{ url_for(".sell", state='new') }} method='post'> Sell an item </a>
             </div>
             <div class="row mp-nav-div" style="border-top: 2px solid black;border-bottom: 2px solid black;margin:5px 0px;font-size: 17px">
                 <table class="mp-nav" style="width:100%">

@@ -14,11 +14,16 @@
     Please select a category for your item.
     <br>
     <br>
-    <form action={{ url_for(".sell") }} method='post'>
-        <select name="cat_id">
+    {% if state=='edit' %}
+    <form action={{ url_for(".sell", state=state, item_id=request.args['item']) }} method='post'>
+    {% else %}
+    <form action={{ url_for(".sell", state=state) }} method='post'>
+    {% endif %}
+        <select name="category_id">
             {% for i in range(cats|length) %}
                 {% for j in range(cats[i]|length) %}
-                    <option value={{ i*cats[0]|length+j+1 }}>
+                    <option value={{ i*cats[0]|length+j+1 }}
+                    {% if i*cats[0]|length+j+1 == category_id %} selected {% endif %} >
                         <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
                         {{ cats[i][j] }}
                     </option>
@@ -26,6 +31,11 @@
             {% endfor %}
         </select>
         <button name="page" value=2>Continue</button>
+
+        <!-- hidden fields allow us to pass info between form pages -->
+        {% for h in hidden %}
+        <input type="hidden" name={{ h[0] }} value={{ h[1] }}>
+        {% endfor %}
     </form>
 </div>
 <br>

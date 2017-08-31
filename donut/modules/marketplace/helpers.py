@@ -297,6 +297,34 @@ def process_category_headers(fields):
     return headers
 
 
+def generate_hidden_form_elements(skip_fields):
+    """
+    Creates a list of names of parameters and values, gathered from flask.request.form, to be passed into sell_*.html.
+    There, they will be turned into hidden form elements and passed into the request form.
+    Some fields are skipped because including them would overwrite other fields.
+
+    Arguments:
+        skip_fields: The fields to skip.
+    Returns:
+        to_return: The list of parameters and values, in a 2d list where each row is of the form ["parameter", value]
+    """
+    parameters = ["category_id", "item_title", "item_condition", "item_details", "item_price", "textbook_id", "textbook_edition", "textbook_isbn", "state"]
+
+    to_return = []
+    for parameter in parameters:
+        if parameter in skip_fields:
+            continue
+        if parameter in flask.request.form:
+            to_return.append([parameter, flask.request.form[parameter]])
+
+    if not "item_image" in skip_fields:
+        if "item_image" in flask.request.form:
+            for img in flask.request.form["item_image"]:
+                to_return.append(["item_image[]", img])
+
+    return to_return
+
+
 def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
@@ -327,6 +355,7 @@ def tokenize_query(query):
 
     return tokens
 
+
 def validate_isbn(isbn):
     """
     Determines whether an ISBN is valid or not.  Works with ISBN-10 and ISBN-13,
@@ -355,7 +384,6 @@ def validate_isbn(isbn):
     elif re.match("^[0-9]{13}$", isbn, re.IGNORECASE) != None:
         return True
     return False
-
 
 
 def process_edition(edition):
@@ -390,6 +418,35 @@ def process_edition(edition):
             return str(edition)
     except ValueError:
         return edition
+
+
+def add_textbook(title, author):
+    """
+    Adds a textbook to the database, with title <title> and author
+    <author>.
+
+    Arguments:
+        title: The title.
+        author: The author.
+
+    Returns:
+        True if the insert succeeds, and False if not (the textbook
+        already exists)
+    """
+    # check if the textbook exists
+    query = sqlalchemy.sql.select("1").select_from("marketplace_textbooks")
+    query = query.where(sqlalchemy.text("textbook_title = :title"))
+    query = query.where(sqlalchemy.text("textbook_author = :author"))
+    result = list(flask.g.db.execute(query, title=title, author=author))
+    if len(result) != 0:
+        # the textbook already exists
+        return False
+
+    query = sqlalchemy.sql.text("""INSERT INTO marketplace_textbooks
+            (textbook_title, textbook_author) VALUES (:title,
+            :author)""")
+    flask.g.db.execute(query, title=title, author=author)
+    return True
 
 
 def get_name_from_user_id(user_id):

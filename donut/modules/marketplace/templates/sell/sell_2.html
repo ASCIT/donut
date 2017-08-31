@@ -14,7 +14,11 @@
     Please select a category for your item.
     <br>
     <br>
-    <form action={{ url_for(".sell") }} method='post'>
+    {% if state=='edit' %}
+    <form action={{ url_for(".sell", state=state, item_id=request.args['item']) }} method='post'>
+    {% else %}
+    <form action={{ url_for(".sell", state=state) }} method='post'>
+    {% endif %}
         <select name="cat_id">
             {% for i in range(cats|length) %}
                 {% for j in range(cats[i]|length) %}
@@ -25,7 +29,13 @@
                 {% endfor %}
             {% endfor %}
         </select>
-        <button name="page" value=2>Continue</button>
+        <button name="page" value=1>Back</button>
+        <button name="page" value=3>Continue</button>
+
+        <!-- hidden fields allow us to pass info between form pages -->
+        {% for h in hidden %}
+        <input type="hidden" name={{ h[0] }} value={{ h[1] }}>
+        {% endfor %}
     </form>
 </div>
 <br>
