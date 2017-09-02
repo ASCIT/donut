@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS marketplace_categories;
 DROP TABLE IF EXISTS marketplace_textbooks;
 
 CREATE TABLE marketplace_textbooks (
-	textbook_id INT NOT NULL,
+	textbook_id INT NOT NULL AUTO_INCREMENT,
 	textbook_title VARCHAR(255) NOT NULL,
 	textbook_author VARCHAR(255) NOT NULL,
 PRIMARY KEY(textbook_id),
@@ -12,7 +12,7 @@ UNIQUE KEY (textbook_title, textbook_author)
 );
 
 CREATE TABLE marketplace_categories (
-	cat_id INT NOT NULL,
+	cat_id INT NOT NULL AUTO_INCREMENT,
 	cat_title VARCHAR(100) NOT NULL,
 	cat_active BOOLEAN DEFAULT TRUE,
 	cat_order INT,
@@ -23,7 +23,7 @@ UNIQUE KEY(cat_title)
 
 CREATE TABLE marketplace_items (
 
-	item_id INT NOT NULL,
+	item_id INT NOT NULL AUTO_INCREMENT,
 	cat_id INT NOT NULL,
 	user_id INT NOT NULL,
 	item_title VARCHAR(255) NOT NULL,
@@ -42,7 +42,7 @@ FOREIGN KEY(textbook_id) REFERENCES marketplace_textbooks(textbook_id)
 );
 
 CREATE TABLE marketplace_images (
-	img_id INT NOT NULL,
+	img_id INT NOT NULL AUTO_INCREMENT,
 	item_id INT NOT NULL,
 	img_link VARCHAR(255),
 PRIMARY KEY(img_id),

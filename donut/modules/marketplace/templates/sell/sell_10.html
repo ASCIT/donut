@@ -15,7 +15,7 @@
     <br>
     <br>
     {% if state=='edit' %}
-    <form action={{ url_for(".sell", state=state, item_id=request.args['item']) }} method='post'>
+    <form action={{ url_for(".sell", state=state, item_id=request.args['item_id']) }} method='post'>
     {% else %}
     <form action={{ url_for(".sell", state=state) }} method='post'>
     {% endif %}

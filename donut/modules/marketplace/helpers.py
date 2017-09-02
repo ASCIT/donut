@@ -111,7 +111,7 @@ def generate_search_table(fields=None, attrs={}):
     # it (i.e., when we're adding it to links)
     fields = ["item_id"] + fields
 
-    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs)
+    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs, "NATURAL LEFT JOIN")
     (result, fields) = merge_titles(result, fields)
 
     sanitized_res = []
@@ -181,7 +181,7 @@ def generate_search_table(fields=None, attrs={}):
     return (sanitized_res, headers, links)
 
 
-def get_table_list_data(tables, fields=None, attrs={}):
+def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN'):
     """
     Queries the database (specifically, table <table>) and returns list of member data
     constrained by the specified attributes.
@@ -189,10 +189,11 @@ def get_table_list_data(tables, fields=None, attrs={}):
     Arguments:
         tables: The tables to query.  If it's only one, it can be just a string,
                 but if it's more than one, it can be in a list, whereupon they will
-                be INNER JOINED in order to query all of them at the same time.
+                be <method>ed in order to query all of them at the same time.
         fields: The fields to return. If None specified, then default_fields
                 are used.
         attrs:  The attributes of the members to filter for.
+        method: How the tables are connected (ex: INNER JOIN, NATURAL LEFT JOIN, etc.)
     Returns:
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
@@ -217,8 +218,10 @@ def get_table_list_data(tables, fields=None, attrs={}):
             return "Invalid field"
 
 
+    # add spaces around method to make the query work
+    method = " " + method + " "
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(" INNER JOIN ".join(tables)))
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(method.join(tables)))
 
     # Build the WHERE clause
     for key, value in attrs.items():
@@ -461,6 +464,8 @@ def get_name_from_user_id(user_id):
     """
     query = sqlalchemy.text("""SELECT full_name FROM members_full_name WHERE user_id=:user_id""")
     result = flask.g.db.execute(query, user_id=user_id).first()
+    if result == None:
+        return None
     return result[0]
 
 
@@ -475,6 +480,8 @@ def get_textbook_info_from_textbook_id(textbook_id):
     """
     query = sqlalchemy.text("""SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id""")
     result = flask.g.db.execute(query, textbook_id=textbook_id).first()
+    if result == None:
+        return None
     return list(result)
 
 
@@ -489,4 +496,6 @@ def get_category_name_from_id(cat_id):
     """
     query = sqlalchemy.text("""SELECT cat_title FROM marketplace_categories WHERE cat_id=:cat_id""")
     result = flask.g.db.execute(query, cat_id=cat_id).first()
+    if result == None:
+        return None
     return result[0]
