@@ -19,7 +19,7 @@
     {% else %}
     <form action={{ url_for(".sell", state=state) }} method='post'>
     {% endif %}
-        <select name="category_id">
+        <select name="cat_id">
             {% for i in range(cats|length) %}
                 {% for j in range(cats[i]|length) %}
                     <option value={{ i*cats[0]|length+j+1 }}

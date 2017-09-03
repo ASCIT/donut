@@ -56,7 +56,7 @@
                 <tr>
                     <td>Title *:</td>
                     <td>
-                        <input type="text" name="item_title" maxlength=240 size=50 value={{stored["item_title"]}}>
+                        <input type="text" name="item_title" maxlength=240 size=50 value="{{stored['item_title']}}">
                     </td>
                 </tr>
             {% endif %}
@@ -88,7 +88,7 @@
             <tr>
                 <td>Details:</td>
                 <td>
-                    <textarea rows=6 cols=40 name="item_details" maxlength=2000 value={{stored["item_details"]}}></textarea>
+                    <textarea rows=6 cols=40 name="item_details" maxlength=2000>{{stored['item_details']}}</textarea>
                 </td>
             </tr>
         </table>

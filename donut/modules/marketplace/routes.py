@@ -69,10 +69,6 @@ def query():
 def sell():
     print(flask.session)
     print(flask.request.form)
-    """if flask.request.method == 'GET':
-        # you can only GET the main category select page, from the topbar
-        # so render and return it
-        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', state='new')"""
 
     # if the data or the page in general has errors, we don't let the user continue to the next page
     hasErrors = False
@@ -109,17 +105,20 @@ def sell():
         flask.flash('Invalid state')
         hasErrors = True
 
-    itemId = None
+    item_id = None
     stored = {}
     storedFields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
+    for field in storedFields:
+        stored[field] = ""
+
     if state == 'edit':
         if 'item_id' not in flask.request.args:
             flask.flash('Invalid item')
             hasErrors = True
         else:
             item_id = int(flask.request.args['item_id'])
-            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], storedFields, {'item_id': item_id}, "NATURAL LEFT JOIN")
-            for i in range(len(fields)):
+            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], storedFields, {'item_id': item_id}, "NATURAL LEFT JOIN")[0]
+            for i in range(len(data)):
                 stored[storedFields[i]] = data[i]
 
     # prev_page is used for the back button
@@ -135,18 +134,18 @@ def sell():
     # turn the resulting 2d list into a map from cat_id to cat_title
     cat_id_map = {sublist[0]: sublist[1] for sublist in helpers.get_table_list_data("marketplace_categories", ["cat_id", "cat_title"])}
     cat_title = None
-    if "category_id" in flask.request.form:
+    if "cat_id" in flask.request.form:
         # flask.request.form should override the database if the user selects a new category
-        stored["category_id"] = int(flask.request.form["category_id"])
-        if stored["category_id"] not in cat_id_map:
+        stored["cat_id"] = int(flask.request.form["cat_id"])
+        if stored["cat_id"] not in cat_id_map:
             flask.flash('Invalid category')
             hasErrors = True
         else:
             # get the category title from the id using the map
-            cat_title = cat_id_map[stored["category_id"]]
+            cat_title = cat_id_map[stored["cat_id"]]
 
     # if we're past page 1, we need category to be selected
-    if stored["category_id"] == None and page > 1:
+    if page > 1 and stored["cat_id"] == None:
             flask.flash('Category must be selected')
             hasErrors = True
 
@@ -183,10 +182,11 @@ def sell():
 
     if page == 1:
         # generate the hidden values
-        hidden = helpers.generate_hidden_form_elements(['category_id'])
+        hidden = helpers.generate_hidden_form_elements(['cat_id'])
         hidden.append(['prev_page', page])
 
-        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', page=page, state=state, category_id=stored['category_id'], hidden=hidden)
+        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', page=page, state=state, category_id=stored['cat_id'], hidden=hidden)
+
     elif page == 10:
         # get a list of textbooks to select from
         textbooks = helpers.get_table_list_data("marketplace_textbooks", ["textbook_id", "textbook_title", "textbook_author"])
@@ -197,6 +197,7 @@ def sell():
         hidden.append(['prev_page', page])
 
         return helpers.render_with_top_marketplace_bar('sell/sell_10.html', page=page, state=state, textbooks=textbooks, old_textbook_id=textbook_id, hidden=hidden)
+
     elif page == 2:
         validation_errors = [] # TODO: validation
 
@@ -222,6 +223,7 @@ def sell():
         hidden.append(['prev_page', page])
 
         return helpers.render_with_top_marketplace_bar('sell/sell_2.html', page=page, state=state, cat_title=cat_title, stored=stored, errors=validation_errors, hidden=hidden)
+
     elif page == 3:
 
         for field in storedFields:
@@ -234,15 +236,41 @@ def sell():
                 (stored["textbook_title"], stored["textbook_author"]) = textbook_info[0]
             if field in flask.request.form:
                 stored[field] = flask.request.form[field]
+
         # generate the hidden values
-        hidden = helpers.generate_hidden_form_elements(['item_title', 'textbook_id'])
+        hidden = []
+        if cat_title == 'Textbooks':
+            hidden = helpers.generate_hidden_form_elements(['item_title'])
+        else:
+            hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn'])
         hidden.append(['prev_page', page])
-        return helpers.render_with_top_marketplace_bar('sell/sell_3.html', page=page, state=state, hidden=hidden)
+        return helpers.render_with_top_marketplace_bar('sell/sell_3.html', page=page, state=state, cat_title=cat_title, stored=stored, hidden=hidden)
+
     elif page == 4:
-        # generate the hidden values
-        hidden = helpers.generate_hidden_form_elements(['item_title', 'textbook_id'])
-        hidden.append(['prev_page', page])
-        return helpers.render_with_top_marketplace_bar('sell/sell_4.html', page=page, state=state, hidden=hidden)
+        for field in storedFields:
+            if field == "textbook_id" and cat_title == "Textbooks":
+                # we also want to put textbook_title and textbook_author in stored,
+                # but they won't be in request.form
+                # so we get them here
+                textbook_id = flask.request.form["textbook_id"]
+                textbook_info = helpers.get_table_list_data("marketplace_textbooks", ["textbook_title", "textbook_author"], {"textbook_id": textbook_id})
+                # get_table_list_data returns a list of lists, so grab the inner list using [0]
+                (stored["textbook_title"], stored["textbook_author"]) = textbook_info[0]
+            if field in flask.request.form:
+                stored[field] = flask.request.form[field]
+
+        stored["user_id"] = 1 # TODO: once logins and that sort of stuff works, get the actual user id
+        # if we are creating a new item listing, insert it into the database.
+        # otherwise, if we are editing an item that already exists, we need
+        # to update the listing.
+        stored["cat_title"] = cat_title
+        if (state == "new"):
+            result = helpers.createNewListing(stored)
+        else:
+            result = helpers.updateCurrentListing(item_id, stored);
+
+
+        return helpers.render_with_top_marketplace_bar('sell/sell_4.html', result=result)
 
 
 

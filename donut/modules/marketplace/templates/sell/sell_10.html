@@ -35,7 +35,7 @@
                     {% for i in range(textbooks|length) %}
                         <tr style="text-align:left" id={{ "td-"+textbooks[i][0]|string }}>
                             <td><input type="radio" name="textbook_id" value={{ textbooks[i][0] }}
-                                {% if textbooks[i][0] == old_textbook_id %} checked {% endif %}>
+                                {% if textbooks[i][0]|string == old_textbook_id %} checked {% endif %}>
                             </td>
                             <td>{{ textbooks[i][1] }}</td>
                             <td>{{ textbooks[i][2] }}</td>

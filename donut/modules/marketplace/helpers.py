@@ -311,7 +311,7 @@ def generate_hidden_form_elements(skip_fields):
     Returns:
         to_return: The list of parameters and values, in a 2d list where each row is of the form ["parameter", value]
     """
-    parameters = ["category_id", "item_title", "item_condition", "item_details", "item_price", "textbook_id", "textbook_edition", "textbook_isbn", "state"]
+    parameters = ["cat_id", "item_title", "item_condition", "item_details", "item_price", "textbook_id", "textbook_edition", "textbook_isbn", "state"]
 
     to_return = []
     for parameter in parameters:
@@ -326,6 +326,59 @@ def generate_hidden_form_elements(skip_fields):
                 to_return.append(["item_image[]", img])
 
     return to_return
+
+
+def createNewListing(stored):
+    """
+    Inserts into the database!
+
+    Arguments:
+        stored: a map with the info
+    Returns:
+        the item_id, or -1 if it fails
+    """
+    user_id = int(stored["user_id"])
+    cat_id = int(stored["cat_id"])
+    cat_title = stored["cat_title"]
+    item_condition = stored["item_condition"]
+    item_details = stored["item_details"]
+    item_price = stored["item_price"]
+    item_images = []
+    #item_images = stored["item_images"] # TODO: images
+    result = []
+    if cat_title == "Textbooks":
+        textbook_id = int(stored["textbook_id"])
+        textbook_edition = stored["textbook_edition"]
+        textbook_isbn = stored["textbook_isbn"].replace("-", "")
+        query = sqlalchemy.sql.text("""INSERT INTO marketplace_items
+                (user_id, cat_id, item_condition, item_details, item_price, textbook_id, textbook_edition, textbook_isbn)
+                VALUES (:user_id, :cat_id, :item_condition, :item_details, :item_price, :textbook_id, :textbook_edition, :textbook_isbn)""")
+        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
+                item_condition=item_condition, item_details=item_details,
+                item_price=item_price, textbook_id=textbook_id, textbook_edition=textbook_edition,
+                textbook_isbn=textbook_isbn)
+    else:
+        item_title = stored["item_title"];
+        query = sqlalchemy.sql.text("""INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_inum, :cat_id, :item_title, :item_condition, :item_details, :item_price)""")
+        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
+                item_title=item_title, item_condition=item_condition,
+                item_details=item_details, item_price=item_price)
+
+    query = sqlalchemy.sql.text("SELECT LAST_INSERT_ID()")
+    result = list(flask.g.db.execute(query))
+    item_id = -1
+    if result[0][0] != 0:
+        item_id = result[0][0]
+    else:
+        return -1
+
+    # TODO: images
+    """
+    for image in item_images:
+        query = sqlalchemy.sql.text(" ""INSERT INTO marketplace.images (item_id, img_link) VALUES (:item_id, :image);"" ")
+        result = flask.g.db.execute(query, item_id=item_id, image=image)
+    """
+    return item_id
 
 
 def tokenize_query(query):
