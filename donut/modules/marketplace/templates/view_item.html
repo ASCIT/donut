@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <h3>
+        Viewing item:
+        {% if cat_title=="Textbooks" %}
+        {{stored["textbook_title"]}}
+        {% else %}
+        {{stored["item_title"]}}
+        {% endif %}
+    </h3>
+
+    <!-- TODO: when logins and privs are implemented, put "edit this item" here -->
+
+    <br>
+    <table style="margin-left: auto;margin-right: auto;text-align:left">
+        <thead>
+            <tr style="hidden">
+                <td style="width:90px"></td>
+                <td style="width:400px"></td>
+            </tr>
+        </thead>
+        <tr>
+            <td>Category:</td>
+            <td>{{ cat_title }}</td>
+        </tr>
+        {% if cat_title == "Textbooks" %}
+            <tr>
+                <td>Title:</td>
+                <td> {{stored["textbook_title"]}} </td>
+            </tr>
+            <tr>
+                <td>Author:</td>
+                <td> {{stored["textbook_author"]}} </td>
+            </tr>
+            <tr>
+                <td>Edition:</td>
+                <td> {{stored["textbook_edition"]}} </td>
+            </tr>
+            <tr>
+                <td>ISBN:</td>
+                <td> {{stored["textbook_isbn"]}} </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td>Title:</td>
+                <td> {{stored["item_title"]}} </td>
+            </tr>
+        {% endif %}
+
+        <tr>
+            <td>Condition:</td>
+            <td> {{stored["item_condition"]}} </td>
+        </tr>
+
+        <tr>
+            <td>Price:</td>
+            <td> {{stored["item_price"]}} </td>
+        </tr>
+
+        <tr>
+            <td>Details:</td>
+            <td> {{stored["item_details"]}} </td>
+        </tr>
+    </table>
+    <br>
+    <br>
+    <h4>
+        Seller details:
+    </h4>
+    <table style="margin-left: auto;margin-right: auto;text-align:left">
+        <thead>
+            <tr style="hidden">
+                <td style="width:90px"></td>
+                <td style="width:400px"></td>
+            </tr>
+        </thead>
+        <tr>
+            <td>Name:</td>
+            <!-- TODO: update when stalker is working -->
+            <td> <a href={{url_for("core.get_members", user_id=stored["user_id"])}}> {{stored["full_name"]}} </a> </td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td> <a href="mailto:{{stored['email']}}"> {{stored["email"]}} </a> </td>
+        </tr>
+    </table>
+</div>
+<br>
+
+{% endblock %}

@@ -154,8 +154,7 @@ def generate_search_table(fields=None, attrs={}):
                     temp_res_row.append(get_category_name_from_id(int(data)))
 
                 elif fields[field_index] == "item_title" or fields[field_index] == "textbook_title":
-                    temp_link_row.append(flask.url_for(".marketplace"))
-                    # TODO: update when I implement looking at items
+                    temp_link_row.append(flask.url_for(".view_item", item_id=item_id))
                     added_link = True
                     temp_res_row.append(data)
 

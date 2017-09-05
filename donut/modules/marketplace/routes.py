@@ -64,6 +64,42 @@ def query():
         # not a number? something's wrong
         return flask.render_template('404.html')
 
+@blueprint.route('/marketplace/view_item')
+def view_item():
+    """View additional details about item <item_id>, passed through flask.request.args."""
+
+    if "item_id" not in flask.request.args:
+        return flask.render_template('404.html')
+
+    # make sure item_id is a number
+    try:
+        item_id = int(flask.request.args["item_id"])
+
+        stored = {}
+        storedFields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
+        data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], storedFields, {'item_id': item_id}, "NATURAL LEFT JOIN")[0]
+        for i in range(len(data)):
+            stored[storedFields[i]] = data[i]
+
+        # cat_title from cat_id
+        cat_id_map = {sublist[0]: sublist[1] for sublist in helpers.get_table_list_data("marketplace_categories", ["cat_id", "cat_title"])}
+        cat_title=cat_id_map[stored["cat_id"]]
+
+        # full_name and email from user_id
+        data = helpers.get_table_list_data(['members', 'members_full_name'], ['full_name', 'email'], {'user_id': stored['user_id']}, "NATURAL LEFT JOIN")[0]
+        stored['full_name'] = data[0]
+        stored['email'] = data[1]
+
+        # if any field is None, replace it with "" to display more cleanly
+        for field in stored:
+            if stored[field] == None:
+                stored[field] = ""
+
+        return helpers.render_with_top_marketplace_bar('view_item.html', stored=stored, cat_title=cat_title)
+
+    except ValueError:
+        return flask.render_template('404.html')
+
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
