@@ -79,7 +79,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
 
 
-def generate_search_table(fields=None, attrs={}):
+def generate_search_table(fields=None, attrs={}, query=""):
     """
     Provides a centralized way to generate the 2d array of cells that is displayed
     in a table, along with all the stuff that needs to be packaged with it.  Calls
@@ -94,6 +94,9 @@ def generate_search_table(fields=None, attrs={}):
         attrs: A map of fields to values that make up conditions on the fields.
                For example, {"cat_id":1} will only return results for which the
                category id is 1.
+
+        query: The query we want to filter our results by.  If "", no
+               filtering happens.
 
     Returns:
         result: The 2d array that was requested.
@@ -111,7 +114,22 @@ def generate_search_table(fields=None, attrs={}):
     # it (i.e., when we're adding it to links)
     fields = ["item_id"] + fields
 
+    if query != "":
+        # and add cat_id, textbook_author and textbook_isbn to the end so
+        # that we can use those fields in search_datalist
+        fields = fields + ["textbook_author", "textbook_isbn", "cat_id"]
+
     result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs, "NATURAL LEFT JOIN")
+
+    if query != "":
+        # filter by query
+        result = search_datalist(fields, result, query)
+        # take textbook_author, textbook_isbn, and cat_id (the last 3
+        # columns) back out
+        fields = fields[:-3]
+        for i in range(len(result)):
+            result[i] = result[i][:-3]
+
     (result, fields) = merge_titles(result, fields)
 
     sanitized_res = []
@@ -180,6 +198,23 @@ def generate_search_table(fields=None, attrs={}):
     return (sanitized_res, headers, links)
 
 
+def get_table_columns(tables):
+    """
+    Get all the columns in a table or tables.
+    """
+    # if there's only one table in the form of a string, we wrap it
+    # in a list so that TABLE_NAME IN :tables works
+    if type(tables) == str:
+        tables = [tables]
+    column_query = sqlalchemy.sql.select([sqlalchemy.text("COLUMN_NAME")]).select_from(sqlalchemy.text("INFORMATION_SCHEMA.COLUMNS"))
+    column_query = column_query.where(sqlalchemy.text("TABLE_NAME IN :tables"))
+    columns_temp = list(flask.g.db.execute(column_query, tables=tuple(tables)))
+    columns = []
+    for field in columns_temp:
+        columns += list(field)
+    return columns
+
+
 def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN'):
     """
     Queries the database (specifically, table <table>) and returns list of member data
@@ -200,18 +235,10 @@ def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN
     if type(tables) == str:
         tables = [tables]
 
-    column_query = sqlalchemy.sql.select([sqlalchemy.text("COLUMN_NAME")]).select_from(
-                   sqlalchemy.text("INFORMATION_SCHEMA.COLUMNS"))
-    column_query = column_query.where(sqlalchemy.text("TABLE_NAME IN :tables"))
-    all_returnable_fields_temp = list(flask.g.db.execute(column_query, tables=tuple(tables)))
-    all_returnable_fields = []
-    for field in all_returnable_fields_temp:
-        all_returnable_fields += list(field)
-
-    default_fields = all_returnable_fields
+    all_returnable_fields = get_table_columns(tables)
 
     if fields == None:
-        fields = default_fields
+        fields = all_returnable_fields
     else:
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
@@ -380,6 +407,107 @@ def createNewListing(stored):
     return item_id
 
 
+def search_datalist(fields, datalist, query):
+    """
+    Searches in datalist (which has columns denoted in fields) to
+    create a new datalist, sorted first by relevance and then by date
+    created.
+    """
+    # map column names to indices
+    # we need to map item_title and category_title to the same index
+    # because datalist has already been merged
+    field_index_map = {}
+    for i in range(len(fields)):
+        field_index_map[fields[i]] = i
+    # add a special column at the end: score
+    field_index_map["score"] = len(fields)
+
+    query_tokens = tokenize_query(query)
+    perfect_matches = []
+    imperfect_matches = []
+
+    query_isbns = []
+    # ISBNs instantly make listings a perfect match
+    for token in query_tokens:
+        if validate_isbn(token):
+            query_isbns.append(token)
+
+    for listing in datalist:
+        item_tokens = []
+        if get_category_name_from_id(listing[field_index_map["cat_id"]]) == "Textbooks":
+            # if it's a textbook, include the author's name and the
+            # book title in the item tokens
+            item_tokens = tokenize_query(listing[field_index_map["textbook_title"]])
+            item_tokens += tokenize_query(listing[field_index_map["textbook_author"]])
+        else:
+            # only include the item title
+            item_tokens = tokenize_query(listing[field_index_map["item_title"]])
+
+        # does the isbn match any of the query's isbns?
+        is_isbn_match = False
+        for isbn in query_isbns:
+            if listing[field_index_map["textbook_isbn"]] == isbn:
+                is_isbn_match = True
+
+        score = get_matches(query_tokens, item_tokens)
+
+        # if it's an isbn match, give it a perfect score as well
+        # so that it doesn't get placed after all of the other perfect
+        # matches
+        if is_isbn_match:
+            score = len(query_tokens)
+
+        listing.append(score)
+        if score == 0:
+            continue
+
+        if score == len(query_tokens):
+            perfect_matches.append(listing)
+        else:
+            imperfect_matches.append(listing)
+
+    search_results = []
+    # if we have any perfect matches, don't include the imperfect ones
+    if len(perfect_matches) > 0:
+        search_results = perfect_matches
+    else:
+        search_results = imperfect_matches
+
+    # define a custom comparison function to use in python's sort
+    # -1 if item1 goes above item2, i.e. either item1's score is higher
+    # or item1 was posted earlier.
+    def compare(item1, item2):
+        if item1[field_index_map["score"]] < item2[field_index_map["score"]]:
+            return 1
+        elif item1[field_index_map["score"]] > item2[field_index_map["score"]]:
+            return -1
+        # they have the same number of matches, so we sort by timestamp
+        if item1[field_index_map["item_timestamp"]] < item2[field_index_map["item_timestamp"]]:
+            return 1
+        elif item1[field_index_map["item_timestamp"]] == item2[field_index_map["item_timestamp"]]:
+            return 0
+        else:
+            return -1
+
+    search_results = sorted(search_results, cmp=compare)
+
+    # chop off the last column, which holds the score
+    for i in range(len(search_results)):
+        search_results[i] = search_results[i][:-1]
+
+    return search_results
+
+
+def get_matches(l1, l2):
+    """
+    Returns the number of matches between list 1 and list 2.
+    """
+    if len(l1) < len(l2):
+        return len([x for x in l1 if x in l2])
+    else:
+        return len([x for x in l2 if x in l1])
+
+
 def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
@@ -405,8 +533,9 @@ def tokenize_query(query):
     # if any of the words in query are in our skip_words, don't add them
     # to tokens
     for token in query:
-        if True:
-            pass
+        token = token.lower()
+        if not token in skip_words:
+            tokens.append(token)
 
     return tokens
 
@@ -419,7 +548,7 @@ def validate_isbn(isbn):
     Arguments:
         isbn: The ISBN, in the form of a string.
     Returns:
-        valid: Whether or not the isbn is valid.
+        valid: Whether or not the isbn is valid (a boolean).
     """
     if type(isbn) != str:
         return False

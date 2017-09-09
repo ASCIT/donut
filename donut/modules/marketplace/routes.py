@@ -56,13 +56,14 @@ def query():
     # now, the category id had better be a number
     try:
         cat_id_num = int(category_id)
-        (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs=attrs)
+        (datalist, headers, links) = helpers.generate_search_table(fields=fields, attrs=attrs, query=query)
 
         return helpers.render_with_top_marketplace_bar('search.html', datalist=datalist, cat_id=cat_id_num, headers=headers, links=links)
 
     except ValueError:
         # not a number? something's wrong
         return flask.render_template('404.html')
+
 
 @blueprint.route('/marketplace/view_item')
 def view_item():
@@ -307,7 +308,6 @@ def sell():
 
 
         return helpers.render_with_top_marketplace_bar('sell/sell_4.html', result=result)
-
 
 
 @blueprint.route('/1/marketplace_items')
