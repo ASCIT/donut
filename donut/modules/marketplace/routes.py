@@ -104,9 +104,6 @@ def view_item():
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
-    print(flask.session)
-    print(flask.request.form)
-
     # if the data or the page in general has errors, we don't let the user continue to the next page
     hasErrors = False
     # PAGES
@@ -204,6 +201,8 @@ def sell():
                     flask.flash('Textbook already exists!')
                     hasErrors = True
 
+    # TODO: Validation of the data passed in; not allowing the user to continue if any data is malformed or essential data is missing
+
     if hasErrors:
         # there's an error, so we can't change the page like the (continue or back) button would've done
         page = prev_page
@@ -214,8 +213,6 @@ def sell():
             # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
             if (page == 2 and prev_page == 1) or (page == 1 and prev_page == 2):
                 page = 10
-        pass
-
 
     if page == 1:
         # generate the hidden values
