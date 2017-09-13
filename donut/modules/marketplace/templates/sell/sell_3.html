@@ -76,7 +76,7 @@
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
-        <input type="hidden" name={{ h[0] }} value={{ h[1] }}>
+        <input type="hidden" name="{{ h[0] }}" value="{{ h[1] }}">
         {% endfor %}
     </form>
 </div>

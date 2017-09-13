@@ -43,13 +43,13 @@
                 <tr>
                     <td>Edition:</td>
                     <td>
-                        <input type="text" name="textbook_edition" maxlength=20 value={{stored["textbook_edition"]}}>
+                        <input type="text" name="textbook_edition" maxlength=20 value="{{stored['textbook_edition']}}">
                     </td>
                 </tr>
                 <tr>
                     <td>ISBN:</td>
                     <td>
-                        <input type="text" name="textbook_isbn" maxlength=20 value={{stored["textbook_isbn"]}}>
+                        <input type="text" name="textbook_isbn" maxlength=20 value="{{stored['textbook_isbn']}}">
                     </td>
                 </tr>
             {% else %}
@@ -66,7 +66,7 @@
                 <td>
                     <select name="item_condition">
                         {% for condition in ["", "New", "Very Good", "Good", "Acceptable", "Poor"] %}
-                            <option value={{condition}} {% if condition == stored["item_condition"] %} selected {% endif %}>
+                            <option value="{{condition}}" {% if condition == stored["item_condition"] %} selected {% endif %}>
                                 {% if condition == "" %}
                                     Choose one...
                                 {% else %}
@@ -81,14 +81,14 @@
             <tr>
                 <td>Price *:</td>
                 <td>
-                    <input type="text" name="item_price" maxlength=7 size=10 value={{stored["item_price"]}}>
+                    <input type="text" name="item_price" maxlength=7 size=10 value="{{stored['item_price']}}">
                 </td>
             </tr>
 
             <tr>
                 <td>Details:</td>
                 <td>
-                    <textarea rows=6 cols=40 name="item_details" maxlength=2000>{{stored['item_details']}}</textarea>
+                    <textarea rows=6 cols=40 name="item_details" maxlength=2000>{{stored["item_details"]}}</textarea>
                 </td>
             </tr>
         </table>
@@ -99,7 +99,7 @@
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
-        <input type="hidden" name={{ h[0] }} value={{ h[1] }}>
+        <input type="hidden" name="{{ h[0] }}" value="{{ h[1] }}">
         {% endfor %}
     </form>
 </div>

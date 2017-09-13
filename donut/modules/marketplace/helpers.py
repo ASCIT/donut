@@ -385,7 +385,7 @@ def createNewListing(stored):
                 textbook_isbn=textbook_isbn)
     else:
         item_title = stored["item_title"];
-        query = sqlalchemy.sql.text("""INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_inum, :cat_id, :item_title, :item_condition, :item_details, :item_price)""")
+        query = sqlalchemy.sql.text("""INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_id, :cat_id, :item_title, :item_condition, :item_details, :item_price)""")
         result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
                 item_title=item_title, item_condition=item_condition,
                 item_details=item_details, item_price=item_price)
