@@ -194,14 +194,12 @@ def sell():
                 textbook_title = flask.request.form["textbook_title"]
                 textbook_author = flask.request.form["textbook_author"]
                 if textbook_title == "" or textbook_author == "":
-                    flask.flash("Textbook title and textbook author can't be blank")
+                    flask.flash("Textbook title and textbook author can't be blank.")
                     hasErrors = True
                 elif not helpers.add_textbook(textbook_title, textbook_author):
                     # add_textbook returns false if it fails
                     flask.flash('Textbook already exists!')
                     hasErrors = True
-
-    # TODO: Validation of the data passed in; not allowing the user to continue if any data is malformed or essential data is missing
 
     if hasErrors:
         # there's an error, so we can't change the page like the (continue or back) button would've done
@@ -213,6 +211,25 @@ def sell():
             # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
             if (page == 2 and prev_page == 1) or (page == 1 and prev_page == 2):
                 page = 10
+
+    if page >= 2 and page <= 4 and cat_title == "Textbooks":
+        if "textbook_id" not in flask.request.form or flask.request.form["textbook_id"] == "":
+            flask.flash("You need to select a textbook.")
+            # go back to the textbook select page
+            page = 10
+        else:
+            # make sure that the textbook_id is valid
+            textbook_result = helpers.get_table_list_data("marketplace_textbooks", attrs={"textbook_id": flask.request.form["textbook_id"]})
+            if len(textbook_result) == 0:
+                flask.flash("Invalid textbook.")
+                page = 10
+
+    # don't allow the user to continue if any data is malformed or essential data is missing
+    errors = []
+    if page in [3, 4]:
+        errors += helpers.validate_data()
+        if len(errors) != 0:
+            page = 2
 
     if page == 1:
         # generate the hidden values
@@ -233,8 +250,6 @@ def sell():
         return helpers.render_with_top_marketplace_bar('sell/sell_10.html', page=page, state=state, textbooks=textbooks, old_textbook_id=textbook_id, hidden=hidden)
 
     elif page == 2:
-        validation_errors = [] # TODO: validation
-
         # get correct stored values
         for field in storedFields:
             if field == "textbook_id" and cat_title == "Textbooks":
@@ -256,7 +271,7 @@ def sell():
             hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn', 'item_title', 'item_condition', 'item_price', 'item_details'])
         hidden.append(['prev_page', page])
 
-        return helpers.render_with_top_marketplace_bar('sell/sell_2.html', page=page, state=state, cat_title=cat_title, stored=stored, errors=validation_errors, hidden=hidden)
+        return helpers.render_with_top_marketplace_bar('sell/sell_2.html', page=page, state=state, cat_title=cat_title, stored=stored, errors=errors, hidden=hidden)
 
     elif page == 3:
 
@@ -299,9 +314,10 @@ def sell():
         # to update the listing.
         stored["cat_title"] = cat_title
         if (state == "new"):
-            result = helpers.createNewListing(stored)
+            result = helpers.create_new_listing(stored)
         else:
-            result = helpers.updateCurrentListing(item_id, stored);
+            # TODO
+            result = helpers.update_current_listing(item_id, stored);
 
 
         return helpers.render_with_top_marketplace_bar('sell/sell_4.html', result=result)

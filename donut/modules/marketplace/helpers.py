@@ -354,7 +354,79 @@ def generate_hidden_form_elements(skip_fields):
     return to_return
 
 
-def createNewListing(stored):
+def validate_data():
+    """
+    Validates the data submitted in the sell form.
+
+    Returns:
+        A list of all the validation errors; an empty list if no errors.
+    """
+    errors = []
+    try:
+        category_id = int(flask.request.form["cat_id"])
+    except ValueError:
+        # this should never happen through normal form use
+        errors.append("Somehow the category got all messed up.")
+        return errors
+
+    cat_title = get_table_list_data("marketplace_categories",
+            fields=["cat_title"], attrs={"cat_id": category_id})
+    if len(cat_title) == 0:
+        # the category id doesn't correspond to any category
+        errors.append("Somehow the category got all messed up.")
+        return errors
+    else:
+        # 2d array to a single element
+        # [["Furniture"]] -> "Furniture"
+        cat_title = cat_title[0][0]
+
+    if cat_title == "Textbooks":
+        # regex to make sure the textbook edition is valid
+        if "textbook_edition" in flask.request.form:
+            edition_regex = "^([0-9]+|international)$"
+            if re.match(edition_regex, str(flask.request.form["textbook_edition"]), re.IGNORECASE) == None:
+                errors.append("Textbook edition is invalid. Try providing a number or 'International'.")
+
+        # validate the isbn too, if it's present
+        if "textbook_isbn" in flask.request.form and flask.request.form["textbook_isbn"] != "":
+            if not validate_isbn(flask.request.form["textbook_isbn"]):
+                errors.append("Textbook ISBN appears to be invalid. Please check that you typed it in correctly.")
+
+    else:
+        # just need to make sure the item_title exists
+        if not "item_title" in flask.request.form or flask.request.form["item_title"] == "":
+            errors.append("Item title cannot be empty.")
+
+    # condition is mandatory
+    if not "item_condition" in flask.request.form or flask.request.form["item_condition"] == "":
+        errors.append("Item condition must be set.")
+
+    # price must be present and valid
+    if not "item_price" in flask.request.form or flask.request.form["item_price"] == "":
+        errors.append("Price cannot be left blank.")
+    else:
+        price_regex = "^([0-9]{1,4}\.[0-9]{0,2}|[0-9]{1,4}|\.[0-9]{1,2})$"
+        # matches prices of the form ****.**, ****, and .**
+        # examples:
+        # first capture group:
+        # 123.98
+        # 1234.9
+        # 12.
+        # second capture group:
+        # 12
+        # 123
+        # third capture group:
+        # .9
+        # .98
+        if re.match(price_regex, flask.request.form["item_price"]) == None:
+            errors.append("Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places.")
+
+    # TODO: image link verification
+
+    return errors
+
+
+def create_new_listing(stored):
     """
     Inserts into the database!
 

@@ -12,7 +12,14 @@
     {% endif %}
     <br>
     <p>Please provide additional details about your item.</p>
-    <p>* Required field.</p>
+    <p style="color:#ff0000">* Required field.</p>
+    <div id="errors">
+        {% for error in errors %}
+            <p style="color:#ff0000">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </div>
     <br>
     <br>
     {% if state=='edit' %}
