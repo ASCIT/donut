@@ -1,0 +1,13 @@
+Files used for populating the database:
+
+donut_courses_[term][academic year]_[date].txt: Schedule file obtained from registrar via email.
+	Contact information: Debra Tuttle, debit@caltech.edu
+	Example of file name for Fall 2014-15 created on August 8, 2014: donut_courses_FA2014-15_140808.txt
+
+departments.txt: Hard-coded list of Caltech academic departments obtained from the first page of the course schedule
+	Example URL for Fall 2014-15: http://registrar.caltech.edu/schedules/FA2014-15.html
+	Format: [Department name] ([Department abbreviation])
+
+run.sh: Generates course schedule and descriptions SQL file and inserts into database
+
+
