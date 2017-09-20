@@ -77,17 +77,17 @@ def view_item():
         item_id = int(flask.request.args["item_id"])
 
         stored = {}
-        storedFields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
-        data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], storedFields, {'item_id': item_id}, "NATURAL LEFT JOIN")[0]
+        stored_fields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
+        data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
         for i in range(len(data)):
-            stored[storedFields[i]] = data[i]
+            stored[stored_fields[i]] = data[i]
 
         # cat_title from cat_id
         cat_id_map = {sublist[0]: sublist[1] for sublist in helpers.get_table_list_data("marketplace_categories", ["cat_id", "cat_title"])}
         cat_title=cat_id_map[stored["cat_id"]]
 
         # full_name and email from user_id
-        data = helpers.get_table_list_data(['members', 'members_full_name'], ['full_name', 'email'], {'user_id': stored['user_id']}, "NATURAL LEFT JOIN")[0]
+        data = helpers.get_table_list_data(['members', 'members_full_name'], ['full_name', 'email'], {'user_id': stored['user_id']})[0]
         stored['full_name'] = data[0]
         stored['email'] = data[1]
 
@@ -105,7 +105,7 @@ def view_item():
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
     # if the data or the page in general has errors, we don't let the user continue to the next page
-    hasErrors = False
+    has_errors = False
     # PAGES
     # -----
     # 1:  Select a category (default first page)
@@ -121,7 +121,7 @@ def sell():
 
     if not page in [1, 10, 2, 3, 4]:
         flask.flash('Invalid page')
-        hasErrors = True
+        has_errors = True
 
 
     # STATES
@@ -137,23 +137,23 @@ def sell():
 
     if not state in ["new", "edit"]:
         flask.flash('Invalid state')
-        hasErrors = True
+        has_errors = True
 
     item_id = None
     stored = {}
-    storedFields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
-    for field in storedFields:
+    stored_fields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
+    for field in stored_fields:
         stored[field] = ""
 
     if state == 'edit':
         if 'item_id' not in flask.request.args:
             flask.flash('Invalid item')
-            hasErrors = True
+            has_errors = True
         else:
             item_id = int(flask.request.args['item_id'])
-            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], storedFields, {'item_id': item_id}, "NATURAL LEFT JOIN")[0]
+            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
             for i in range(len(data)):
-                stored[storedFields[i]] = data[i]
+                stored[stored_fields[i]] = data[i]
 
     # prev_page is used for the back button
     prev_page = None
@@ -161,7 +161,7 @@ def sell():
         prev_page = int(flask.request.form["prev_page"])
         if not prev_page in [1, 10, 2, 3, 4]:
             flask.flash('Invalid page')
-            hasErrors = True
+            has_errors = True
 
     # category_id is used to specify which category is active
     # get_table_list_data always returns a list of lists
@@ -173,7 +173,7 @@ def sell():
         stored["cat_id"] = int(flask.request.form["cat_id"])
         if stored["cat_id"] not in cat_id_map:
             flask.flash('Invalid category')
-            hasErrors = True
+            has_errors = True
         else:
             # get the category title from the id using the map
             cat_title = cat_id_map[stored["cat_id"]]
@@ -181,7 +181,7 @@ def sell():
     # if we're past page 1, we need category to be selected
     if page > 1 and stored["cat_id"] == None:
             flask.flash('Category must be selected')
-            hasErrors = True
+            has_errors = True
 
     # action is used if we need to perform an action on the server-side
     if "action" in flask.request.form:
@@ -189,19 +189,19 @@ def sell():
             # only called on the textbook_select page; page 10
             if page != 10:
                 flask.flash('Invalid action')
-                hasErrors = True
+                has_errors = True
             else:
                 textbook_title = flask.request.form["textbook_title"]
                 textbook_author = flask.request.form["textbook_author"]
                 if textbook_title == "" or textbook_author == "":
                     flask.flash("Textbook title and textbook author can't be blank.")
-                    hasErrors = True
+                    has_errors = True
                 elif not helpers.add_textbook(textbook_title, textbook_author):
                     # add_textbook returns false if it fails
                     flask.flash('Textbook already exists!')
-                    hasErrors = True
+                    has_errors = True
 
-    if hasErrors:
+    if has_errors:
         # there's an error, so we can't change the page like the (continue or back) button would've done
         page = prev_page
     else:
@@ -251,7 +251,7 @@ def sell():
 
     elif page == 2:
         # get correct stored values
-        for field in storedFields:
+        for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
                 # we also want to put textbook_title and textbook_author in stored,
                 # but they won't be in request.form
@@ -275,7 +275,7 @@ def sell():
 
     elif page == 3:
 
-        for field in storedFields:
+        for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
                 # we also want to put textbook_title and textbook_author in stored,
                 # but they won't be in request.form
@@ -296,7 +296,7 @@ def sell():
         return helpers.render_with_top_marketplace_bar('sell/sell_3.html', page=page, state=state, cat_title=cat_title, stored=stored, hidden=hidden)
 
     elif page == 4:
-        for field in storedFields:
+        for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
                 # we also want to put textbook_title and textbook_author in stored,
                 # but they won't be in request.form

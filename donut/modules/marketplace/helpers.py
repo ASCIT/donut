@@ -8,7 +8,7 @@ import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
-skip_words = ["a", "all", "am", "an", "and", "are", "as", "at",
+SKIP_WORDS = ["a", "all", "am", "an", "and", "are", "as", "at",
         "be", "been", "but", "by",
         "did", "do",
         "for", "from",
@@ -119,7 +119,7 @@ def generate_search_table(fields=None, attrs={}, query=""):
         # that we can use those fields in search_datalist
         fields = fields + ["textbook_author", "textbook_isbn", "cat_id"]
 
-    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs, "NATURAL LEFT JOIN")
+    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs)
 
     if query != "":
         # filter by query
@@ -215,7 +215,7 @@ def get_table_columns(tables):
     return columns
 
 
-def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN'):
+def get_table_list_data(tables, fields=None, attrs={}):
     """
     Queries the database (specifically, table <table>) and returns list of member data
     constrained by the specified attributes.
@@ -227,7 +227,6 @@ def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN
         fields: The fields to return. If None specified, then default_fields
                 are used.
         attrs:  The attributes of the members to filter for.
-        method: How the tables are connected (ex: INNER JOIN, NATURAL LEFT JOIN, etc.)
     Returns:
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
@@ -244,8 +243,8 @@ def get_table_list_data(tables, fields=None, attrs={}, method='NATURAL LEFT JOIN
             return "Invalid field"
 
 
-    # add spaces around method to make the query work
-    method = " " + method + " "
+    # have spaces around method to make the query work
+    method = " NATURAL LEFT JOIN "
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(method.join(tables)))
 
@@ -273,15 +272,15 @@ def merge_titles(datalist, fields):
         datalist: the original table, but with the two columns merged
         fields: the column titles similarly merged together into item_title
     """
-    item_index = -1
-    textbook_index = -1
+    item_index = None
+    textbook_index = None
     for i in range(len(fields)):
         if fields[i] == "item_title":
             item_index = i
         if fields[i] == "textbook_title":
             textbook_index = i
 
-    if item_index == -1 or textbook_index == -1:
+    if item_index is None or textbook_index is None:
         # can't merge, since the two columns aren't there
         return (datalist, fields)
 
@@ -584,7 +583,6 @@ def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
     """
-    global skip_words
     tokens = []
 
     query = query.split()
@@ -602,11 +600,11 @@ def tokenize_query(query):
         query = query.replace(p, " ")
     query = query.split()
 
-    # if any of the words in query are in our skip_words, don't add them
+    # if any of the words in query are in our SKIP_WORDS, don't add them
     # to tokens
     for token in query:
         token = token.lower()
-        if not token in skip_words:
+        if not token in SKIP_WORDS:
             tokens.append(token)
 
     return tokens
@@ -663,11 +661,11 @@ def process_edition(edition):
             # if the tens digit is 1, it's always "th"
             if (edition / 10) % 10 == 1:
                 return str(edition) + "th"
-            if edition%10 == 1:
+            if edition % 10 == 1:
                 return str(edition) + "st"
-            if edition%10 == 2:
+            if edition % 10 == 2:
                 return str(edition) + "nd"
-            if edition%10 == 3:
+            if edition % 10 == 3:
                 return str(edition) + "rd"
             return str(edition) + "th"
         else:
