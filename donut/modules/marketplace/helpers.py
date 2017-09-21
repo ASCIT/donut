@@ -249,7 +249,7 @@ def get_table_list_data(tables, fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(method.join(tables)))
 
     # Build the WHERE clause
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query

@@ -179,7 +179,20 @@ def get_group_list_data(fields=None, attrs={}):
     result = [{ f:t for f,t in zip(fields, res) } for res in result]
     return result
 
+def get_name_and_email(user_id):
+    """
+    Queries the database and returns the full_name and email corresponding to the
+    user_id.
 
+    Arguments:
+        user_id:            The user_id to match.
+    Returns:
+        (full_name, email): The full_name and email corresponding, in a tuple.
+    """
+    s = sqlalchemy.sql.select(["full_name", "email"]).select_from(sqlalchemy.text(
+        "members NATURAL LEFT JOIN members_full_name"))
+    s = s.where(sqlalchemy.text("user_id = :u"))
 
-
+    result = list(flask.g.db.execute(s, {'u': user_id}))
+    return (result[0][0], result[0][1]) # convert from a 2d list to a 1d list
 

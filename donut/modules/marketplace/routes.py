@@ -73,33 +73,33 @@ def view_item():
         return flask.render_template('404.html')
 
     # make sure item_id is a number
+    item_id = None
     try:
         item_id = int(flask.request.args["item_id"])
-
-        stored = {}
-        stored_fields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
-        data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
-        for i in range(len(data)):
-            stored[stored_fields[i]] = data[i]
-
-        # cat_title from cat_id
-        cat_id_map = {sublist[0]: sublist[1] for sublist in helpers.get_table_list_data("marketplace_categories", ["cat_id", "cat_title"])}
-        cat_title=cat_id_map[stored["cat_id"]]
-
-        # full_name and email from user_id
-        data = helpers.get_table_list_data(['members', 'members_full_name'], ['full_name', 'email'], {'user_id': stored['user_id']})[0]
-        stored['full_name'] = data[0]
-        stored['email'] = data[1]
-
-        # if any field is None, replace it with "" to display more cleanly
-        for field in stored:
-            if stored[field] == None:
-                stored[field] = ""
-
-        return helpers.render_with_top_marketplace_bar('view_item.html', stored=stored, cat_title=cat_title)
-
     except ValueError:
         return flask.render_template('404.html')
+
+    stored = {}
+    stored_fields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
+    data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
+    for i in range(len(data)):
+        stored[stored_fields[i]] = data[i]
+
+    # cat_title from cat_id
+    cat_id_map = {sublist[0]: sublist[1] for sublist in helpers.get_table_list_data("marketplace_categories", ["cat_id", "cat_title"])}
+    cat_title=cat_id_map[stored["cat_id"]]
+
+    # full_name and email from user_id
+    from donut.modules.core.helpers import get_name_and_email
+    (stored['full_name'], stored['email']) = get_name_and_email(stored['user_id'])
+
+    # if any field is None, replace it with "" to display more cleanly
+    for field in stored:
+        if stored[field] == None:
+            stored[field] = ""
+
+    return helpers.render_with_top_marketplace_bar('view_item.html', stored=stored, cat_title=cat_title)
+
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
