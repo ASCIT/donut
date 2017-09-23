@@ -10,5 +10,8 @@ USE donut_test;
 -- Create the database schema.
 SOURCE sql/donut.sql
 
+-- Create scheduler schema.
+SOURCE sql/scheduler.sql
+
 -- Populate with test data.
 SOURCE sql/test_data.sql
