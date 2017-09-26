@@ -184,7 +184,7 @@ def hash_password(password, salt, rounds, algorithm):
     return binascii.hexlify(result).decode()
   elif algorithm == 'md5':
     # Rounds is ignored.
-    return hashlib.md5((salt + password).encode).hexdigest()
+    return hashlib.md5((salt + password).encode()).hexdigest()
   return None
 
 def set_password(username, password):
