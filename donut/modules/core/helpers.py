@@ -69,7 +69,7 @@ def get_member_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
@@ -139,7 +139,7 @@ def get_organization_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
@@ -175,7 +175,7 @@ def get_group_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
