@@ -8,5 +8,8 @@ venv:
 pip-install:
 	pip install -r requirements.txt
 
+lint:
+	yapf -i -r .
+
 test:
 	python -m pytest .
