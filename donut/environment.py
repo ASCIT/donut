@@ -1,5 +1,5 @@
 class Environment(object):
-  """A configuration environment.
+    """A configuration environment.
   Provides environment-specific configuration variables:
     db_uri: uri to connect to the database.
     db_hostname: database hostname.
@@ -11,16 +11,16 @@ class Environment(object):
     secret_key: secret key for session cookie.
   """
 
-  def __init__(self, db_hostname, db_name, db_user, db_password, debug, 
-      testing, secret_key):
-    self.db_hostname = db_hostname
-    self.db_name = db_name
-    self.db_user = db_user
-    self.db_password = db_password
-    self.debug = debug
-    self.secret_key = secret_key
+    def __init__(self, db_hostname, db_name, db_user, db_password, debug,
+                 testing, secret_key):
+        self.db_hostname = db_hostname
+        self.db_name = db_name
+        self.db_user = db_user
+        self.db_password = db_password
+        self.debug = debug
+        self.secret_key = secret_key
 
-  @property
-  def db_uri(self):
-    return "mysql+pymysql://{0}:{1}@{2}/{3}".format(
-        self.db_user, self.db_password, self.db_hostname, self.db_name)
+    @property
+    def db_uri(self):
+        return "mysql+pymysql://{0}:{1}@{2}/{3}".format(
+            self.db_user, self.db_password, self.db_hostname, self.db_name)
