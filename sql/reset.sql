@@ -9,6 +9,7 @@ USE donut_test;
 
 -- Create the database schema.
 SOURCE sql/donut.sql
+SOURCE sql/marketplace.sql
 
 -- Populate with test data.
 SOURCE sql/test_data.sql

@@ -13,6 +13,7 @@ except ImportError:
 from donut import constants
 from donut.modules import account
 from donut.modules import auth
+from donut.modules import marketplace
 from donut.modules import core
 
 app = flask.Flask(__name__)
@@ -20,6 +21,7 @@ app = flask.Flask(__name__)
 # Load blueprint modules
 app.register_blueprint(account.blueprint)
 app.register_blueprint(auth.blueprint)
+app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
 
 

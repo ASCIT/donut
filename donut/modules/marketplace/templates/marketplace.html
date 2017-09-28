@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="lead" style="margin: 0px 100px">
+    <div style="font-weight: bold">Welcome to the ASCIT Marketplace!</div>
+    <div>Here, Caltech undergraduates can buy and sell textbooks and other items to other Caltech undergrads. We've tried to make using Marketplace as intuitive as possible, but we've included some FAQ below just in case things aren't clear.</div>
+
+
+    <h4>Frequently Asked Questions</h4>
+    <ul>
+    <li>
+    <div class="faq-q">How do I register if I'm not an undergraduate?</div>
+    <div class="faq-a">Currently, ASCIT Donut is a service for Caltech undergraduates only.
+        Please see the marketplace@caltech.edu <a href="https://lists.caltech.edu/listinfo/marketplace">mailing list</a>
+        for a place to sell things to the Caltech community.
+    </div>
+    </li>
+    <li>
+    <div class="faq-q">How do I sell an item?</div>
+    <div class="faq-a">To post a listing for an item, click the "sell an item" link at the top of this page.</div>
+    </li>
+    <li>
+    <div class="faq-q">How do I buy an item?</div>
+    <div class="faq-a">You can browse each category by clicking on each link above. If you have something specific you are looking for, you can also search for it with the search bar provided. Once you've found what you're looking for, you can buy the item by contacting the seller directly.</div>
+    </li>
+    <li>
+    <div class="faq-q">Do I pay online or in person?</div>
+    <div class="faq-a">There is no online payment system built into Marketplace. To buy an item, you should contact the seller directly (links to their directory profile are provided, or you could just knock on their door...)</div>
+    </li>
+    <li>
+    <div class="faq-q">What should I do after my item is sold?</div>
+    <div class="faq-a">You should archive or delete your item so it no longer appears in search results.</div>
+    </li>
+    <li>
+    <div class="faq-q">What's the difference between archiving and deleting an item?</div>
+    <div class="faq-a">Archiving an item marks it as inactive, so it will no longer appear in search results. The data remains stored on the system, so if you want to look at it later or make it active again, you can simply unarchive it. Deleting an item removes it from the system entirely (there is no undo for deleting items). We prefer if you archive items instead of deleting them, as that helps improve other search results, but if you absolutely do not want that item's data to be stored anywhere, then you should delete it.
+    <li>
+    <div class="faq-q">Why are all the images hosted in Imgur?</div>
+    <div class="faq-a">We upload all images to Imgur instead of hosting them on our own server for faster content delivery and for unlimited storage (Imgur handles images much better than we can). In addition, for security reasons, we require that all manually uploaded images also be hosted by Imgur, as it is a trusted host.</div>
+    </li>
+    </ul>
+
+    <p>If you find any bugs or have any suggestions, please let us know by emailing <a href="mailto:devteam@donut.caltech.edu">devteam@donut.caltech.edu</a>. Thanks!</p>
+</div>
+
+
+{% endblock %}
