@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <!-- SECTION 2 OF SELLING: INFO INPUT -->
+    {% if state == "new" %}
+    <h3>Create a new item</h3>
+    {% else %}
+    <h3>Modify an existing item</h3>
+    {% endif %}
+    <br>
+    <p>Please provide additional details about your item.</p>
+    <p style="color:#ff0000">* Required field.</p>
+    <div id="errors">
+        {% for error in errors %}
+            <p style="color:#ff0000">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </div>
+    <br>
+    <br>
+    {% if state=='edit' %}
+    <form action={{ url_for(".sell", state=state, item_id=request.args['item_id']) }} method='post'>
+    {% else %}
+    <form action={{ url_for(".sell", state=state) }} method='post'>
+    {% endif %}
+        <table style="margin-left: auto;margin-right: auto;text-align:left">
+            <thead>
+                <tr style="hidden">
+                    <td style="width:90px"></td>
+                    <td style="width:400px"></td>
+                </tr>
+            </thead>
+            <tr>
+                <td>Category:</td>
+                <td>{{ cat_title }}</td>
+            </tr>
+            {% if cat_title == "Textbooks" %}
+                <tr>
+                    <td>Title:</td>
+                    <td> {{stored["textbook_title"]}} </td>
+                </tr>
+                <tr>
+                    <td>Author:</td>
+                    <td> {{stored["textbook_author"]}} </td>
+                </tr>
+                <tr>
+                    <td>Edition:</td>
+                    <td>
+                        <input type="text" name="textbook_edition" maxlength=20 value="{{stored['textbook_edition']}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>ISBN:</td>
+                    <td>
+                        <input type="text" name="textbook_isbn" maxlength=20 value="{{stored['textbook_isbn']}}">
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td>Title *:</td>
+                    <td>
+                        <input type="text" name="item_title" maxlength=240 size=50 value="{{stored['item_title']}}">
+                    </td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>Condition *:</td>
+                <td>
+                    <select name="item_condition">
+                        {% for condition in ["", "New", "Very Good", "Good", "Acceptable", "Poor"] %}
+                            <option value="{{condition}}" {% if condition == stored["item_condition"] %} selected {% endif %}>
+                                {% if condition == "" %}
+                                    Choose one...
+                                {% else %}
+                                    {{condition}}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Price *:</td>
+                <td>
+                    <input type="text" name="item_price" maxlength=7 size=10 value="{{stored['item_price']}}">
+                </td>
+            </tr>
+
+            <tr>
+                <td>Details:</td>
+                <td>
+                    <textarea rows=6 cols=40 name="item_details" maxlength=2000>{{stored["item_details"]}}</textarea>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <br>
+        <button name="page" value=1>Back</button>
+        <button name="page" value=3>Continue</button>
+
+        <!-- hidden fields allow us to pass info between form pages -->
+        {% for h in hidden %}
+        <input type="hidden" name="{{ h[0] }}" value="{{ h[1] }}">
+        {% endfor %}
+    </form>
+</div>
+<br>
+
+{% endblock %}
