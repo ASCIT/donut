@@ -12,4 +12,4 @@ addons:
 before_script:
   - mysql -u root < sql/setup.sql
   - mysql -u donut_test --password=public < sql/reset.sql
-script: "make test"
+script: "yapf -d -r . && make test"
