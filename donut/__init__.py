@@ -3,7 +3,7 @@ import sqlalchemy
 import os
 import pdb
 import traceback
-import httplib
+import http
 import datetime
 
 try:
@@ -71,22 +71,22 @@ def teardown_request(exception):
     db.close()
 
 # Error handlers
-@app.errorhandler(httplib.NOT_FOUND)
+@app.errorhandler(http.client.NOT_FOUND)
 def page_not_found(error):
   """ Handles a 404 page not found error. """
-  return flask.render_template("404.html"), httplib.NOT_FOUND
+  return flask.render_template("404.html"), http.client.NOT_FOUND
 
-@app.errorhandler(httplib.FORBIDDEN)
+@app.errorhandler(http.client.FORBIDDEN)
 def access_forbidden(error):
   """ Handles a 403 access forbidden error. """
-  return flask.render_template("403.html"), httplib.FORBIDDEN
+  return flask.render_template("403.html"), http.client.FORBIDDEN
 
-@app.errorhandler(httplib.INTERNAL_SERVER_ERROR)
+@app.errorhandler(http.client.INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
   """
   Handles a 500 internal server error response. 
   """
-  return flask.render_template("500.html"), httplib.INTERNAL_SERVER_ERROR
+  return flask.render_template("500.html"), http.client.INTERNAL_SERVER_ERROR
 
 # After initialization, import the routes.
 from donut import routes

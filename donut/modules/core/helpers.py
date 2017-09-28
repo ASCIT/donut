@@ -28,8 +28,11 @@ def get_member_data(user_id, fields=None):
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
 
+    # Build the WHERE clause
+    s = s.where(sqlalchemy.text("user_id = :u"))
+
     # Execute the query
-    result = flask.g.db.execute(s, user_id=user_id).first()
+    result = flask.g.db.execute(s, u=user_id).first()
     
     # Return the row in the form of a of dict
     result = { f:t for f,t in zip(fields, result) }
@@ -66,7 +69,7 @@ def get_member_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
@@ -99,8 +102,11 @@ def get_organization_data(org_id, fields=None):
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
 
+    # Build the WHERE clause
+    s = s.where(sqlalchemy.text("org_id = :o"))
+
     # Execute the query
-    result = flask.g.db.execute(s, org_id=org_id).first()
+    result = flask.g.db.execute(s, o=org_id).first()
     
     # Return the row in the form of a of dict
     result = { f:t for f,t in zip(fields, result) }
@@ -133,7 +139,7 @@ def get_organization_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
@@ -169,7 +175,7 @@ def get_group_list_data(fields=None, attrs={}):
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
     
     # Build the WHERE clause 
-    for key, value in attrs.items():
+    for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
