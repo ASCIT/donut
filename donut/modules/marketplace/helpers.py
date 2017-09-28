@@ -4,7 +4,7 @@ import re
 
 from donut.modules.core.helpers import get_member_data
 
-import routes
+from . import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
