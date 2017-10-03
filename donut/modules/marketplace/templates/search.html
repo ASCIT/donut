@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<h4>
+    Found {{ datalist|length }} results.
+</h4>
+{% if datalist|length != 0 %}
+    <div>
+        <table style="width:100%;min-width:590px" class="sortable text-center" border=1 frame=void rules=rows>
+            <thead>
+                <tr>
+                {% for i in headers %}
+                <th class="text-center"><b>{{i}}<b></th>
+                {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- display data in one main table -->
+                {% for i in range(datalist|length) %}
+                    <tr>
+                        {% for j in range(datalist[i]|length) %}
+                            <td>
+                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
+                                {{ datalist[i][j] }}
+                                {% if links[i][j] != 0 %} </a> {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+    </div>
+{% endif %}
+
+{% endblock %}

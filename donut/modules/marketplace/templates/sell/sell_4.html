@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+{% include "topbar.html" %}
+
+<div class="text-center">
+    <!-- SECTION 4 OF SELLING: SUBMIT -->
+    {% if result >= 0 %}
+        <p>Thanks! Your submission has been recorded. You can view it <a href={{url_for(".view_item", item_id=result)}}>here</a>.</p>
+    {% else %}
+        <p>There was an error processing your request. Please try again or contact an admin. Thanks!</p>
+    {% endif %}
+</div>
+<br>
+
+{% endblock %}

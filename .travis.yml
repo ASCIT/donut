@@ -1,9 +1,8 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
+  - "3.6"
 services: mysql
-env: 
+env:
   - FLASK=0.10.1
 before_install:
     sudo apt-get install libmariadbclient-dev
@@ -13,4 +12,4 @@ addons:
 before_script:
   - mysql -u root < sql/setup.sql
   - mysql -u donut_test --password=public < sql/reset.sql
-script: "py.test ."
+script: "yapf -d -r . && make test"
