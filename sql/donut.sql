@@ -12,11 +12,7 @@ DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS organizations;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS privacies;
-DROP TABLE IF EXISTS member_options;
-DROP TABLE IF EXISTS options;
-DROP VIEW IF EXISTS members_full_name;
-DROP TABLE IF EXISTS members;
-
+DROP TABLE IF EXISTS member_options; DROP TABLE IF EXISTS options; DROP VIEW IF EXISTS members_full_name; DROP TABLE IF EXISTS members; 
 -- Members Table
 CREATE TABLE members (
     user_id            INT          NOT NULL AUTO_INCREMENT, 
@@ -146,7 +142,7 @@ CREATE TABLE position_holders (
     PRIMARY KEY (hold_id),
     FOREIGN KEY (org_id, pos_id) REFERENCES positions(org_id, pos_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
-)
+);
 
 -- House View
 -- Because houses are used so much, make a view separate from the organizations
@@ -181,7 +177,7 @@ CREATE TABLE groups (
 CREATE TABLE group_members (
     user_id  INT NOT NULL,
     group_id INT NOT NULL,
-    PRIMARY_KEY (user_id, group_id)
+    PRIMARY KEY (user_id, group_id)
 );
 
 
