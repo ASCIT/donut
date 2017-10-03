@@ -58,7 +58,6 @@ CREATE VIEW members_full_name AS (
 CREATE TABLE options (
     option_id     INT         NOT NULL AUTO_INCREMENT,
     option_name   VARCHAR(16) NOT NULL,
-    option_type   VARCHAR(8)  NOT NULL,
     PRIMARY KEY (option_id)
 );
 
@@ -67,6 +66,7 @@ CREATE TABLE options (
 CREATE TABLE member_options (
     user_id     INT,
     option_id   INT, 
+    option_type   VARCHAR(8)  NOT NULL,
     PRIMARY KEY (user_id, option_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (option_id) REFERENCES options(option_id)
