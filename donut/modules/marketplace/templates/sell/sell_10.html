@@ -46,8 +46,8 @@
         </div>
         <br>
         <br>
-        <button name="page" value=1>Back</button>
-        <button name="page" value=2>Continue</button>
+        <button name="page" value="CATEGORY">Back</button>
+        <button name="page" value="INFORMATION">Continue</button>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
@@ -73,7 +73,7 @@
                 <td> <input type="text" name="textbook_author" maxlength="255" size="40"> </td>
             </tr>
         </table>
-        <button type="submit" name="page" value=10>Add textbook</button>
+        <button type="submit" name="page" value="TEXTBOOK">Add textbook</button>
         </form>
     </p>
 

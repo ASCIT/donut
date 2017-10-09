@@ -104,22 +104,24 @@ def view_item():
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
+    from donut.modules.marketplace.constants import Page
+
     # if the data or the page in general has errors, we don't let the user continue to the next page
     has_errors = False
     # PAGES
     # -----
-    # 1:  Select a category (default first page)
-    # 10: Select a textbook (special, appears between pages 1 and 2 if the category is 'Textbooks')
-    # 2:  Input information about the listing
-    # 3:  Confirm that info is correct
-    # 4:  Add data to database, show success message
+    # Page.CATEGORY:     Select a category (default first page)
+    # Page.TEXTBOOK:     Select a textbook (special, appears between pages 1 and 2 if the category is 'Textbooks')
+    # Page.INFORMATION:  Input information about the listing
+    # Page.CONFIRMATION: Confirm that info is correct
+    # Page.SUBMIT:       Add data to database, show success message
 
-    page = 1 # default is first page; category select page
+    page = Page.CATEGORY # default is first page; category select page
     if "page" in flask.request.form:
         # but if we pass it in, get it
-        page = int(flask.request.form["page"])
+        page = Page.__members__[flask.request.form["page"]]
 
-    if not page in [1, 10, 2, 3, 4]:
+    if not page in Page:
         flask.flash('Invalid page')
         has_errors = True
 
@@ -158,8 +160,10 @@ def sell():
     # prev_page is used for the back button
     prev_page = None
     if "prev_page" in flask.request.form:
-        prev_page = int(flask.request.form["prev_page"])
-        if not prev_page in [1, 10, 2, 3, 4]:
+        # make sure flask.request.form["prev_page"] is an int, and that it's a valid page to go to (i.e. in the enum)
+        try:
+            prev_page = Page(int(flask.request.form["prev_page"]))
+        except ValueError:
             flask.flash('Invalid page')
             has_errors = True
 
@@ -179,15 +183,15 @@ def sell():
             cat_title = cat_id_map[stored["cat_id"]]
 
     # if we're past page 1, we need category to be selected
-    if page > 1 and stored["cat_id"] == None:
+    if page != Page.CATEGORY and stored["cat_id"] == None:
             flask.flash('Category must be selected')
             has_errors = True
 
     # action is used if we need to perform an action on the server-side
     if "action" in flask.request.form:
         if flask.request.form["action"] == "add-textbook":
-            # only called on the textbook_select page; page 10
-            if page != 10:
+            # only called on the textbook select page
+            if page != Page.TEXTBOOK:
                 flask.flash('Invalid action')
                 has_errors = True
             else:
@@ -206,50 +210,50 @@ def sell():
         page = prev_page
     else:
         # nothing's wrong, so increment the page
-        # if the category is textbooks, insert a page between pages 1 and 2
+        # if the category is textbooks, insert a page between INFO and CATEGORY pages
         if prev_page != None and cat_title == "Textbooks":
             # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
-            if (page == 2 and prev_page == 1) or (page == 1 and prev_page == 2):
-                page = 10
+            if (page == Page.INFORMATION and prev_page == Page.CATEGORY) or (page == Page.CATEGORY and prev_page == Page.INFORMATION):
+                page = Page.TEXTBOOK
 
-    if page >= 2 and page <= 4 and cat_title == "Textbooks":
+    if page in [Page.INFORMATION, Page.CONFIRMATION, Page.SUBMIT] and cat_title == "Textbooks":
         if "textbook_id" not in flask.request.form or flask.request.form["textbook_id"] == "":
             flask.flash("You need to select a textbook.")
             # go back to the textbook select page
-            page = 10
+            page = Page.TEXTBOOK
         else:
             # make sure that the textbook_id is valid
             textbook_result = helpers.get_table_list_data("marketplace_textbooks", attrs={"textbook_id": flask.request.form["textbook_id"]})
             if len(textbook_result) == 0:
                 flask.flash("Invalid textbook.")
-                page = 10
+                page = Page.TEXTBOOK
 
     # don't allow the user to continue if any data is malformed or essential data is missing
     errors = []
-    if page in [3, 4]:
+    if page in [Page.CONFIRMATION, Page.SUBMIT]:
         errors += helpers.validate_data()
         if len(errors) != 0:
-            page = 2
+            page = Page.INFORMATION # the data was inputted on the INFORMATION page
 
-    if page == 1:
+    if page == Page.CATEGORY:
         # generate the hidden values
         hidden = helpers.generate_hidden_form_elements(['cat_id'])
-        hidden.append(['prev_page', page])
+        hidden.append(['prev_page', page.value])
 
-        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', page=page, state=state, category_id=stored['cat_id'], hidden=hidden)
+        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', page=page, state=state, category_id=stored['cat_id'], hidden=hidden, page_map=Page.__members__)
 
-    elif page == 10:
+    elif page == Page.TEXTBOOK:
         # get a list of textbooks to select from
         textbooks = helpers.get_table_list_data("marketplace_textbooks", ["textbook_id", "textbook_title", "textbook_author"])
         textbook_id = flask.request.form.get("textbook_id", None)
 
         # generate the hidden values
         hidden = helpers.generate_hidden_form_elements(['item_title', 'textbook_id'])
-        hidden.append(['prev_page', page])
+        hidden.append(['prev_page', page.value])
 
         return helpers.render_with_top_marketplace_bar('sell/sell_10.html', page=page, state=state, textbooks=textbooks, old_textbook_id=textbook_id, hidden=hidden)
 
-    elif page == 2:
+    elif page == Page.INFORMATION:
         # get correct stored values
         for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
@@ -269,11 +273,11 @@ def sell():
             hidden = helpers.generate_hidden_form_elements(['textbook_edition', 'textbook_isbn', 'item_title', 'item_condition', 'item_price', 'item_details'])
         else:
             hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn', 'item_title', 'item_condition', 'item_price', 'item_details'])
-        hidden.append(['prev_page', page])
+        hidden.append(['prev_page', page.value])
 
         return helpers.render_with_top_marketplace_bar('sell/sell_2.html', page=page, state=state, cat_title=cat_title, stored=stored, errors=errors, hidden=hidden)
 
-    elif page == 3:
+    elif page == Page.CONFIRMATION:
 
         for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
@@ -292,10 +296,10 @@ def sell():
             hidden = helpers.generate_hidden_form_elements(['item_title'])
         else:
             hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn'])
-        hidden.append(['prev_page', page])
+        hidden.append(['prev_page', page.value])
         return helpers.render_with_top_marketplace_bar('sell/sell_3.html', page=page, state=state, cat_title=cat_title, stored=stored, hidden=hidden)
 
-    elif page == 4:
+    elif page == Page.SUBMIT:
         for field in stored_fields:
             if field == "textbook_id" and cat_title == "Textbooks":
                 # we also want to put textbook_title and textbook_author in stored,
