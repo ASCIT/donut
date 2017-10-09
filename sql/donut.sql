@@ -166,9 +166,21 @@ CREATE VIEW org_house_membership AS (
 -- Groups are very similar to organizations, but more for internal groupings
 -- of users.
 CREATE TABLE groups (
-    group_id    INT          NOT NULL AUTO_INCREMENT,
-    group_name  VARCHAR(32)  NOT NULL,
-    group_desc  VARCHAR(255) DEFAULT NULL,
+    group_id                INT          NOT NULL AUTO_INCREMENT,
+    group_name              VARCHAR(32)  NOT NULL,
+    group_desc              VARCHAR(255) DEFAULT NULL,
+    anyone_can_send         BOOLEAN      DEFAULT FALSE, -- This flag controls
+                                                        -- whether or not 
+                                                        -- anyone can send
+                                                        -- emails to the group
+    newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
+                                                        -- an email group
+    visible                 BOOLEAN      DEFAULT FALSE, -- Controls if anyone
+                                                        -- anyone can see this
+                                                        -- group
+    admin_control_members   BOOLEAN      DEFAULT TRUE,  -- Toggles whether or
+                                                        -- not admins control
+                                                        -- Group membership
     PRIMARY KEY (group_id),
     UNIQUE (group_name)
 );
@@ -177,7 +189,28 @@ CREATE TABLE groups (
 CREATE TABLE group_members (
     user_id  INT NOT NULL,
     group_id INT NOT NULL,
-    PRIMARY KEY (user_id, group_id)
+    send     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this member can
+                                    -- send emails to group
+    control  BOOLEAN DEFAULT FALSE, -- Toggles whether or not this member has
+                                    -- admin control over group
+    receive  BOOLEAN DEFAULT TRUE,  -- Toggles if the member receives emails
+                                    -- From this group
+    PRIMARY KEY (user_id, group_id),
+    FOREIGN KEY (user_id) REFERENCES members(user_id),
+    FOREIGN KEY (group_id) REFERENCES groups(group_id)
 );
 
-
+-- Group Member Positions Table
+CREATE TABLE group_member_positions (
+    pos_id      INT NOT NULL,
+    group_id    INT NOT NULL,
+    send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
+                                       -- can send emails to group
+    control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
+                                       -- has admin control over group
+    receive     BOOLEAN DEFAULT TRUE,  -- Toggles if this position receives
+                                       -- emails from this group
+    PRIMARY KEY (pos_id, group_id),
+    FOREIGN KEY (pos_id) REFERENCES positions(pos_id),
+    FOREIGN KEY (group_id) REFERENCES groups(group_id)
+);
