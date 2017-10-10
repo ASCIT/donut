@@ -478,6 +478,56 @@ def create_new_listing(stored):
     return item_id
 
 
+def update_current_listing(item_id, stored):
+    """
+    Changes items in the database!
+
+    Arguments:
+        stored: a map with the info
+    Returns:
+        the item_id, or -1 if it fails
+    """
+    user_id = int(stored["user_id"])
+    cat_id = int(stored["cat_id"])
+    cat_title = stored["cat_title"]
+    item_condition = stored["item_condition"]
+    item_details = stored["item_details"]
+    item_price = stored["item_price"]
+    item_images = []
+    #item_images = stored["item_images"] # TODO: images
+    result = []
+    if cat_title == "Textbooks":
+        textbook_id = int(stored["textbook_id"])
+        textbook_edition = stored["textbook_edition"]
+        textbook_isbn = stored["textbook_isbn"].replace("-", "")
+        query = sqlalchemy.sql.text("""UPDATE marketplace_items SET
+                user_id=:user_id, cat_id=:cat_id, item_condition=:item_condition, item_details=:item_details, item_price=:item_price,
+                textbook_id=:textbook_id, textbook_edition=:textbook_edition, textbook_isbn=:textbook_isbn WHERE item_id=:item_id""")
+        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
+                item_id=item_id, item_condition=item_condition, item_details=item_details,
+                item_price=item_price, textbook_id=textbook_id, textbook_edition=textbook_edition,
+                textbook_isbn=textbook_isbn)
+    else:
+        item_title = stored["item_title"];
+        query = sqlalchemy.sql.text("""UPDATE marketplace_items SET
+                user_id=:user_id, cat_id=:cat_id, item_title=:item_title, item_condition=:item_condition, item_details=:item_details,
+                item_price=:item_price WHERE item_id=:item_id""")
+        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id, item_id=item_id,
+                item_title=item_title, item_condition=item_condition,
+                item_details=item_details, item_price=item_price)
+
+    return item_id
+
+    # TODO: images
+    """
+    for image in item_images:
+        query = sqlalchemy.sql.text(" ""INSERT INTO marketplace.images (item_id, img_link) VALUES (:item_id, :image);"" ")
+        result = flask.g.db.execute(query, item_id=item_id, image=image)
+    """
+    return item_id
+    pass
+
+
 def search_datalist(fields, datalist, query):
     """
     Searches in datalist (which has columns denoted in fields) to
