@@ -99,7 +99,9 @@ CREATE TABLE groups (
     group_id                INT          NOT NULL AUTO_INCREMENT,
     group_name              VARCHAR(32)  NOT NULL,
     group_desc              VARCHAR(255) DEFAULT NULL,
-    type                    VARCHAR(32)  DEFAULT NULL,
+    type                    ENUM('house','committee','ascit','publication'
+                            'ugcurrent','ugalumn')
+                                         DEFAULT NULL,
     anyone_can_send         BOOLEAN      DEFAULT FALSE, -- This flag controls
                                                         -- whether or not 
                                                         -- anyone can send
