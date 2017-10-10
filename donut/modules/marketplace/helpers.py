@@ -63,7 +63,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # in the html file.
     cats2d = [[]] * num_rows
     for cat_index in range(len(categories)):
-        cats2d[cat_index // num_cols].append(categories[cat_index])
+        cats2d[cat_index / num_cols].append(categories[cat_index])
 
     # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
     width = "width: " + str(100.0 / (num_cols)) + "%"
@@ -576,12 +576,24 @@ def search_datalist(fields, datalist, query):
     else:
         search_results = imperfect_matches
 
-    # sort first by score, and then by timestamp
-    search_results = sorted(
-        search_results,
-        key=
-        lambda item: (item[field_index_map["score"]], item[field_index_map["item_timestamp"]])
-    )
+    # define a custom comparison function to use in python's sort
+    # -1 if item1 goes above item2, i.e. either item1's score is higher
+    # or item1 was posted earlier.
+    def compare(item1, item2):
+        if item1[field_index_map["score"]] < item2[field_index_map["score"]]:
+            return 1
+        elif item1[field_index_map["score"]] > item2[field_index_map["score"]]:
+            return -1
+        # they have the same number of matches, so we sort by timestamp
+        if item1[field_index_map["item_timestamp"]] < item2[field_index_map["item_timestamp"]]:
+            return 1
+        elif item1[field_index_map["item_timestamp"]] == item2[field_index_map[
+                "item_timestamp"]]:
+            return 0
+        else:
+            return -1
+
+    search_results = sorted(search_results, cmp=compare)
 
     # chop off the last column, which holds the score
     for i in range(len(search_results)):
