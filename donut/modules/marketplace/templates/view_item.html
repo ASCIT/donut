@@ -11,6 +11,9 @@
         {{stored["item_title"]}}
         {% endif %}
     </h3>
+    <h4>
+        <a href={{ url_for(".sell", state='edit', item_id=request.args["item_id"]) }}>Edit this listing</a>
+    </h4>
 
     <!-- TODO: when logins and privs are implemented, put "edit this item" here -->
 
