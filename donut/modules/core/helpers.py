@@ -1,6 +1,7 @@
 import flask
 import sqlalchemy
 
+
 def get_member_data(user_id, fields=None):
     """
     Queries the database and returns member data for the specified user_id.
@@ -13,12 +14,16 @@ def get_member_data(user_id, fields=None):
         result: The fields and corresponding values of member with user_id. In
                 the form of a dict with key:value of columnname:columnvalue.
     """
-    all_returnable_fields = ["user_id", "uid", "last_name", "first_name", 
-            "middle_name", "email", "phone", "gender", "gender_custom", 
-            "birthday", "entry_year", "graduation_year", "msc", "building",
-            "room_num", "address", "city", "state", "zip", "country"]
-    default_fields = ["user_id", "first_name", "last_name", "email", "uid",
-              "entry_year", "graduation_year"]
+    all_returnable_fields = [
+        "user_id", "uid", "last_name", "first_name", "middle_name", "email",
+        "phone", "gender", "gender_custom", "birthday", "entry_year",
+        "graduation_year", "msc", "building", "room_num", "address", "city",
+        "state", "zip", "country"
+    ]
+    default_fields = [
+        "user_id", "first_name", "last_name", "email", "uid", "entry_year",
+        "graduation_year"
+    ]
     if fields == None:
         fields = default_fields
     else:
@@ -33,9 +38,9 @@ def get_member_data(user_id, fields=None):
 
     # Execute the query
     result = flask.g.db.execute(s, u=user_id).first()
-    
+
     # Return the row in the form of a of dict
-    result = { f:t for f,t in zip(fields, result) }
+    result = {f: t for f, t in zip(fields, result)}
     return result
 
 
@@ -53,12 +58,16 @@ def get_member_list_data(fields=None, attrs={}):
                 attributes. In the form of a list of dicts with key:value of 
                 columnname:columnvalue.
     """
-    all_returnable_fields = ["user_id", "uid", "last_name", "first_name", 
-            "middle_name", "email", "phone", "gender", "gender_custom", 
-            "birthday", "entry_year", "graduation_year", "msc", "building",
-            "room_num", "address", "city", "state", "zip", "country"]
-    default_fields = ["user_id", "first_name", "last_name", "email", "uid",
-              "entry_year", "graduation_year"]
+    all_returnable_fields = [
+        "user_id", "uid", "last_name", "first_name", "middle_name", "email",
+        "phone", "gender", "gender_custom", "birthday", "entry_year",
+        "graduation_year", "msc", "building", "room_num", "address", "city",
+        "state", "zip", "country"
+    ]
+    default_fields = [
+        "user_id", "first_name", "last_name", "email", "uid", "entry_year",
+        "graduation_year"
+    ]
     if fields == None:
         fields = default_fields
     else:
@@ -67,17 +76,18 @@ def get_member_list_data(fields=None, attrs={}):
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
-    
-    # Build the WHERE clause 
+
+    # Build the WHERE clause
     for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
-    
+
     # Return the rows in the form of a list of dicts
-    result = [{ f:t for f,t in zip(fields, res) } for res in result]
+    result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
+
 
 def get_organization_data(org_id, fields=None):
     """
@@ -100,16 +110,17 @@ def get_organization_data(org_id, fields=None):
             return "Invalid field"
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text("organizations"))
 
     # Build the WHERE clause
     s = s.where(sqlalchemy.text("org_id = :o"))
 
     # Execute the query
     result = flask.g.db.execute(s, o=org_id).first()
-    
+
     # Return the row in the form of a of dict
-    result = { f:t for f,t in zip(fields, result) }
+    result = {f: t for f, t in zip(fields, result)}
     return result
 
 
@@ -136,18 +147,20 @@ def get_organization_list_data(fields=None, attrs={}):
             return "Invalid field"
 
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("organizations"))
-    
-    # Build the WHERE clause 
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text("organizations"))
+
+    # Build the WHERE clause
     for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
-    
+
     # Return the rows in the form of a list of dicts
-    result = [{ f:t for f,t in zip(fields, res) } for res in result]
+    result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
+
 
 def get_group_list_data(fields=None, attrs={}):
     """
@@ -163,7 +176,7 @@ def get_group_list_data(fields=None, attrs={}):
                 attributes. In the form of a list of dicts with key:value of 
                 columnname:columnvalue.
     """
-    all_returnable_fields = ["group_id", "group_name", "group_desc"] 
+    all_returnable_fields = ["group_id", "group_name", "group_desc"]
     default_fields = ["group_id", "group_name", "group_desc"]
     if fields == None:
         fields = default_fields
@@ -173,17 +186,18 @@ def get_group_list_data(fields=None, attrs={}):
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
-    
-    # Build the WHERE clause 
+
+    # Build the WHERE clause
     for key, value in list(attrs.items()):
         s = s.where(sqlalchemy.text(key + "= :" + key))
 
     # Execute the query
     result = flask.g.db.execute(s, attrs).fetchall()
-    
+
     # Return the rows in the form of a list of dicts
-    result = [{ f:t for f,t in zip(fields, res) } for res in result]
+    result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
+
 
 def get_name_and_email(user_id):
     """
@@ -195,10 +209,9 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    s = sqlalchemy.sql.select(["full_name", "email"]).select_from(sqlalchemy.text(
-        "members NATURAL LEFT JOIN members_full_name"))
+    s = sqlalchemy.sql.select(["full_name", "email"]).select_from(
+        sqlalchemy.text("members NATURAL LEFT JOIN members_full_name"))
     s = s.where(sqlalchemy.text("user_id = :u"))
 
     result = list(flask.g.db.execute(s, {'u': user_id}))
-    return (result[0][0], result[0][1]) # convert from a 2d list to a 1d list
-
+    return (result[0][0], result[0][1])  # convert from a 2d list to a 1d list

@@ -8,20 +8,14 @@ from . import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
-SKIP_WORDS = ["a", "all", "am", "an", "and", "are", "as", "at",
-        "be", "been", "but", "by",
-        "did", "do",
-        "for", "from",
-        "had", "has", "have", "he", "her", "hers", "him", "his",
-        "i", "if", "in", "into", "is", "it", "its",
-        "me", "my",
-        "not",
-        "of", "on", "or",
-        "so",
-        "that", "the", "their", "them", "they", "this", "to",
-        "up", "us",
-        "was", "we", "what", "who", "why", "will", "with",
-        "you", "your"]
+SKIP_WORDS = [
+    "a", "all", "am", "an", "and", "are", "as", "at", "be", "been", "but",
+    "by", "did", "do", "for", "from", "had", "has", "have", "he", "her",
+    "hers", "him", "his", "i", "if", "in", "into", "is", "it", "its", "me",
+    "my", "not", "of", "on", "or", "so", "that", "the", "their", "them",
+    "they", "this", "to", "up", "us", "was", "we", "what", "who", "why",
+    "will", "with", "you", "your"
+]
 
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
@@ -41,7 +35,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     """
     # Get category titles
 
-    fields=["cat_title"]
+    fields = ["cat_title"]
     categories = list(get_table_list_data("marketplace_categories", fields))
     # get_table_list_data always returns a list of lists, but we know that
     # each list is only one element long, and we only want a list of strings.
@@ -53,7 +47,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # categories per row, with the last row catching the remainder. However, we
     # want to avoid having exactly 1 category in the remainder row if possible.
     # Thus we do our best to prevent num_cats % num_cols from being 1.
-    num_cats = len(categories);
+    num_cats = len(categories)
     if num_cats <= 5:
         num_cols = num_cats
     elif num_cats % 5 != 1:
@@ -69,14 +63,15 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # in the html file.
     cats2d = [[]] * num_rows
     for cat_index in range(len(categories)):
-        cats2d[cat_index // num_cols].append(categories[cat_index])
+        cats2d[cat_index / num_cols].append(categories[cat_index])
 
     # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
     width = "width: " + str(100.0 / (num_cols)) + "%"
 
     # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
     # function, on to Flask in order to render the top bar and the rest of the content.
-    return flask.render_template(template_url, cats=cats2d, width=width, **kwargs)
+    return flask.render_template(
+        template_url, cats=cats2d, width=width, **kwargs)
 
 
 def generate_search_table(fields=None, attrs={}, query=""):
@@ -119,7 +114,8 @@ def generate_search_table(fields=None, attrs={}, query=""):
         # that we can use those fields in search_datalist
         fields = fields + ["textbook_author", "textbook_isbn", "cat_id"]
 
-    result = get_table_list_data(["marketplace_items", "marketplace_textbooks"], fields, attrs)
+    result = get_table_list_data(
+        ["marketplace_items", "marketplace_textbooks"], fields, attrs)
 
     if query != "":
         # filter by query
@@ -159,7 +155,8 @@ def generate_search_table(fields=None, attrs={}, query=""):
                     temp_res_row.append(data.strftime("%m/%d/%y"))
 
                 elif fields[field_index] == "user_id":
-                    temp_link_row.append(flask.url_for("core.get_members", user_id=int(data)))
+                    temp_link_row.append(
+                        flask.url_for("core.get_members", user_id=int(data)))
                     # TODO: update when stalker is working
                     added_link = True
 
@@ -172,7 +169,8 @@ def generate_search_table(fields=None, attrs={}, query=""):
                     temp_res_row.append(get_category_name_from_id(int(data)))
 
                 elif fields[field_index] == "item_title" or fields[field_index] == "textbook_title":
-                    temp_link_row.append(flask.url_for(".view_item", item_id=item_id))
+                    temp_link_row.append(
+                        flask.url_for(".view_item", item_id=item_id))
                     added_link = True
                     temp_res_row.append(data)
 
@@ -191,7 +189,8 @@ def generate_search_table(fields=None, attrs={}, query=""):
         sanitized_res.append(temp_res_row)
         links.append(temp_link_row)
 
-    fields = fields[1:] # strip off the item_id column we added at the beginning
+    fields = fields[
+        1:]  # strip off the item_id column we added at the beginning
 
     headers = process_category_headers(fields)
 
@@ -206,7 +205,9 @@ def get_table_columns(tables):
     # in a list so that TABLE_NAME IN :tables works
     if type(tables) == str:
         tables = [tables]
-    column_query = sqlalchemy.sql.select([sqlalchemy.text("COLUMN_NAME")]).select_from(sqlalchemy.text("INFORMATION_SCHEMA.COLUMNS"))
+    column_query = sqlalchemy.sql.select([
+        sqlalchemy.text("COLUMN_NAME")
+    ]).select_from(sqlalchemy.text("INFORMATION_SCHEMA.COLUMNS"))
     column_query = column_query.where(sqlalchemy.text("TABLE_NAME IN :tables"))
     columns_temp = list(flask.g.db.execute(column_query, tables=tuple(tables)))
     columns = []
@@ -242,11 +243,11 @@ def get_table_list_data(tables, fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-
     # have spaces around method to make the query work
     method = " NATURAL LEFT JOIN "
     # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text(method.join(tables)))
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text(method.join(tables)))
 
     # Build the WHERE clause
     for key, value in list(attrs.items()):
@@ -336,7 +337,10 @@ def generate_hidden_form_elements(skip_fields):
     Returns:
         to_return: The list of parameters and values, in a 2d list where each row is of the form ["parameter", value]
     """
-    parameters = ["cat_id", "item_title", "item_condition", "item_details", "item_price", "textbook_id", "textbook_edition", "textbook_isbn", "state"]
+    parameters = [
+        "cat_id", "item_title", "item_condition", "item_details", "item_price",
+        "textbook_id", "textbook_edition", "textbook_isbn", "state"
+    ]
 
     to_return = []
     for parameter in parameters:
@@ -368,8 +372,10 @@ def validate_data():
         errors.append("Somehow the category got all messed up.")
         return errors
 
-    cat_title = get_table_list_data("marketplace_categories",
-            fields=["cat_title"], attrs={"cat_id": category_id})
+    cat_title = get_table_list_data(
+        "marketplace_categories",
+        fields=["cat_title"],
+        attrs={"cat_id": category_id})
     if len(cat_title) == 0:
         # the category id doesn't correspond to any category
         errors.append("Somehow the category got all messed up.")
@@ -383,13 +389,19 @@ def validate_data():
         # regex to make sure the textbook edition is valid
         if "textbook_edition" in flask.request.form:
             edition_regex = "^([0-9]+|international)$"
-            if re.match(edition_regex, str(flask.request.form["textbook_edition"]), re.IGNORECASE) == None:
-                errors.append("Textbook edition is invalid. Try providing a number or 'International'.")
+            if re.match(edition_regex,
+                        str(flask.request.form["textbook_edition"]),
+                        re.IGNORECASE) == None:
+                errors.append(
+                    "Textbook edition is invalid. Try providing a number or 'International'."
+                )
 
         # validate the isbn too, if it's present
         if "textbook_isbn" in flask.request.form and flask.request.form["textbook_isbn"] != "":
             if not validate_isbn(flask.request.form["textbook_isbn"]):
-                errors.append("Textbook ISBN appears to be invalid. Please check that you typed it in correctly.")
+                errors.append(
+                    "Textbook ISBN appears to be invalid. Please check that you typed it in correctly."
+                )
 
     else:
         # just need to make sure the item_title exists
@@ -418,7 +430,9 @@ def validate_data():
         # .9
         # .98
         if re.match(price_regex, flask.request.form["item_price"]) == None:
-            errors.append("Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places.")
+            errors.append(
+                "Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places."
+            )
 
     # TODO: image link verification
 
@@ -449,17 +463,31 @@ def create_new_listing(stored):
         textbook_isbn = stored["textbook_isbn"].replace("-", "")
         query = sqlalchemy.sql.text("""INSERT INTO marketplace_items
                 (user_id, cat_id, item_condition, item_details, item_price, textbook_id, textbook_edition, textbook_isbn)
-                VALUES (:user_id, :cat_id, :item_condition, :item_details, :item_price, :textbook_id, :textbook_edition, :textbook_isbn)""")
-        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
-                item_condition=item_condition, item_details=item_details,
-                item_price=item_price, textbook_id=textbook_id, textbook_edition=textbook_edition,
-                textbook_isbn=textbook_isbn)
+                VALUES (:user_id, :cat_id, :item_condition, :item_details, :item_price, :textbook_id, :textbook_edition, :textbook_isbn)"""
+                                    )
+        result = flask.g.db.execute(
+            query,
+            user_id=user_id,
+            cat_id=cat_id,
+            item_condition=item_condition,
+            item_details=item_details,
+            item_price=item_price,
+            textbook_id=textbook_id,
+            textbook_edition=textbook_edition,
+            textbook_isbn=textbook_isbn)
     else:
-        item_title = stored["item_title"];
-        query = sqlalchemy.sql.text("""INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_id, :cat_id, :item_title, :item_condition, :item_details, :item_price)""")
-        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
-                item_title=item_title, item_condition=item_condition,
-                item_details=item_details, item_price=item_price)
+        item_title = stored["item_title"]
+        query = sqlalchemy.sql.text(
+            """INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_id, :cat_id, :item_title, :item_condition, :item_details, :item_price)"""
+        )
+        result = flask.g.db.execute(
+            query,
+            user_id=user_id,
+            cat_id=cat_id,
+            item_title=item_title,
+            item_condition=item_condition,
+            item_details=item_details,
+            item_price=item_price)
 
     query = sqlalchemy.sql.text("SELECT LAST_INSERT_ID()")
     result = list(flask.g.db.execute(query))
@@ -555,14 +583,18 @@ def search_datalist(fields, datalist, query):
 
     for listing in datalist:
         item_tokens = []
-        if get_category_name_from_id(listing[field_index_map["cat_id"]]) == "Textbooks":
+        if get_category_name_from_id(
+                listing[field_index_map["cat_id"]]) == "Textbooks":
             # if it's a textbook, include the author's name and the
             # book title in the item tokens
-            item_tokens = tokenize_query(listing[field_index_map["textbook_title"]])
-            item_tokens += tokenize_query(listing[field_index_map["textbook_author"]])
+            item_tokens = tokenize_query(
+                listing[field_index_map["textbook_title"]])
+            item_tokens += tokenize_query(
+                listing[field_index_map["textbook_author"]])
         else:
             # only include the item title
-            item_tokens = tokenize_query(listing[field_index_map["item_title"]])
+            item_tokens = tokenize_query(
+                listing[field_index_map["item_title"]])
 
         # does the isbn match any of the query's isbns?
         is_isbn_match = False
@@ -594,8 +626,24 @@ def search_datalist(fields, datalist, query):
     else:
         search_results = imperfect_matches
 
-    # sort first by score, and then by timestamp
-    search_results = sorted(search_results, key=lambda item: (item[field_index_map["score"]], item[field_index_map["item_timestamp"]]))
+    # define a custom comparison function to use in python's sort
+    # -1 if item1 goes above item2, i.e. either item1's score is higher
+    # or item1 was posted earlier.
+    def compare(item1, item2):
+        if item1[field_index_map["score"]] < item2[field_index_map["score"]]:
+            return 1
+        elif item1[field_index_map["score"]] > item2[field_index_map["score"]]:
+            return -1
+        # they have the same number of matches, so we sort by timestamp
+        if item1[field_index_map["item_timestamp"]] < item2[field_index_map["item_timestamp"]]:
+            return 1
+        elif item1[field_index_map["item_timestamp"]] == item2[field_index_map[
+                "item_timestamp"]]:
+            return 0
+        else:
+            return -1
+
+    search_results = sorted(search_results, cmp=compare)
 
     # chop off the last column, which holds the score
     for i in range(len(search_results)):
@@ -624,7 +672,7 @@ def tokenize_query(query):
     # Validate ISBNs before we remove hyphens
     for token_index in range(len(query)):
         token = query[token_index]
-        if(validate_isbn(token)):
+        if (validate_isbn(token)):
             tokens.append(token)
             del query[token_index]
 
@@ -748,7 +796,8 @@ def get_name_from_user_id(user_id):
         result: A string of the user's full name.
                 (first + " " + last)
     """
-    query = sqlalchemy.text("""SELECT full_name FROM members_full_name WHERE user_id=:user_id""")
+    query = sqlalchemy.text(
+        """SELECT full_name FROM members_full_name WHERE user_id=:user_id""")
     result = flask.g.db.execute(query, user_id=user_id).first()
     if result == None:
         return None
@@ -764,7 +813,9 @@ def get_textbook_info_from_textbook_id(textbook_id):
     Returns:
         result: A list of the textbook title and author.
     """
-    query = sqlalchemy.text("""SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id""")
+    query = sqlalchemy.text(
+        """SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id"""
+    )
     result = flask.g.db.execute(query, textbook_id=textbook_id).first()
     if result == None:
         return None
@@ -780,7 +831,9 @@ def get_category_name_from_id(cat_id):
     Returns:
         result: A string with the name of the category.
     """
-    query = sqlalchemy.text("""SELECT cat_title FROM marketplace_categories WHERE cat_id=:cat_id""")
+    query = sqlalchemy.text(
+        """SELECT cat_title FROM marketplace_categories WHERE cat_id=:cat_id"""
+    )
     result = flask.g.db.execute(query, cat_id=cat_id).first()
     if result == None:
         return None
