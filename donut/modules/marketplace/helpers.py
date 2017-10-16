@@ -63,7 +63,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # in the html file.
     cats2d = [[]] * num_rows
     for cat_index in range(len(categories)):
-        cats2d[cat_index / num_cols].append(categories[cat_index])
+        cats2d[cat_index // num_cols].append(categories[cat_index])
 
     # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
     width = "width: " + str(100.0 / (num_cols)) + "%"
