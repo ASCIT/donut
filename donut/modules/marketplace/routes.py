@@ -164,11 +164,7 @@ def sell():
     # Page.CONFIRMATION: Confirm that info is correct
     # Page.SUBMIT:       Add data to database, show success message
 
-<<<<<<< HEAD
     page = Page.CATEGORY # default is first page; category select page
-=======
-    page = 1  # default is first page; category select page
->>>>>>> origin/master
     if "page" in flask.request.form:
         # but if we pass it in, get it
         page = Page.__members__[flask.request.form["page"]]
@@ -209,8 +205,9 @@ def sell():
             has_errors = True
         else:
             item_id = int(flask.request.args['item_id'])
-<<<<<<< HEAD
-            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+            data = helpers.get_table_list_data([
+                'marketplace_items', 'marketplace_textbooks'
+            ], stored_fields, {'item_id': item_id})
 
             if len(data) == 0:
                 # no data? the item_id must be wrong
@@ -222,13 +219,6 @@ def sell():
                 data = data[0]
                 for i in range(len(data)):
                     stored[stored_fields[i]] = data[i]
-=======
-            data = helpers.get_table_list_data([
-                'marketplace_items', 'marketplace_textbooks'
-            ], stored_fields, {'item_id': item_id})[0]
-            for i in range(len(data)):
-                stored[stored_fields[i]] = data[i]
->>>>>>> origin/master
 
     # prev_page is used for the back button
     prev_page = page
@@ -260,15 +250,9 @@ def sell():
             cat_title = cat_id_map[stored["cat_id"]]
 
     # if we're past page 1, we need category to be selected
-<<<<<<< HEAD
     if page != Page.CATEGORY and stored["cat_id"] == None:
             flask.flash('Category must be selected')
             has_errors = True
-=======
-    if page > 1 and stored["cat_id"] == None:
-        flask.flash('Category must be selected')
-        has_errors = True
->>>>>>> origin/master
 
     # action is used if we need to perform an action on the server-side
     if "action" in flask.request.form:
@@ -297,14 +281,8 @@ def sell():
         # if the category is textbooks, insert a page between INFO and CATEGORY pages
         if prev_page != None and cat_title == "Textbooks":
             # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
-<<<<<<< HEAD
             if (page == Page.INFORMATION and prev_page == Page.CATEGORY) or (page == Page.CATEGORY and prev_page == Page.INFORMATION):
                 page = Page.TEXTBOOK
-=======
-            if (page == 2 and prev_page == 1) or (page == 1
-                                                  and prev_page == 2):
-                page = 10
->>>>>>> origin/master
 
     if page in [Page.INFORMATION, Page.CONFIRMATION, Page.SUBMIT] and cat_title == "Textbooks":
         if "textbook_id" not in flask.request.form or flask.request.form["textbook_id"] == "":
@@ -332,16 +310,13 @@ def sell():
         hidden = helpers.generate_hidden_form_elements(['cat_id'])
         hidden.append(['prev_page', page.value])
 
-<<<<<<< HEAD
-        return helpers.render_with_top_marketplace_bar('sell/sell_1.html', page=page, state=state, category_id=stored['cat_id'], hidden=hidden, page_map=Page.__members__)
-=======
         return helpers.render_with_top_marketplace_bar(
             'sell/sell_1.html',
             page=page,
             state=state,
             category_id=stored['cat_id'],
-            hidden=hidden)
->>>>>>> origin/master
+            hidden=hidden,
+            page_map=Page.__members__)
 
     elif page == Page.TEXTBOOK:
         # get a list of textbooks to select from
@@ -351,14 +326,9 @@ def sell():
         textbook_id = flask.request.form.get("textbook_id", None)
 
         # generate the hidden values
-<<<<<<< HEAD
-        hidden = helpers.generate_hidden_form_elements(['item_title', 'textbook_id'])
-        hidden.append(['prev_page', page.value])
-=======
         hidden = helpers.generate_hidden_form_elements(
             ['item_title', 'textbook_id'])
-        hidden.append(['prev_page', page])
->>>>>>> origin/master
+        hidden.append(['prev_page', page.value])
 
         return helpers.render_with_top_marketplace_bar(
             'sell/sell_10.html',
@@ -394,16 +364,11 @@ def sell():
                 'item_condition', 'item_price', 'item_details'
             ])
         else:
-<<<<<<< HEAD
-            hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn', 'item_title', 'item_condition', 'item_price', 'item_details'])
-        hidden.append(['prev_page', page.value])
-=======
             hidden = helpers.generate_hidden_form_elements([
                 'textbook_id', 'textbook_edition', 'textbook_isbn',
                 'item_title', 'item_condition', 'item_price', 'item_details'
             ])
-        hidden.append(['prev_page', page])
->>>>>>> origin/master
+        hidden.append(['prev_page', page.value])
 
         return helpers.render_with_top_marketplace_bar(
             'sell/sell_2.html',
@@ -436,14 +401,9 @@ def sell():
         if cat_title == 'Textbooks':
             hidden = helpers.generate_hidden_form_elements(['item_title'])
         else:
-<<<<<<< HEAD
-            hidden = helpers.generate_hidden_form_elements(['textbook_id', 'textbook_edition', 'textbook_isbn'])
-        hidden.append(['prev_page', page.value])
-        return helpers.render_with_top_marketplace_bar('sell/sell_3.html', page=page, state=state, cat_title=cat_title, stored=stored, hidden=hidden)
-=======
             hidden = helpers.generate_hidden_form_elements(
                 ['textbook_id', 'textbook_edition', 'textbook_isbn'])
-        hidden.append(['prev_page', page])
+        hidden.append(['prev_page', page.value])
         return helpers.render_with_top_marketplace_bar(
             'sell/sell_3.html',
             page=page,
@@ -451,7 +411,6 @@ def sell():
             cat_title=cat_title,
             stored=stored,
             hidden=hidden)
->>>>>>> origin/master
 
     elif page == Page.SUBMIT:
         for field in stored_fields:
