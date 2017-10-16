@@ -530,19 +530,33 @@ def update_current_listing(item_id, stored):
         textbook_isbn = stored["textbook_isbn"].replace("-", "")
         query = sqlalchemy.sql.text("""UPDATE marketplace_items SET
                 user_id=:user_id, cat_id=:cat_id, item_condition=:item_condition, item_details=:item_details, item_price=:item_price,
-                textbook_id=:textbook_id, textbook_edition=:textbook_edition, textbook_isbn=:textbook_isbn WHERE item_id=:item_id""")
-        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id,
-                item_id=item_id, item_condition=item_condition, item_details=item_details,
-                item_price=item_price, textbook_id=textbook_id, textbook_edition=textbook_edition,
-                textbook_isbn=textbook_isbn)
+                textbook_id=:textbook_id, textbook_edition=:textbook_edition, textbook_isbn=:textbook_isbn WHERE item_id=:item_id"""
+                                    )
+        result = flask.g.db.execute(
+            query,
+            user_id=user_id,
+            cat_id=cat_id,
+            item_id=item_id,
+            item_condition=item_condition,
+            item_details=item_details,
+            item_price=item_price,
+            textbook_id=textbook_id,
+            textbook_edition=textbook_edition,
+            textbook_isbn=textbook_isbn)
     else:
-        item_title = stored["item_title"];
+        item_title = stored["item_title"]
         query = sqlalchemy.sql.text("""UPDATE marketplace_items SET
                 user_id=:user_id, cat_id=:cat_id, item_title=:item_title, item_condition=:item_condition, item_details=:item_details,
                 item_price=:item_price WHERE item_id=:item_id""")
-        result = flask.g.db.execute(query, user_id=user_id, cat_id=cat_id, item_id=item_id,
-                item_title=item_title, item_condition=item_condition,
-                item_details=item_details, item_price=item_price)
+        result = flask.g.db.execute(
+            query,
+            user_id=user_id,
+            cat_id=cat_id,
+            item_id=item_id,
+            item_title=item_title,
+            item_condition=item_condition,
+            item_details=item_details,
+            item_price=item_price)
 
     return item_id
 

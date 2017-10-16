@@ -116,7 +116,9 @@ def view_item():
         "item_active", "textbook_edition", "textbook_isbn", "textbook_title",
         "textbook_author"
     ]
-    data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+    data = helpers.get_table_list_data(
+        ['marketplace_items',
+         'marketplace_textbooks'], stored_fields, {'item_id': item_id})
 
     # make sure the item_id is a valid item, i.e. data is nonempty
     if len(data) == 0:
@@ -164,7 +166,7 @@ def sell():
     # Page.CONFIRMATION: Confirm that info is correct
     # Page.SUBMIT:       Add data to database, show success message
 
-    page = Page.CATEGORY # default is first page; category select page
+    page = Page.CATEGORY  # default is first page; category select page
     if "page" in flask.request.form:
         # but if we pass it in, get it
         page = Page.__members__[flask.request.form["page"]]
@@ -205,9 +207,9 @@ def sell():
             has_errors = True
         else:
             item_id = int(flask.request.args['item_id'])
-            data = helpers.get_table_list_data([
-                'marketplace_items', 'marketplace_textbooks'
-            ], stored_fields, {'item_id': item_id})
+            data = helpers.get_table_list_data(
+                ['marketplace_items',
+                 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
 
             if len(data) == 0:
                 # no data? the item_id must be wrong
@@ -251,8 +253,8 @@ def sell():
 
     # if we're past page 1, we need category to be selected
     if page != Page.CATEGORY and stored["cat_id"] == None:
-            flask.flash('Category must be selected')
-            has_errors = True
+        flask.flash('Category must be selected')
+        has_errors = True
 
     # action is used if we need to perform an action on the server-side
     if "action" in flask.request.form:
@@ -281,10 +283,12 @@ def sell():
         # if the category is textbooks, insert a page between INFO and CATEGORY pages
         if prev_page != None and cat_title == "Textbooks":
             # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
-            if (page == Page.INFORMATION and prev_page == Page.CATEGORY) or (page == Page.CATEGORY and prev_page == Page.INFORMATION):
+            if (page == Page.INFORMATION and prev_page == Page.CATEGORY) or (
+                    page == Page.CATEGORY and prev_page == Page.INFORMATION):
                 page = Page.TEXTBOOK
 
-    if page in [Page.INFORMATION, Page.CONFIRMATION, Page.SUBMIT] and cat_title == "Textbooks":
+    if page in [Page.INFORMATION, Page.CONFIRMATION, Page.SUBMIT
+                ] and cat_title == "Textbooks":
         if "textbook_id" not in flask.request.form or flask.request.form["textbook_id"] == "":
             flask.flash("You need to select a textbook.")
             # go back to the textbook select page
@@ -303,7 +307,7 @@ def sell():
     if page in [Page.CONFIRMATION, Page.SUBMIT]:
         errors += helpers.validate_data()
         if len(errors) != 0:
-            page = Page.INFORMATION # the data was inputted on the INFORMATION page
+            page = Page.INFORMATION  # the data was inputted on the INFORMATION page
 
     if page == Page.CATEGORY:
         # generate the hidden values

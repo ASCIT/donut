@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Page(Enum):
     CATEGORY = 1
     TEXTBOOK = 10
