@@ -13,4 +13,4 @@ lint:
 	yapf -i -r .
 
 test:
-	python -m pytest .
+	python3 -m pytest .
