@@ -16,6 +16,9 @@ def marketplace():
 def category():
     """Display all results in that category, with no query."""
 
+    if "cat" not in flask.request.args:
+        return flask.renter_template('404.html')
+
     category_id = flask.request.args["cat"]
 
     fields = []
@@ -33,6 +36,9 @@ def category():
 def query():
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
+
+    if "cat" not in flask.request.args or "q" not in flask.request.args:
+        return flask.render_template('404.html')
 
     category_id = flask.request.args["cat"]
     query = flask.request.args["q"]
@@ -81,7 +87,14 @@ def view_item():
 
     stored = {}
     stored_fields = ["textbook_id", "item_id", "cat_id", "user_id", "item_title", "item_details", "item_condition", "item_price", "item_timestamp", "item_active", "textbook_edition", "textbook_isbn", "textbook_title", "textbook_author"]
-    data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
+    data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+
+    # make sure the item_id is a valid item, i.e. data is nonempty
+    if len(data) == 0:
+        return flask.render_template('404.html')
+
+    # 2d list to the first list inside it
+    data = data[0]
     for i in range(len(data)):
         stored[stored_fields[i]] = data[i]
 
@@ -153,12 +166,21 @@ def sell():
             has_errors = True
         else:
             item_id = int(flask.request.args['item_id'])
-            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
-            for i in range(len(data)):
-                stored[stored_fields[i]] = data[i]
+            data = helpers.get_table_list_data(['marketplace_items', 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+
+            if len(data) == 0:
+                # no data? the item_id must be wrong
+                flask.flash('Invalid item')
+                has_errors = True
+
+            else:
+                # unwrap 2d array
+                data = data[0]
+                for i in range(len(data)):
+                    stored[stored_fields[i]] = data[i]
 
     # prev_page is used for the back button
-    prev_page = None
+    prev_page = page
     if "prev_page" in flask.request.form:
         # make sure flask.request.form["prev_page"] is an int, and that it's a valid page to go to (i.e. in the enum)
         try:
