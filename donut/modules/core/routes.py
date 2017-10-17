@@ -43,4 +43,3 @@ def get_groups_list():
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
     return json.dumps(helpers.get_group_list_data(fields=fields, attrs=attrs))
-
