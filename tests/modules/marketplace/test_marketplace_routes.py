@@ -16,11 +16,11 @@ def test_marketplace_home(client):
 def test_marketplace_category(client):
     donut.init('test')
     donut.before_request()
-    rv = client.get(flask.url_for('marketplace.category', cat=1))
-    #assert rv.status_code == 200
+    rv = client.get('marketplace/view?cat=1')
+    assert rv.status_code == 200
 
-    rv = client.get(flask.url_for('marketplace.category', cat=2))
-    #assert rv.status_code == 200
+    rv = client.get('marketplace/view?cat=2')
+    assert rv.status_code == 200
     donut.teardown_request(None)
 
 
