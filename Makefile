@@ -14,3 +14,6 @@ lint:
 
 test:
 	python3 -m pytest .
+
+test-db:
+	mysql -u donut_test --password=public < sql/reset.sql

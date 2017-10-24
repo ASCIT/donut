@@ -1,6 +1,7 @@
 import flask
 import sqlalchemy
 import re
+from math import ceil
 
 from donut.modules.core.helpers import get_member_data
 
@@ -57,16 +58,20 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     else:
         num_cols = 5
 
-    num_rows = num_cats // num_cols
+    cats2d = [[]]
+    width = ""
+    if num_cols != 0:
+        # if there's nothing in categories, just return default values for cats2d and width
+        num_rows = ceil(num_cats / num_cols)
 
-    # Break categories into a 2d array so that it's easy to arrange in rows
-    # in the html file.
-    cats2d = [[]] * num_rows
-    for cat_index in range(len(categories)):
-        cats2d[cat_index // num_cols].append(categories[cat_index])
+        # Break categories into a 2d array so that it's easy to arrange in rows
+        # in the html file.
+        cats2d = [[]] * num_rows
+        for cat_index in range(len(categories)):
+            cats2d[cat_index // num_cols].append(categories[cat_index])
 
-    # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
-    width = "width: " + str(100.0 / (num_cols)) + "%"
+        # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
+        width = "width: " + str(100.0 / (num_cols)) + "%"
 
     # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
     # function, on to Flask in order to render the top bar and the rest of the content.
@@ -657,7 +662,11 @@ def search_datalist(fields, datalist, query):
         else:
             return -1
 
-    search_results = sorted(search_results, cmp=compare)
+    search_results = sorted(
+        search_results,
+        key=
+        lambda item: (item[field_index_map["score"]], item[field_index_map["item_timestamp"]])
+    )
 
     # chop off the last column, which holds the score
     for i in range(len(search_results)):

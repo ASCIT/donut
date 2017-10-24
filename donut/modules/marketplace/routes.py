@@ -19,7 +19,8 @@ def category():
     """Display all results in that category, with no query."""
 
     if "cat" not in flask.request.args:
-        return flask.renter_template('404.html')
+        print("testing")
+        return flask.render_template('404.html'), 404
 
     category_id = flask.request.args["cat"]
 
@@ -49,7 +50,7 @@ def query():
        'all' if no category is selected."""
 
     if "cat" not in flask.request.args or "q" not in flask.request.args:
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
     category_id = flask.request.args["cat"]
     query = flask.request.args["q"]
@@ -92,7 +93,7 @@ def query():
 
     except ValueError:
         # not a number? something's wrong
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
 
 @blueprint.route('/marketplace/view_item')
@@ -100,14 +101,14 @@ def view_item():
     """View additional details about item <item_id>, passed through flask.request.args."""
 
     if "item_id" not in flask.request.args:
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
     # make sure item_id is a number
     item_id = None
     try:
         item_id = int(flask.request.args["item_id"])
     except ValueError:
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
     stored = {}
     stored_fields = [
@@ -122,7 +123,7 @@ def view_item():
 
     # make sure the item_id is a valid item, i.e. data is nonempty
     if len(data) == 0:
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
     # 2d list to the first list inside it
     data = data[0]
