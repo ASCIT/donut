@@ -3,14 +3,17 @@
 
 DROP TABLE IF EXISTS group_members;
 DROP TABLE IF EXISTS group_positions;
-DROP TABLE IF EXISTS groups;
 DROP VIEW IF EXISTS group_house_membership;
 DROP VIEW IF EXISTS group_houses;
 DROP TABLE IF EXISTS position_holders;
 DROP TABLE IF EXISTS positions;
+DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS privacies;
-DROP TABLE IF EXISTS member_options; DROP TABLE IF EXISTS options; DROP VIEW IF EXISTS members_full_name; DROP TABLE IF EXISTS members; 
+DROP TABLE IF EXISTS member_options; 
+DROP TABLE IF EXISTS options; 
+DROP VIEW IF EXISTS members_full_name; 
+DROP TABLE IF EXISTS members; 
 -- Members Table
 CREATE TABLE members (
     user_id            INT          NOT NULL AUTO_INCREMENT, 
@@ -93,19 +96,22 @@ CREATE TABLE users (
 -- Groups Table
 -- Groups of members. Used for mailing lists, etc.
 -- Groups are used for any internal/external groupings of users.
--- Used for organizations on campus
+-- Used for groups on campus
 -- Examples: Blacker Hovse, IHC, CRC, ug-list, ug-2020
 CREATE TABLE groups (
     group_id                INT          NOT NULL AUTO_INCREMENT,
     group_name              VARCHAR(32)  NOT NULL,
     group_desc              VARCHAR(255) DEFAULT NULL,
     type                    VARCHAR(255) NOT NULL,
+    newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
+                                                        -- an email group
     anyone_can_send         BOOLEAN      DEFAULT FALSE, -- This flag controls
                                                         -- whether or not 
                                                         -- anyone can send
                                                         -- emails to the group
-    newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
-                                                        -- an email group
+    members_can_send        BOOLEAN      DEFAULT FALSE, -- Controls if any
+                                                        -- member can send to
+                                                        -- the group
     visible                 BOOLEAN      DEFAULT FALSE, -- Controls if anyone
                                                         -- anyone can see this
                                                         -- group
@@ -128,21 +134,21 @@ CREATE TABLE positions (
 -- Position to Member Table
 CREATE TABLE position_holders (
     hold_id    INT  NOT NULL AUTO_INCREMENT,
-    org_id     INT  NOT NULL,
+    group_id   INT  NOT NULL,
     pos_id     INT  NOT NULL,
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (org_id, pos_id) REFERENCES positions(org_id, pos_id),
+    FOREIGN KEY (group_id, pos_id) REFERENCES positions(group_id, pos_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
 -- House View
--- Because houses are used so much, make a view separate from the organizations
+-- Because houses are used so much, make a view separate from the groups
 -- table.
 CREATE VIEW group_houses AS (
-    SELECT group_id, group_name FROM organizations WHERE type = 'house'
+    SELECT group_id, group_name FROM groups WHERE type = 'house'
 );
 
 -- House Members View
