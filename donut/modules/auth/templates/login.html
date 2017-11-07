@@ -6,16 +6,21 @@
       <h2 class="text-center">Login to Donut!</h2>
       <form action="{{ url_for('auth.login_submit') }}" method="post">
         <div class="row">
-          <div class="col-md-12 text-center">
-            <input type="text" name="username" placeholder="Username">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">
+            </div>
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12 text-center">
-            <input type="password" name="password" placeholder="Password">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+            </div>
           </div>
         </div>
-        <br>
         <div class="row">
           <div class="col-md-12 text-center">
             <button type="submit" class="btn btn-primary">Login</button>
