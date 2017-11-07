@@ -11,5 +11,8 @@ USE donut_test;
 SOURCE sql/donut.sql
 SOURCE sql/marketplace.sql
 
+-- Create scheduler schema.
+SOURCE sql/scheduler.sql
+
 -- Populate with test data.
 SOURCE sql/test_data.sql

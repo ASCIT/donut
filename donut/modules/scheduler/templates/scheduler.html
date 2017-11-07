@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<link rel="stylesheet" type="text/css"
+href="{{ url_for('scheduler.static', filename='css/scheduler.css') }}" />
+<script src="{{ url_for('scheduler.static', filename='js/scheduler.js') }}"></script>
+
+<div class="container">
+    <div id="mainbody">
+
+        <div id="scheduler">
+            <div id="calendar">
+                <div id="calendar_body">
+                    <div class="day_grid" id="day_grid_M">
+
+                    </div>
+                    <div class="day_grid" id="day_grid_T"></div>
+                    <div class="day_grid" id="day_grid_W"></div>
+                    <div class="day_grid" id="day_grid_R"></div>
+                    <div class="day_grid" id="day_grid_F"></div>
+                </div>
+
+                <div id="time_column">
+                    <div class="time_title">8 am</div>
+                    <div class="time_title">9 am</div>
+                    <div class="time_title">10 am</div>
+                    <div class="time_title">11 am</div>
+                    <div class="time_title">12 pm</div>
+                    <div class="time_title">1 pm</div>
+                    <div class="time_title">2 pm</div>
+                    <div class="time_title">3 pm</div>
+                    <div class="time_title">4 pm</div>
+                    <div class="time_title">5 pm</div>
+                    <div class="time_title">6 pm</div>
+                    <div class="time_title">7 pm</div>
+                    <div class="time_title">8 pm</div>
+                    <div class="time_title">9 pm</div>
+                    <div class="time_title">10 pm</div>
+                    <div class="time_title">11 pm</div>
+                </div>
+
+
+                <div id="day_row">
+                    <div class="day_title">Monday (M)</div>
+                    <div class="day_title">Tuesday (T)</div>
+                    <div class="day_title">Wednesday (W)</div>
+                    <div class="day_title">Thursday (R)</div>
+                    <div class="day_title">Friday (F)</div>
+                    <div style="float: left; width: 15px; border-bottom: none"></div>
+                    <div style="clear: both"></div>
+                </div>
+
+
+                <div id="calendar_corner">
+                    <div id="calendar_corner_title">Units</div>
+                    <div id="calendar_corner_content"></div>
+                </div>
+
+            </div>
+
+            <div id="schedules"></div>
+
+            <div id="top_bar">
+
+                <div id="title"></div>
+
+
+
+                <div id="tool_bar">
+                    <a id="save_button" class="button_disabled">Save</a>
+                    <a id="clear_button" class="button_disabled">Clear All</a>
+                </div>
+
+            </div>
+
+
+            <div id="divider"></div>
+
+            <form action="" method="get" id="search_form" name="search_form">
+
+                <div id="search_bar">
+                    Search:
+                    <input type="text" name="query" id="search_query_box"/>
+                    <input type="submit" name="submit" id="search_button" value=""/>
+                </div>
+
+                <div id="search_box_button">
+                    <a href="#" id="search_box_button_text">Show advanced options</a>
+                </div>
+
+                <div id="course_list_box">
+                    <div id="course_list">
+                    </div>
+                    {% for course in courses %}
+                    <div class="course_box" id="course_{{ course.course_id }}">
+                        <div class="course_color"></div>
+                        <div class="course_title">{{ course.department }} {{ course.course_no }}</div>
+                        <div class="course_desc">{{ course.name }}</div>
+                        <div class="course_units">{{ course.units }}</div>
+                        <div class="sections">
+                            {% if course.n_sections > 0 %}
+                            <div class="section" id="section_{{ course.sections[0].section_id }}">
+                                <input type="checkbox" id="section_{{ course.sections[0].section_id }}_checkbox" />
+                                <div class="section_number">{{ course.sections[0].section_no }}</div>
+                                <div class="section_instructor">{{ course.sections[0].instructor }}</div>
+                                <div class="section_times">{{ course.sections[0].times }}</div>
+                                <div class="section_image" style="display:none"></div>
+                            {% endif %}
+                            {% if course.n_sections > 1 %}
+                                <div class="more_sections" style="display:none">
+                            {% endif %}
+                            {% for i in range(1, course.n_sections) %}
+                                <div class="section" id="section_{{ course.sections[i].section_id }}">
+                                    <input type="checkbox" id="section_{{ course.sections[i].section_id }}_checkbox" />
+                                    <div class="section_number">{{ course.sections[i].section_no }}</div>
+                                    <div class="section_instructor">{{ course.sections[i].instructor }}</div>
+                                    <div class="section_times">{{ course.sections[i].times }}</div>
+                                    <div class="section_image" style="display:none"></div>
+                                 </div>
+                            {% endfor %}
+                            {% if course.n_sections > 1 %}
+                                <div class="more_sections_preview" style="display:none">
+                                    <div class="section" id="section_{{ course.sections[1].section_id }}">
+                                        <input type="checkbox" id="section_{{ course.sections[1].section_id }}_checkbox" />
+                                        <div class="section_number">{{ course.sections[1].section_no }}</div>
+                                        <div class="section_instructor">{{ course.sections[1].instructor }}</div>
+                                        <div class="section_times">{{ course.sections[1].times }}</div>
+                                        <div class="section_image" style="display:none"></div>
+                                    </div>
+                                </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div id="course_list_loading">
+                        <img src="{{ url_for('scheduler.static', filename='images/loading.gif') }}" /><br />
+                        Searching...
+                    </div>
+                </div>
+
+            </form>
+
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+{% endblock body %}
