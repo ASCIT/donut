@@ -18,7 +18,7 @@ from donut.modules import marketplace
 from donut.modules import core
 
 app = flask.Flask(__name__)
-Bootstrap(app) #enable Bootstrap in Flask
+Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
 app.register_blueprint(account.blueprint)
