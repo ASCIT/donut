@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block body %}
+{% block page %}
 <h2>Request An Account</h2>
 <form action="{{ url_for('account.request_account_submit') }}" method="post">
   <p>Please provide your UID and last name:</p>
@@ -16,4 +16,4 @@
   </table>
   <button type="submit" tabindex="3">Submit</button>
 </form>
-{% endblock body %}
+{% endblock page %}
