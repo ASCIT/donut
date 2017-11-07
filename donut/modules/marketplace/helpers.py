@@ -76,7 +76,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
         # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
         # function, on to Flask in order to render the top bar and the rest of the content.
         return flask.render_template(
-                template_url, cats=cats2d, width=width, **kwargs)
+            template_url, cats=cats2d, width=width, **kwargs)
 
 
 def generate_search_table(fields=None, attrs={}, query=""):
