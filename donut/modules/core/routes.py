@@ -29,4 +29,3 @@ def get_members_list():
 def get_members(user_id):
     """GET /1/members/<int:user_id>/"""
     return json.dumps(helpers.get_member_data(user_id))
-

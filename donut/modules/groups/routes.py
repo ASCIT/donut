@@ -3,6 +3,7 @@ import json
 
 from donut.modules.groups import blueprint, helpers
 
+
 @blueprint.route("/1/groups/")
 def get_groups_list():
     # Create a dict of the passed in attribute which are filterable
@@ -15,3 +16,9 @@ def get_groups_list():
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
     return json.dumps(helpers.get_group_list_data(fields=fields, attrs=attrs))
+
+
+@blueprint.route("/1/groups/<int:group_id>/")
+def get_groups(group_id):
+    """GET /1/groups/<int:group_id>/"""
+    return json.dumps(helpers.get_group_data(group_id))
