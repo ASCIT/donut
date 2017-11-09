@@ -78,4 +78,3 @@ def get_group_data(group_id, fields=None):
     # Return the row in the form of a dict
     result = {f: t for f, t in zip(fields, result)}
     return result
-
