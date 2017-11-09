@@ -1,6 +1,7 @@
 import flask
 import sqlalchemy
 
+
 def get_group_list_data(fields=None, attrs={}):
     """
     Queries the database and returns list of group data constrained by the 
@@ -15,9 +16,10 @@ def get_group_list_data(fields=None, attrs={}):
                 attributes. In the form of a list of dicts with key:value of 
                 columnname:columnvalue.
     """
-    all_returnable_fields = ["group_id", "group_name", "group_desc", "type",
-        "anyone_can_send", "members_can_send", "newsgroups", "visible", 
-        "admin_control_members"]
+    all_returnable_fields = [
+        "group_id", "group_name", "group_desc", "type", "anyone_can_send",
+        "members_can_send", "newsgroups", "visible", "admin_control_members"
+    ]
     default_fields = ["group_id", "group_name", "group_desc", "type"]
     if fields == None:
         fields = default_fields
@@ -38,4 +40,3 @@ def get_group_list_data(fields=None, attrs={}):
     # Return the rows in the form of a list of dicts
     result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
-             

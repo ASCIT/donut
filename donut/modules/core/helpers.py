@@ -88,6 +88,7 @@ def get_member_list_data(fields=None, attrs={}):
     result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
 
+
 def get_name_and_email(user_id):
     """
     Queries the database and returns the full_name and email corresponding to the

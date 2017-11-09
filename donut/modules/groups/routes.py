@@ -3,6 +3,7 @@ import json
 
 from donut.modules.groups import blueprint, helpers
 
+
 @blueprint.route("/1/groups/")
 def get_groups_list():
     # Create a dict of the passed in attribute which are filterable
