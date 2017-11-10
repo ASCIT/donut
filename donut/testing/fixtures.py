@@ -22,5 +22,6 @@ def client():
         flask.g.tx = flask.g.db.begin()
 
     yield app.test_client()
+    # Teardown logic (happens after each test function)
     flask.g.tx.rollback()
     flask.g.db.close()
