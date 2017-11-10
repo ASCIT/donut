@@ -102,7 +102,6 @@ def get_members_by_group(group_id):
         return {}
 
     # Get data for each user id
-    members = []
-    for row in result:
-        members.append(core.get_member_data(row['user_id']))
-    return members
+    members = [row['user_id'] for row in result]
+    result = core.get_member_data(members)
+    return result
