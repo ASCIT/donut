@@ -3,7 +3,7 @@ import pytest
 import flask
 import sqlalchemy
 import donut
-from donut import app, init
+from donut import app
 
 
 @pytest.fixture
