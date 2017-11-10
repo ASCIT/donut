@@ -50,15 +50,15 @@ This (see `Makefile`)
 ## Test Site
 The easiest way to set up a test site is to use SSH port forwarding, so that requests to your local computer are forwarded to the development server. For example:
 ```
-ssh -L 9001:localhost:5000 <host>
+ssh -L 9000:localhost:5000 <host>
 ```
-This will forward your local port 9001 so that visiting [localhost:9001](http://localhost:9001) on your local computer is equivalent to visiting [localhost:5000](http://localhost:5000) on the remote server. Flask's debugging environment defaults to port 5000, but you can change that in your `config.py` file (multiple people cannot simultaneously bind to the same port through SSH port forwarding).
+This will forward your local port 9000 so that visiting [localhost:9000](http://localhost:9000) on your local computer is equivalent to visiting [localhost:5000](http://localhost:5000) on the remote server. Flask's debugging environment defaults to port 5000, but you can change that in your `config.py` file (multiple people cannot simultaneously bind to the same port through SSH port forwarding).
 
 To start the test site:
 ```
 python run_server.py -e dev -p 50XX
 ```
-You can visit the test site by going to [localhost:9001](http://localhost:9001) (or whichever port you decided to forward) in your local browser.
+You can visit the test site by going to [localhost:9000](http://localhost:9000) (or whichever port you decided to forward) in your local browser.
 
 [travis-url]: https://travis-ci.org/ASCIT/donut
 [travis-image]: https://travis-ci.org/ASCIT/donut.svg?branch=master
