@@ -1,5 +1,6 @@
 import flask
 import sqlalchemy
+from donut.modules.core import helpers as core
 
 
 def get_group_list_data(fields=None, attrs={}):
@@ -82,3 +83,25 @@ def get_group_data(group_id, fields=None):
     # Return the row in the form of a dict
     result = {f: t for f, t in zip(fields, result)}
     return result
+
+
+def get_members_by_group(group_id):
+    # Build the SELECT and FROM clauses
+    fields = [sqlalchemy.text("user_id")]
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("group_members"))
+
+    # Build the WHERE clause
+    s = s.where(sqlalchemy.text("group_id = :g"))
+
+    # Execute the query
+    result = flask.g.db.execute(s, g=group_id).fetchall()
+
+    # Check to see if query returned anything
+    if result is None:
+        return {}
+
+    # Get data for each user id
+    members = []
+    for row in result:
+        members.append(core.get_member_data(row['user_id']))
+    return members
