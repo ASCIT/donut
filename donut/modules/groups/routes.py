@@ -28,4 +28,4 @@ def get_groups(group_id):
 @blueprint.route("/1/groups/<int:group_id>/members/")
 def get_group_members(group_id):
     """GET /1/groups/<int:group_id>/"""
-    return str(helpers.get_members_by_group(group_id))
+    return json.dumps(helpers.get_members_by_group(group_id))
