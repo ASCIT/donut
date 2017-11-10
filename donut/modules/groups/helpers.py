@@ -4,7 +4,7 @@ import sqlalchemy
 
 def get_group_list_data(fields=None, attrs={}):
     """
-    Queries the database and returns list of group data constrained by the 
+    Queries the database and returns list of group data constrained by the
     specified attributes.
 
     Arguments:
@@ -13,7 +13,7 @@ def get_group_list_data(fields=None, attrs={}):
         attrs:  The attributes of the group to filter for.
     Returns:
         result: The fields and corresponding values of groups with desired
-                attributes. In the form of a list of dicts with key:value of 
+                attributes. In the form of a list of dicts with key:value of
                 columnname:columnvalue.
     """
     all_returnable_fields = [
@@ -50,7 +50,7 @@ def get_group_data(group_id, fields=None):
         group_id: The group to look up
         fields:   The fields to return. If None are specified, then
                   default_fields are used
-    
+
     Returns:
         result:   The fields and corresponding values of group with group_id.
                   In the form of a dict with key:value of columnname:columnalue
@@ -64,7 +64,7 @@ def get_group_data(group_id, fields=None):
         fields = default_fields
     else:
         if any(f not in all_returnable_fields for f in fields):
-            return None
+            return "Invalid field"
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
