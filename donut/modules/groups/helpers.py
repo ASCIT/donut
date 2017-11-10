@@ -88,7 +88,8 @@ def get_group_data(group_id, fields=None):
 def get_members_by_group(group_id):
     # Build the SELECT and FROM clauses
     fields = [sqlalchemy.text("user_id")]
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("group_members"))
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text("group_members"))
 
     # Build the WHERE clause
     s = s.where(sqlalchemy.text("group_id = :g"))
