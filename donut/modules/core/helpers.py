@@ -45,7 +45,9 @@ def get_member_data(user_id, fields=None):
 
     # Return the row in the form of a dict (or list of dicts)
     result = [{f: t for f, t in zip(fields, res)} for res in result]
-    if len(result) == 1:
+    if len(result) == 0:
+        return {}
+    elif len(result) == 1:
         return result[0]
     else:
         return result
