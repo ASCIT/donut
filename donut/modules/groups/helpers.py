@@ -64,7 +64,7 @@ def get_group_data(group_id, fields=None):
         fields = default_fields
     else:
         if any(f not in all_returnable_fields for f in fields):
-            return None 
+            return None
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
@@ -74,7 +74,7 @@ def get_group_data(group_id, fields=None):
 
     # Execute the query
     result = flask.g.db.execute(s, g=group_id).first()
-   
+
     # Check to see if query returned anything
     if result is None:
         return {}
