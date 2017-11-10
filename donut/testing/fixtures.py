@@ -1,7 +1,9 @@
 import pytest
 
+import flask
+import sqlalchemy
 import donut
-from donut import app
+from donut import app, init
 
 
 @pytest.fixture
@@ -13,5 +15,12 @@ def client():
     # Establish an application context before running the tests.
     ctx = app.app_context()
     ctx.push()
+    if 'DB_URI' in app.config:
+        engine = sqlalchemy.create_engine(
+            app.config['DB_URI'], convert_unicode=True)
+        flask.g.db = engine.connect()
+        flask.g.tx = flask.g.db.begin()
 
-    return app.test_client()
+    yield app.test_client()
+    flask.g.tx.rollback()
+    flask.g.db.close()
