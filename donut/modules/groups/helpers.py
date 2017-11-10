@@ -4,7 +4,7 @@ import sqlalchemy
 
 def get_group_list_data(fields=None, attrs={}):
     """
-    Queries the database and returns list of group data constrained by the 
+    Queries the database and returns list of group data constrained by the
     specified attributes.
 
     Arguments:
@@ -13,7 +13,7 @@ def get_group_list_data(fields=None, attrs={}):
         attrs:  The attributes of the group to filter for.
     Returns:
         result: The fields and corresponding values of groups with desired
-                attributes. In the form of a list of dicts with key:value of 
+                attributes. In the form of a list of dicts with key:value of
                 columnname:columnvalue.
     """
     all_returnable_fields = [
@@ -40,3 +40,24 @@ def get_group_list_data(fields=None, attrs={}):
     # Return the rows in the form of a list of dicts
     result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
+
+
+group_position_fields = ["pos_id", "pos_name"]
+
+
+def get_group_positions(group_id):
+    """
+    Returns a list of all positions for a group with the given id.
+
+    Arguments:
+        group_id: The integer id of the group
+    """
+
+    query = sqlalchemy.sql.select(group_position_fields).select_from(
+        sqlalchemy.text("positions"))
+    query = query.where(sqlalchemy.text("group_id = :group_id"))
+    positions = flask.g.db.execute(query, group_id=group_id).fetchall()
+    return [{
+        field: value
+        for field, value in zip(group_position_fields, position)
+    } for position in positions]

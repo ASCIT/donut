@@ -16,3 +16,9 @@ def get_groups_list():
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
     return json.dumps(helpers.get_group_list_data(fields=fields, attrs=attrs))
+
+
+@blueprint.route("/1/groups/<int:group_id>/positions/")
+def get_group_positions(group_id):
+    """GET /1/groups/<int:group_id>/positions/"""
+    return json.dumps(helpers.get_group_positions(group_id))
