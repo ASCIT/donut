@@ -68,10 +68,8 @@
                 <td> {{stored["item_details"]}} </td>
             </tr>
         </table>
-        <br>
-        <br>
-        <button name="page" value=2>Back</button>
-        <button name="page" value=4>Continue</button>
+        <button class="btn btn-danger" name="page" value=2>Back</button>
+        <button class="btn btn-success" name="page" value=4>Confirm</button>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}

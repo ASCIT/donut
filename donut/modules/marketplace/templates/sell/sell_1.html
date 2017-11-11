@@ -2,7 +2,7 @@
 {% block page %}
 {% include "topbar.html" %}
 
-<div class="text-center">
+<div class="col-md-4 col-md-offset-4 text-center" style="margin-bottom: 25px">
     <!-- SECTION 1 OF SELLING: CATEGORY SELECT -->
     {% if state == "new" %}
     <h3>Create a new item</h3>
@@ -10,26 +10,26 @@
     <h3>Modify an existing item</h3>
     {% endif %}
     <br>
-    Please select a category for your item.
-    <br>
-    <br>
     {% if state=='edit' %}
     <form action={{ url_for(".sell", state=state, item_id=request.args['item_id']) }} method='post'>
     {% else %}
     <form action={{ url_for(".sell", state=state) }} method='post'>
     {% endif %}
-        <select name="cat_id">
-            {% for i in range(cats|length) %}
-                {% for j in range(cats[i]|length) %}
-                    <option value="{{ i*cats[0]|length+j+1 }}"
-                    {% if i*cats[0]|length+j+1 == category_id %} selected {% endif %} >
-                        <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
-                        {{ cats[i][j] }}
-                    </option>
+        <div class="form-group">
+            <label for="cat_id">Please select a category for your item</label>
+            <select class="form-control" name="cat_id" id="cat_id" autofocus>
+                {% for i in range(cats|length) %}
+                    {% for j in range(cats[i]|length) %}
+                        <option value="{{ i*cats[0]|length+j+1 }}"
+                        {% if i*cats[0]|length+j+1 == category_id %} selected {% endif %} >
+                            <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
+                            {{ cats[i][j] }}
+                        </option>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </select>
-        <button name="page" value=2>Continue</button>
+            </select>
+        </div>
+        <button class="btn btn-primary" name="page" value=2>Continue</button>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
@@ -37,6 +37,5 @@
         {% endfor %}
     </form>
 </div>
-<br>
 
 {% endblock %}

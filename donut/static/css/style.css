@@ -19,3 +19,8 @@ body {
 #copyright {
   padding: 15px;
 }
+
+label.required:after {
+  content:"*";
+  color:red;
+}
