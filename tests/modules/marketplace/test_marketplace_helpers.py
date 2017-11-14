@@ -1,9 +1,7 @@
 from donut.testing.fixtures import client
 from donut import app
-from donut.modules.marketplace.helpers import (get_category_name_from_id,
-                                               get_table_columns,
-                                               get_matches,
-                                               tokenize_query)
+from donut.modules.marketplace.helpers import (
+    get_category_name_from_id, get_table_columns, get_matches, tokenize_query)
 
 
 def test_get_category_name_from_id(client):
