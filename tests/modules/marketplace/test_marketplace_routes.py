@@ -25,8 +25,11 @@ def test_marketplace_category(client):
 
 
 def test_marketplace_query(client):
-    rv = client.get(flask.url_for('marketplace.query', cat=2, q='great'))
-    #assert rv.status_code == 200
+    donut.init('test')
+    donut.before_request()
+    rv = client.get(flask.url_for('marketplace.query'), query_string={ 'cat':2, 'q':'great'})
+    assert rv.status_code == 200
 
     rv = client.get(flask.url_for('marketplace.query'))
     #assert rv.status_code == 404
+    donut.teardown_request(None)
