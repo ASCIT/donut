@@ -55,7 +55,7 @@ def get_member_data(user_id, fields=None):
 
 def get_member_list_data(fields=None, attrs={}):
     """
-    Queries the database and returns list of member data constrained by the 
+    Queries the database and returns list of member data constrained by the
     specified attributes.
 
     Arguments:
@@ -64,7 +64,7 @@ def get_member_list_data(fields=None, attrs={}):
         attrs:  The attributes of the members to filter for.
     Returns:
         result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of dicts with key:value of 
+                attributes. In the form of a list of dicts with key:value of
                 columnname:columnvalue.
     """
     all_returnable_fields = [
