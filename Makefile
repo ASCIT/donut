@@ -12,8 +12,7 @@ pip-install:
 lint:
 	yapf -i -r .
 
-test:
-	make init-test-db && \
+test: init-test-db
 	python3 -m pytest .
 
 init-test-db:
