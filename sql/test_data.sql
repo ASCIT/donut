@@ -12,4 +12,3 @@ INSERT INTO groups(group_id, group_name, type)
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary'); 
-
