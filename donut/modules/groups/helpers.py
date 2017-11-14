@@ -82,3 +82,30 @@ def get_group_data(group_id, fields=None):
     # Return the row in the form of a dict
     result = {f: t for f, t in zip(fields, result)}
     return result
+
+
+
+def get_position_data(fields=None):
+    all_returnable_fields = ["group_id", "pos_id", "pos_name"]
+    default_fields = ["pos_name"]
+
+    if fields is None:
+        fields = default_fields
+    else:
+        if any(f not in all_returnable_fields for f in fields):
+            return "Invalid field"
+
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("positions"))
+    
+    result = flask.g.db.execute(s)
+
+    if result is None:
+        return {}
+    
+    res = []
+    for row in result:
+        res.append(row["pos_name"])
+    
+    print(res)
+    print(type(res))
+    return res
