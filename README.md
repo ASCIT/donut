@@ -26,33 +26,39 @@ The repository for Donut. Written using Python/Flask and powered by MariaDB.
 ```
 git clone https://github.com/ASCIT/donut.git ~/donut
 ```
-- Set up your virtualenv:
+- Set up your virtualenv and install requirements in that virtualenv
 ```
-mkdir virtualenvs (if you haven't already)
-cd ~/virtualenvs
-virtualenv [-p /usr/local/bin/python] donut 
-    (The -p part depends on which version of Python you want to install. You shouldn't have to set this.)
-source ~/virtualenvs/donut/bin/activate
+make fresh-install
 ```
-- The last command activates the virtualenv, so that your python packages are managed on a per-project basis by the virtual environment instead of using the global python installation. You may want to create an alias in your `~/.bashrc` file since this must be executed every time you want to start development. If you want to leave the virtual environment, use the `deactivate` command.
-- Install the required packages using pip:
-```
-pip install -r requirements.txt
-```
+This (see `Makefile`)
+1. Creates a virtualenv in `~/virtualenvs/donut-py3`
+2. Installs the requirements given  in `requirements.txt` into the virtualenv.
+3. Adds a line to your `~/.profile` to automatically activate the virtualenv when you login. 
+  
+   To deactivate the virtualenv (which you shouldn't need to do), simply type `deactivate`
+
+
 - You will also need a separate config file that we will give you in order to access the database.
 
-# Testing
+# Testing 
+## Linting
+- `make lint`
+
+## Unit Testing
+- `make test`
+
+## Test Site
 The easiest way to set up a test site is to use SSH port forwarding, so that requests to your local computer are forwarded to the development server. For example:
 ```
-ssh -L 9001:localhost:5000 <host>
+ssh -L 9000:localhost:5000 <host>
 ```
-This will forward your local port 9001 so that visiting [localhost:9001](http://localhost:9001) on your local computer is equivalent to visiting [localhost:5000](http://localhost:5000) on the remote server. Flask's debugging environment defaults to port 5000, but you can change that in your `config.py` file (multiple people cannot simultaneously bind to the same port through SSH port forwarding).
+This will forward your local port 9000 so that visiting [localhost:9000](http://localhost:9000) on your local computer is equivalent to visiting [localhost:5000](http://localhost:5000) on the remote server. Flask's debugging environment defaults to port 5000, but you can change that in your `config.py` file (multiple people cannot simultaneously bind to the same port through SSH port forwarding).
 
 To start the test site:
 ```
-python run_server.py
+python run_server.py -e dev -p 50XX
 ```
-You can visit the test site by going to [localhost:9001](http://localhost:9001) (or whichever port you decided to forward) in your local browser.
+You can visit the test site by going to [localhost:9000](http://localhost:9000) (or whichever port you decided to forward) in your local browser.
 
 [travis-url]: https://travis-ci.org/ASCIT/donut
 [travis-image]: https://travis-ci.org/ASCIT/donut.svg?branch=master

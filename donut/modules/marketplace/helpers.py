@@ -73,10 +73,10 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
         # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
         width = "width: " + str(100.0 / (num_cols)) + "%"
 
-    # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
-    # function, on to Flask in order to render the top bar and the rest of the content.
-    return flask.render_template(
-        template_url, cats=cats2d, width=width, **kwargs)
+        # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
+        # function, on to Flask in order to render the top bar and the rest of the content.
+        return flask.render_template(
+            template_url, cats=cats2d, width=width, **kwargs)
 
 
 def generate_search_table(fields=None, attrs={}, query=""):
@@ -87,9 +87,9 @@ def generate_search_table(fields=None, attrs={}, query=""):
     the headers.
 
     Arguments:
-        fields: A list of the fields that are requested to be in the table.  For
-                example: ["cat_id", "item_title", "textbook_title", "item_price",
-                ...]
+    fields: A list of the fields that are requested to be in the table.  For
+        example: ["cat_id", "item_title", "textbook_title", "item_price",
+            ...]
 
         attrs: A map of fields to values that make up conditions on the fields.
                For example, {"cat_id":1} will only return results for which the
