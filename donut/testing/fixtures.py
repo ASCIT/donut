@@ -11,6 +11,7 @@ def client():
     donut.init("test")
     # Need to specify a server, since test_client doesn't do that for us.
     app.config["SERVER_NAME"] = "127.0.0.1"
+    app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
 
     # Establish an application context before running the tests.
     ctx = app.app_context()
