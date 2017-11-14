@@ -1,6 +1,7 @@
 /* Test data / initial data */
 INSERT INTO members(uid, last_name, first_name, email)
-    VALUES ('1957540', 'Qu', 'David', 'davidqu12345@gmail.com');
+    VALUES ('1957540', 'Qu', 'David', 'davidqu12345@gmail.com')
+    VALUES ('1984853', 'Eng', 'Robert', 'reng@caltech.edu');
 
 INSERT INTO groups(group_id, group_name, type)
     VALUES (1, 'Donut Devteam', '');
