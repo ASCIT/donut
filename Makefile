@@ -13,7 +13,8 @@ lint:
 	yapf -i -r .
 
 test:
+	make init-test-db && \
 	python3 -m pytest .
 
-test-db:
+init-test-db:
 	mysql -u donut_test --password=public < sql/reset.sql
