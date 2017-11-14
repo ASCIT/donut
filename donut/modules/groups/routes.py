@@ -22,7 +22,7 @@ def get_groups_list():
 @blueprint.route("/1/groups/<int:group_id>/positions/")
 def get_group_positions(group_id):
     """GET /1/groups/<int:group_id>/positions/"""
-    return json.dumps(helpers.get_group_positions(group_id))
+    return jsonify(helpers.get_group_positions(group_id))
 
 
 @blueprint.route("/1/groups/<int:group_id>/")
