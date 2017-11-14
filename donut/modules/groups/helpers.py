@@ -43,6 +43,27 @@ def get_group_list_data(fields=None, attrs={}):
     return result
 
 
+group_position_fields = ["pos_id", "pos_name"]
+
+
+def get_group_positions(group_id):
+    """
+    Returns a list of all positions for a group with the given id.
+
+    Arguments:
+        group_id: The integer id of the group
+    """
+
+    query = sqlalchemy.sql.select(group_position_fields).select_from(
+        sqlalchemy.text("positions"))
+    query = query.where(sqlalchemy.text("group_id = :group_id"))
+    positions = flask.g.db.execute(query, group_id=group_id).fetchall()
+    return [{
+        field: value
+        for field, value in zip(group_position_fields, position)
+    } for position in positions]
+
+
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.
