@@ -31,13 +31,18 @@ def get_member_data(user_id, fields=None):
     else:
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
+    
+    if not isinstance(user_id, list):
+        user_id = [user_id]
+    
+    # edge case: user_id is empty list
+    if len(user_id) == 0:
+        return {}
 
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
 
     # Build the WHERE clause
-    if not isinstance(user_id, list):
-        user_id = [user_id]
     s = s.where(sqlalchemy.text("user_id IN :u"))
 
     # Execute the query
