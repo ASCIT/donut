@@ -47,11 +47,6 @@ def test_get_group_data(client):
     }
 
 
-def test_get_members_by_group(client):
-    assert helpers.get_members_by_group(1)[0]["user_id"] == 1
-    assert helpers.get_members_by_group(-1) == {}
-
-
 # Test Routes
 # Difficult to test because query arguments are undefined outside Flask context
 # def test_get_groups_list(client):
@@ -64,7 +59,3 @@ def test_get_group_positions(client):
 
 def get_groups(client):
     assert routes.get_groups(1) is not None
-
-
-def test_get_group_members(client):
-    assert routes.get_group_members(1) is not None
