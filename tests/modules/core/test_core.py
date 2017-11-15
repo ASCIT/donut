@@ -21,6 +21,7 @@ def test_get_member_data(client):
     assert get_member_data(1, "spaghetti") == "Invalid field"
     # try a list of user id's with no valid id's
     assert get_member_data([-1]) == {}
+    assert get_member_data([]) == {}
 
 
 def test_get_member_list_data(client):

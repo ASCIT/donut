@@ -118,10 +118,6 @@ def get_members_by_group(group_id):
     # Execute the query
     result = flask.g.db.execute(s, g=group_id).fetchall()
 
-    # Check to see if query returned anything
-    if result is None:
-        return {}
-
     # Get data for each user id
     members = [row['user_id'] for row in result]
     result = core.get_member_data(members)
