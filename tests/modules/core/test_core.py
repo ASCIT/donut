@@ -22,6 +22,7 @@ def test_get_member_data(client):
     # try a list of user id's with no valid id's
     assert get_member_data([-1]) == {}
 
+
 def test_get_member_list_data(client):
     members = get_member_list_data(attrs={"uid": "1957540"})
     assert members[0]["uid"] == "1957540"
