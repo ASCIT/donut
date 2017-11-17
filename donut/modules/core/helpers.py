@@ -136,9 +136,9 @@ def get_group_list_of_member(user_id):
     s = s.where(sqlalchemy.text("user_id = :u"))
     result = flask.g.db.execute(s, u=user_id)
 
-    finResult = {}
+    fin_result = {}
     counter = 0
     for res in result:
-        finResult[counter] = res[1]
+        fin_result[counter] = res[1]
         counter += 1
-    return finResult
+    return fin_result

@@ -33,8 +33,7 @@ def get_members(user_id):
 
 @blueprint.route("/1/members/<int:user_id>/groups/")
 def get_group_list_of_member(user_id):
-    '''- /1/members/3/groups/ group_members table grabbing the groups
-    by member list endpoint
-    List all groups that a member is in
+    '''GET /1/members/<int:user_id>/groups/
+       List all groups that a member is in  
     '''
     return json.dumps(helpers.get_group_list_of_member(user_id))
