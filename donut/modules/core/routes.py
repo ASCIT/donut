@@ -22,7 +22,7 @@ def get_members_list():
     fields = None
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
-    
+
     return jsonify(helpers.get_member_list_data(fields=fields, attrs=attrs))
 
 
