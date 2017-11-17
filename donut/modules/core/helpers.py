@@ -119,3 +119,23 @@ def get_name_and_email(user_id):
 
     result = list(flask.g.db.execute(s, {'u': user_id}))
     return (result[0][0], result[0][1])  # convert from a 2d list to a 1d list
+
+def get_group_list_of_member(user_id):
+    """
+    Queries the database and returns list of groups for a given id
+    Arguments:
+        user_id: The user_id for query.
+    Returns:
+        result: All the groups that an user_id is a part of
+    """
+    s = sqlalchemy.sql.select(["group_id, group_name"]).select_from(sqlalchemy.text(" group_members NATURAL JOIN groups NATURAL JOIN members"))
+
+    s = s.where(sqlalchemy.text("user_id = :u"))
+    result = flask.g.db.execute(s, u = user_id)
+
+    finResult = {}
+    counter = 0
+    for res in result:
+        finResult[counter] = res[1]
+        counter += 1
+    return finResult
