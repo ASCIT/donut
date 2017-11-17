@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block page %}
-	<div>
-		<ul class="nav nav-tabs" role="tablist">
+	<div class="col-md-6 col-md-offset-3" style="padding-bottom: 25px">
+		<ul class="nav nav-tabs nav-justified">
 			<li class="active">
 				<a href="#book" aria-controls="book" role="tab" data-toggle="tab">
 					Book a room
@@ -24,16 +24,16 @@
 			</li>
 		</ul>
 		<div class="tab-content">
-			<div role="tabpanel" class="tab-pane active" id="book">
+			<div class="tab-pane active" id="book">
 				{% include "book.html" %}
 			</div>
-			<div role="tabpanel" class="tab-pane" id="mine">
+			<div class="tab-pane" id="mine">
 				{% include "mine.html" %}
 			</div>
-			<div role="tabpanel" class="tab-pane" id="all">
+			<div class="tab-pane" id="all">
 				{% include "all.html" %}
 			</div>
-			<div role="tabpanel" class="tab-pane" id="rooms">
+			<div class="tab-pane" id="rooms">
 				{% include "rooms.html" %}
 			</div>
 		</div>
