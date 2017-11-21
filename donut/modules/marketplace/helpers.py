@@ -60,23 +60,25 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
 
     cats2d = [[]]
     width = ""
-    if num_cols != 0:
-        # if there's nothing in categories, just return default values for cats2d and width
-        num_rows = ceil(num_cats / num_cols)
+    if num_cols == 0:
+        return flask.render_template('404.html')
 
-        # Break categories into a 2d array so that it's easy to arrange in rows
-        # in the html file.
-        cats2d = [[]] * num_rows
-        for cat_index in range(len(categories)):
-            cats2d[cat_index // num_cols].append(categories[cat_index])
+    # if there's nothing in categories, just return default values for cats2d and width
+    num_rows = ceil(num_cats / num_cols)
 
-        # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
-        width = "width: " + str(100.0 / (num_cols)) + "%"
+    # Break categories into a 2d array so that it's easy to arrange in rows
+    # in the html file.
+    cats2d = [[]] * num_rows
+    for cat_index in range(len(categories)):
+        cats2d[cat_index // num_cols].append(categories[cat_index])
 
-        # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
-        # function, on to Flask in order to render the top bar and the rest of the content.
-        return flask.render_template(
-            template_url, cats=cats2d, width=width, **kwargs)
+    # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
+    width = "width: " + str(100.0 / (num_cols)) + "%"
+
+    # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
+    # function, on to Flask in order to render the top bar and the rest of the content.
+    return flask.render_template(
+        template_url, cats=cats2d, width=width, **kwargs)
 
 
 def generate_search_table(fields=None, attrs={}, query=""):

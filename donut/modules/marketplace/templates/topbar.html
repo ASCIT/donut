@@ -18,7 +18,7 @@
                         {% for i in range(cats|length) %}
                         <tr>
                             {% for j in range(cats[i]|length) %}
-                            <td style={{ width }}>
+                            <td style="{{ width }}">
                                 <a href={{ url_for(".category", cat=i*cats[0]|length+j+1) }}>{{ cats[i][j] }}</a>
                                 <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
                             </td>

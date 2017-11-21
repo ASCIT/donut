@@ -7,6 +7,9 @@ INSERT INTO marketplace_categories(cat_title, cat_order) VALUES
     ('Furniture', 1),
     ('Textbooks', 2);
 
+INSERT INTO marketplace_items(cat_id, user_id, item_title, item_details, item_condition, item_price) VALUES
+    (1, 1, 'A table', "It\'s a pretty cool table, I guess", 'Good', 5.99);
+
 INSERT INTO groups(group_id, group_name, type)
     VALUES (1, 'Donut Devteam', '');
 
