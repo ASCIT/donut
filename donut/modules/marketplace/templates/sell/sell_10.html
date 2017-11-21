@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block page %}
 {% include "topbar.html" %}
 
 <div id="wide-column" class="text-center">
@@ -22,7 +22,7 @@
         <br>
         <br>-->
         <div class="scrollbox">
-            <table style="margin-left: auto;margin-right: auto;table-layout:fixed;width:50%;min-width:590px" class="sortable" border=1 frame=void rules=rows>
+            <table class="table table-hover table-condensed sortable" style="margin-left: auto;margin-right: auto;table-layout:fixed;width:50%;min-width:590px" frame=void rules=rows>
                 <thead>
                     <tr style="text-align:center">
                         <th class="sorttable_nosort" style="width:50px"></th>
@@ -31,14 +31,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                <!-- textbooks is an array with elements for each textbook.  textbook[i][0] is the ith textbook's id; [1] is the title; [2] is the author. -->
-                    {% for i in range(textbooks|length) %}
-                        <tr style="text-align:left" id={{ "td-"+textbooks[i][0]|string }}>
-                            <td><input type="radio" name="textbook_id" value="{{ textbooks[i][0] }}"
-                                {% if textbooks[i][0]|string == old_textbook_id %} checked {% endif %}>
+                <!-- textbooks is an array with elements for each textbook.  textbook[0] is the ith textbook's id; [1] is the title; [2] is the author. -->
+                    {% for textbook in textbooks %}
+                        <tr style="text-align:left" id={{ "td-"+textbook[0]|string }}>
+                            <td><input type="radio" name="textbook_id" value="{{ textbook[0] }}"
+                                {% if textbook[0]|string == old_textbook_id %} checked {% endif %}>
                             </td>
-                            <td>{{ textbooks[i][1] }}</td>
-                            <td>{{ textbooks[i][2] }}</td>
+                            <td>{{ textbook[1] }}</td>
+                            <td>{{ textbook[2] }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -46,8 +46,8 @@
         </div>
         <br>
         <br>
-        <button name="page" value="CATEGORY">Back</button>
-        <button name="page" value="INFORMATION">Continue</button>
+        <button class="btn btn-warning" name="page" value="CATEGORY">Back</button>
+        <button class="btn btn-primary" name="page" value="INFORMATION">Continue</button>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
@@ -56,26 +56,22 @@
     </form>
     <br>
     <br>
-    <p>
-    Alternatively, if you can't find your textbook, you can add it here.
+    <p>Alternatively, if you can't find your textbook, you can add it here.</p>
     <form action={{ url_for(".sell", state=state) }} method="post">
         {% for h in hidden %}
         <input type="hidden" name="{{ h[0] }}" value="{{ h[1] }}">
         {% endfor %}
         <input type="hidden" name="action" value="add-textbook">
-        <table style="margin-left: auto;margin-right: auto;">
-            <tr>
-                <td>Title:</td>
-                <td> <input type="text" name="textbook_title" maxlength="255" size="40"> </td>
-            </tr>
-            <tr>
-                <td>Author:</td>
-                <td> <input type="text" name="textbook_author" maxlength="255" size="40"> </td>
-            </tr>
-        </table>
-        <button type="submit" name="page" value="TEXTBOOK">Add textbook</button>
-        </form>
-    </p>
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" type="text" name="textbook_title" id="title" maxlength="255" style="width: 250px; margin-left: auto; margin-right: auto" />
+        </div>
+        <div class="form-group">
+            <label for="author">Author</label>
+            <input class="form-control" type="text" name="textbook_author" id="author" maxlength="255" style="width: 250px; margin-left: auto; margin-right: auto" />
+        </div>
+        <button class="btn btn-default" type="submit" name="page" value="TEXTBOOK">Add textbook</button>
+    </form>
 
 
 </div>

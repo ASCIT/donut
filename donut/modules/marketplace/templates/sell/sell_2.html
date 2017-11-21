@@ -1,107 +1,86 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block page %}
 {% include "topbar.html" %}
 
-<div class="text-center">
+<div class="col-md-4 col-md-offset-4" style="margin-bottom: 25px">
     <!-- SECTION 2 OF SELLING: INFO INPUT -->
-    {% if state == "new" %}
-    <h3>Create a new item</h3>
-    {% else %}
-    <h3>Modify an existing item</h3>
-    {% endif %}
-    <br>
-    <p>Please provide additional details about your item.</p>
-    <p style="color:#ff0000">* Required field.</p>
-    <div id="errors">
-        {% for error in errors %}
-            <p style="color:#ff0000">
-                {{ error }}
-            </p>
-        {% endfor %}
+    <div class="text-center">
+        {% if state == "new" %}
+        <h3>Create a new item</h3>
+        {% else %}
+        <h3>Modify an existing item</h3>
+        {% endif %}
+        <br>
+        <p>Please provide additional details about your item.</p>
+        <p style="color:#ff0000">* Required field.</p>
+        <div id="errors">
+            {% for error in errors %}
+                <p style="color:#ff0000">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
     </div>
-    <br>
-    <br>
     {% if state=='edit' %}
     <form action={{ url_for(".sell", state=state, item_id=request.args['item_id']) }} method='post'>
     {% else %}
     <form action={{ url_for(".sell", state=state) }} method='post'>
     {% endif %}
-        <table style="margin-left: auto;margin-right: auto;text-align:left">
-            <thead>
-                <tr style="hidden">
-                    <td style="width:90px"></td>
-                    <td style="width:400px"></td>
-                </tr>
-            </thead>
-            <tr>
-                <td>Category:</td>
-                <td>{{ cat_title }}</td>
-            </tr>
-            {% if cat_title == "Textbooks" %}
-                <tr>
-                    <td>Title:</td>
-                    <td> {{stored["textbook_title"]}} </td>
-                </tr>
-                <tr>
-                    <td>Author:</td>
-                    <td> {{stored["textbook_author"]}} </td>
-                </tr>
-                <tr>
-                    <td>Edition:</td>
-                    <td>
-                        <input type="text" name="textbook_edition" maxlength=20 value="{{stored['textbook_edition']}}">
-                    </td>
-                </tr>
-                <tr>
-                    <td>ISBN:</td>
-                    <td>
-                        <input type="text" name="textbook_isbn" maxlength=20 value="{{stored['textbook_isbn']}}">
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td>Title *:</td>
-                    <td>
-                        <input type="text" name="item_title" maxlength=240 size=50 value="{{stored['item_title']}}">
-                    </td>
-                </tr>
-            {% endif %}
+        <div class="form-group">
+            <label>Category</label>
+            <input class="form-control" disabled value="{{ cat_title }}" />
+        </div>
+        {% if cat_title == "Textbooks" %}
+            <div class="form-group">
+                <label>Title</label>
+                <input class="form-control" disabled value="{{ stored['textbook_title'] }}" />
+            </div>
+            <div class="form-group">
+                <label>Author</label>
+                <input class="form-control" disabled value="{{ stored['textbook_author'] }}" />
+            </div>
+            <div class="form-group">
+                <label for="edition">Edition</label>
+                <input class="form-control" name="textbook_edition" id="edition" maxlength="20" value="{{ stored['textbook_edition'] }}" />
+            </div>
+            <div class="form-group">
+                <label for="isbn">ISBN</label>
+                <input class="form-control" name="textbook_isbn" id="isbn" maxlength="20" value="{{ stored['textbook_isbn'] }}" />
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label class="required" for="title">Edition</label>
+                <input class="form-control" name="item_title" id="title" maxlength="240" value="{{ stored['item_title'] }}" />
+            </div>
+        {% endif %}
 
-            <tr>
-                <td>Condition *:</td>
-                <td>
-                    <select name="item_condition">
-                        {% for condition in ["", "New", "Very Good", "Good", "Acceptable", "Poor"] %}
-                            <option value="{{condition}}" {% if condition == stored["item_condition"] %} selected {% endif %}>
-                                {% if condition == "" %}
-                                    Choose one...
-                                {% else %}
-                                    {{condition}}
-                                {% endif %}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
+        <div class="form-group">
+            <label class="required" for="condition">Condition</label>
+            <select class="form-control" name="item_condition" id="condition">
+                {% for condition in ["", "New", "Very Good", "Good", "Acceptable", "Poor"] %}
+                    <option value="{{condition}}" {% if condition == stored["item_condition"] %} selected {% endif %}>
+                        {% if condition %}
+                            {{condition}}
+                        {% else %}
+                            Choose one...
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="required" for="price">Price</label>
+            <input class="form-control" name="item_price" id="price" maxlength="7" value="{{ stored['item_price'] }}" />
+        </div>
+        <div class="form-group">
+            <label for="details">Details</label>
+            <textarea class="form-control" name="item_details" id="details" maxlength="2000">{{ stored['item_details'] }}</textarea>
+        </div>
 
-            <tr>
-                <td>Price *:</td>
-                <td>
-                    <input type="text" name="item_price" maxlength=7 size=10 value="{{stored['item_price']}}">
-                </td>
-            </tr>
-
-            <tr>
-                <td>Details:</td>
-                <td>
-                    <textarea rows=6 cols=40 name="item_details" maxlength=2000>{{stored["item_details"]}}</textarea>
-                </td>
-            </tr>
-        </table>
-        <br>
-        <br>
-        <button name="page" value="CATEGORY">Back</button>
-        <button name="page" value="CONFIRMATION">Continue</button>
+        <div class="text-center">
+            <button class="btn btn-warning" name="page" value="CATEGORY">Back</button>
+            <button class="btn btn-primary" name="page" value="CONFIRMATION">Continue</button>
+        </div>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
@@ -109,6 +88,5 @@
         {% endfor %}
     </form>
 </div>
-<br>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block page %}
 {% include "topbar.html" %}
 
 <div class="text-center">
@@ -70,8 +70,9 @@
         </table>
         <br>
         <br>
-        <button name="page" value="INFORMATION">Back</button>
-        <button name="page" value="SUBMIT">Continue</button>
+
+        <button class="btn btn-danger" name="page" value="INFORMATION">Back</button>
+        <button class="btn btn-success" name="page" value="SUBMIT">Confirm</button>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}

@@ -9,6 +9,7 @@ body {
 }
 
 #footer {
+  margin-top: 25px;
   width: 100%;
   display: table;
   text-align: center;
@@ -19,10 +20,7 @@ body {
   padding: 15px;
 }
 
-.message {
-  background-color: #FFEB99;
-  border-right: 2px solid #eeeeee;
-  border-bottom: 2px solid #eeeeee;
-  margin-bottom: 15px;
-  padding: 10px;
+label.required:after {
+  content:"*";
+  color:red;
 }
