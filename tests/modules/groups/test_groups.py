@@ -9,8 +9,7 @@ from donut.modules.groups.routes import get_positions
 
 # Helpers
 def test_get_position_data(client):
-    test_list = ["Head", "Secretary"]
-    assert get_position_data() == test_list
+    assert get_position_data()[0]["user_id"] == 2
 
 # Test Routes
 def test_get_positions():

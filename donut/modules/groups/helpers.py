@@ -87,7 +87,7 @@ def get_group_data(group_id, fields=None):
 
 def get_position_data(fields=None):
     all_returnable_fields = ["group_id", "pos_id", "pos_name"]
-    default_fields = ["pos_name"]
+    default_fields = ["pos_name", "pos_id"]
 
     if fields is None:
         fields = default_fields
@@ -102,10 +102,25 @@ def get_position_data(fields=None):
     if result is None:
         return {}
     
-    res = []
+    res = {}
     for row in result:
-        res.append(row["pos_name"])
+        res[row["pos_id"]] = row["pos_name"]
     
-    print(res)
-    print(type(res))
-    return res
+
+    fields = ["user_id", "pos_id", "group_id"]
+    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("position_holders"))
+    result = flask.g.db.execute(s)
+    if result is None:
+        return {}
+
+    user_position_arr = []
+    for row in result:
+        position_holder = {}
+        position_holder["user_id"] = row["user_id"]
+        position_holder["pos_id"] = row["pos_id"]
+        position_holder["pos_name"] = res[row["pos_id"]]
+        position_holder["group_id"] = row["group_id"]
+        user_position_arr.append(position_holder)
+
+    
+    return user_position_arr
