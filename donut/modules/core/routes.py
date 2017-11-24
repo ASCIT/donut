@@ -38,4 +38,3 @@ def get_group_list_of_member(user_id):
        List all groups that a member is in  
     '''
     return json.dumps(helpers.get_group_list_of_member(user_id))
-  
