@@ -138,6 +138,7 @@ def validate_date(date, flash_errors=True):
         return False
     return True
 
+
 def validate_exists(form, param, flash_errors=True):
     """
     Validates that the specified parameter exists in the POST data
@@ -148,6 +149,7 @@ def validate_exists(form, param, flash_errors=True):
         return False
     return True
 
+
 def validate_in(value, values, flash_errors=True):
     """
     Validates that value is in the iterable values
@@ -157,6 +159,7 @@ def validate_in(value, values, flash_errors=True):
             flask.flash("'" + value + "' not in " + str(values))
         return False
     return True
+
 
 def validate_int(int_str, min=None, max=None, flash_errors=True):
     """
@@ -170,9 +173,11 @@ def validate_int(int_str, min=None, max=None, flash_errors=True):
             flask.flash("Not an integer: '" + int_str + "'")
         return False
 
-    if not ((min is None or min <= int_value) and (max is None or int_value <= max)):
+    if not ((min is None or min <= int_value) and
+            (max is None or int_value <= max)):
         if flash_errors:
-            flask.flash("Not between " + str(min) + " and " + str(max) + ": " + int_str)
+            flask.flash("Not between " + str(min) + " and " + str(max) + ": " +
+                        int_str)
         return False
 
     return True
