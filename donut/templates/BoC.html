@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="container">
+  <div id = 'BoC'>
+    <p><i>
+      "No member of the Caltech community shall take unfair advantage of any
+      other member of the Caltech community!"
+    </i></p>
+    <p>
+      The Board of Control (BoC) is a committee charged with hearing cases of
+      potential Honor System violations among undergraduates.
+      The committee membership is entirely undergraduate.
+      Decisions are reviewed by the Dean of Students.
+    </p>
+    <p>
+      Cases are organized by the BoC Chair and BoC Secretaries.
+      Each case is heard and decided by a board of seven BoC
+      representatives selected from the pool of current BoC representatives.
+      Former BoC representatives and current House presidents may sit be asked
+      to sit on cases if necessary.
+    </p>
+  </div>
+    <!-- Creating table for list of people on boc. -->
+    {% for member in BoC.members %}
+    <tr>
+        <td>{{ member.name }}</td>
+        <td>{{ member.position }}</td>
+    </tr>
+    {% endfor %}
+</div>
+{% endblock %}
+
