@@ -84,7 +84,6 @@ def get_group_data(group_id, fields=None):
     return result
 
 
-
 def get_position_data(fields=None):
     all_returnable_fields = ["group_id", "pos_id", "pos_name"]
     default_fields = ["user_id", "pos_id", "pos_name", "group_id"]
@@ -96,14 +95,14 @@ def get_position_data(fields=None):
             return "Invalid field"
 
     #s= sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("positions JOIN position_holders WHERE positions.pos_id = position_holders.pos_id"))
-    
-    
-    result = flask.g.db.execute("SELECT user_id, positions.pos_id, pos_name, positions.group_id \nFROM positions JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;")    
-    
+
+    result = flask.g.db.execute(
+        "SELECT user_id, positions.pos_id, pos_name, positions.group_id \nFROM positions JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;"
+    )
+
     if result is None:
         return {}
 
-    user_position_arr = [{f: t for f,t in zip(fields, row)} for row in result]
-    
-    return user_position_arr
+    user_position_arr = [{f: t for f, t in zip(fields, row)} for row in result]
 
+    return user_position_arr

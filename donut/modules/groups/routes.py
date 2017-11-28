@@ -18,9 +18,10 @@ def get_groups_list():
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
     return jsonify(helpers.get_group_list_data(fields=fields, attrs=attrs))
 
+
 @blueprint.route("/1/positions/")
 def get_positions():
-    return jsonify(result = helpers.get_position_data())
+    return jsonify(result=helpers.get_position_data())
 
 
 @blueprint.route("/1/groups/<int:group_id>/")
