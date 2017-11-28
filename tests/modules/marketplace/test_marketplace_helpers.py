@@ -74,6 +74,7 @@ def count_textbooks():
     result = list(flask.g.db.execute(query))
     return result[0][0]
 
+
 def test_add_textbook(client):
     num_textbooks_begin = count_textbooks()
     textbooks_added_successfully = 0
@@ -88,4 +89,5 @@ def test_add_textbook(client):
     assert add_textbook("title", "author") == False
 
     num_textbooks_end = count_textbooks()
-    assert (num_textbooks_end - num_textbooks_begin) == textbooks_added_successfully
+    assert (num_textbooks_end -
+            num_textbooks_begin) == textbooks_added_successfully
