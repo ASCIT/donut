@@ -1,3 +1,4 @@
+{% if "username" in session %}
 <form action={{ url_for(".book") }} method="POST">
 	<div class="form-group">
 		<label for="room" class="required">Room</label>
@@ -52,3 +53,6 @@
 	</div>
 	<button type="submit" class="btn btn-primary">Reserve</button>
 </form>
+{% else %}
+	<h2>Please log in to reserve a room</h2>
+{% endif %}
