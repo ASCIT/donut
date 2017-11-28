@@ -737,14 +737,39 @@ def validate_isbn(isbn):
         return False
 
     # now that we've done that we can remove them
-    isbn.replace("-", "")
+    isbn = isbn.replace("-", "")
 
     # regexes shamelessly copypasted
     # the ISBN-10 can have an x at the end (but the ISBN-13 can't)
     if re.match("^[0-9]{9}[0-9x]$", isbn, re.IGNORECASE) != None:
-        return True
+        # check the check digit
+        total = 0
+        for i in range(10):
+            char = isbn[i].lower()
+            digit = 10  # x has value 10
+            if char != 'x':
+                digit = int(char)
+            weight = 10 - i
+            total += digit * weight
+        if total % 11 == 0:
+            return True
+        else:
+            return False
+
     elif re.match("^[0-9]{13}$", isbn, re.IGNORECASE) != None:
-        return True
+        # check the check digit
+        total = 0
+        for i in range(13):
+            weight = 1
+            if i % 2 != 0:
+                weight = 3
+            digit = int(isbn[i])
+            total += digit * weight
+        if total % 10 == 0:
+            return True
+        else:
+            return False
+
     return False
 
 
@@ -796,9 +821,9 @@ def add_textbook(title, author):
         already exists)
     """
     # check if the textbook exists
-    query = sqlalchemy.sql.select("1").select_from("marketplace_textbooks")
-    query = query.where(sqlalchemy.text("textbook_title = :title"))
-    query = query.where(sqlalchemy.text("textbook_author = :author"))
+    query = sqlalchemy.sql.text("""SELECT textbook_title FROM
+            marketplace_textbooks WHERE textbook_title = :title AND
+            textbook_author = :author LIMIT 1""")
     result = list(flask.g.db.execute(query, title=title, author=author))
     if len(result) != 0:
         # the textbook already exists
