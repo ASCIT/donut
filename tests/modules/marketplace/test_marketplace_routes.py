@@ -60,35 +60,30 @@ def test_marketplace_sell(client):
         # as we can only dig into flask.request[] during the actual
         # request (see http://flask.pocoo.org/docs/0.12/testing/#keeping-the-context-around)
         rv = c.post(
-            flask.url_for('marketplace.sell'),
-            data=dict(page='CATEGORY'))
+            flask.url_for('marketplace.sell'), data=dict(page='CATEGORY'))
+        assert rv.status_code == 200
+        assert page_has_no_alerts(rv.data)
+
+        rv = c.post(
+            flask.url_for('marketplace.sell'), data=dict(page='TEXTBOOK'))
         assert rv.status_code == 200
         assert page_has_no_alerts(rv.data)
 
         rv = c.post(
             flask.url_for('marketplace.sell'),
-            data=dict(page='TEXTBOOK'))
+            data=dict(page='INFORMATION', cat_id=1))
         assert rv.status_code == 200
         assert page_has_no_alerts(rv.data)
 
         rv = c.post(
             flask.url_for('marketplace.sell'),
-            data=dict(page='INFORMATION',
-                      cat_id=1))
-        assert rv.status_code == 200
-        assert page_has_no_alerts(rv.data)
-
-        rv = c.post(
-            flask.url_for('marketplace.sell'),
-            data=dict(page='CONFIRMATION',
-                      cat_id=1))
+            data=dict(page='CONFIRMATION', cat_id=1))
         assert rv.status_code == 200
         assert not page_has_no_alerts(rv.data)
 
         rv = c.post(
             flask.url_for('marketplace.sell'),
-            data=dict(page='SUBMIT',
-                      cat_id=1))
+            data=dict(page='SUBMIT', cat_id=1))
         assert rv.status_code == 200
         assert not page_has_no_alerts(rv.data)
 
