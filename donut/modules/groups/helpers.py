@@ -87,7 +87,7 @@ def get_group_data(group_id, fields=None):
 
 def get_position_data(fields=None):
     all_returnable_fields = ["group_id", "pos_id", "pos_name"]
-    default_fields = ["pos_name", "pos_id"]
+    default_fields = ["user_id", "pos_id", "pos_name", "group_id"]
 
     if fields is None:
         fields = default_fields
@@ -95,32 +95,15 @@ def get_position_data(fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("positions"))
+    #s= sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("positions JOIN position_holders WHERE positions.pos_id = position_holders.pos_id"))
     
-    result = flask.g.db.execute(s)
-
-    if result is None:
-        return {}
     
-    res = {}
-    for row in result:
-        res[row["pos_id"]] = row["pos_name"]
+    result = flask.g.db.execute("SELECT user_id, positions.pos_id, pos_name, positions.group_id \nFROM positions JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;")    
     
-
-    fields = ["user_id", "pos_id", "group_id"]
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("position_holders"))
-    result = flask.g.db.execute(s)
     if result is None:
         return {}
 
-    user_position_arr = []
-    for row in result:
-        position_holder = {}
-        position_holder["user_id"] = row["user_id"]
-        position_holder["pos_id"] = row["pos_id"]
-        position_holder["pos_name"] = res[row["pos_id"]]
-        position_holder["group_id"] = row["group_id"]
-        user_position_arr.append(position_holder)
-
+    user_position_arr = [{f: t for f,t in zip(fields, row)} for row in result]
     
     return user_position_arr
+

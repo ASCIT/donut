@@ -20,7 +20,7 @@ def get_groups_list():
 
 @blueprint.route("/1/positions/")
 def get_positions():
-    return json.dumps(helpers.get_position_data())
+    return jsonify(result = helpers.get_position_data())
 
 
 @blueprint.route("/1/groups/<int:group_id>/")
