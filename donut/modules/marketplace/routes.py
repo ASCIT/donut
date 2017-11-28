@@ -19,7 +19,6 @@ def category():
     """Display all results in that category, with no query."""
 
     if "cat" not in flask.request.args:
-        print("testing")
         return flask.render_template('404.html'), 404
 
     category_id = flask.request.args["cat"]

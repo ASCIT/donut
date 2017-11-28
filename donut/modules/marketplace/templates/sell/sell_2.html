@@ -15,7 +15,7 @@
         <p style="color:#ff0000">* Required field.</p>
         <div id="errors">
             {% for error in errors %}
-                <p style="color:#ff0000">
+                <p style="color:#ff0000" id="error">
                     {{ error }}
                 </p>
             {% endfor %}
@@ -49,7 +49,7 @@
             </div>
         {% else %}
             <div class="form-group">
-                <label class="required" for="title">Edition</label>
+                <label class="required" for="title">Title</label>
                 <input class="form-control" name="item_title" id="title" maxlength="240" value="{{ stored['item_title'] }}" />
             </div>
         {% endif %}

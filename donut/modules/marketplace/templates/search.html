@@ -3,7 +3,7 @@
 {% include "topbar.html" %}
 
 <h4>
-    Found {{ datalist|length }} results.
+    Found {{ datalist|length }} result{% if datalist|length != 1 %}s{% endif %}.
 </h4>
 {% if datalist %}
     <div>
