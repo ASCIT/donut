@@ -20,12 +20,7 @@ def get_groups_list():
 
 
 @blueprint.route("/1/positions/")
-def get_positions():
-    temp = helpers.get_position_data()
-    print (temp[0]["group_id"] == 1)
-    print(temp[0]["pos_id"] == 2)
-    print (temp[0]["pos_name"] == "Secretary")
-    print (temp[0]["user_id"] == 2)
+def get_position():
     return jsonify(helpers.get_position_data())
 
 

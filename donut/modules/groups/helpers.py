@@ -101,8 +101,10 @@ def get_position_data(fields=None):
         elif (field != "pos_id"):
             field_string += ", " + field
 
-    
-    result = flask.g.db.execute("SELECT " + field_string + "\nFROM positions NATURAL JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;")
+    result = flask.g.db.execute(
+        "SELECT " + field_string +
+        "\nFROM positions NATURAL JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;"
+    )
 
     if result is None:
         return {}
