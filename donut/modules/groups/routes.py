@@ -20,7 +20,7 @@ def get_groups_list():
 
 
 @blueprint.route("/1/positions/")
-def get_position():
+def get_positions():
     return jsonify(helpers.get_position_data())
 
 
