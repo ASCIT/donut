@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+	<form action={{ url_for(".all_reservations") }}>
+		<div class="form-group">
+			<label for="rooms">Rooms</label>
+			<select id="rooms" name="rooms" class="form-control" multiple>
+				{% for room in rooms %}
+					<option value={{ room["id"] }} selected>
+						{{ room["name"] }}
+					</option>
+				<option value={{ room["id"] + 1 }}>
+					{{ room["name"] + "2" }}
+				</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="start" class="required">Start</label>
+			<input type="date" class="form-control" name="start" id="start" required />
+		</div>
+		<div class="form-group">
+			<label for="start" class="required">End</label>
+			<input type="date" class="form-control" name="end" id="end" required />
+		</div>
+		<button type="submit" class="btn btn-primary">Show reservations</button>
+	</form>
+{% endblock %}

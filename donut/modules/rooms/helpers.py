@@ -33,3 +33,14 @@ def add_reservation(room, username, reason, start, end):
         reason=reason,
         start=start,
         end=end)
+
+def render_reservations(rooms, start, end):
+    query = sqlalchemy.text("""
+        SELECT room_reservations.id, location, start_time, end_time
+        FROM room_reservations LEFT OUTER JOIN rooms
+        WHERE room_reservations.room_id = rooms.id
+        AND end_time >= :start AND start_time >= :end
+    """)
+    reservations = flask.g.db.execute(query, start=start, end=end)
+    print(reservations)
+    return flask.render_template("all-iframe.html", rooms=get_rooms(), start=start, end=end)

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import flask
 
 from . import blueprint, helpers
@@ -6,7 +6,7 @@ from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
 
 AM_OR_PM = set(["A", "P"])
-
+YYYY_MM_DD = '%Y-%m-%d'
 
 @blueprint.route("/reserve")
 def rooms_home():
@@ -39,7 +39,6 @@ def book():
         and validate_in(form["end_period"], AM_OR_PM),
         validate_exists(form, "reason")
     ]
-
     if not all(validations):
         # TODO: Should include old parameters in form here
         return flask.render_template(
@@ -61,7 +60,7 @@ def book():
             "reservations.html", rooms=helpers.get_rooms())
 
     room = int(form["room"])
-    day = datetime.strptime(form["date"], '%Y-%m-%d')
+    day = datetime.strptime(form["date"], YYYY_MM_DD)
     start = datetime(day.year, day.month, day.day, start_hour, start_minute)
     end = datetime(day.year, day.month, day.day, end_hour, end_minute)
     reason = form["reason"] or None
@@ -70,3 +69,22 @@ def book():
                             end)
 
     return flask.render_template("reservation_success.html")
+
+@blueprint.route("/all-reservations")
+def all_reservations():
+    now = datetime.now()
+    next_week = now + timedelta(days=7)
+
+    args = flask.request.args
+    rooms = args.getlist("rooms")
+    validations = [
+        all(map(validate_int, rooms)),
+        "start" not in args or validate_date(args["start"]),
+        "end" not in args or validate_date(args["end"])
+    ]
+    if not all(validations):
+        return helpers.render_reservations([], now, next_week)
+
+    start = datetime.strptime(args.get("start", now.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
+    end = datetime.strptime(args.get("end", next_week.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
+    return helpers.render_reservations(map(int, rooms), start, end)
