@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block page %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/groups/groups.css')}}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/groups/positions.js') }}"></script>
+<div class="container" style="background-color: #eee">
+    <div id="page-header">
+        <h1 id="pagetitle" > The Ascit Position Service </h1>
+    </div>
+    <div class="input-group">
+        <select class="form-control" id="groupSelect" onchange="filterChange()">
+            <option>All Groups</option>
+        </select>
+        <select class="form-control" id="positionSelect" onchange="filterChange()">
+            <option>All Positions</option>
+        </select>
+    </div>
+        <table id="positionsTable">
+            <thead>
+                <tr>
+                    <td width=25%><strong>Group</strong></td>
+                    <td width=20%><strong>Position</strong></td>
+                    <td width=25%><strong>Student</strong></td>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+</div>
+<script>
+getGroupList();
+</script>
+{% endblock %}
