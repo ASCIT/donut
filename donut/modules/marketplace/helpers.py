@@ -231,7 +231,7 @@ def get_table_list_data(tables, fields=None, attrs={}):
     Arguments:
         tables: The tables to query.  If it's only one, it can be just a string,
                 but if it's more than one, it can be in a list, whereupon they will
-                be <method>ed in order to query all of them at the same time.
+                be NATURAL LEFT JOINed in order to query all of them at the same time.
         fields: The fields to return. If None specified, then default_fields
                 are used.
         attrs:  The attributes of the members to filter for.

@@ -1,14 +1,21 @@
 from donut.testing.fixtures import client
 from donut import app
 from donut.modules.marketplace.helpers import (
-    get_category_name_from_id, get_table_columns, get_matches, tokenize_query,
-    validate_isbn, process_edition, add_textbook)
+    get_category_name_from_id, get_name_from_user_id, get_table_columns,
+    get_table_list_data, get_matches, tokenize_query, validate_isbn,
+    process_edition, add_textbook)
 import sqlalchemy, flask
+from decimal import Decimal
 
 
 def test_get_category_name_from_id(client):
     cat_name = get_category_name_from_id(1)
     assert cat_name == 'Furniture'
+
+
+def test_get_name_from_user_id(client):
+    full_name = get_name_from_user_id(1)
+    assert full_name == 'David Qu'
 
 
 def test_get_table_columns(client):
@@ -23,6 +30,26 @@ def test_get_table_columns(client):
         'item_price', 'item_timestamp', 'item_active', 'textbook_id',
         'textbook_edition', 'textbook_isbn'
     ]
+
+
+def test_get_table_list_data(client):
+    table = 'marketplace_categories'
+    attrs = {'cat_title': 'Furniture'}
+    result = get_table_list_data(table, attrs=attrs)
+    assert len(result) == 1  # only one result
+
+    table = 'marketplace_items'
+    fields = ['item_price', 'item_title']
+    attrs = {'cat_id': 1}
+    result = get_table_list_data(table, fields=fields, attrs=attrs)
+    assert len(result) == 1  # only one result
+    assert len(result[0]) == 2  # result has two fields
+    assert result[0] == [Decimal('5.99'), 'A table']
+
+    tables = ['marketplace_items']
+    old_result = result
+    result = get_table_list_data(table, fields=fields, attrs=attrs)
+    assert old_result == result
 
 
 def test_get_matches(client):
