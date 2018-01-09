@@ -61,7 +61,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     cats2d = [[]]
     width = ""
     if num_cols == 0:
-        return flask.render_template('404.html')
+        return flask.render_template('404.html'), 404
 
     # if there's nothing in categories, just return default values for cats2d and width
     num_rows = ceil(num_cats / num_cols)

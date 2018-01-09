@@ -2,6 +2,7 @@ import flask
 import json
 
 from donut.modules.marketplace import blueprint, helpers
+from donut.auth_utils import get_user_id
 
 
 @blueprint.route('/marketplace')
@@ -154,6 +155,11 @@ def view_item():
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
+    if 'username' not in flask.session:
+        # they're not logged in, kick them out
+        flask.session['next'] = flask.url_for('.sell')
+        return helpers.render_with_top_marketplace_bar('requires_login.html')
+
     from donut.modules.marketplace.constants import Page
 
     # if the data or the page in general has errors, we don't let the user continue to the next page
@@ -433,8 +439,8 @@ def sell():
             if field in flask.request.form:
                 stored[field] = flask.request.form[field]
 
-        stored[
-            "user_id"] = 1  # TODO: once logins and that sort of stuff works, get the actual user id
+        stored["user_id"] = get_user_id(flask.session['username'])
+
         # if we are creating a new item listing, insert it into the database.
         # otherwise, if we are editing an item that already exists, we need
         # to update the listing.
