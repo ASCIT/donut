@@ -25,11 +25,18 @@ def FAQ():
 
 @blueprint.route('/BoC/reporters')
 def reporters():
-    """Display Boc FAQ page."""
+    """Display Boc reporters page."""
     return flask.render_template('BoC.reporters.html')
+
+@blueprint.route('/BoC/bylaws')
+def bylaws():
+    """Display Boc bylaws  page."""
+    return flask.render_template('BoC.bylaws.html')
 
 @blueprint.route('/CRC')
 def CRC():
     """Display CRC page."""
     return flask.render_template('CRC.html', CRC = helpers.get_CRC_member())
+
+
 
