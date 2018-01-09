@@ -1,3 +1,5 @@
+from datetime import timedelta
+from itertools import groupby
 import flask
 import sqlalchemy
 
@@ -22,9 +24,9 @@ def is_room(room_id_string):
 def add_reservation(room, username, reason, start, end):
     # TODO: Check that there are no overlapping reservations
     insertion = sqlalchemy.text("""
-    INSERT INTO room_reservations
-    (room_id, user_id, reason, start_time, end_time)
-    VALUES (:room, :user, :reason, :start, :end)
+        INSERT INTO room_reservations
+        (room_id, user_id, reason, start_time, end_time)
+        VALUES (:room, :user, :reason, :start, :end)
     """)
     flask.g.db.execute(
         insertion,
@@ -34,13 +36,40 @@ def add_reservation(room, username, reason, start, end):
         start=start,
         end=end)
 
+
 def render_reservations(rooms, start, end):
+    if not rooms:
+        rooms = [room["id"] for room in get_rooms()]
     query = sqlalchemy.text("""
-        SELECT room_reservations.id, location, start_time, end_time
-        FROM room_reservations LEFT OUTER JOIN rooms
-        WHERE room_reservations.room_id = rooms.id
-        AND end_time >= :start AND start_time >= :end
+        SELECT reservation.id, location, start_time, end_time
+        FROM room_reservations AS reservation LEFT OUTER JOIN rooms AS room
+        ON reservation.room_id = room.id
+        WHERE :start <= end_time AND start_time <= :end
+        AND room.id IN (""" + ",".join(map(str, rooms)) + """)
+        ORDER BY start_time
     """)
-    reservations = flask.g.db.execute(query, start=start, end=end)
-    print(reservations)
-    return flask.render_template("all-iframe.html", rooms=get_rooms(), start=start, end=end)
+    reservations = flask.g.db.execute(
+        query,
+        start=start,
+        end=end + timedelta(days=1),  # until start of following day
+        rooms=rooms)
+    reservations = [{
+        "id": id,
+        "room": room,
+        "start": start,
+        "end": end
+    } for id, room, start, end in reservations]
+    day_reservations = [
+        {
+            "day": day,
+            "reservations": list(day_rooms)
+        }
+        for day, day_rooms in groupby(
+            reservations, lambda reservation: reservation["start"].date())
+    ]
+    return flask.render_template(
+        "all-iframe.html",
+        rooms=get_rooms(),
+        start=start,
+        end=end,
+        reservations=day_reservations)

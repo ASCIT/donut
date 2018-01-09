@@ -8,6 +8,7 @@ from donut.validation_utils import (validate_date, validate_exists,
 AM_OR_PM = set(["A", "P"])
 YYYY_MM_DD = '%Y-%m-%d'
 
+
 @blueprint.route("/reserve")
 def rooms_home():
     """Displays room reservation homepage"""
@@ -70,6 +71,7 @@ def book():
 
     return flask.render_template("reservation_success.html")
 
+
 @blueprint.route("/all-reservations")
 def all_reservations():
     now = datetime.now()
@@ -78,13 +80,15 @@ def all_reservations():
     args = flask.request.args
     rooms = args.getlist("rooms")
     validations = [
-        all(map(validate_int, rooms)),
-        "start" not in args or validate_date(args["start"]),
-        "end" not in args or validate_date(args["end"])
+        all(map(validate_int, rooms)), "start" not in args
+        or validate_date(args["start"]), "end" not in args
+        or validate_date(args["end"])
     ]
     if not all(validations):
         return helpers.render_reservations([], now, next_week)
 
-    start = datetime.strptime(args.get("start", now.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
-    end = datetime.strptime(args.get("end", next_week.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
-    return helpers.render_reservations(map(int, rooms), start, end)
+    start = datetime.strptime(
+        args.get("start", now.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
+    end = datetime.strptime(
+        args.get("end", next_week.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
+    return helpers.render_reservations(list(map(int, rooms)), start, end)
