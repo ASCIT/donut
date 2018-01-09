@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+	<button class="btn btn-info" onclick="history.back()">
+		&lt; Back
+	</button>
+	<div class="panel panel-default" style="position:relative;top:15px">
+		<div class="panel-heading">
+			<b>Reservation Details</b>
+		</div>
+		<div class="panel-body">
+			<p>Room: {{ reservation["title"] }} ({{ reservation["location"] }})</p>
+			<p>Held by: {{ reservation["name"] }}</p>
+			<p>From: {{ reservation["start"].strftime("%A, %B %d, %Y at %I:%M %p") }}</p>
+			<p>To: {{ reservation["end"].strftime("%A, %B %d, %Y at %I:%M %p") }}</p>
+			<p>
+				Activity:
+				{% if reservation["reason"] %} {{ reservation["reason"] }}
+				{% else %} N/A
+				{% endif %}
+			</p>
+		</div>
+	</div>
+{% endblock %}

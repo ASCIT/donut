@@ -73,3 +73,16 @@ def render_reservations(rooms, start, end):
         start=start,
         end=end,
         reservations=day_reservations)
+
+def get_reservation(id):
+    query = sqlalchemy.text("""
+        SELECT location, title, full_name, start_time, end_time, reason
+        FROM room_reservations AS reservation
+            LEFT OUTER JOIN members_full_name as member
+            ON reservation.user_id = member.user_id
+            LEFT OUTER JOIN rooms AS room
+            ON reservation.room_id = room_id
+        WHERE reservation.id = :id
+    """)
+    location, title, name, start, end, reason = flask.g.db.execute(query, id=id).fetchone()
+    return {"location": location, "title": title, "name": name, "start": start, "end": end, "reason": reason}
