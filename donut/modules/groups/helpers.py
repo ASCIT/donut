@@ -82,3 +82,22 @@ def get_group_data(group_id, fields=None):
     # Return the row in the form of a dict
     result = {f: t for f, t in zip(fields, result)}
     return result
+
+
+def add_position(group_id, pos_id, pos_name):
+    """
+    Adds the input position to the group_positions database.
+
+    Arguments:
+        group_id: The id of the group to which the position will be added.
+        pos_name: The name of the position to add.
+    """
+    fields = ["group_id", "pos_id", "pos_name"]
+    s = pos_table.select(fields).select_from(sqlalchemy.text("positions"))
+    s = s.where(sqlalchemy.text("group_id = :g"))
+
+    pos_table = flask.g.db.execute(s, g=group_id)
+    
+    u = sqlalchemy.sql.update(pos_table)
+    u = u.values({"pos_id": pos_id, "pos_name": pos_name})
+    flask.g.db.execute(u)
