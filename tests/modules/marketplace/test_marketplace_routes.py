@@ -56,9 +56,13 @@ def test_marketplace_sell(client):
     assert page_has_no_alerts(rv.data)
 
     with client as c:
+        with c.session_transaction() as sess:
+            sess['username'] = 'username'
+
         # this with block is necessary to keep the client around,
         # as we can only dig into flask.request[] during the actual
         # request (see http://flask.pocoo.org/docs/0.12/testing/#keeping-the-context-around)
+
         rv = c.post(
             flask.url_for('marketplace.sell'), data=dict(page='CATEGORY'))
         assert rv.status_code == 200
@@ -86,5 +90,3 @@ def test_marketplace_sell(client):
             data=dict(page='SUBMIT', cat_id=1))
         assert rv.status_code == 200
         assert not page_has_no_alerts(rv.data)
-
-        # next time: look at postman errors and fix .html files
