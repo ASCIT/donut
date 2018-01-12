@@ -1,7 +1,6 @@
 import flask
 import json
 from flask import jsonify
-from flask import request
 
 from donut.modules.groups import blueprint, helpers
 
@@ -17,7 +16,13 @@ def get_groups_list():
     fields = None
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
-    return jsonify(helpers.get_group_list_data(fields=fields, attrs=attrs))
+    return json.dumps(helpers.get_group_list_data(fields=fields, attrs=attrs))
+
+
+@blueprint.route("/1/groups/<int:group_id>/positions/")
+def get_group_positions(group_id):
+    """GET /1/groups/<int:group_id>/positions/"""
+    return jsonify(helpers.get_group_positions(group_id))
 
 
 @blueprint.route("/1/groups/<int:group_id>/")
@@ -26,10 +31,7 @@ def get_groups(group_id):
     return jsonify(helpers.get_group_data(group_id))
 
 
-@blueprint.route("/1/positions/<int:group_id>/", methods=['GET', 'POST'])
-def positions_request(group_id):
-    """POST /1/positions/<int:group_id>/"""
-    if request.method == "POST":
-        add_position(group_id, request.form["pos_id"], request.form["pos_name"])
-
-
+@blueprint.route("/1/groups/<int:group_id>/members/")
+def get_group_members(group_id):
+    """GET /1/groups/<int:group_id>/"""
+    return jsonify(helpers.get_members_by_group(group_id))
