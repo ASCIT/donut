@@ -68,3 +68,7 @@ def get_groups(client):
 
 def test_get_group_members(client):
     assert routes.get_group_members(1) is not None
+
+
+def test_get_pos_holders(client):
+    assert routes.get_pos_holders(1) is not None
