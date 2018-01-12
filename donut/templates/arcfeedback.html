@@ -6,7 +6,46 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
-        <p>Hello, world!<p>
+        <p>This is the ARC anonymous course feedback form.</p>
+	
+	<p>Do feel free to send us
+  comments about anything ARC-related -- such as problems with TAs,
+  professors or courses, particularly good instructors or clear course
+  policies, ideas for what the ARC should be doing, or just
+  about anything else (in fact, we'd be interested to know what at
+  Caltech does not have some relation to academics or research). </p>
+
+	<p>Fill in your name and email address if you are willing to have the ARC contact
+  you with follow up questions; this will obviously make your comment
+  non-anonymous, but we do promise to keep comments strictly
+  confidential. </p>
+
+	<p>After you submit your feedback, you'll be given a URL
+  where you can follow up on what the ARC is doing in response.</p>
+	
+	<form method="POST" action="">
+	  <input type="hidden" name="state" value="report" />
+	  <table id="feedback">
+	    <tr>
+	      <td class="feedback">Name:</td>
+	      <td class="feedback"><input size="40" type="text" name="name" value="" /></td>
+	    </tr>
+	    <tr>
+	      <td class="feedback">Reply Email:</td>
+	      <td class="feedback"><input size="40" type="text" name="email" value="" /></td>
+	    </tr>
+	    <tr>
+	      <td class="feedback">Class:</td>
+	      <td class="feedback"><input size="40" type="text" name="class" value="" /></td>
+	    </tr>
+	    <tr>
+	      <td class="feedback">Feedback:</td>
+	      <td class="feedback"><textarea name="msg" rows="10" cols="40"></textarea></td>
+	    </tr>
+	  </table>
+	  <input type="submit" value="Submit" />
+	  <input type="reset" value="Reset" />
+	</form>
     </div>
 
 </div>
