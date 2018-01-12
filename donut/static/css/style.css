@@ -1,7 +1,83 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
 
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  padding-top: 3%;
+  font-family: 'Open Sans', 'sans-serif';
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+.container {
+  width: 90%;
+}
+
+.jumbotron {
+  background-color: #FFF;
+  text-align: justify;
+  padding-top: 30px;
+}
+
+.jumbotron form input {
+  padding: 0.5%;
+  margin-top: 1%;
+  border: 1px #333 solid;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.navbar {
+  border-top: 5px orange solid;
+}
+
+#content {
+  width: 100%;
+}
+
+#header {
+  margin-bottom: 50px;
+}
+
+#footer {
+  width: 100%;
+  text-align: center;
+  background-color: orange;
+  position: absolute;
+  z-index: 9999;
+  bottom: 0;
+}
+
+#copyright {
+  padding: 15px;
+}
+
+.message {
+  background-color: #FFEB99;
+  border-right: 2px solid #eeeeee;
+  border-bottom: 2px solid #eeeeee;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
 @media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
 
+  h2 {
+    font-size: 5vw;
+  }
+  
   .caret {
     display: none;
   }
@@ -84,69 +160,14 @@
     width: 100%;
   }
 
+  #footer {
+    position: fixed;
+    bottom: 0; 
+  }
+
   #copyright {
     font-size: 1vh;
     text-align: left;
-    color: 
   }
-}
-
-html {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  padding-top: 3%;
-  font-family: 'Open Sans', 'sans-serif';
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-}
-
-.container {
-  width: 90%;
-}
-
-.jumbotron {
-  background-color: #FFF;
-  text-align: justify;
-  padding-top: 30px;
-}
-
-.jumbotron form input {
-  padding: 0.5%;
-  margin-top: 1%;
-  border: 1px #222 solid;
-  border-radius: 5px;
-}
-
-#content {
-  width: 100%;
-}
-
-#header {
-  margin-bottom: 50px;
-}
-
-#footer {
-  width: 100%;
-  text-align: center;
-  background-color: orange;
-  position: fixed;
-  z-index: 9999;
-  bottom: 0;
-}
-
-#copyright {
-  padding: 15px;
-}
-
-.message {
-  background-color: #FFEB99;
-  border-right: 2px solid #eeeeee;
-  border-bottom: 2px solid #eeeeee;
-  margin-bottom: 15px;
-  padding: 10px;
 }
 
