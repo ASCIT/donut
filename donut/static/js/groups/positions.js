@@ -1,6 +1,6 @@
 var groupDict = {}; // Dict of groups
 var positionsDict = {}; // Dict of different types of positions
-var allPositions = []; // Complete list of all position-group pairs
+var allPositions = []; // Complete list of all position-group-person pairs
 var counter = 0;
 
 /*
@@ -45,15 +45,32 @@ function collectPositionFromGroup(group) {
                 $('#positionSelect option:last').after(newOption);
                 counter++;
             }
+        }
+    });
+}
+
+/*
+ * This function takes in a position id, group id, pos name, looks up all
+ * students associated with the position and adds each student as a row
+ * to the table
+ */
+function collectStudentsFromPosition(pos_id, group_id, pos_nam) {
+    $.getJSON('/1/positions/'+pos_id, function(people){
+        for (var i = 0; i < people.length; i++) {
+            var firstName = people[i].first_name;
+            var lastName = people[i].last_name;
+            var name = firstName + ' ' + lastName;
+            var userId = people[i].user_id;
             var text = '{ "groupId":' + group.group_id + ',' +
-                                   '"positionName":"' + positions[j].pos_name + '",' +
-                                   '"student":' + '"David Qu"}';
+                        '"positionName":"' + positions[j].pos_name + '",' +
+                        '"studentName":"' + name +'",' +
+                        '"studentId":' + userId + '}';
             var json = JSON.parse(text);
             allPositions.push(json);
             addRowToTable(json);
+     
         }
     });
-
 }
 
 /*
@@ -66,7 +83,7 @@ function addRowToTable(pos) {
                             + groupDict[pos.groupId] + '</a> </td>'
            + '<td> <a onclick=changePosition(' + positionsDict[pos.positionName] + ')>' 
                             + pos.positionName + '</a> </td>'
-           + '<td>' + pos.student + '</td>' 
+           + '<td>' + pos.studentName + '</td>' 
                 + '</tr>';
     $('#positionsTable tbody').append(newRow);
 }
