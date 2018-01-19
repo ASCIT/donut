@@ -2,7 +2,8 @@ import flask
 import json
 
 from donut.modules.marketplace import blueprint, helpers
-from donut.auth_utils import get_user_id
+from donut.auth_utils import get_user_id, check_permission
+from donut.resources import Permissions
 
 
 @blueprint.route('/marketplace')
@@ -228,12 +229,25 @@ def sell():
                 for i in range(len(data)):
                     stored[stored_fields[i]] = data[i]
 
+            # make sure the current user is the one who posted the item
+            current_user_id = get_user_id(flask.session['username'])
+            if stored['user_id'] != current_user_id and not check_permission(
+                    Permissions.ADMIN):
+                if flask.request.referrer == None:
+                    # there's no previous page? that's weird, just go home
+                    return flask.redirect(flask.url_for('home'))
+                else:
+                    flask.flash(
+                        'You do not have permission to edit this item.')
+                    return flask.redirect(
+                        flask.request.referrer)  # go back to the previous page
+
     # prev_page is used for the back button
     prev_page = page
-    if "prev_page" in flask.request.form:
+    if 'prev_page' in flask.request.form:
         # make sure flask.request.form["prev_page"] is an int, and that it's a valid page to go to (i.e. in the enum)
         try:
-            prev_page = Page(int(flask.request.form["prev_page"]))
+            prev_page = Page(int(flask.request.form['prev_page']))
         except ValueError:
             flask.flash('Invalid page')
             has_errors = True
