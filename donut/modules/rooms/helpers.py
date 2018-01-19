@@ -135,3 +135,17 @@ def get_reservation(id):
         "reason": reason,
         "username": username
     }
+
+
+def delete_reservation(id):
+    if "username" not in flask.session:
+        raise "Not logged in"
+
+    query = sqlalchemy.text("""
+        DELETE FROM room_reservations
+        WHERE id = :id
+        AND user_id IN (
+            SELECT user_id FROM users WHERE username = :username
+        )
+    """)
+    flask.g.db.execute(query, id=id, username=flask.session["username"])

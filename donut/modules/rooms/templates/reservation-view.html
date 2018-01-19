@@ -33,20 +33,22 @@
 	<script>
 		$(document).ready(function() {
 			$("button#delete").click(function() {
+				var $this = $(this).blur()
 				if (!confirm("Do you want to delete this reservation?")) return
 
-				var $this = $(this)
-					.blur()
+				$this
 					.text("Deleting...")
 					.removeClass("btn-danger")
 					.addClass("btn-disabled")
 					.blur()
 				$.ajax({
-					url: "/delete-reservation" +
+					url: "/reservation" +
 						location.pathname.substring(location.pathname.lastIndexOf("/")),
+					method: "DELETE",
 					success: function() {
 						$this.text("Deleted")
-						setTimeout($this.remove.bind($this), 2000)
+						setTimeout($this.remove.bind($this), 1000)
+						localStorage.setItem("deleted", true)
 					},
 					error: function() {
 						$this.text("Failed to delete")

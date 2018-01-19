@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block navbar %}{% endblock %}
+{% block content %}
 	{% if reservations["upcoming"] %}
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -49,4 +50,13 @@
 	{% if not (reservations["past"] or reservations["upcoming"]) %}
 		No reservations found
 	{% endif %}
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		if (localStorage.getItem("deleted")) {
+			localStorage.removeItem("deleted")
+			location.reload()
+		}
+	</script>
 {% endblock %}

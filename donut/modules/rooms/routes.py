@@ -108,9 +108,15 @@ def all_reservations():
         reservations=reservations)
 
 
-@blueprint.route("/reservation/<int:id>")
+@blueprint.route("/reservation/<int:id>", methods=["GET"])
 def view_reservation(id):
     return flask.render_template(
         "reservation-view.html",
         reservation=helpers.get_reservation(id),
         now=datetime.now())
+
+
+@blueprint.route("/reservation/<int:id>", methods=["DELETE"])
+def delete_reservation(id):
+    helpers.delete_reservation(id)
+    return flask.jsonify({"success": True})
