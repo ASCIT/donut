@@ -63,6 +63,7 @@ def get_group_positions(group_id):
         for field, value in zip(group_position_fields, position)
     } for position in positions]
 
+
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.
