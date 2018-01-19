@@ -16,6 +16,7 @@ from donut.modules import auth
 from donut.modules import marketplace
 from donut.modules import core
 from donut.modules import groups
+from donut.modules import arcfeedback
 
 app = flask.Flask(__name__)
 
@@ -25,7 +26,7 @@ app.register_blueprint(auth.blueprint)
 app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
 app.register_blueprint(groups.blueprint)
-
+app.register_blueprint(arcfeedback.blueprint)
 
 def init(environment_name):
     """Initializes the application with configuration variables and routes.

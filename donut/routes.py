@@ -12,6 +12,3 @@ def contact():
     return flask.render_template('contact.html')
 
 
-@app.route('/arcfeedback')
-def arcfeedback():
-    return flask.render_template('arcfeedback.html')
