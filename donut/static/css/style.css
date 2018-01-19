@@ -21,6 +21,26 @@ body {
   position: relative;
 }
 
+a:hover {
+  transition-duration: 0.5s;
+  opacity: 1;
+}
+
+a {
+  transition-duration: 0.5s;
+  opacity: 0.9;
+}
+
+button:hover {
+  transition-duration: 0.5s;
+  opacity: 1;
+}
+
+button {
+  transition-duration: 0.5s;
+  opacity: 0.9;
+}
+
 .container {
   width: 90%;
 }
