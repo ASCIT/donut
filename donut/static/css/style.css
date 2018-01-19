@@ -1,7 +1,70 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  padding-top: 65px;
-  background-size: cover;
-  padding: 20px;
+  padding-top: 3%;
+  font-family: 'Open Sans', 'sans-serif';
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+a:hover {
+  transition-duration: 0.5s;
+  opacity: 1;
+}
+
+a {
+  transition-duration: 0.5s;
+  opacity: 0.9;
+}
+
+button:hover {
+  transition-duration: 0.5s;
+  opacity: 1;
+}
+
+button {
+  transition-duration: 0.5s;
+  opacity: 0.9;
+}
+
+.container {
+  width: 90%;
+}
+
+.jumbotron {
+  background-color: #FFF;
+  text-align: justify;
+  padding-top: 30px;
+}
+
+.jumbotron form input {
+  padding: 0.5%;
+  margin-top: 1%;
+  border: 1px #333 solid;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.navbar {
+  border-top: 5px orange solid;
+}
+
+#content {
+  width: 100%;
 }
 
 #header {
@@ -9,20 +72,120 @@ body {
 }
 
 #footer {
+  margin-top: 25px;
   width: 100%;
-  display: table;
   text-align: center;
   background-color: orange;
+  position: absolute;
+  z-index: 9999;
+  bottom: 0;
 }
 
 #copyright {
   padding: 15px;
 }
 
-.message {
-  background-color: #FFEB99;
-  border-right: 2px solid #eeeeee;
-  border-bottom: 2px solid #eeeeee;
-  margin-bottom: 15px;
-  padding: 10px;
+label.required:after {
+  content:"*";
+  color:red;
 }
+
+@media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
+
+  h2 {
+    font-size: 5vw;
+  }
+  
+  .caret {
+    display: none;
+  }
+
+  .jumbotron button {
+    font-size: 2vh;
+  }
+
+  .jumbotron img {
+    padding-bottom: 5%;
+    width: 80%;
+  }
+
+  .jumbotron p {
+    font-size: 2vh;
+  }
+
+  .jumbotron form {
+    margin-top: 10%;
+    font-size: 2vh;
+  }
+
+  .jumbotron form input {
+    padding: 1%;
+    margin-top: 5%;
+    border: 1px #222 solid;
+    border-radius: 5px;
+  }
+
+  .jumbotron {
+    position: absolute;
+    width: 70%;
+    right: 0;
+    top: 0;
+  }
+
+  .navbar {
+    width: 30%;
+    height: 100%;
+  }
+
+  .navbar-brand {
+    font-size: 2vh;
+    margin-top: 20%;
+    margin-bottom: 20%;
+  }
+
+  .message {
+    width: 70%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 9999;
+    font-size: 2vh;
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+  }
+
+  #navbar button {
+    font-size: 2vh;
+    position: absolute;
+    left: 7%;
+  }
+
+  #navbar li a {
+    line-height: 3.5vh;
+  }
+
+  #navbar li {
+    width: 100%;
+    margin-bottom: 10%;
+    margin-top: 5%;
+    font-size: 2vh;
+  }
+
+  #content {
+    width: 100%;
+  }
+
+  #footer {
+    position: fixed;
+    bottom: 0; 
+  }
+
+  #copyright {
+    font-size: 1vh;
+    text-align: left;
+  }
+}
+

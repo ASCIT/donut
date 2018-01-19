@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Donut</title>
+        <title>Donut</title> 
         
-        <link rel="stylesheet" type="text/css" 
-              href="{{ url_for('static', filename='css/style.css') }}" />
         {# Google Fonts #}
         <link href='https://fonts.googleapis.com/css?family=EB+Garamond|Roboto' rel='stylesheet' type='text/css'>
 
@@ -12,8 +10,10 @@
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
         {# Bootstrap theme #}
 
+	<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+
         {# Just for debugging purposes. Don't actually copy this line! #}
-        {# [if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif] #}
+        {# [if lt IE 9]><script src="../../docs-assets/js/ie8-respnsive-file-warning.js"></script><![endif] #}
 
         {# HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries #}
         <!-- [if lt IE 9]>
@@ -34,11 +34,12 @@
                     {% endfor %}
                     {% endif %}
                     {% endwith %}
-                    {% block body %}
-                    {% endblock body %}
+                    {% block page %}
+                    {% endblock page %}
                 </div>
             </div>
-            {% include "includes/footer.html" %}
+	    {% include "includes/footer.html" %}
+
             {# Bootstrap core JavaScript
             {# Placed at the end of the document so the pages load faster #}
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>

@@ -1,4 +1,5 @@
 import flask
+from flask_bootstrap import Bootstrap
 import sqlalchemy
 import os
 import pdb
@@ -19,6 +20,7 @@ from donut.modules import groups
 from donut.modules import arcfeedback
 
 app = flask.Flask(__name__)
+Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
 app.register_blueprint(account.blueprint)
@@ -94,7 +96,7 @@ def access_forbidden(error):
 @app.errorhandler(http.client.INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
     """
-  Handles a 500 internal server error response. 
+  Handles a 500 internal server error response.
   """
     return flask.render_template("500.html"), http.client.INTERNAL_SERVER_ERROR
 
