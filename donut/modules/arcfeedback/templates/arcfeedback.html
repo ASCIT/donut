@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block page %}
 
 <div class="container theme-showcase" role="main">
 
@@ -21,30 +21,37 @@
   confidential. </p>
 
 	<p>After you submit your feedback, you'll be given a URL
-  where you can follow up on what the ARC is doing in response.</p>
-	
-	<form method="POST" action="{{  url_for('arcfeedback.arcfeedback_submit')  }}">
-	  <input type="hidden" name="state" value="report" />
-	  <table id="feedback" class="table">
-	    <tr>
-	      <td class="feedback">Name: </td>
-	      <td class="feedback"><input size="40" type="text" name="name" /></td>
-	    </tr>
-	    <tr>
-	      <td class="feedback">Reply Email: </td>
-	      <td class="feedback"><input size="40" type="text" name="email" /></td>
-	    </tr>
-	    <tr>
-	      <td class="feedback">Class: </td>
-	      <td class="feedback"><input size="40" type="text" name="class" /></td>
-	    </tr>
-	    <tr>
-	      <td class="feedback">Feedback: </td>
-	      <td class="feedback"><textarea name="msg" rows="10" cols="40"></textarea></td>
-	    </tr>
-	  </table>
-	  <input class="btn-large" type="submit" value="Submit" />
-	</form>
+	 where you can follow up on what the ARC is doing in response.</p>
+	<div class="container">
+	  <div class="row">
+	    <form method="POST" action="{{  url_for('arcfeedback.arcfeedback_submit')  }}">
+	      <input type="hidden" name="state" value="report" />
+	      <table id="feedback" class="table">
+		<tr>
+		  <td class="feedback">Name: </td>
+		  <td class="feedback"><input size="40" type="text" name="name" /></td>
+		</tr>
+		<tr>
+		  <td class="feedback">Reply Email: </td>
+		  <td class="feedback"><input size="40" type="text" name="email" /></td>
+		</tr>
+		<tr>
+		  <td class="feedback">Class: </td>
+		  <td class="feedback"><input size="40" type="text" name="class" /></td>
+		</tr>
+		<tr>
+		  <td class="feedback">Feedback: </td>
+		  <td class="feedback"><textarea name="msg" rows="10" cols="40"></textarea></td>
+		</tr>
+	      </table>
+	      <div class="row">
+		<div class="text-center">
+		     <input class="btn" type="submit" value="Submit" />
+		</div>
+	      </div>
+	    </form>
+	  </div>
+	</div>
     </div>
 
 </div>
