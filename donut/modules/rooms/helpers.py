@@ -114,15 +114,17 @@ def get_my_reservations():
 
 def get_reservation(id):
     query = sqlalchemy.text("""
-        SELECT location, title, full_name, start_time, end_time, reason
+        SELECT location, title, full_name, start_time, end_time, reason, username
         FROM room_reservations AS reservation
             LEFT OUTER JOIN members_full_name as member
             ON reservation.user_id = member.user_id
+            LEFT OUTER JOIN users as user
+            ON reservation.user_id = user.user_id
             LEFT OUTER JOIN rooms AS room
             ON reservation.room_id = room_id
         WHERE reservation.id = :id
     """)
-    location, title, name, start, end, reason = flask.g.db.execute(
+    location, title, name, start, end, reason, username = flask.g.db.execute(
         query, id=id).fetchone()
     return {
         "location": location,
@@ -130,5 +132,6 @@ def get_reservation(id):
         "name": name,
         "start": start,
         "end": end,
-        "reason": reason
+        "reason": reason,
+        "username": username
     }

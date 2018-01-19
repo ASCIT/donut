@@ -111,4 +111,6 @@ def all_reservations():
 @blueprint.route("/reservation/<int:id>")
 def view_reservation(id):
     return flask.render_template(
-        "reservation-view.html", reservation=helpers.get_reservation(id))
+        "reservation-view.html",
+        reservation=helpers.get_reservation(id),
+        now=datetime.now())
