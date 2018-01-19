@@ -2,6 +2,7 @@ import flask
 import json
 
 from donut.modules.marketplace import blueprint, helpers
+from donut.modules.core.helpers import get_name_and_email
 from donut.auth_utils import get_user_id, check_permission
 from donut.resources import Permissions
 
@@ -135,13 +136,12 @@ def view_item():
     # cat_title from cat_id
     cat_id_map = {
         sublist[0]: sublist[1]
-        for sublist in helpers.get_table_list_data("marketplace_categories",
-                                                   ["cat_id", "cat_title"])
+        for sublist in helpers.get_table_list_data('marketplace_categories',
+                                                   ['cat_id', 'cat_title'])
     }
     cat_title = cat_id_map[stored["cat_id"]]
 
     # full_name and email from user_id
-    from donut.modules.core.helpers import get_name_and_email
     (stored['full_name'],
      stored['email']) = get_name_and_email(stored['user_id'])
 
@@ -150,8 +150,18 @@ def view_item():
         if stored[field] == None:
             stored[field] = ""
 
+    has_edit_privs = False
+    if 'username' in flask.session:
+        current_user_id = get_user_id(flask.session['username'])
+        if stored['user_id'] == current_user_id or check_permission(
+                Permissions.ADMIN):
+            has_edit_privs = True
+
     return helpers.render_with_top_marketplace_bar(
-        'view_item.html', stored=stored, cat_title=cat_title)
+        'view_item.html',
+        stored=stored,
+        cat_title=cat_title,
+        has_edit_privs=has_edit_privs)
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
