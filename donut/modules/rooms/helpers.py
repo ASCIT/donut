@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from itertools import groupby
 import flask
 import sqlalchemy
@@ -43,7 +43,7 @@ def add_reservation(room, username, reason, start, end):
         end=end)
 
 
-def render_reservations(rooms, start, end):
+def get_all_reservations(rooms, start, end):
     if not rooms:
         rooms = [room["id"] for room in get_rooms()]
     query = sqlalchemy.text("""
@@ -65,20 +65,51 @@ def render_reservations(rooms, start, end):
         "start": start,
         "end": end
     } for id, room, start, end in reservations]
-    day_reservations = [
-        {
-            "day": day,
-            "reservations": list(day_rooms)
-        }
-        for day, day_rooms in groupby(
-            reservations, lambda reservation: reservation["start"].date())
-    ]
-    return flask.render_template(
-        "all-iframe.html",
-        rooms=get_rooms(),
-        start=start,
-        end=end,
-        reservations=day_reservations)
+    return [{
+        "day": day,
+        "reservations": list(day_rooms)
+    }
+            for day, day_rooms in groupby(
+                reservations, lambda reservation: reservation["start"].date())]
+
+
+def split(lst, pred):
+    switch_index = len(lst)
+    for index, item in enumerate(lst):
+        if not pred(item):
+            switch_index = index
+            break
+    return [lst[:switch_index], lst[switch_index:]]
+
+
+def get_my_reservations():
+    if "username" not in flask.session:
+        return None
+
+    query = sqlalchemy.text("""
+        SELECT reservation.id, location, start_time, end_time
+        FROM room_reservations AS reservation
+            LEFT OUTER JOIN users AS user
+            ON reservation.user_id = user.user_id
+            LEFT OUTER JOIN rooms AS room
+            ON reservation.room_id = room.id
+        WHERE user.username = :username
+        ORDER BY start_time
+    """)
+    reservations = flask.g.db.execute(
+        query, username=flask.session["username"])
+    reservations = [{
+        "id": id,
+        "room": room,
+        "start": start,
+        "end": end
+    } for id, room, start, end in reservations]
+    now = datetime.now()
+    past, upcoming = split(reservations, lambda res: res["start"] < now)
+    return {
+        "past": past[::-1],  #show most recent past first
+        "upcoming": upcoming
+    }
 
 
 def get_reservation(id):

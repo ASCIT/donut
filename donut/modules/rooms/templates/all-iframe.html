@@ -31,8 +31,8 @@
 				{% for reservation in day_reservation["reservations"] %}
 					<p class='list-group-item-text'>
 						{{ reservation["room"] }} from
-						{{ reservation["start"].strftime("%I:%M %p") }} to
-						{{ reservation["end"].strftime("%I:%M %p") }}
+						{{ reservation["start"].strftime("%-I:%M %p") }} to
+						{{ reservation["end"].strftime("%-I:%M %p") }}
 
 						<a href="/reservation/{{ reservation['id'] }}">View</a>
 					</p>

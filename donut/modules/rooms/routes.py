@@ -72,6 +72,12 @@ def book():
     return flask.render_template("reservation_success.html")
 
 
+@blueprint.route("/my-reservations")
+def my_reservations():
+    return flask.render_template(
+        "mine-iframe.html", reservations=helpers.get_my_reservations())
+
+
 @blueprint.route("/all-reservations")
 def all_reservations():
     now = datetime.now()
@@ -84,14 +90,22 @@ def all_reservations():
         or validate_date(args["start"]), "end" not in args
         or validate_date(args["end"])
     ]
-    if not all(validations):
-        return helpers.render_reservations([], now, next_week)
-
-    start = datetime.strptime(
-        args.get("start", now.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
-    end = datetime.strptime(
-        args.get("end", next_week.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
-    return helpers.render_reservations(list(map(int, rooms)), start, end)
+    if all(validations):
+        start = datetime.strptime(
+            args.get("start", now.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
+        end = datetime.strptime(
+            args.get("end", next_week.strftime(YYYY_MM_DD)),
+            YYYY_MM_DD).date()
+        reservations = helpers.get_all_reservations(
+            list(map(int, rooms)), start, end)
+    else:
+        reservations = helpers.get_all_reservations([], now, next_week)
+    return flask.render_template(
+        "all-iframe.html",
+        rooms=helpers.get_rooms(),
+        start=start,
+        end=end,
+        reservations=reservations)
 
 
 @blueprint.route("/reservation/<int:id>")

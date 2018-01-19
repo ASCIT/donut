@@ -10,8 +10,8 @@
 		<div class="panel-body">
 			<p>Room: {{ reservation["title"] }} ({{ reservation["location"] }})</p>
 			<p>Held by: {{ reservation["name"] }}</p>
-			<p>From: {{ reservation["start"].strftime("%A, %B %d, %Y at %I:%M %p") }}</p>
-			<p>To: {{ reservation["end"].strftime("%A, %B %d, %Y at %I:%M %p") }}</p>
+			<p>From: {{ reservation["start"].strftime("%A, %B %d, %Y at %-I:%M %p") }}</p>
+			<p>To: {{ reservation["end"].strftime("%A, %B %d, %Y at %-I:%M %p") }}</p>
 			<p>
 				Activity:
 				{% if reservation["reason"] %} {{ reservation["reason"] }}
