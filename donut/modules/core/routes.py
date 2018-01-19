@@ -1,5 +1,6 @@
 import flask
 import json
+from flask import jsonify
 
 from donut.modules.core import blueprint, helpers
 
@@ -22,10 +23,18 @@ def get_members_list():
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
 
-    return json.dumps(helpers.get_member_list_data(fields=fields, attrs=attrs))
+    return jsonify(helpers.get_member_list_data(fields=fields, attrs=attrs))
 
 
 @blueprint.route("/1/members/<int:user_id>/")
 def get_members(user_id):
     """GET /1/members/<int:user_id>/"""
-    return json.dumps(helpers.get_member_data(user_id))
+    return jsonify(results=helpers.get_member_data(user_id))
+
+
+@blueprint.route("/1/members/<int:user_id>/groups/")
+def get_group_list_of_member(user_id):
+    '''GET /1/members/<int:user_id>/groups/
+       List all groups that a member is in  
+    '''
+    return jsonify(helpers.get_group_list_of_member(user_id))
