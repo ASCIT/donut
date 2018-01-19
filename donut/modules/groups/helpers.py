@@ -63,30 +63,6 @@ def get_group_positions(group_id):
         for field, value in zip(group_position_fields, position)
     } for position in positions]
 
-
-def get_position_holders(pos_id):
-    """
-    Queries the database and returns a list of all members and their
-    Names that current hold the position specified by pos_id
-
-    Arguments:
-        pos_id:     The position to look up
-    
-    Returns:
-        results:    A list where each element describes a user who holds the
-                    position. Each element is a dict with key:value of
-                    columnname:columnvalue
-    """
-    fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text(" position_holders NATURAL JOIN members"))
-    s = s.where(sqlalchemy.text("pos_id = :p"))
-    result = flask.g.db.execute(s, p=pos_id)
-
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    return result
-
-
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.
