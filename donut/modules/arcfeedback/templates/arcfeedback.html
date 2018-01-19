@@ -23,28 +23,27 @@
 	<p>After you submit your feedback, you'll be given a URL
   where you can follow up on what the ARC is doing in response.</p>
 	
-	<form method="POST" action="">
+	<form method="POST" action="{{  url_for('arcfeedback.arcfeedback_submit')  }}">
 	  <input type="hidden" name="state" value="report" />
-	  <table id="feedback">
+	  <table id="feedback" class="table">
 	    <tr>
-	      <td class="feedback">Name:</td>
-	      <td class="feedback"><input size="40" type="text" name="name" value="" /></td>
+	      <td class="feedback">Name: </td>
+	      <td class="feedback"><input size="40" type="text" name="name" /></td>
 	    </tr>
 	    <tr>
-	      <td class="feedback">Reply Email:</td>
-	      <td class="feedback"><input size="40" type="text" name="email" value="" /></td>
+	      <td class="feedback">Reply Email: </td>
+	      <td class="feedback"><input size="40" type="text" name="email" /></td>
 	    </tr>
 	    <tr>
-	      <td class="feedback">Class:</td>
-	      <td class="feedback"><input size="40" type="text" name="class" value="" /></td>
+	      <td class="feedback">Class: </td>
+	      <td class="feedback"><input size="40" type="text" name="class" /></td>
 	    </tr>
 	    <tr>
-	      <td class="feedback">Feedback:</td>
+	      <td class="feedback">Feedback: </td>
 	      <td class="feedback"><textarea name="msg" rows="10" cols="40"></textarea></td>
 	    </tr>
 	  </table>
-	  <input type="submit" value="Submit" />
-	  <input type="reset" value="Reset" />
+	  <input class="btn-large" type="submit" value="Submit" />
 	</form>
     </div>
 
