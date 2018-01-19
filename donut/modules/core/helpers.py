@@ -1,6 +1,7 @@
 import flask
 import sqlalchemy
 
+import pymysql.cursors
 
 def get_member_data(user_id, fields=None):
     """
@@ -45,8 +46,24 @@ def get_member_data(user_id, fields=None):
     # Build the WHERE clause
     s = s.where(sqlalchemy.text("user_id IN :u"))
 
+    s = "SELECT " + ', '.join(["%s" for _ in range(len(fields))]) + " FROM `members` WHERE `user_id` = %s"
+    fields.extend(user_id)
+    print (s)
+    print (fields)
+    x = s % tuple(fields)
+    print (x)
+
+    s = "SELECT `user_id` FROM `members` WHERE `user_id` = 1"
+    print (s)
+    
     # Execute the query
-    result = flask.g.db.execute(s, {'u': user_id}).fetchall()
+    with flask.g.db.cursor() as cursor:
+        #cursor.execute(s, fields)
+        cursor.execute(s)
+        print (cursor._last_executed)
+        result = cursor.fetchall()
+   
+    print (result)
 
     # Return the row in the form of a dict (or list of dicts)
     result = [{f: t for f, t in zip(fields, res)} for res in result]
