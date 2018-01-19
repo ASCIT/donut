@@ -4,19 +4,21 @@
   <div id = 'CRC'>
     <h2>CONDUCT REVIEW COMMITTEE(CRC)</h2>
     <div id = 'representative'>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Email</th>
-      </tr>
-      <!-- Creating table for list of people on crc. -->
-      {% for name, pos, email in CRC %}
-      <tr>
-          <td>{{ member }}</td>
-          <td>{{ pos }}</td>
-          <td>{{ email }}</td>
-      </tr>
-      {% endfor %}
+      <table class = 'table'>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Email</th>
+        </tr>
+        <!-- Creating table for list of people on crc. -->
+        {% for name, pos, email in CRC %}
+        <tr>
+            <td>{{ member }}</td>
+            <td>{{ pos }}</td>
+            <td>{{ email }}</td>
+        </tr>
+        {% endfor %}
+      </table>
     </div>
   </div>
 </div>

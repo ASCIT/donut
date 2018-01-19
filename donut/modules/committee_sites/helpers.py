@@ -8,7 +8,9 @@ def get_BoC_member():
     """
     sqlText1 = "groups NATURAL JOIN positions NATURAL JOIN position_holders "
     sqlText2 = "NATURAL JOIN members"
-    s = sqlalchemy.sql.select(["first_name, last_name, pos_name, email"]).select_from(sqlalchemy.text(sqlText1 + sqlText2))
+    s = sqlalchemy.sql.select([
+        "first_name, last_name, pos_name, email"
+    ]).select_from(sqlalchemy.text(sqlText1 + sqlText2))
 
     s = s.where(sqlalchemy.text("group_name = 'BoC'"))
     result = flask.g.db.execute(s)
@@ -23,12 +25,13 @@ def get_BoC_member():
         else:
             pos_house.append((name, pos_name, email))
 
-    high_pos.sort(key=lambda tup:tup[1])
-    pos_house.sort(key=lambda tup:tup[1])
+    high_pos.sort(key=lambda tup: tup[1])
+    pos_house.sort(key=lambda tup: tup[1])
 
     fin_result = high_pos + pos_house
 
     return fin_result
+
 
 def get_CRC_member():
     """
@@ -36,7 +39,9 @@ def get_CRC_member():
     """
     sqlText1 = "groups NATURAL JOIN positions NATURAL JOIN position_holders "
     sqlText2 = "NATURAL JOIN members"
-    s = sqlalchemy.sql.select(["first_name, last_name, pos_name, email"]).select_from(sqlalchemy.text(sqlText1 + sqlText2))
+    s = sqlalchemy.sql.select([
+        "first_name, last_name, pos_name, email"
+    ]).select_from(sqlalchemy.text(sqlText1 + sqlText2))
 
     s = s.where(sqlalchemy.text("group_name = 'CRC'"))
     result = flask.g.db.execute(s)
@@ -51,10 +56,9 @@ def get_CRC_member():
         else:
             pos_house.append((name, pos_name, email))
 
-    high_pos.sort(key=lambda tup:tup[1])
-    pos_house.sort(key=lambda tup:tup[1])
+    high_pos.sort(key=lambda tup: tup[1])
+    pos_house.sort(key=lambda tup: tup[1])
 
     fin_result = high_pos + pos_house
 
     return fin_result
-

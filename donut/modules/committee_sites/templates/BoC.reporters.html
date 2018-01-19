@@ -11,7 +11,9 @@
         <p>
           This is a guide with advice on how to respond to a BoC concern against
           you and what to expect throughout the case process. You may also find
-          information in our <a href="#"> Frequently Asked Questions useful.</a>
+          information in our 
+	  <a href="{{ url_for('committee_sites.FAQ')}}">
+	Frequently Asked Questions useful.</a>
         </p>
 
         <h3>Guide for TAs and Professors</h3>
@@ -21,7 +23,8 @@
           report a potential violation to the BoC. The BoC will respond
           to you to arrange a short meeting to discuss the concern and
           receive copies of the evidence. See
-          <a href="#">"How do I report a potential violation?"</a>
+          <a href="{{ url_for('committee_sites.FAQ', _anchor='How do I report a potential violation?') }}">
+		  "How do I report a potential violation?"</a>
           for more information.
         </p>
         <p>
