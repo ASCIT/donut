@@ -52,6 +52,7 @@ body {
 }
 
 #footer {
+  margin-top: 25px;
   width: 100%;
   text-align: center;
   background-color: orange;
@@ -64,12 +65,9 @@ body {
   padding: 15px;
 }
 
-.message {
-  background-color: #FFEB99;
-  border-right: 2px solid #eeeeee;
-  border-bottom: 2px solid #eeeeee;
-  margin-bottom: 15px;
-  padding: 10px;
+label.required:after {
+  content:"*";
+  color:red;
 }
 
 @media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {

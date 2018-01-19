@@ -1,18 +1,20 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block page %}
 {% include "topbar.html" %}
 
 <h4>
     Found {{ datalist|length }} results.
 </h4>
-{% if datalist|length != 0 %}
+{% if datalist %}
     <div>
-        <table style="width:100%;min-width:590px" class="sortable text-center" border=1 frame=void rules=rows>
+        <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
             <thead>
                 <tr>
-                {% for i in headers %}
-                <th class="text-center"><b>{{i}}<b></th>
-                {% endfor %}
+                    {% for i in headers %}
+                        <th>
+                            <b>{{i}}</b>
+                        </th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
@@ -30,7 +32,6 @@
                 {% endfor %}
             </tbody>
         </table>
-        <br>
     </div>
 {% endif %}
 
