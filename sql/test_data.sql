@@ -13,3 +13,7 @@ INSERT INTO group_members(user_id, group_id) VALUES
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary');
+
+INSERT INTO position_holders(group_id, pos_id, user_id) VALUES
+    (1, 1, 1),
+    (1, 1, 2);

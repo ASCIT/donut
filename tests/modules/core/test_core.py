@@ -37,8 +37,12 @@ def test_get_name_and_email(client):
 
 
 def test_get_group_list_of_member(client):
-    assert get_group_list_of_member(1) == {0: 'Donut Devteam'}
-    assert get_group_list_of_member(3) == {}
+    assert get_group_list_of_member(1) == [{
+        "control": 0,
+        "group_id": 1,
+        "group_name": "Donut Devteam"
+    }]
+    assert get_group_list_of_member(3) == []
 
 
 # Test Routes
