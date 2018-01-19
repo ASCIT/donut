@@ -7,12 +7,18 @@ from donut.auth_utils import get_user_id
 
 
 def get_rooms():
-    """Gets a list of rooms in the form {id, name}"""
+    """Gets a list of rooms in the form {id, name, title, desc}"""
 
-    query = sqlalchemy.text("SELECT id, location FROM rooms")
+    query = sqlalchemy.text(
+        "SELECT id, location, title, description FROM rooms")
     rooms = flask.g.db.execute(query).fetchall()
 
-    return [{"id": id, "name": location} for id, location in rooms]
+    return [{
+        "id": id,
+        "name": location,
+        "title": title,
+        "desc": description
+    } for id, location, title, description in rooms]
 
 
 def is_room(room_id_string):
@@ -74,6 +80,7 @@ def render_reservations(rooms, start, end):
         end=end,
         reservations=day_reservations)
 
+
 def get_reservation(id):
     query = sqlalchemy.text("""
         SELECT location, title, full_name, start_time, end_time, reason
@@ -84,5 +91,13 @@ def get_reservation(id):
             ON reservation.room_id = room_id
         WHERE reservation.id = :id
     """)
-    location, title, name, start, end, reason = flask.g.db.execute(query, id=id).fetchone()
-    return {"location": location, "title": title, "name": name, "start": start, "end": end, "reason": reason}
+    location, title, name, start, end, reason = flask.g.db.execute(
+        query, id=id).fetchone()
+    return {
+        "location": location,
+        "title": title,
+        "name": name,
+        "start": start,
+        "end": end,
+        "reason": reason
+    }

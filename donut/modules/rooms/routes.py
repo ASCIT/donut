@@ -93,6 +93,8 @@ def all_reservations():
         args.get("end", next_week.strftime(YYYY_MM_DD)), YYYY_MM_DD).date()
     return helpers.render_reservations(list(map(int, rooms)), start, end)
 
+
 @blueprint.route("/reservation/<int:id>")
 def view_reservation(id):
-    return flask.render_template("reservation-view.html", reservation=helpers.get_reservation(id))
+    return flask.render_template(
+        "reservation-view.html", reservation=helpers.get_reservation(id))
