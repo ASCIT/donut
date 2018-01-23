@@ -14,6 +14,10 @@ INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary');
 
+INSERT INTO position_holders(group_id, pos_id, user_id) VALUES
+    (1, 1, 1),
+    (1, 1, 2);
+
 INSERT INTO rooms(id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
