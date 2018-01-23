@@ -6,7 +6,8 @@ from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
 
 AM_OR_PM = set(["A", "P"])
-YYYY_MM_DD = '%Y-%m-%d'
+H_MM = "%-I:%M %p"
+YYYY_MM_DD = "%Y-%m-%d"
 
 
 @blueprint.route("/reserve")
@@ -20,6 +21,25 @@ def rooms_home():
 @blueprint.route("/1/book-room/", methods=["POST"])
 def book():
     """POST /1/book-room/"""
+
+    def book_error(message):
+        flask.flash(message)
+        #Using form.get() in case values were not POSTed
+        room = form.get("room")
+        if room is not None and validate_int(room):
+            room = int(room)
+        return flask.render_template(
+            "reservations.html",
+            rooms=helpers.get_rooms(),
+            room=room,
+            date=form.get("date"),
+            start_hour=form.get("start_hour"),
+            start_minute=form.get("start_minute"),
+            start_period=form.get("start_period"),
+            end_hour=form.get("end_hour"),
+            end_minute=form.get("end_minute"),
+            end_period=form.get("end_period"),
+            reason=form.get("reason"))
 
     form = flask.request.form
     validations = [
@@ -41,9 +61,9 @@ def book():
         validate_exists(form, "reason")
     ]
     if not all(validations):
-        # TODO: Should include old parameters in form here
-        return flask.render_template(
-            "reservations.html", rooms=helpers.get_rooms())
+        #Should only happen if a malicious request is sent,
+        #so error message is not important
+        return book_error("Invalid form data")
 
     start_hour = int(form["start_hour"]) % 12
     if form["start_period"] == "P":
@@ -53,22 +73,29 @@ def book():
     if form["end_period"] == "P":
         end_hour += 12
     end_minute = int(form["end_minute"])
-    if start_hour > end_hour or (start_hour == end_hour
-                                 and start_minute >= end_minute):
-        flask.flash("Start time must be before end time")
-        # TODO: Should include old parameters in form here
-        return flask.render_template(
-            "reservations.html", rooms=helpers.get_rooms())
+    invalid_times = start_hour > end_hour or (start_hour == end_hour
+                                              and start_minute >= end_minute)
+    if invalid_times:
+        return book_error("Start time must be before end time")
 
     room = int(form["room"])
     day = datetime.strptime(form["date"], YYYY_MM_DD)
     start = datetime(day.year, day.month, day.day, start_hour, start_minute)
     end = datetime(day.year, day.month, day.day, end_hour, end_minute)
     reason = form["reason"] or None
+    conflicts = helpers.conflicts(room, start, end)
+    if conflicts:
+        message = "Room already booked for: "
+        for conflict in conflicts:
+            if conflict is not conflicts[0]:
+                message += ", "
+            start, end = conflict
+            message += start.strftime(H_MM) + " to "
+            message += end.strftime(H_MM)
+        return book_error(message)
 
     helpers.add_reservation(room, flask.session["username"], reason, start,
                             end)
-
     return flask.render_template("reservation_success.html")
 
 

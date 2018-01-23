@@ -28,7 +28,6 @@ def is_room(room_id_string):
 
 
 def add_reservation(room, username, reason, start, end):
-    # TODO: Check that there are no overlapping reservations
     insertion = sqlalchemy.text("""
         INSERT INTO room_reservations
         (room_id, user_id, reason, start_time, end_time)
@@ -149,3 +148,13 @@ def delete_reservation(id):
         )
     """)
     flask.g.db.execute(query, id=id, username=flask.session["username"])
+
+
+def conflicts(room, start, end):
+    """Returns a list of overlapping [start_time, end_time] tuples"""
+    query = sqlalchemy.text("""
+        SELECT start_time, end_time FROM room_reservations
+        WHERE room_id = :room AND :start < end_time AND start_time < :end
+        ORDER BY start_time
+    """)
+    return list(flask.g.db.execute(query, room=room, start=start, end=end))
