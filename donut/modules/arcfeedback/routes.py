@@ -6,6 +6,7 @@ from donut.modules.arcfeedback import blueprint
 def arcfeedback():
     return flask.render_template('arcfeedback.html')
 
+
 @blueprint.route('/arcfeedback/submit', methods=['POST'])
 def arcfeedback_submit():
     fields = ['name', 'email', 'class', 'msg']
@@ -17,4 +18,3 @@ def arcfeedback_submit():
         return flask.redirect(flask.url_for('home'))
     flask.flash('Class and feedback are required fields!')
     return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
-    
