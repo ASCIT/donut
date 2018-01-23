@@ -23,7 +23,7 @@ def get_rooms():
 
 def is_room(room_id_string):
     query = sqlalchemy.text("SELECT id FROM rooms WHERE id = :room_id")
-    room = flask.g.db.execute(query, room_id=int(room_id_string))
+    room = flask.g.db.execute(query, room_id=int(room_id_string)).fetchone()
     return room is not None
 
 
