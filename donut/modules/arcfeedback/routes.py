@@ -10,11 +10,14 @@ def arcfeedback():
 @blueprint.route('/arcfeedback/submit', methods=['POST'])
 def arcfeedback_submit():
     fields = ['name', 'email', 'class', 'msg']
+    required = ['class', 'msg']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
-    if data['class'] != "" and data['msg'] != "":
-        flask.flash('Success!')
-        return flask.redirect(flask.url_for('home'))
-    flask.flash('Class and feedback are required fields!')
+    for field in required:
+        if (data[field] == ""):
+            flask.flash('Please fill in all required fields (marked with *)', 'error')
+            return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
+    flask.flash('Success')
     return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
+
