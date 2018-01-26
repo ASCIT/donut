@@ -168,10 +168,7 @@ def view_item():
 def manage():
     headers = ["Category", "Item", "Price", "Date", "", "", ""]
     return helpers.render_with_top_marketplace_bar(
-        'manage.html',
-        headers=headers,
-        activelist=["hi"],
-        inactivelist=[])
+        'manage.html', headers=headers, activelist=["hi"], inactivelist=[])
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
