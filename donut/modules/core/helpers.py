@@ -40,39 +40,14 @@ def get_member_data(user_id, fields=None):
     if len(user_id) == 0:
         return {}
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
-
-    # Build the WHERE clause
-    s = s.where(sqlalchemy.text("user_id IN :u"))
-
-    s = "SELECT " + ', '.join(["%s" for _ in range(len(fields))]) + " FROM `members` WHERE `user_id` = %s"
-    fields.extend(user_id)
-    print (s)
-    print (fields)
-    x = s % tuple(fields)
-    print (x)
-
-    s = "SELECT `user_id` FROM `members` WHERE `user_id` = 1"
-    print (s)
+    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE `user_id` = %s"
     
     # Execute the query
     with flask.g.db.cursor() as cursor:
-        #cursor.execute(s, fields)
-        cursor.execute(s)
-        print (cursor._last_executed)
+        cursor.execute(s, user_id)
         result = cursor.fetchall()
    
-    print (result)
-
-    # Return the row in the form of a dict (or list of dicts)
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    if len(result) == 0:
-        return {}
-    elif len(result) == 1:
-        return result[0]
-    else:
-        return result
+    return result
 
 
 def get_member_list_data(fields=None, attrs={}):
@@ -105,18 +80,16 @@ def get_member_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
-
-    # Build the WHERE clause
-    for key, value in list(attrs.items()):
-        s = s.where(sqlalchemy.text(key + "= :" + key))
+    s = "SELECT " + ', '.join(fields) + " FROM `members`"
+    
+    s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
+    values = [value for key, value in attrs.items()]
 
     # Execute the query
-    result = flask.g.db.execute(s, attrs).fetchall()
+    with flask.g.db.cursor() as cursor:
+        cursor.execute(s, values)
+        result = cursor.fetchall()
 
-    # Return the rows in the form of a list of dicts
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
 
 
