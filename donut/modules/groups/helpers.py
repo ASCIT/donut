@@ -105,6 +105,7 @@ def get_group_data(group_id, fields=None):
     result = {f: t for f, t in zip(fields, result)}
     return result
 
+
 def get_position_data(fields=None):
     all_returnable_fields = ["user_id", "group_id", "pos_id", "pos_name"]
     default_fields = ["user_id", "pos_id", "pos_name", "group_id"]
@@ -133,6 +134,7 @@ def get_position_data(fields=None):
     user_position_arr = [{f: t for f, t in zip(fields, row)} for row in result]
     return user_position_arr
 
+
 def get_members_by_group(group_id):
     # Build the SELECT and FROM clauses
     fields = [sqlalchemy.text("user_id")]
@@ -149,4 +151,3 @@ def get_members_by_group(group_id):
     members = [row['user_id'] for row in result]
     result = core.get_member_data(members)
     return result
-

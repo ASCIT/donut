@@ -6,7 +6,6 @@ from donut import app
 from donut.modules.groups import helpers
 from donut.modules.groups import routes
 
-
 group = {
     "group_id": 1,
     "group_name": "Donut Devteam",
@@ -38,9 +37,11 @@ def test_get_group_positions_data(client):
     }]
     assert helpers.get_group_positions(2) == []
 
+
 def test_get_position_data(client):
     res = helpers.get_position_data()
     assert res is not None
+
 
 def test_get_group_data(client):
     assert helpers.get_group_data(2) == {}
