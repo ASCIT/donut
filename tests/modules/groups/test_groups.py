@@ -3,8 +3,6 @@ Tests donut/modules/groups/
 """
 from donut.testing.fixtures import client
 from donut import app
-from donut.modules.groups.helpers import get_position_data
-from donut.modules.groups.routes import get_positions
 from donut.modules.groups import helpers
 from donut.modules.groups import routes
 
@@ -41,7 +39,7 @@ def test_get_group_positions_data(client):
     assert helpers.get_group_positions(2) == []
 
 def test_get_position_data(client):
-    res = get_position_data()
+    res = helpers.get_position_data()
     assert res is not None
 
 def test_get_group_data(client):
@@ -74,4 +72,3 @@ def get_groups(client):
 
 def test_get_group_members(client):
     assert routes.get_group_members(1) is not None
-
