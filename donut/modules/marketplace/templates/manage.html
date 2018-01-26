@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "topbar.html" %}
+
+<h3>
+    Manage your listings
+</h3>
+<div id='active'>
+    {% if activelist %}
+        <p>
+            Your active listings:
+        </p>
+        <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
+            <thead>
+                <tr>
+                    {% for i in headers %}
+                        <th>
+                            <b>{{i}}</b>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- display data in one main table -->
+                {% for i in range(datalist|length) %}
+                    <tr>
+                        {% for j in range(datalist[i]|length) %}
+                            <td>
+                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
+                                {{ datalist[i][j] }}
+                                {% if links[i][j] != 0 %} </a> {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+        You have no active listings.
+        </p>
+    {% endif %}
+</div>
+<div id='inactive'>
+    {% if inactivelist %}
+        <p>
+            Your active listings:
+        </p>
+        <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
+            <thead>
+                <tr>
+                    {% for i in headers %}
+                        <th>
+                            <b>{{i}}</b>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- display data in one main table -->
+                {% for i in range(datalist|length) %}
+                    <tr>
+                        {% for j in range(datalist[i]|length) %}
+                            <td>
+                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
+                                {{ datalist[i][j] }}
+                                {% if links[i][j] != 0 %} </a> {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>
+            You have no inactive listings.
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}

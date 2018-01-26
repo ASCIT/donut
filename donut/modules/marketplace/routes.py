@@ -164,6 +164,16 @@ def view_item():
         has_edit_privs=has_edit_privs)
 
 
+@blueprint.route('/marketplace/manage', methods=['GET'])
+def manage():
+    headers = ["Category", "Item", "Price", "Date", "", "", ""]
+    return helpers.render_with_top_marketplace_bar(
+        'manage.html',
+        headers=headers,
+        activelist=["hi"],
+        inactivelist=[])
+
+
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
     if 'username' not in flask.session:
