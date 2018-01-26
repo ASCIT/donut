@@ -37,4 +37,4 @@ def get_group_list_of_member(user_id):
     '''GET /1/members/<int:user_id>/groups/
        List all groups that a member is in  
     '''
-    return json.dumps(helpers.get_group_list_of_member(user_id))
+    return jsonify(helpers.get_group_list_of_member(user_id))
