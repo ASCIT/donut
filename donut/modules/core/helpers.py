@@ -47,7 +47,7 @@ def get_member_data(user_id, fields=None):
         cursor.execute(s, user_id)
         result = cursor.fetchall()
    
-    return result
+    return result[0] if len(result) > 0 else {}
 
 
 def get_member_list_data(fields=None, attrs={}):
