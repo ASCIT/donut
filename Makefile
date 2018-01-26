@@ -12,5 +12,8 @@ pip-install:
 lint:
 	yapf -i -r .
 
-test:
+test: init-test-db
 	python -m pytest .
+
+init-test-db:
+	mysql -u donut_test --password=public < sql/reset.sql
