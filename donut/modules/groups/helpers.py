@@ -63,6 +63,7 @@ def get_group_positions(group_id):
         for field, value in zip(group_position_fields, position)
     } for position in positions]
 
+
 def get_position_holders(pos_id):
     """
     Queries the database and returns a list of all members and their
