@@ -4,6 +4,26 @@ var allPositions = []; // Complete list of all position-group-person pairs
 var counter = 0;
 
 /*
+ * Initailizes all relevant fields including all groups, positions,
+ * position holders and groups with admin access.
+ */
+function init(approvedGroupIds, approvedGroupNames) {
+    getGroupList();
+    populateAdminGroups(approvedGroupIds, approvedGroupNames);
+}
+
+/*
+ * Populates the groups list in the admin tab
+ */
+function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
+    for (var i = 0; i < approvedGroupIds.length; i++) {
+        var newOption = '<option value=' + approvedGroupIds[i] + '>' +
+            approvedGroupNames[i] + '</option>'
+        $('#groupCreate option:last').after(newOption);
+        $('#groupDel option:last').after(newOption);
+    }
+}
+/*
  * Gathers the total list of groups from the groups endpoint.
  * for each group, it calls the collectPositions method on it
  */
@@ -45,6 +65,8 @@ function collectPositionFromGroup(group) {
                 $('#positionSelect option:last').after(newOption);
                 counter++;
             }
+            collectStudentsFromPosition(positions[j].pos_id, 
+                    group.group_id,positions[j].pos_name)
         }
     });
 }
@@ -54,15 +76,15 @@ function collectPositionFromGroup(group) {
  * students associated with the position and adds each student as a row
  * to the table
  */
-function collectStudentsFromPosition(pos_id, group_id, pos_nam) {
+function collectStudentsFromPosition(pos_id, group_id, pos_name) {
     $.getJSON('/1/positions/'+pos_id, function(people){
         for (var i = 0; i < people.length; i++) {
             var firstName = people[i].first_name;
             var lastName = people[i].last_name;
             var name = firstName + ' ' + lastName;
             var userId = people[i].user_id;
-            var text = '{ "groupId":' + group.group_id + ',' +
-                        '"positionName":"' + positions[j].pos_name + '",' +
+            var text = '{ "groupId":' + group_id + ',' +
+                        '"positionName":"' + pos_name + '",' +
                         '"studentName":"' + name +'",' +
                         '"studentId":' + userId + '}';
             var json = JSON.parse(text);
