@@ -106,8 +106,12 @@ def get_group_data(group_id, fields=None):
     return result
 
 def get_position_data(fields=None):
-    all_returnable_fields = ["user_id", "group_id", "pos_id", "pos_name"]
-    default_fields = ["user_id", "pos_id", "pos_name", "group_id"]
+    all_returnable_fields = ["user_id", "group_id", "pos_id", 
+        "first_name", "last_name", "start_date", "end_date",
+        "group_name", "pos_name"]
+    default_fields = ["user_id", "group_id", "pos_id", 
+        "first_name", "last_name", "start_date", "end_date",
+        "group_name", "pos_name"]
 
     if fields is None:
         fields = default_fields
@@ -115,17 +119,10 @@ def get_position_data(fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    field_string = "positions.pos_id"
-    for field in fields:
-        if (field == "group_id"):
-            field_string += ", positions.group_id"
-        elif (field != "pos_id"):
-            field_string += ", " + field
-
-    result = flask.g.db.execute(
-        "SELECT " + field_string +
-        "\nFROM positions NATURAL JOIN position_holders WHERE positions.pos_id = position_holders.pos_id;"
-    )
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text("members NATURAL JOIN positions NATURAL JOIN groups" +
+            " NATURAL JOIN position_holders"))
+    result = flask.g.db.execute(s)
 
     if result is None:
         return {}

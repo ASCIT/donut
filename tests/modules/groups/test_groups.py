@@ -39,7 +39,13 @@ def test_get_group_positions_data(client):
 
 def test_get_position_data(client):
     res = helpers.get_position_data()
-    assert res is not None
+    assert res[0]["first_name"] == "David"
+    assert res[0]["last_name"] == "Qu"
+    assert res[0]["group_name"] == "Donut Devteam"
+    assert res[0]["user_id"] == 1
+    assert res[0]["pos_name"] == "Head"
+    assert res[0]["group_id"] == 1
+    assert res[0]["pos_id"] == 1
 
 def test_get_group_data(client):
     assert helpers.get_group_data(2) == {}
