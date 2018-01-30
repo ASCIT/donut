@@ -38,6 +38,17 @@ def test_get_group_positions_data(client):
     assert helpers.get_group_positions(2) == []
 
 
+def test_get_position_data(client):
+    res = helpers.get_position_data()
+    assert res[0]["first_name"] == "David"
+    assert res[0]["last_name"] == "Qu"
+    assert res[0]["group_name"] == "Donut Devteam"
+    assert res[0]["user_id"] == 1
+    assert res[0]["pos_name"] == "Head"
+    assert res[0]["group_id"] == 1
+    assert res[0]["pos_id"] == 1
+
+
 def test_get_group_data(client):
     assert helpers.get_group_data(2) == {}
     assert helpers.get_group_data(1, ["not_a_real_field"]) == "Invalid field"
