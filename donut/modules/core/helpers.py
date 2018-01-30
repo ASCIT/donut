@@ -3,6 +3,7 @@ import sqlalchemy
 
 import pymysql.cursors
 
+
 def get_member_data(user_id, fields=None):
     """
     Queries the database and returns member data for the specified user_id
@@ -40,14 +41,19 @@ def get_member_data(user_id, fields=None):
     if len(user_id) == 0:
         return {}
 
-    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE `user_id` = %s"
-    
+    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE "
+    s += ' OR '.join(["`user_id`=%s" for _ in user_id])
+
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, user_id)
         result = cursor.fetchall()
-   
-    return result[0] if len(result) > 0 else {}
+
+    if len(result) == 0:
+        return {}
+    elif len(result) == 1:
+        return result[0]
+    return result
 
 
 def get_member_list_data(fields=None, attrs={}):
@@ -81,8 +87,10 @@ def get_member_list_data(fields=None, attrs={}):
             return "Invalid field"
 
     s = "SELECT " + ', '.join(fields) + " FROM `members`"
-    
-    s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
+
+    if attrs:
+        s += " WHERE "
+        s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
     values = [value for key, value in attrs.items()]
 
     # Execute the query
