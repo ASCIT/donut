@@ -37,6 +37,7 @@ def test_get_group_positions_data(client):
     }]
     assert helpers.get_group_positions(2) == []
 
+
 def test_get_position_data(client):
     res = helpers.get_position_data()
     assert res[0]["first_name"] == "David"
@@ -46,6 +47,7 @@ def test_get_position_data(client):
     assert res[0]["pos_name"] == "Head"
     assert res[0]["group_id"] == 1
     assert res[0]["pos_id"] == 1
+
 
 def test_get_group_data(client):
     assert helpers.get_group_data(2) == {}
@@ -77,3 +79,10 @@ def get_groups(client):
 
 def test_get_group_members(client):
     assert routes.get_group_members(1) is not None
+<<<<<<< HEAD
+=======
+
+
+def test_get_pos_holders(client):
+    assert routes.get_pos_holders(1) is not None
+>>>>>>> e8a75f8c1418515cb58032c4902e1626d8c49261

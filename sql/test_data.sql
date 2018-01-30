@@ -14,5 +14,11 @@ INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary');
 
+<<<<<<< HEAD
 INSERT INTO position_holders(pos_id, user_id, group_id) VALUES
     (1,1,1);
+=======
+INSERT INTO position_holders(group_id, pos_id, user_id) VALUES
+    (1, 1, 1),
+    (1, 1, 2);
+>>>>>>> e8a75f8c1418515cb58032c4902e1626d8c49261
