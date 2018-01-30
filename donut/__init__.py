@@ -68,6 +68,10 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
+    if 'DB_URI' in app.config:
+        engine = sqlalchemy.create_engine(
+            app.config['DB_URI'], convert_unicode=True)
+        flask.g.db = engine.connect()
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
@@ -78,10 +82,7 @@ def before_request():
                              db='db',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
-        flask.g.db = connection
-        #engine = sqlalchemy.create_engine(
-        #    app.config['DB_URI'], convert_unicode=True)
-        #flask.g.db = engine.connect()
+        flask.g.pymysql_db = connection
 
 
 @app.teardown_request

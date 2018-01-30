@@ -43,7 +43,7 @@ def get_member_data(user_id, fields=None):
     s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE `user_id` = %s"
     
     # Execute the query
-    with flask.g.db.cursor() as cursor:
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, user_id)
         result = cursor.fetchall()
    
@@ -86,7 +86,7 @@ def get_member_list_data(fields=None, attrs={}):
     values = [value for key, value in attrs.items()]
 
     # Execute the query
-    with flask.g.db.cursor() as cursor:
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, values)
         result = cursor.fetchall()
 
