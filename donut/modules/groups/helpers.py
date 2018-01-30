@@ -130,12 +130,14 @@ def get_group_data(group_id, fields=None):
 
 
 def get_position_data(fields=None):
-    all_returnable_fields = ["user_id", "group_id", "pos_id", 
-        "first_name", "last_name", "start_date", "end_date",
-        "group_name", "pos_name"]
-    default_fields = ["user_id", "group_id", "pos_id", 
-        "first_name", "last_name", "start_date", "end_date",
-        "group_name", "pos_name"]
+    all_returnable_fields = [
+        "user_id", "group_id", "pos_id", "first_name", "last_name",
+        "start_date", "end_date", "group_name", "pos_name"
+    ]
+    default_fields = [
+        "user_id", "group_id", "pos_id", "first_name", "last_name",
+        "start_date", "end_date", "group_name", "pos_name"
+    ]
 
     if fields is None:
         fields = default_fields
@@ -145,7 +147,7 @@ def get_position_data(fields=None):
 
     s = sqlalchemy.sql.select(fields).select_from(
         sqlalchemy.text("members NATURAL JOIN positions NATURAL JOIN groups" +
-            " NATURAL JOIN position_holders"))
+                        " NATURAL JOIN position_holders"))
     result = flask.g.db.execute(s)
 
     if result is None:
