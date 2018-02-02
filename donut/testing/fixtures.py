@@ -24,13 +24,14 @@ def client():
         flask.g.tx = flask.g.db.begin()
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
-        connection = pymysql.connect(host='localhost',
-                             database=app.config['DB_NAME'],
-                             user=app.config['DB_USER'],
-                             password=app.config['DB_PASSWORD'],
-                             db='db',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
+        connection = pymysql.connect(
+            host='localhost',
+            database=app.config['DB_NAME'],
+            user=app.config['DB_USER'],
+            password=app.config['DB_PASSWORD'],
+            db='db',
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor)
         flask.g.pymysql_db = connection
 
     yield app.test_client()
