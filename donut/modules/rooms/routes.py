@@ -15,7 +15,13 @@ def rooms_home():
     """Displays room reservation homepage"""
 
     return flask.render_template(
-        "reservations.html", rooms=helpers.get_rooms())
+        "reservations.html",
+        rooms=helpers.get_rooms(),
+        date=None,
+        start_hour=None,
+        start_minute=None,
+        end_hour=None,
+        end_minute=None)
 
 
 @blueprint.route("/1/book-room/", methods=["POST"])
@@ -101,8 +107,10 @@ def book():
 
 @blueprint.route("/my-reservations")
 def my_reservations():
-    return flask.render_template(
-        "mine-iframe.html", reservations=helpers.get_my_reservations())
+    reservations = helpers.get_my_reservations(
+        flask.session["username"]) if "username" in flask.session else None
+
+    return flask.render_template("mine-iframe.html", reservations=reservations)
 
 
 @blueprint.route("/all-reservations")
@@ -145,5 +153,5 @@ def view_reservation(id):
 
 @blueprint.route("/reservation/<int:id>", methods=["DELETE"])
 def delete_reservation(id):
-    helpers.delete_reservation(id)
+    helpers.delete_reservation(id, flask.session.get("username"))
     return flask.jsonify({"success": True})

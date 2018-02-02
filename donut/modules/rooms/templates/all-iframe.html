@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block navbar %}{% endblock %}
+{% block content %}
 	<form action={{ url_for(".all_reservations") }}>
 		<div class="form-group">
 			<label for="rooms">Rooms</label>

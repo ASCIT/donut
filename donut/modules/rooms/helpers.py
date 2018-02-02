@@ -81,10 +81,7 @@ def split(lst, pred):
     return [lst[:switch_index], lst[switch_index:]]
 
 
-def get_my_reservations():
-    if "username" not in flask.session:
-        return None
-
+def get_my_reservations(username):
     query = sqlalchemy.text("""
         SELECT reservation.id, location, start_time, end_time
         FROM room_reservations AS reservation
@@ -95,8 +92,7 @@ def get_my_reservations():
         WHERE user.username = :username
         ORDER BY start_time
     """)
-    reservations = flask.g.db.execute(
-        query, username=flask.session["username"])
+    reservations = flask.g.db.execute(query, username=username)
     reservations = [{
         "id": id,
         "room": room,
@@ -136,8 +132,8 @@ def get_reservation(id):
     }
 
 
-def delete_reservation(id):
-    if "username" not in flask.session:
+def delete_reservation(id, username):
+    if username is None:
         raise "Not logged in"
 
     query = sqlalchemy.text("""
@@ -147,7 +143,7 @@ def delete_reservation(id):
             SELECT user_id FROM users WHERE username = :username
         )
     """)
-    flask.g.db.execute(query, id=id, username=flask.session["username"])
+    flask.g.db.execute(query, id=id, username=username)
 
 
 def conflicts(room, start, end):
