@@ -68,6 +68,7 @@ def get_position_holders(pos_id):
     """
     Queries the database and returns a list of all members and their
     Names that current hold the position specified by pos_id
+
     Arguments:
         pos_id:     The position to look up
 
@@ -126,6 +127,34 @@ def get_group_data(group_id, fields=None):
     # Return the row in the form of a dict
     result = {f: t for f, t in zip(fields, result)}
     return result
+
+
+def get_position_data(fields=None):
+    all_returnable_fields = [
+        "user_id", "group_id", "pos_id", "first_name", "last_name",
+        "start_date", "end_date", "group_name", "pos_name"
+    ]
+    default_fields = [
+        "user_id", "group_id", "pos_id", "first_name", "last_name",
+        "start_date", "end_date", "group_name", "pos_name"
+    ]
+
+    if fields is None:
+        fields = default_fields
+    else:
+        if any(f not in all_returnable_fields for f in fields):
+            return "Invalid field"
+
+    s = sqlalchemy.sql.select(fields).select_from(
+        sqlalchemy.text("members NATURAL JOIN positions NATURAL JOIN groups" +
+                        " NATURAL JOIN position_holders"))
+    result = flask.g.db.execute(s)
+
+    if result is None:
+        return {}
+
+    user_position_arr = [{f: t for f, t in zip(fields, row)} for row in result]
+    return user_position_arr
 
 
 def get_members_by_group(group_id):
