@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block page %}
+{% complaint_id = get_id(uuid) %}
+{% summary = get_summary(complaint_id) %}
+<h3>Feedback Summary</h3>
+<p>Course: {{summary['course']}} </p>
+<p>Status: {{summary['status']}} </p>
+<p>Subscribed emails: </p>
+{% for email in get_emails(complaint_id) %}
+<p>{{email}}</p>
+{% endfor %}
+<table>
+  <tr> <td>Name</td> <td>Message</td> </tr>
+  {% for message in get_messages(complaint_id) %}
+  <tr> <td>{{ message['poster'] }}</td> <td>{{ message['message'] }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS `arc_complaint_info`;
 CREATE TABLE `arc_complaint_info` (
   `complaint_id` int(11) NOT NULL AUTO_INCREMENT,
   `course` varchar(50) DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
   `uuid` varchar(36) NOT NULL,
   PRIMARY KEY (`complaint_id`),
   UNIQUE KEY (`uuid`)
