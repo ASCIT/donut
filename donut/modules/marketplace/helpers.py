@@ -58,12 +58,10 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     else:
         num_cols = 5
 
-    cats2d = [[]]
-    width = ""
+    # if there's nothing in categories, 404; something's borked
     if num_cols == 0:
         return flask.render_template('404.html'), 404
 
-    # if there's nothing in categories, just return default values for cats2d and width
     num_rows = ceil(num_cats / num_cols)
 
     # Break categories into a 2d array so that it's easy to arrange in rows
@@ -79,6 +77,55 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # function, on to Flask in order to render the top bar and the rest of the content.
     return flask.render_template(
         template_url, cats=cats2d, width=width, **kwargs)
+
+
+def row_text_from_managed_item(item, field_index_map):
+    """
+    For use in routes.manage().  Removes item_active and item_id from item[],
+    replacing them with edit, (un)archive, and delete text instead.  Also modifies
+    field_index_map to reflect this change.
+    """
+    # convert datestrings into actual dates
+    item[field_index_map['item_timestamp']] = item[field_index_map[
+        'item_timestamp']].strftime("%m/%d/%y")
+    # convert category ids to category names
+    item[field_index_map['cat_id']] = get_category_name_from_id(
+        item[field_index_map['cat_id']])
+
+    item_active = item[field_index_map['item_active']]
+    # remove item_active and item_id
+    del item[field_index_map['item_id']]
+    del item[field_index_map['item_active']]
+    # this order is important because if we delete item_active first,
+    # field_index_map['item_id'] will be wrong
+
+    # in the real text of the manage page, we need edit, (un)archive, and delete links
+    item.append('Edit')
+    field_index_map['edit'] = len(item) - 1
+
+    if item_active:
+        item.append('Archive')
+    else:
+        item.append('Unarchive')
+    field_index_map['archive'] = len(item) - 1
+
+    item.append('Delete')
+    field_index_map['delete'] = len(item) - 1
+
+    return (item, field_index_map)
+
+
+def generate_links_for_managed_item(item, field_index_map, item_active,
+                                    item_id):
+    links = [0] * (len(item) + 3)
+    links[field_index_map['item_title']] = flask.url_for(
+        '.view_item', item_id=item_id)
+    links[field_index_map['edit']] = flask.url_for(
+        '.sell', item_id=item_id, state='edit')
+    # TODO: update when archive and delete pages are finished
+    links[field_index_map['archive']] = '#'
+    links[field_index_map['delete']] = '#'
+    return links
 
 
 def generate_search_table(fields=None, attrs={}, query=""):

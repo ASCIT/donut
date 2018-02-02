@@ -22,13 +22,13 @@
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for i in range(datalist|length) %}
+                {% for i in range(activelist|length) %}
                     <tr>
-                        {% for j in range(datalist[i]|length) %}
+                        {% for j in range(activelist[i]|length) %}
                             <td>
-                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
-                                {{ datalist[i][j] }}
-                                {% if links[i][j] != 0 %} </a> {% endif %}
+                                {% if activelinks[i][j] != 0 %} <a href={{ activelinks[i][j] }}> {% endif %}
+                                {{ activelist[i][j] }}
+                                {% if activelinks[i][j] != 0 %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
@@ -44,7 +44,7 @@
 <div id='inactive'>
     {% if inactivelist %}
         <p>
-            Your active listings:
+            Your inactive listings:
         </p>
         <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
             <thead>
@@ -58,13 +58,13 @@
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for i in range(datalist|length) %}
+                {% for i in range(inactivelist|length) %}
                     <tr>
-                        {% for j in range(datalist[i]|length) %}
+                        {% for j in range(inactivelist[i]|length) %}
                             <td>
-                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
-                                {{ datalist[i][j] }}
-                                {% if links[i][j] != 0 %} </a> {% endif %}
+                                {% if inactivelinks[i][j] != 0 %} <a href={{ inactivelinks[i][j] }}> {% endif %}
+                                {{ inactivelist[i][j] }}
+                                {% if inactivelinks[i][j] != 0 %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>

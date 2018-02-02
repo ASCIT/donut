@@ -167,8 +167,44 @@ def view_item():
 @blueprint.route('/marketplace/manage', methods=['GET'])
 def manage():
     headers = ["Category", "Item", "Price", "Date", "", "", ""]
+
+    fields = [
+        'cat_id', 'item_title', 'item_price', 'item_timestamp', 'item_active',
+        'item_id'
+    ]
+    field_index_map = {k: v for v, k in enumerate(fields)}
+
+    owned_items = helpers.get_table_list_data(
+        "marketplace_items",
+        fields=fields,
+        attrs={"user_id": get_user_id(flask.session['username'])})
+
+    active_items = []
+    active_links = []
+    inactive_items = []
+    inactive_links = []
+    for item in owned_items:
+        item_active = item[field_index_map['item_active']]
+        item_id = item[field_index_map['item_id']]
+        (item, field_index_map) = helpers.row_text_from_managed_item(
+            item, field_index_map)
+        links = helpers.generate_links_for_managed_item(
+            item, field_index_map, item_active, item_id)
+
+        if item_active:
+            active_items.append(item)
+            active_links.append(links)
+        else:
+            inactive_items.append(item)
+            inactive_links.append(links)
+
     return helpers.render_with_top_marketplace_bar(
-        'manage.html', headers=headers, activelist=["hi"], inactivelist=[])
+        'manage.html',
+        headers=headers,
+        activelist=active_items,
+        activelinks=active_links,
+        inactivelist=inactive_items,
+        inactivelinks=inactive_links)
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
