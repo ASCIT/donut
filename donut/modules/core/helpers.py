@@ -111,9 +111,16 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    s = sqlalchemy.sql.select(["full_name", "email"]).select_from(
-        sqlalchemy.text("members NATURAL LEFT JOIN members_full_name"))
-    s = s.where(sqlalchemy.text("user_id = :u"))
+    s = "SELECT full_name, email "
+    s += "members NATURAL LEFT JOIN members_full_name "
+    #s += "WHERE `user_id`=%s"
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        #cursor.execute(s, [str(user_id)])
+        cursor.execute(s)
+        result = cursor.fetchall()
+
+    return result
 
     result = list(flask.g.db.execute(s, {'u': user_id}))
     return (result[0][0], result[0][1])  # convert from a 2d list to a 1d list

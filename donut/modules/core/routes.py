@@ -29,7 +29,17 @@ def get_members_list():
 @blueprint.route("/1/members/<int:user_id>/")
 def get_members(user_id):
     """GET /1/members/<int:user_id>/"""
-    return jsonify(results=helpers.get_member_data(user_id))
+    filterable_attrs = [
+        "uid", "last_name", "first_name", "middle_name", "email", "entry_year",
+        "graduation_year", "zip"
+    ]
+    
+    # Get the fields to return if they were passed in
+    fields = None
+    if "fields" in flask.request.args:
+        fields = [f.strip() for f in flask.request.args["fields"].split(',')]
+    
+    return json.dumps(helpers.get_member_data(user_id, fields=fields))
 
 
 @blueprint.route("/1/members/<int:user_id>/groups/")
