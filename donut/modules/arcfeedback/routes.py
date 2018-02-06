@@ -22,7 +22,7 @@ def arcfeedback_submit():
     complaint_id = helpers.register_complaint(data)
     if data['email'] != "":
         helpers.send_confirmation_email(data['email'], complaint_id)
-    flask.flash('Success')
+    flask.flash('Success. Link: ' + helpers.get_link(complaint_id))
     return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
 
 
@@ -30,4 +30,12 @@ def arcfeedback_submit():
 def arcfeedback_view_complaint(id):
     if not (helpers.get_id(id)):
         return flask.render_template("404.html")
-    return flask.render_template('complaint.html', uuid=id)
+    complaint_id = helpers.get_id(id)
+    #pack all the data we need into a dict
+    data = {}
+    data['emails'] = helpers.get_emails(complaint_id)
+    data['messages'] = helpers.get_messages(complaint_id)
+    summary = helpers.get_summary(complaint_id)
+    data['course'] = summary['course']
+    data['status'] = summary['status']
+    return flask.render_template('complaint.html', data=data)
