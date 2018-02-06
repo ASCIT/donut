@@ -12,7 +12,10 @@ YYYY_MM_DD = "%Y-%m-%d"
 
 @blueprint.route("/reserve")
 def rooms_home():
-    """Displays room reservation homepage"""
+    """
+        GET /reserve
+        Displays room reservation homepage
+    """
 
     return flask.render_template(
         "reservations.html",
@@ -24,9 +27,9 @@ def rooms_home():
         end_minute=None)
 
 
-@blueprint.route("/1/book-room/", methods=["POST"])
+@blueprint.route("/1/reservation/", methods=["POST"])
 def book():
-    """POST /1/book-room/"""
+    """POST /1/reservation/"""
 
     def book_error(message):
         flask.flash(message)
@@ -107,6 +110,8 @@ def book():
 
 @blueprint.route("/my-reservations")
 def my_reservations():
+    """GET /my-reservations"""
+
     reservations = helpers.get_my_reservations(
         flask.session["username"]) if "username" in flask.session else None
 
@@ -115,6 +120,8 @@ def my_reservations():
 
 @blueprint.route("/all-reservations")
 def all_reservations():
+    """GET /all-reservations"""
+
     now = datetime.now()
     next_week = now + timedelta(days=7)
 
@@ -143,15 +150,19 @@ def all_reservations():
         reservations=reservations)
 
 
-@blueprint.route("/reservation/<int:id>", methods=["GET"])
+@blueprint.route("/1/reservation/<int:id>", methods=["GET"])
 def view_reservation(id):
+    """GET /1/reservation/1"""
+
     return flask.render_template(
         "reservation-view.html",
         reservation=helpers.get_reservation(id),
         now=datetime.now())
 
 
-@blueprint.route("/reservation/<int:id>", methods=["DELETE"])
+@blueprint.route("/1/reservation/<int:id>", methods=["DELETE"])
 def delete_reservation(id):
+    """DELETE /1/reservation/1"""
+
     helpers.delete_reservation(id, flask.session.get("username"))
     return flask.jsonify({"success": True})
