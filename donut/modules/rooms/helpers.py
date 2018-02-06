@@ -10,7 +10,7 @@ def get_rooms():
     """Gets a list of rooms in the form {id, name, title, desc}"""
 
     query = sqlalchemy.text(
-        "SELECT id, location, title, description FROM rooms")
+        "SELECT room_id, location, title, description FROM rooms")
     rooms = flask.g.db.execute(query).fetchall()
 
     return [{
@@ -22,7 +22,7 @@ def get_rooms():
 
 
 def is_room(room_id_string):
-    query = sqlalchemy.text("SELECT id FROM rooms WHERE id = :room_id")
+    query = sqlalchemy.text("SELECT room_id FROM rooms WHERE room_id = :room_id")
     room = flask.g.db.execute(query, room_id=int(room_id_string)).fetchone()
     return room is not None
 
@@ -46,11 +46,11 @@ def get_all_reservations(rooms, start, end):
     if not rooms:
         rooms = [room["id"] for room in get_rooms()]
     query = sqlalchemy.text("""
-        SELECT reservation.id, location, start_time, end_time
+        SELECT reservation_id, location, start_time, end_time
         FROM room_reservations AS reservation LEFT OUTER JOIN rooms AS room
-        ON reservation.room_id = room.id
+        ON reservation.room_id = room.room_id
         WHERE :start <= end_time AND start_time <= :end
-        AND room.id IN (""" + ",".join(map(str, rooms)) + """)
+        AND room.room_id IN (""" + ",".join(map(str, rooms)) + """)
         ORDER BY start_time
     """)
     reservations = flask.g.db.execute(
@@ -83,12 +83,12 @@ def split(lst, pred):
 
 def get_my_reservations(username):
     query = sqlalchemy.text("""
-        SELECT reservation.id, location, start_time, end_time
+        SELECT reservation_id, location, start_time, end_time
         FROM room_reservations AS reservation
             LEFT OUTER JOIN users AS user
             ON reservation.user_id = user.user_id
             LEFT OUTER JOIN rooms AS room
-            ON reservation.room_id = room.id
+            ON reservation.room_id = room.room_id
         WHERE user.username = :username
         ORDER BY start_time
     """)
@@ -116,8 +116,8 @@ def get_reservation(id):
             LEFT OUTER JOIN users as user
             ON reservation.user_id = user.user_id
             LEFT OUTER JOIN rooms AS room
-            ON reservation.room_id = room_id
-        WHERE reservation.id = :id
+            ON reservation.room_id = room.room_id
+        WHERE reservation_id = :id
     """)
     location, title, name, start, end, reason, username = flask.g.db.execute(
         query, id=id).fetchone()
@@ -138,7 +138,7 @@ def delete_reservation(id, username):
 
     query = sqlalchemy.text("""
         DELETE FROM room_reservations
-        WHERE id = :id
+        WHERE reservation_id = :id
         AND user_id IN (
             SELECT user_id FROM users WHERE username = :username
         )
