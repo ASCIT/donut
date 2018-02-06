@@ -25,8 +25,8 @@ def arcfeedback_submit():
     flask.flash('Success. Link: ' + helpers.get_link(complaint_id))
     return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
 
-
-@blueprint.route('/arcfeedback/view/<uuid:id>')
+# api endpoint with all visible data
+@blueprint.route('/1/arcfeedback/view/<uuid:id>')
 def arcfeedback_view_complaint(id):
     if not (helpers.get_id(id)):
         return flask.render_template("404.html")
@@ -38,4 +38,4 @@ def arcfeedback_view_complaint(id):
     summary = helpers.get_summary(complaint_id)
     data['course'] = summary['course']
     data['status'] = summary['status']
-    return flask.render_template('complaint.html', data=data)
+    return flask.jsonify(data) #flask.render_template('complaint.html', data=data)

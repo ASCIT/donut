@@ -110,7 +110,7 @@ def get_messages(complaint_id):
     in the order they were added to the database
     """
     query ="""
-    SELECT poster, message FROM arc_complaint_messages ORDER BY time WHERE complaint_id = %s
+    SELECT poster, message FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -124,10 +124,10 @@ def get_summary(complaint_id):
 
     """
     fields = ['course', 'status']
-    query = 'SELECT ' + ', '.join(info_fields) + 'FROM arc_complaint_info WHERE complaint_id = %s'
+    query = 'SELECT ' + ', '.join(fields) + ' FROM arc_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        res = cursor.fetchall()
+        res = cursor.fetchone()
     return res
 
 
@@ -136,7 +136,7 @@ def get_emails(complaint_id):
     Returns a list of subscribed emails for this complaint
     """
     query = 'SELECT email FROM arc_complaint_emails WHERE complaint_id = %s'
-    with flask.g.pymsql_db.cursor() as cursor:
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
     return res
