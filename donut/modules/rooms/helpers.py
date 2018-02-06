@@ -22,7 +22,8 @@ def get_rooms():
 
 
 def is_room(room_id_string):
-    query = sqlalchemy.text("SELECT room_id FROM rooms WHERE room_id = :room_id")
+    query = sqlalchemy.text(
+        "SELECT room_id FROM rooms WHERE room_id = :room_id")
     room = flask.g.db.execute(query, room_id=int(room_id_string)).fetchone()
     return room is not None
 
