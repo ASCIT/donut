@@ -28,8 +28,6 @@ def register_complaint(data):
     status = 'new_msg'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (data['course'], status))
-        print("ran query to insert")
-        print("affected " + str(cursor.rowcount) + " rows")
     # grab the complaint id that we just inserted
     query = 'SELECT LAST_INSERT_ID()'
     with flask.g.pymysql_db.cursor() as cursor:
