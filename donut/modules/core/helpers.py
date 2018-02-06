@@ -1,6 +1,8 @@
 import flask
 import sqlalchemy
 
+import pymysql.cursors
+
 
 def get_member_data(user_id, fields=None):
     """
@@ -39,23 +41,19 @@ def get_member_data(user_id, fields=None):
     if len(user_id) == 0:
         return {}
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
-
-    # Build the WHERE clause
-    s = s.where(sqlalchemy.text("user_id IN :u"))
+    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE "
+    s += ' OR '.join(["`user_id`=%s" for _ in user_id])
 
     # Execute the query
-    result = flask.g.db.execute(s, {'u': user_id}).fetchall()
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, user_id)
+        result = cursor.fetchall()
 
-    # Return the row in the form of a dict (or list of dicts)
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
     if len(result) == 0:
         return {}
     elif len(result) == 1:
         return result[0]
-    else:
-        return result
+    return result
 
 
 def get_member_list_data(fields=None, attrs={}):
@@ -88,18 +86,18 @@ def get_member_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("members"))
+    s = "SELECT " + ', '.join(fields) + " FROM `members`"
 
-    # Build the WHERE clause
-    for key, value in list(attrs.items()):
-        s = s.where(sqlalchemy.text(key + "= :" + key))
+    if attrs:
+        s += " WHERE "
+        s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
+    values = [value for key, value in attrs.items()]
 
     # Execute the query
-    result = flask.g.db.execute(s, attrs).fetchall()
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, values)
+        result = cursor.fetchall()
 
-    # Return the rows in the form of a list of dicts
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
     return result
 
 
