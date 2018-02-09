@@ -1,33 +1,32 @@
 {% extends "layout.html" %}
 
 {% block page %}
-  <div class="container">
-    <div class="col-md-6 col-md-offset-3">
-      <div class="jumbotron">
-        <h2 class="text-center">Request an account</h2>
-        <form action="{{ url_for('account.request_account_submit') }}" method="post">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="uid">UID</label>
-                <input type="text" class="form-control" id="uid" name="uid" placeholder="Enter UID" autofocus />
-              </div>
-            </div>
+<div class="col-md-6 col-md-offset-3" style="float: none">
+  <div class="jumbotron">
+    <h2 class="text-center">Request an account</h2>
+    <form action="{{ url_for('account.request_account_submit') }}" method="post">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="uid">UID</label>
+            <input type="text" class="form-control" id="uid" name="uid" placeholder="Enter UID" autofocus />
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="last_name">Last name</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter name" />
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12 text-center">
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </form>
+        </div>
       </div>
-    </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="last_name">Last name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter name" />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
   </div>
+</div>
 {% endblock page %}

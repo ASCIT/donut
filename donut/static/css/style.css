@@ -22,22 +22,20 @@ body {
 }
 
 a:hover {
-  transition-duration: 0.5s;
   opacity: 1;
 }
 
 a {
-  transition-duration: 0.5s;
+  transition: opacity 0.5s;
   opacity: 0.9;
 }
 
 button:hover {
-  transition-duration: 0.5s;
   opacity: 1;
 }
 
 button {
-  transition-duration: 0.5s;
+  transition: opacity 0.5s;
   opacity: 0.9;
 }
 
@@ -72,13 +70,11 @@ button {
 }
 
 #footer {
-  margin-top: 25px;
   width: 100%;
   text-align: center;
   background-color: orange;
   position: absolute;
   z-index: 9999;
-  bottom: 0;
 }
 
 #copyright {
@@ -95,7 +91,7 @@ label.required:after {
   h2 {
     font-size: 5vw;
   }
-  
+
   .caret {
     display: none;
   }
@@ -180,7 +176,7 @@ label.required:after {
 
   #footer {
     position: fixed;
-    bottom: 0; 
+    bottom: 0;
   }
 
   #copyright {
