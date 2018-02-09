@@ -130,6 +130,13 @@ def get_summary(complaint_id):
         res = cursor.fetchone()
     return res
 
+def get_course(complaint_id):
+    return get_summary(complaint_id)['course']
+
+
+def get_status(complaint_id):
+    return get_summary(complaint_id)['status']
+
 
 def get_emails(complaint_id):
     """
@@ -140,3 +147,15 @@ def get_emails(complaint_id):
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
     return res
+
+
+def get_all_fields(complaint_id):
+    '''
+    Returns a dict with emails, messages, course, status
+    '''
+    data = {}
+    data['emails'] = get_emails(complaint_id)
+    data['messages'] = get_messages(complaint_id)
+    data['course'] = get_course(complaint_id)
+    data['status'] = get_status(complaint_id)
+    return data
