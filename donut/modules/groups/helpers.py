@@ -71,7 +71,7 @@ def get_position_holders(pos_id):
 
     Arguments:
         pos_id:     The position to look up
-    
+
     Returns:
         results:    A list where each element describes a user who holds the
                     position. Each element is a dict with key:value of

@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block navbar %}{% endblock %}
+{% block content %}
+	<button class="btn btn-info" onclick="history.back()">
+		&lt; Back
+	</button>
+	<div class="panel panel-default" style="position:relative;top:15px">
+		<div class="panel-heading">
+			<b>Reservation Details</b>
+		</div>
+		<div class="panel-body">
+			<p>Room: {{ reservation["title"] }} ({{ reservation["location"] }})</p>
+			<p>Held by: {{ reservation["name"] }}</p>
+			<p>From: {{ reservation["start"].strftime("%A, %B %d, %Y at %-I:%M %p") }}</p>
+			<p>To: {{ reservation["end"].strftime("%A, %B %d, %Y at %-I:%M %p") }}</p>
+			<p>
+				Activity:
+				{% if reservation["reason"] %} {{ reservation["reason"] }}
+				{% else %} N/A
+				{% endif %}
+			</p>
+			{% if
+				"username" in session and session["username"] == reservation["username"]
+				and reservation["start"] > now
+			%}
+				<button id="delete" class="btn btn-danger">Delete</button>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			$("button#delete").click(function() {
+				var $this = $(this).blur()
+				if (!confirm("Do you want to delete this reservation?")) return
+
+				$this
+					.text("Deleting...")
+					.removeClass("btn-danger")
+					.addClass("btn-disabled")
+					.blur()
+				$.ajax({
+					url: "/1/reservation" +
+						location.pathname.substring(location.pathname.lastIndexOf("/")),
+					method: "DELETE",
+					success: function() {
+						$this.text("Deleted")
+						setTimeout($this.remove.bind($this), 1000)
+						localStorage.setItem("deleted", true)
+					},
+					error: function() {
+						$this.text("Failed to delete")
+						setTimeout(function() {
+							$this
+								.text("Delete")
+								.removeClass("btn-disabled")
+								.addClass("btn-danger")
+						}, 2000)
+					}
+				})
+			})
+		})
+	</script>
+{% endblock %}

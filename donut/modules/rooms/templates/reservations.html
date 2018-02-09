@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block page %}
+	<div class="col-md-6 col-md-offset-3" style="float: none; padding-bottom: 25px">
+		<ul class="nav nav-tabs nav-justified">
+			<li class="active">
+				<a href="#book" aria-controls="book" role="tab" data-toggle="tab">
+					Book a room
+				</a>
+			</li>
+			<li>
+				<a href="#mine" aria-controls="mine" role="tab" data-toggle="tab">
+					My reservations
+				</a>
+			</li>
+			<li>
+				<a href="#all" aria-controls="all" role="tab" data-toggle="tab">
+					All reservations
+				</a>
+			</li>
+			<li>
+				<a href="#rooms" aria-controls="rooms" role="tab" data-toggle="tab">
+					Room info
+				</a>
+			</li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="book">
+				{% include "book.html" %}
+			</div>
+			<div class="tab-pane" id="mine">
+				{% include "mine.html" %}
+			</div>
+			<div class="tab-pane" id="all">
+				{% include "all.html" %}
+			</div>
+			<div class="tab-pane" id="rooms">
+				{% include "rooms.html" %}
+			</div>
+		</div>
+	</div>
+{% endblock %}
