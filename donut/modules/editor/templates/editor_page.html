@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="container">
+  <div class="col-md-24">
+    <div class="jumbotron">
+      <h1 id = "title" class="text-center">Editing</h1>
+
+      <textarea id="title" rows="10" cols="82"></textarea>
+      <button id="change_title" onClick="change_title()">Change Title</button>
+      <hr/>
+
+      <textarea id="source" rows="10" cols="82"></textarea>
+      <hr/>
+      <button id="runBtn" onClick="run()">preview</button>
+      <button id="save" onClick="save()">Save Changes</button>
+      <div id="preview">
+
+      </div>
+    </div>
+  </div>
+</div>
+<!--<script src="bower_components/showdown/1.0.1/showdown.min.js"></script>-->
+<script src="static/script.js"></script>
+{% endblock %}
+

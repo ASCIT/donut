@@ -36,8 +36,20 @@ def reporters():
 
 @blueprint.route('/BoC/bylaws')
 def bylaws():
-    """Display Boc bylaws  page."""
+    """Display Boc bylaws page."""
     return flask.render_template('BoC.bylaws.html')
+
+
+@blueprint.route('/ascit/bylaws')
+def ascit_bylaws():
+    """Display ASCIT bylaws page"""
+    return flask.render_template('ascit_bylaws.html')
+
+
+@blueprint.route('/honor_system_handbook')
+def honor_system_handbook():
+    """Display the honor system faculty handbook"""
+    return flask.render_template('honor_system_handbook.html')
 
 
 @blueprint.route('/CRC')
