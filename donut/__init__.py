@@ -36,7 +36,6 @@ app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
 
 
-
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
 
