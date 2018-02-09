@@ -10,7 +10,6 @@ var counter = 0;
 function init(approvedGroupIds, approvedGroupNames,
         allPos) {
     filterPositions(allPos);
-    debugger;
     getGroupList();
     collectPositions();
     populateTables();
