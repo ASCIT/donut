@@ -11,7 +11,3 @@ def home():
 def contact():
     return flask.render_template('contact.html')
 
-@app.route('/directory')
-def directory_search():
-    return flask.render_template('directory_search.html')
-
