@@ -1,6 +1,7 @@
 import flask
 from flask_bootstrap import Bootstrap
 import sqlalchemy
+import pymysql.cursors
 import os
 import pdb
 import traceback
@@ -17,6 +18,7 @@ from donut.modules import auth
 from donut.modules import marketplace
 from donut.modules import core
 from donut.modules import groups
+from donut.modules import rooms
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -27,6 +29,7 @@ app.register_blueprint(auth.blueprint)
 app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
 app.register_blueprint(groups.blueprint)
+app.register_blueprint(rooms.blueprint)
 
 
 def init(environment_name):
@@ -52,6 +55,9 @@ def init(environment_name):
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
     app.config["SECRET_KEY"] = environment.secret_key
+    app.config["DB_USER"] = environment.db_user
+    app.config["DB_PASSWORD"] = environment.db_password
+    app.config["DB_NAME"] = environment.db_name
 
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH
@@ -64,11 +70,23 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
-    """Logic executed before request is processed."""
     if 'DB_URI' in app.config:
         engine = sqlalchemy.create_engine(
             app.config['DB_URI'], convert_unicode=True)
         flask.g.db = engine.connect()
+    """Logic executed before request is processed."""
+    if ('DB_NAME' in app.config and 'DB_USER' in app.config
+            and 'DB_PASSWORD' in app.config):
+        connection = pymysql.connect(
+            host='localhost',
+            database=app.config['DB_NAME'],
+            user=app.config['DB_USER'],
+            password=app.config['DB_PASSWORD'],
+            db='db',
+            autocommit=True,
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor)
+        flask.g.pymysql_db = connection
 
 
 @app.teardown_request
