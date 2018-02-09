@@ -1,0 +1,132 @@
+{% if "username" in session %}
+<form action={{ url_for(".book") }} method="POST">
+	<div class="form-group">
+		<label for="room" class="required">Room</label>
+		<select class="form-control" name="room" id="room" required autofocus>
+			<option value="">Please choose a room</option>
+			{% for room_option in rooms %}
+				<option
+					value={{ room_option["id"] }}
+					{% if (room is not none) and room_option["id"] == room %}
+						selected
+					{% endif %}
+				>
+					{{ room_option["name"] }}
+				</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="date" class="required">Date</label>
+		<input
+			type="date"
+			class="form-control"
+			name="date"
+			id="date"
+			required
+			{% if date is not none %}value={{ date }}{% endif %}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="start_hour" class="required">Start time</label>
+		<div class="input-group">
+			<input
+				type="number"
+				class="form-control"
+				name="start_hour"
+				id="start_hour"
+				required
+				min="1"
+				placeholder="4"
+				max="12"
+				{% if start_hour is not none %}value={{ start_hour }}{% endif %}
+			/>
+			<span class="input-group-addon">:</span>
+			<input
+				type="number"
+				class="form-control"
+				name="start_minute"
+				id="start_minute"
+				required
+				min="0"
+				placeholder="00"
+				max="59"
+				{% if start_minute is not none %}value={{ start_minute }}{% endif %}
+			/>
+			<span class="input-group-btn" data-toggle="buttons">
+				<label class="btn btn-default{% if start_period == 'A' %} active{% endif %}">
+					<input
+						type="radio"
+						name="start_period"
+						value="A"
+						{% if start_period == "A" %}checked{% endif %}
+					/>
+					AM
+				</label>
+				<label class="btn btn-default{% if start_period != 'A' %} active{% endif %}">
+					<input
+						type="radio"
+						name="start_period"
+						value="P"
+						{% if start_period != "A" %}checked{% endif %}
+					/>
+					PM
+				</label>
+			</span>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="end_hour" class="required">End time</label>
+		<div class="input-group">
+			<input
+				type="number"
+				class="form-control"
+				name="end_hour"
+				id="end_hour"
+				required
+				min="1"
+				placeholder="6"
+				max="12"
+				{% if end_hour is not none %}value={{ end_hour }}{% endif %}
+			/>
+			<span class="input-group-addon">:</span>
+			<input
+				type="number"
+				class="form-control"
+				name="end_minute"
+				id="end_minute"
+				required
+				min="0"
+				placeholder="00"
+				max="59"
+				{% if end_minute is not none %}value={{ end_minute }}{% endif %}
+			/>
+			<span class="input-group-btn" data-toggle="buttons">
+				<label class="btn btn-default{% if end_period == 'A' %} active{% endif %}">
+					<input
+						type="radio"
+						name="end_period"
+						value="A"
+						{% if end_period == "A" %}checked{% endif %}
+					/> AM
+				</label>
+				<label class="btn btn-default{% if end_period != 'A' %} active{% endif %}">
+					<input
+						type="radio"
+						name="end_period"
+						value="P"
+						{% if end_period != "A" %}checked{% endif %}
+					/> PM
+				</label>
+			</span>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="reason">Reason</label>
+		<textarea class="form-control" name="reason" id="reason" placeholder="Studying for the Ch 41 midterm with friends">{% if reason is not none %}{{reason}}{% endif %}</textarea>
+	</div>
+	<button type="submit" class="btn btn-primary">Reserve</button>
+</form>
+{% else %}
+	<h2>Please log in to reserve a room</h2>
+{% endif %}

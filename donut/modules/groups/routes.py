@@ -25,6 +25,11 @@ def get_group_positions(group_id):
     return jsonify(helpers.get_group_positions(group_id))
 
 
+@blueprint.route("/1/positions/")
+def get_positions():
+    return jsonify(helpers.get_position_data())
+
+
 @blueprint.route("/1/groups/<int:group_id>/")
 def get_groups(group_id):
     """GET /1/groups/<int:group_id>/"""
@@ -35,3 +40,9 @@ def get_groups(group_id):
 def get_group_members(group_id):
     """GET /1/groups/<int:group_id>/"""
     return jsonify(helpers.get_members_by_group(group_id))
+
+
+@blueprint.route("/1/positions/<int:pos_id>/")
+def get_pos_holders(pos_id):
+    """Get /1/positions/<int:pos_id>/"""
+    return jsonify(helpers.get_position_holders(pos_id))

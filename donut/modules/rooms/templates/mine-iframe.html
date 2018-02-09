@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block navbar %}{% endblock %}
+{% block content %}
+	{% if reservations["upcoming"] %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Upcoming reservations</h3>
+			</div>
+			<div class="panel-body">
+				<div class="list-group" style="margin-bottom: 0">
+					{% for reservation in reservations["upcoming"] %}
+						<div class="list-group-item">
+							<p class='list-group-item-text'>
+								{{ reservation["room"] }} on
+								{{ reservation["start"].strftime("%-m/%-d/%y") }} from
+								{{ reservation["start"].strftime("%-I:%M %p") }} to
+								{{ reservation["end"].strftime("%-I:%M %p") }}
+
+								<a href="/1/reservation/{{ reservation['id'] }}">View</a>
+							</p>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	{% if reservations["past"] %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Past reservations</h3>
+			</div>
+			<div class="panel-body">
+				<div class="list-group" style="margin-bottom: 0">
+					{% for reservation in reservations["past"] %}
+						<div class="list-group-item">
+							<p class='list-group-item-text'>
+								{{ reservation["room"] }} on
+								{{ reservation["start"].strftime("%-m/%-d/%y") }} from
+								{{ reservation["start"].strftime("%-I:%M %p") }} to
+								{{ reservation["end"].strftime("%-I:%M %p") }}
+
+								<a href="/1/reservation/{{ reservation['id'] }}">View</a>
+							</p>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	{% if not (reservations["past"] or reservations["upcoming"]) %}
+		No reservations found
+	{% endif %}
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		if (localStorage.getItem("deleted")) {
+			localStorage.removeItem("deleted")
+			location.reload()
+		}
+	</script>
+{% endblock %}
