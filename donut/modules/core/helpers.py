@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 
 import pymysql.cursors
 
@@ -121,9 +120,6 @@ def get_name_and_email(user_id):
         result = cursor.fetchall()
 
     return (result[0]["full_name"], result[0]["email"])
-
-    result = list(flask.g.db.execute(s, {'u': user_id}))
-    return (result[0][0], result[0][1])  # convert from a 2d list to a 1d list
 
 
 def get_group_list_of_member(user_id):

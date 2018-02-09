@@ -8,7 +8,6 @@ from donut.modules.core.helpers import (get_member_data, get_member_list_data,
                                         get_group_list_of_member)
 from donut.modules.core.routes import get_members
 
-
 # Helpers
 def test_get_member_data(client):
     assert get_member_data(1)["user_id"] == 1
@@ -47,4 +46,5 @@ def test_get_group_list_of_member(client):
 
 # Test Routes
 def test_get_members(client):
-    assert get_members(1) is not None
+    with app.test_request_context('/'):
+        assert get_members(1) is not None
