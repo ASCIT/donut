@@ -1,5 +1,6 @@
 import flask
 import sqlalchemy
+import pymysql.cursors
 from donut.modules.core import helpers as core
 
 
@@ -28,6 +29,19 @@ def get_group_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
+    s = "SELECT " + ', '.join(fields) + " FROM `groups` "
+    if attrs:
+        s += "WHERE "
+        s += " AND ".join([key + "= %s" for key, value in attrs.items()])
+    values = [value for key, value in attrs.items()]
+
+    # Execute the query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, values)
+        result = cursor.fetchall()
+    
+    return list(result)
+   
     # Build the SELECT and FROM clauses
     s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
 
