@@ -70,13 +70,11 @@ button {
 }
 
 #footer {
-  margin-top: 25px;
   width: 100%;
   text-align: center;
   background-color: orange;
   position: absolute;
   z-index: 9999;
-  bottom: 0;
 }
 
 #copyright {
