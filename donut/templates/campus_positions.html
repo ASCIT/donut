@@ -15,10 +15,10 @@
         <div id="viewAll" class="tab-pane fade in active">
             <div class="input">
                 <select class="form-control" id="groupSelect" onchange="filterChange()">
-                    <option>All Groups</option>
+                    <option value="0">All Groups</option>
                 </select>
                 <select class="form-control" id="positionSelect" onchange="filterChange()">
-                    <option>All Positions</option>
+                    <option value="0">All Positions</option>
                 </select>
             </div>
             <table id="positionsTable">
@@ -82,6 +82,7 @@
     </div>
 </div>
 <script type="text/javascript">
-init({{approved_group_ids}},{{approved_group_names|safe}});
+init({{approved_group_ids}},{{approved_group_names|safe}},
+    {{all_positions|safe}});
 </script>
 {% endblock %}
