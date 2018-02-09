@@ -42,7 +42,23 @@ def arcfeedback_view_complaint(id):
     if not (helpers.get_id(id)):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
-    data = helpers.get_all_fields(complaint_id)
-    return flask.render_template('complaint.html', data=data)
+    complaint = helpers.get_all_fields(complaint_id)
+    return flask.render_template('complaint.html', complaint=complaint)
+
+
+# add a message to this post
+@blueprint.route('/1/arcfeedback/add/<uuid:id>', methods=['POST'])
+def arcfeedback_add_msg(id):
+    complaint_id = helpers.get_id(id)
+    fields = ['message', 'poster']
+    data = {}
+    for field in fields:
+        data[field] = flask.request.form.get(field)
+    if data['message'] == "":
+        #TODO return an error here
+        pass
+    helpers.add_msg(complaint_id, data['message'], data['poster'])
+    return # some kind of success memo?
+
 
 # TODO: summary page for arc members
