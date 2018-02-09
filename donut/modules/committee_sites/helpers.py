@@ -18,8 +18,9 @@ def get_BoC_member():
     high_pos = []
     pos_house = []
     counter = 0
-    for fname, lname, pos_name, email in result:
-        name = fname + lname
+    for first_name, last_name, pos_name, email in result:
+        print(first_name, last_name)
+        name = first_name + " " + last_name
         if pos_name == 'Chair' or 'ecretary' in pos_name:
             high_pos.append((name, pos_name, email))
         else:
@@ -50,7 +51,7 @@ def get_CRC_member():
     pos_house = []
     counter = 0
     for fname, lname, pos_name, email in result:
-        name = fname + lname
+        name = fname + " " + lname
         if pos_name == 'Chair' or 'ecretary' in pos_name:
             high_pos.append((name, pos_name, email))
         else:
