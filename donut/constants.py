@@ -15,3 +15,9 @@ PWD_RESET_KEY_LENGTH = 32
 # Length of time before recovery key expires, in minutes.
 PWD_RESET_KEY_EXPIRATION = 1 * 24 * 60
 CREATE_ACCOUNT_KEY_LENGTH = 32
+"""Value of members.gender if member's gender is unknown"""
+NO_GENDER = None
+"""Value of members.gender if member is female"""
+FEMALE = 0
+"""Value of members.gender if member is male"""
+MALE = 1

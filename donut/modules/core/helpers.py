@@ -121,7 +121,7 @@ def get_name_and_email(user_id):
 
 def get_group_list_of_member(user_id):
     """
-    Queries the database and returns list of groups and admin status 
+    Queries the database and returns list of groups and admin status
     for a given id
     Arguments:
         user_id: The user_id for query.

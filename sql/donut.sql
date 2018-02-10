@@ -10,14 +10,14 @@ DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS privacies;
-DROP TABLE IF EXISTS member_options; 
-DROP TABLE IF EXISTS options; 
-DROP VIEW IF EXISTS members_full_name; 
-DROP TABLE IF EXISTS members; 
+DROP TABLE IF EXISTS member_options;
+DROP TABLE IF EXISTS options;
+DROP VIEW IF EXISTS members_full_name;
+DROP TABLE IF EXISTS members;
 -- Members Table
 CREATE TABLE members (
-    user_id            INT          NOT NULL AUTO_INCREMENT, 
-    uid                CHAR(7)      NOT NULL,  
+    user_id            INT          NOT NULL AUTO_INCREMENT,
+    uid                CHAR(7)      NOT NULL,
     last_name          VARCHAR(255) NOT NULL,
     first_name         VARCHAR(255) NOT NULL,
     preferred_name     VARCHAR(255) DEFAULT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE members (
     phone              VARCHAR(64)  DEFAULT NULL,
     gender             TINYINT      DEFAULT NULL, -- Numerical code that will be
                                                   -- stored in code
-    gender_custom      VARCHAR(32)  DEFAULT NULL, -- TODO: Implement showing 
+    gender_custom      VARCHAR(32)  DEFAULT NULL, -- TODO: Implement showing
                                                   -- custom gender options
     birthday           DATE         DEFAULT NULL,
     entry_year         YEAR(4)      DEFAULT NULL,
@@ -54,7 +54,7 @@ CREATE VIEW members_full_name AS (
 -- Major Option Table
 CREATE TABLE options (
     option_id     INT         NOT NULL AUTO_INCREMENT,
-    option_name   VARCHAR(16) NOT NULL,
+    option_name   VARCHAR(50) NOT NULL,
     PRIMARY KEY (option_id)
 );
 
@@ -62,12 +62,12 @@ CREATE TABLE options (
 -- Many to many relationship between members and options
 CREATE TABLE member_options (
     user_id     INT,
-    option_id   INT, 
+    option_id   INT,
     option_type   VARCHAR(8)  NOT NULL,
     PRIMARY KEY (user_id, option_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (option_id) REFERENCES options(option_id)
-); 
+);
 
 -- Privacy Level of Member Info Table
 -- Directory privacies for who can see data.
@@ -83,7 +83,7 @@ CREATE TABLE privacies (
 -- Users Table
 CREATE TABLE users (
     user_id                   INT,
-    username                  VARCHAR(32)  NOT NULL,   
+    username                  VARCHAR(32)  NOT NULL,
     last_login                DATETIME     DEFAULT NULL,
     password_hash             VARCHAR(255) NOT NULL,
     password_reset_key        CHAR(32)     DEFAULT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE groups (
     newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
                                                         -- an email group
     anyone_can_send         BOOLEAN      DEFAULT FALSE, -- This flag controls
-                                                        -- whether or not 
+                                                        -- whether or not
                                                         -- anyone can send
                                                         -- emails to the group
     members_can_send        BOOLEAN      DEFAULT FALSE, -- Controls if any
@@ -157,7 +157,7 @@ CREATE VIEW group_houses AS (
 CREATE VIEW group_house_membership AS (
     SELECT user_id, group_id, pos_id
     FROM group_houses NATURAL JOIN positions NATURAL JOIN position_holders
-    WHERE UPPER(pos_name) = UPPER('Full Member') 
+    WHERE UPPER(pos_name) = UPPER('Full Member')
         OR UPPER(pos_name) = UPPER('Social Member')
 );
 
