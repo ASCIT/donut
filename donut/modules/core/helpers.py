@@ -116,7 +116,6 @@ def get_name_and_email(user_id):
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [str(user_id)])
-        #cursor.execute(s)
         result = cursor.fetchall()
 
     return (result[0]["full_name"], result[0]["email"])
@@ -131,13 +130,12 @@ def get_group_list_of_member(user_id):
     Returns:
         result: All the groups that an user_id is a part of
     """
-    fields = ["group_id", "group_name", "control"]
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text(
-            " group_members NATURAL JOIN groups NATURAL JOIN members"))
+    s = "SELECT `group_id`, `group_name`, `control` "
+    s += "FROM group_members NATURAL JOIN groups NATURAL JOIN members "
+    s += "WHERE `user_id` = %s"
 
-    s = s.where(sqlalchemy.text("user_id = :u"))
-    result = flask.g.db.execute(s, u=user_id)
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [str(user_id)])
+        result = cursor.fetchall()
 
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    return result
+    return result if result else []
