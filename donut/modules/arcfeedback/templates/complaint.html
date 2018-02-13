@@ -26,5 +26,47 @@
     {% endfor %}
   </table>
 </div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <p>Add a comment<p>
+  </div>
+  <div class="panel-body">
+    <form method="POST" id="addMessage">
+      <div class="form-group">
+	<p>Name: </p>
+	<input class="form-control" type="text" name="poster" />
+      </div>
+      <div class="form-group">
+	<p>Message: </p>
+	<textarea class="form-control" name="message" rows="10" required></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+ function addMessage(response) {
+     //TODO
+ }
+ 
+ function addMessageError(response) {
+     //TODO
+ }
+ $(function() {
+     $('#addMessage').submit = function(e) {
+	 e.preventDefault();
+	 $.ajax({
+	     url: {{ url_for('arcfeedback.arcfeedback_add_msg') }},
+	     data: $('#addMessage').serialize(),
+	     type: 'POST',
+	     success: addMessage(response),
+	     error: addMessageError(response)
+	 }); 
+     });
+ });
+</script>
 
 {% endblock %}
