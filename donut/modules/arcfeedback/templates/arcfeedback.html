@@ -30,20 +30,28 @@
 	      <input type="hidden" name="state" value="report" />
 	      <table id="feedback" class="table">
 		<tr>
+		  <div class="form-group">
 		  <td class="feedback">Name: </td>
-		  <td class="feedback"><input size="40" type="text" name="name" /></td>
+		  <td class="feedback"><input type="text" name="name" class="form-control" /></td>
+		  </div>
 		</tr>
 		<tr>
+		  <div class="form-group">
 		  <td class="feedback">Reply Email: </td>
-		  <td class="feedback"><input size="40" type="text" name="email" /></td>
+		  <td class="feedback"><input type="email" name="email" class="form-control" /></td>
+		  </div>
 		</tr>
 		<tr>
+		  <div class="form-group">
 		  <td class="feedback">Course*: </td>
-		  <td class="feedback"><input size="40" type="text" name="course" /></td>
+		  <td class="feedback"><input type="text" name="course" class="form-control" required /></td>
+		  </div>
 		</tr>
 		<tr>
+		  <div class="form-group">
 		  <td class="feedback">Feedback*: </td>
-		  <td class="feedback"><textarea name="msg" rows="10" cols="40"></textarea></td>
+		  <td class="feedback"><textarea class="form-control" name="msg" rows="10" cols="40" required ></textarea></td>
+		  </div>
 		</tr>
 	      </table>
 	      <div class="row">
