@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 import pymysql.cursors
 
 from donut import auth_utils
