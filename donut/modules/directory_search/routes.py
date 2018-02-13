@@ -1,6 +1,6 @@
 import flask
 import json
-from flask import jsonify
+from flask import jsonify, redirect
 
 from donut.modules.directory_search import blueprint, helpers
 
@@ -8,6 +8,12 @@ from donut.modules.directory_search import blueprint, helpers
 @blueprint.route("/directory")
 def directory_search():
     return flask.render_template("directory_search.html")
+
+
+@blueprint.route('/1/users/me')
+def my_directory_page():
+    return redirect('/1/users/' +
+                    str(helpers.get_user_id(flask.session['username'])))
 
 
 @blueprint.route('/1/users/<int:user_id>')

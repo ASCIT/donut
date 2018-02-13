@@ -68,7 +68,7 @@
                     </li>
                     {% else %}
                     <li>
-                        <a href="#">Greetings, {{ session['username'] }}</a>
+                        <a href="/1/users/me">Greetings, {{ session['username'] }}</a>
                     </li>
                     <li>
                         <form action="{{ url_for('auth.logout') }}">

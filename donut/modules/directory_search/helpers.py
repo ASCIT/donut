@@ -65,3 +65,13 @@ def get_users_by_name_query(search):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, search)
         return cursor.fetchall()
+
+
+def get_user_id(username):
+    query = 'SELECT user_id FROM users WHERE username = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [username])
+        user = cursor.fetchone()
+    if user is None:
+        return 0  #will show 'No such user' page
+    return user['user_id']
