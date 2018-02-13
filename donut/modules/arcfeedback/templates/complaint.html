@@ -47,6 +47,7 @@
 
 {% endblock %}
 {% block scripts %}
+{{ super() }}
 <script>
  function addMessage(response) {
      //TODO
@@ -56,14 +57,14 @@
      //TODO
  }
  $(function() {
-     $('#addMessage').submit = function(e) {
+     $('#addMessage').submit(function(e) {
 	 e.preventDefault();
 	 $.ajax({
 	     url: {{ url_for('arcfeedback.arcfeedback_add_msg') }},
 	     data: $('#addMessage').serialize(),
 	     type: 'POST',
-	     success: addMessage(response),
-	     error: addMessageError(response)
+	     success: addMessage,
+	     error: addMessageError
 	 }); 
      });
  });
