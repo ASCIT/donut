@@ -1,5 +1,6 @@
 import flask
 import sqlalchemy
+import pymysql.cursors
 
 from donut import auth_utils
 from donut import constants
@@ -22,15 +23,14 @@ def authenticate(username, password):
         return None
 
     # Get the correct password hash and user_id from the database.
-    query = sqlalchemy.text("""
-    SELECT user_id, password_hash
-    FROM users
-    WHERE username=:u
-    """)
-    result = flask.g.db.execute(query, u=username).first()
+    s = "SELECT `user_id`, `password_hash` FROM `users` WHERE `username`=%s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [username])
+        result = cursor.fetchone()
+
     if result is None:
-        # Invalid username.
         return None
+
     user_id = result['user_id']
     password_hash = result['password_hash']
 
@@ -55,30 +55,27 @@ def handle_forgotten_password(username, email):
   success, False if the (username, email) pair is not valid.
   """
     # Check username, email pair.
-    query = sqlalchemy.text("""
-    SELECT user_id, first_name, email
-    FROM members
-      NATURAL JOIN users
-    WHERE username = :u
-    """)
-    result = flask.g.db.execute(query, u=username).first()
+    s = """SELECT `user_id`, `first_name`, `email` 
+    FROM `members` NATURAL JOIN `users` WHERE `username` = %s"""
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [username])
+        result = cursor.fetchone()
 
     if result is not None and email == result['email']:
         name = result['first_name']
         user_id = result['user_id']
         # Generate a reset key for the user.
         reset_key = auth_utils.generate_reset_key()
-        query = sqlalchemy.text("""
-      UPDATE users
-      SET password_reset_key = :rk,
-      password_reset_expiration = NOW() + INTERVAL :time MINUTE
-      WHERE username = :u
-      """)
-        flask.g.db.execute(
-            query,
-            rk=reset_key,
-            time=constants.PWD_RESET_KEY_EXPIRATION,
-            u=username)
+        s = """
+            UPDATE users
+            SET password_reset_key = %s,
+            password_reset_expiration = NOW() + INTERVAL %s MINUTE
+            WHERE username = %s
+            """
+        with flask.g.pymysql_db.cursor() as cursor:
+            values = [reset_key, constants.PWD_RESET_KEY_EXPIRATION, username]
+            cursor.execute(s, values)
         # Determine if we want to say "your link expires in _ minutes" or
         # "your link expires in _ hours".
         if constants.PWD_RESET_KEY_EXPIRATION < 60:
@@ -109,20 +106,23 @@ def handle_password_reset(username, new_password, new_password2):
 
     auth_utils.set_password(username, new_password)
     # Clean up the password reset key, so that it cannot be used again.
-    query = sqlalchemy.text("""
+    s = """
     UPDATE users
     SET password_reset_key = NULL, password_reset_expiration = NULL
-    WHERE username = :u
-    """)
-    flask.g.db.execute(query, u=username)
+    WHERE username = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [username])
     # Get the user's email.
-    query = sqlalchemy.text("""
+    s = """
     SELECT first_name, email
     FROM members
       NATURAL JOIN users
-    WHERE username = :u
-    """)
-    result = flask.g.db.execute(query, u=username).first()
+    WHERE username = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [username])
+        result = cursor.fetchone()
     # Send confirmation email to user.
     email = result['email']
     name = result['first_name']

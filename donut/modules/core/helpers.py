@@ -110,9 +110,9 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    s = "SELECT `full_name`, `email` "
-    s += "FROM `members` NATURAL LEFT JOIN `members_full_name` "
-    s += "WHERE `user_id`=%s"
+    s = """SELECT `full_name`, `email` 
+    FROM `members` NATURAL LEFT JOIN `members_full_name` 
+    WHERE `user_id`=%s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [str(user_id)])
@@ -130,9 +130,9 @@ def get_group_list_of_member(user_id):
     Returns:
         result: All the groups that an user_id is a part of
     """
-    s = "SELECT `group_id`, `group_name`, `control` "
-    s += "FROM group_members NATURAL JOIN groups NATURAL JOIN members "
-    s += "WHERE `user_id` = %s"
+    s = """SELECT `group_id`, `group_name`, `control` 
+    FROM `group_members` NATURAL JOIN `groups` NATURAL JOIN `members` 
+    WHERE `user_id` = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [str(user_id)])

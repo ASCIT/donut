@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 import pymysql.cursors
 from donut.modules.core import helpers as core
 
