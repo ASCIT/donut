@@ -79,14 +79,14 @@ def add_msg(complaint_id, message, poster):
 
 def get_link(complaint_id):
     """
-    Gets a link to the view page for this complaint id
+    Gets a (fully qualified) link to the view page for this complaint id
     """
     query = 'SELECT uuid FROM arc_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
         uuid = res['uuid']
-    return flask.url_for('arcfeedback.arcfeedback_view_complaint', id=uuid)
+    return flask.url_for('arcfeedback.arcfeedback_view_complaint', id=uuid, _external=True)
 
 
 def get_id(uuid):
