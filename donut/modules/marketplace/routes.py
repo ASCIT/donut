@@ -13,8 +13,8 @@ def marketplace():
 
     return helpers.render_with_top_marketplace_bar(
         'marketplace.html', cat_id=0)
-    # cat_id = 0 indicates that the select object should be set to "all
-    # categories", which is the default
+    # cat_id = 0 indicates that the select object should be set to 'all
+    # categories', which is the default
 
 
 @blueprint.route('/marketplace/view')
@@ -77,7 +77,7 @@ def query():
     else:
         attrs['cat_id'] = category_id
         # only pass in the cat_id to get_marketplace_items_list_data if it's not
-        # "all", because cat_id (and everything in attrs) goes into a WHERE
+        # 'all', because cat_id (and everything in attrs) goes into a WHERE
         # clause, and not specifying is the same as selecting all.
 
     # now, the category id had better be a number
@@ -102,7 +102,7 @@ def query():
 def view_item():
     """View additional details about item <item_id>, passed through flask.request.args."""
 
-    if "item_id" not in flask.request.args:
+    if 'item_id' not in flask.request.args:
         return flask.render_template('404.html'), 404
 
     # make sure item_id is a number
@@ -139,16 +139,16 @@ def view_item():
         for sublist in helpers.get_table_list_data('marketplace_categories',
                                                    ['cat_id', 'cat_title'])
     }
-    cat_title = cat_id_map[stored["cat_id"]]
+    cat_title = cat_id_map[stored['cat_id']]
 
     # full_name and email from user_id
     (stored['full_name'],
      stored['email']) = get_name_and_email(stored['user_id'])
 
-    # if any field is None, replace it with "" to display more cleanly
+    # if any field is None, replace it with '' to display more cleanly
     for field in stored:
         if stored[field] == None:
-            stored[field] = ""
+            stored[field] = ''
 
     has_edit_privs = False
     if 'username' in flask.session:
@@ -166,10 +166,40 @@ def view_item():
 
 @blueprint.route('/marketplace/manage', methods=['GET'])
 def manage():
-    """if 'state' in flask.request.form:
-        # archive, unarchive, confirm
-    """
-    return helpers.display_managed_items()
+    if 'username' not in flask.session:
+        # they're not logged in, kick them out
+        flask.session['next'] = flask.url_for('.manage')
+        return helpers.render_with_top_marketplace_bar('requires_login.html')
+
+    if 'state' in flask.request.args:
+        has_edit_privs = False
+        current_user_id = get_user_id(flask.session['username'])
+        #if stored['user_id'] == current_user_id or check_permission( Permissions.ADMIN):
+        # has_edit_privs = True
+
+        # archive, unarchive, delete
+        if flask.request.args['state'] == 'archive':
+            if 'item' not in flask.request.args:
+                return flask.render_template('404.html'), 404
+            item = flask.request.args['item']
+            helpers.manage_set_active_status(item, 0)
+            return helpers.display_managed_items()
+
+        elif flask.request.args['state'] == 'unarchive':
+            if 'item' not in flask.request.args:
+                return flask.render_template('404.html'), 404
+            item = flask.request.args['item']
+            helpers.manage_set_active_status(item, 1)
+            return helpers.display_managed_items()
+
+        elif flask.request.args['state'] == 'delete':
+            pass
+
+        else:
+            return flask.render_template('404.html'), 404
+
+    else:
+        return helpers.display_managed_items()
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
@@ -194,7 +224,7 @@ def sell():
     page = Page.CATEGORY  # default is first page; category select page
     if 'page' in flask.request.form:
         # but if we pass it in, get it
-        page = Page.__members__[flask.request.form["page"]]
+        page = Page.__members__[flask.request.form['page']]
 
     if not page in Page:
         flask.flash('Invalid page')
@@ -263,7 +293,7 @@ def sell():
     # prev_page is used for the back button
     prev_page = page
     if 'prev_page' in flask.request.form:
-        # make sure flask.request.form["prev_page"] is an int, and that it's a valid page to go to (i.e. in the enum)
+        # make sure flask.request.form['prev_page'] is an int, and that it's a valid page to go to (i.e. in the enum)
         try:
             prev_page = Page(int(flask.request.form['prev_page']))
         except ValueError:

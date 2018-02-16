@@ -80,6 +80,16 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
         template_url, cats=cats2d, width=width, **kwargs)
 
 
+def manage_set_active_status(item, is_active):
+    """
+    Set the is_active status of item <item> to <is_active>
+    """
+    s = 'UPDATE `marketplace_items` SET `item_active`=%s WHERE `item_id`=%s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, (is_active, item))
+        result = cursor.fetchone()
+
+
 def display_managed_items():
     """
     Handles the generation of the table of managed items.
@@ -96,6 +106,12 @@ def display_managed_items():
         'marketplace_items',
         fields=fields,
         attrs={'user_id': get_user_id(flask.session['username'])})
+
+    s = 'SELECT ' + ', '.join(
+        fields) + ' FROM `marketplace_items` WHERE `user_id`=%s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, get_user_id(flask.session['username']))
+        owned_items = [list(cursor.fetchall()[0].values())]
 
     active_items = []
     active_links = []
@@ -168,8 +184,15 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
         '.view_item', item_id=item_id)
     links[field_index_map['edit']] = flask.url_for(
         '.sell', item_id=item_id, state='edit')
-    # TODO: update when archive and delete pages are finished
-    links[field_index_map['archive']] = '#'
+
+    if item_active:
+        links[field_index_map['archive']] = flask.url_for(
+            '.manage', item=item_id, state='archive')
+    else:
+        links[field_index_map['archive']] = flask.url_for(
+            '.manage', item=item_id, state='unarchive')
+
+    # TODO: update when delete page is finished
     links[field_index_map['delete']] = '#'
     return links
 
