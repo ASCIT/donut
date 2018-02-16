@@ -17,31 +17,35 @@
     {% endif %}
   </div>
 </div>
-<div class="table-responsive">
-  <table class="table" id="messageList">
-    <tr> <td>Name</td> <td>Message</td> </tr>
-    {% for message in complaint['messages'] %}
-    <tr> <td>{{ message['poster'] }}</td> <td>{{ message['message'] }}</td></tr>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+	<div >
+	    <table class="table table-bordered" id="messageList">
+		<tr> <td>Name</td> <td>Message</td> </tr>
+		{% for message in complaint['messages'] %}
+		<tr> <td>{{ message['poster'] }}</td> <td>{{ message['message'] }}</td></tr>
     {% endfor %}
-  </table>
-</div>
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <p>Add a comment<p>
-  </div>
-  <div class="panel-body">
-    <form method="POST" id="addMessage" action="/">
-      <div class="form-group">
-	<p>Name: </p>
-	<input class="form-control" type="text" name="poster" />
-      </div>
-      <div class="form-group">
-	<p>Message: </p>
-	<textarea class="form-control" name="message" rows="10" required></textarea>
-      </div>
-      <input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
-    </form>
-  </div>
+	    </table>
+	</div>
+	<div class="panel panel-default">
+	    <div class="panel-heading">
+		<p>Add a comment<p>
+	    </div>
+	    <div class="panel-body">
+		<form method="POST" id="addMessage" action="/">
+		    <div class="form-group">
+			<p>Name: </p>
+			<input class="form-control" type="text" name="poster" />
+		    </div>
+		    <div class="form-group">
+			<p>Message: </p>
+			<textarea class="form-control" name="message" rows="10" required></textarea>
+		    </div>
+		    <input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+		</form>
+	    </div>
+	</div>
+    </div>
 </div>
 
 {% endblock %}
