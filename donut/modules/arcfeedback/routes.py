@@ -55,10 +55,10 @@ def arcfeedback_add_msg(id):
     for field in fields:
         data[field] = flask.request.form.get(field)
     if data['message'] == "":
-        #TODO return an error here
-        pass
+        content = {'ERROR': 'Cannot insert empty message'}
+        return content, flask.ext.api.status.HTTP_400_BAD_REQUEST
     helpers.add_msg(complaint_id, data['message'], data['poster'])
-    return # some kind of success memo?
+    return {'poster': data[poster], 'message': data[message]}
 
 
 # TODO: summary page for arc members

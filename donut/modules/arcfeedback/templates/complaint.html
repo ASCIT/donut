@@ -19,7 +19,7 @@
   </div>
 </div>
 <div class="table-responsive">
-  <table class="table">
+  <table class="table" id="messageList">
     <tr> <td>Name</td> <td>Message</td> </tr>
     {% for message in complaint['messages'] %}
     <tr> <td>{{ message['poster'] }}</td> <td>{{ message['message'] }}</td></tr>
@@ -50,12 +50,16 @@
 {{ super() }}
 <script>
  function addMessage(response) {
-     //TODO
+     var msg = response['message'];
+     var poster = response['poster'];
+     var msg_html = "<tr> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
+     $(#messageList).append(msg_html);
  }
  
  function addMessageError(response) {
-     //TODO
+     $(messageList).append(response);
  }
+
  $(function() {
      $('#addMessage').submit(function(e) {
 	 e.preventDefault();
