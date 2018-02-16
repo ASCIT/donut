@@ -97,21 +97,15 @@ def display_managed_items():
     headers = ['Category', 'Item', 'Price', 'Date', '', '', '']
 
     fields = [
-        'cat_id', 'item_title', 'item_price', 'item_timestamp', 'item_active',
-        'item_id'
+        'cat_id', 'item_title', 'textbook_title', 'item_price',
+        'item_timestamp', 'item_active', 'item_id'
     ]
     field_index_map = {k: v for v, k in enumerate(fields)}
 
     owned_items = get_table_list_data(
-        'marketplace_items',
+        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
         fields=fields,
         attrs={'user_id': get_user_id(flask.session['username'])})
-
-    s = 'SELECT ' + ', '.join(
-        fields) + ' FROM `marketplace_items` WHERE `user_id`=%s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, get_user_id(flask.session['username']))
-        owned_items = [list(cursor.fetchall()[0].values())]
 
     active_items = []
     active_links = []
@@ -154,12 +148,18 @@ def row_text_from_managed_item(item, field_index_map):
     item[field_index_map['cat_id']] = get_category_name_from_id(
         item[field_index_map['cat_id']])
 
+    if item[field_index_map['item_title']] == '':
+        item[field_index_map['item_title']] = item[field_index_map[
+            'textbook_title']]
+
     item_active = item[field_index_map['item_active']]
-    # remove item_active and item_id
+    # remove item_active, item_id, and textbook_title
     del item[field_index_map['item_id']]
     del item[field_index_map['item_active']]
+    del item[field_index_map['textbook_title']]
     # this order is important because if we delete item_active first,
-    # field_index_map['item_id'] will be wrong
+    # field_index_map['item_id'] will be wrong, so delete in reverse
+    # order
 
     # in the real text of the manage page, we need edit, (un)archive, and delete links
     item.append('Edit')
@@ -238,7 +238,8 @@ def generate_search_table(fields=None, attrs={}, query=''):
         fields = fields + ['textbook_author', 'textbook_isbn', 'cat_id']
 
     result = get_table_list_data(
-        ['marketplace_items', 'marketplace_textbooks'], fields, attrs)
+        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks', fields,
+        attrs)
 
     if query != '':
         # filter by query
@@ -320,34 +321,15 @@ def generate_search_table(fields=None, attrs={}, query=''):
     return (sanitized_res, headers, links)
 
 
-def get_table_columns(tables):
-    """
-    Get all the columns in a table or tables.
-    """
-    # if there's only one table in the form of a string, we wrap it
-    # in a list so that TABLE_NAME IN :tables works
-    if type(tables) == str:
-        tables = [tables]
-    column_query = sqlalchemy.sql.select([
-        sqlalchemy.text('COLUMN_NAME')
-    ]).select_from(sqlalchemy.text('INFORMATION_SCHEMA.COLUMNS'))
-    column_query = column_query.where(sqlalchemy.text('TABLE_NAME IN :tables'))
-    columns_temp = list(flask.g.db.execute(column_query, tables=tuple(tables)))
-    columns = []
-    for field in columns_temp:
-        columns += list(field)
-    return columns
-
-
 def get_table_list_data(tables, fields=None, attrs={}):
     """
     Queries the database (specifically, table <table>) and returns list of member data
     constrained by the specified attributes.
 
     Arguments:
-        tables: The tables to query.  If it's only one, it can be just a string,
-                but if it's more than one, it can be in a list, whereupon they will
-                be NATURAL LEFT JOINed in order to query all of them at the same time.
+        tables: The table(s) to query.  Ex: 'marketplace_items', or
+                'marketplace_items NATURAL LEFT JOIN
+                marketplace_textbooks'.
         fields: The fields to return. If None specified, then default_fields
                 are used.
         attrs:  The attributes of the members to filter for.
@@ -355,32 +337,28 @@ def get_table_list_data(tables, fields=None, attrs={}):
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
     """
-    if type(tables) == str:
-        tables = [tables]
-
-    all_returnable_fields = get_table_columns(tables)
-
     if fields == None:
-        fields = all_returnable_fields
+        s_select_columns = 'SELECT * '
     else:
-        if any(f not in all_returnable_fields for f in fields):
-            return 'Invalid field'
+        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
 
-    # have spaces around method to make the query work
-    method = ' NATURAL LEFT JOIN '
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text(method.join(tables)))
+    s_from = 'FROM ' + tables
 
-    # Build the WHERE clause
-    for key, value in list(attrs.items()):
-        s = s.where(sqlalchemy.text(key + '= :' + key))
+    s_where = ''
+    if len(attrs) != 0:
+        s_where = ' WHERE '
+        for key, value in list(attrs.items()):
+            s_where += str(key) + ' = %s'
+
+    s = s_select_columns + s_from + s_where
 
     # Execute the query
-    result = flask.g.db.execute(s, attrs).fetchall()
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, list(attrs.values()))
+        result = cursor.fetchall()
+
     # Return the list of lists
-    for i in range(len(result)):
-        result[i] = list(result[i])
+    result = list(map(lambda a: list(a.values()), result))
     return result
 
 

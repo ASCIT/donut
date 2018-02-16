@@ -1,9 +1,8 @@
 from donut.testing.fixtures import client
 from donut import app
 from donut.modules.marketplace.helpers import (
-    get_category_name_from_id, get_name_from_user_id, get_table_columns,
-    get_table_list_data, get_matches, tokenize_query, validate_isbn,
-    process_edition, add_textbook)
+    get_category_name_from_id, get_name_from_user_id, get_table_list_data,
+    get_matches, tokenize_query, validate_isbn, process_edition, add_textbook)
 import sqlalchemy, flask
 from decimal import Decimal
 
@@ -16,20 +15,6 @@ def test_get_category_name_from_id(client):
 def test_get_name_from_user_id(client):
     full_name = get_name_from_user_id(1)
     assert full_name == 'David Qu'
-
-
-def test_get_table_columns(client):
-    table_columns = get_table_columns('marketplace_categories')
-    assert table_columns == ['cat_id', 'cat_title', 'cat_active', 'cat_order']
-
-    table_columns = get_table_columns(
-        ['marketplace_categories', 'marketplace_items'])
-    assert table_columns == [
-        'cat_id', 'cat_title', 'cat_active', 'cat_order', 'item_id', 'cat_id',
-        'user_id', 'item_title', 'item_details', 'item_condition',
-        'item_price', 'item_timestamp', 'item_active', 'textbook_id',
-        'textbook_edition', 'textbook_isbn'
-    ]
 
 
 def test_get_table_list_data(client):

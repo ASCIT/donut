@@ -120,8 +120,8 @@ def view_item():
         'textbook_author'
     ]
     data = helpers.get_table_list_data(
-        ['marketplace_items',
-         'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
+        stored_fields, {'item_id': item_id})
 
     # make sure the item_id is a valid item, i.e. data is nonempty
     if len(data) == 0:
@@ -263,8 +263,8 @@ def sell():
         else:
             item_id = int(flask.request.args['item_id'])
             data = helpers.get_table_list_data(
-                ['marketplace_items',
-                 'marketplace_textbooks'], stored_fields, {'item_id': item_id})
+                'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
+                stored_fields, {'item_id': item_id})
 
             if len(data) == 0:
                 # no data? the item_id must be wrong
