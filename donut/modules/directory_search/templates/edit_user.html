@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block page %}
+	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
+		<h2>Updating user info</h2>
+
+		Set profile picture:
+		<form
+			id='image'
+			enctype='multipart/form-data'
+			action='{{ url_for("directory_search.set_image", user_id=user_id) }}'
+			method='POST'
+		>
+			<label class='btn btn-default'>
+				Choose file <input type='file' name='file' accept='image/*' style='display: none' />
+			</label>
+		</form>
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			var imageInput = $('form#image input')
+			var imageForm = $('form#image')
+			imageInput.change(function() { imageForm.submit() })
+		})
+	</script>
+{% endblock %}

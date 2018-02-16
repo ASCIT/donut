@@ -8,7 +8,13 @@
 				{{ user['preferred_name'] or user['first_name'] }}
 				{{ user['middle_name'] or '' }}
 				{{ user['last_name'] }}
+				{% if is_me %}
+					<a href='{{ url_for("directory_search.edit_user", user_id=user_id) }}' style='float: right'>(Update)</a>
+				{% endif %}
 			</h2>
+			{% if user['extension'] %}
+				<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
+			{% endif %}
 			<ul class='list-group'>
 				<li class='list-group-item'>
 					<strong>UID</strong>:

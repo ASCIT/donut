@@ -68,7 +68,9 @@
                     </li>
                     {% else %}
                     <li>
-                        <a href="/1/users/me">Greetings, {{ session['username'] }}</a>
+                        <a href="{{ url_for('directory_search.my_directory_page') }}">
+                            Greetings, {{ session['username'] }}
+                        </a>
                     </li>
                     <li>
                         <form action="{{ url_for('auth.logout') }}">

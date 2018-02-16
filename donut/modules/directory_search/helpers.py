@@ -14,8 +14,9 @@ def get_user(user_id):
     query = """
         SELECT uid, first_name, middle_name, last_name, preferred_name,
             email, phone, gender, birthday, entry_year, graduation_year,
-            msc, building, room_num, address, city, state, zip, country
-        FROM members
+            msc, building, room_num, address, city, state, zip, country,
+            extension
+        FROM members NATURAL LEFT JOIN images
         WHERE user_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -75,3 +76,22 @@ def get_user_id(username):
     if user is None:
         return 0  #will show 'No such user' page
     return user['user_id']
+
+
+def set_image(user_id, extension, contents):
+    delete_query = 'DELETE FROM images WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(delete_query, [user_id])
+    add_query = 'INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s);'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(add_query, [user_id, extension, contents])
+
+
+def get_image(user_id):
+    query = 'SELECT extension, image FROM images WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        image = cursor.fetchone()
+    if image is None:
+        raise Exception('No image found for user')
+    return image['extension'], image['image']
