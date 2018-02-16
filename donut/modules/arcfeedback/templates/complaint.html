@@ -7,15 +7,14 @@
   <div class="panel-body">
     <p>Course: {{complaint['course']}} </p>
     <p>Status: {{complaint['status']}} </p>
-    {% if len(complaint['emails']) == 0 %}
+    {% if complaint['emails']|length == 0 %}
     <p>No emails subscribed to this complaint </p>
-    {% endif %}
     {% else %}
     <p>Subscribed emails: </p>
     {% for email in complaint['emails'] %}
     <p>{{email}}</p>
     {% endfor %}
-    {% endelse %}
+    {% endif %}
   </div>
 </div>
 <div class="table-responsive">
@@ -31,7 +30,7 @@
     <p>Add a comment<p>
   </div>
   <div class="panel-body">
-    <form method="POST" id="addMessage">
+    <form method="POST" id="addMessage" action="/">
       <div class="form-group">
 	<p>Name: </p>
 	<input class="form-control" type="text" name="poster" />
@@ -40,7 +39,7 @@
 	<p>Message: </p>
 	<textarea class="form-control" name="message" rows="10" required></textarea>
       </div>
-      <button class="btn btn-primary" type="submit">Submit</button>
+      <input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
     </form>
   </div>
 </div>
@@ -53,23 +52,24 @@
      var msg = response['message'];
      var poster = response['poster'];
      var msg_html = "<tr> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
-     $(#messageList).append(msg_html);
+     $('#messageList').append(msg_html);
  }
  
  function addMessageError(response) {
      $(messageList).append(response);
  }
 
- $(function() {
-     $('#addMessage').submit(function(e) {
+ $(document).ready(function() {
+     $('#addMessage').on('submit', function(e) {
 	 e.preventDefault();
 	 $.ajax({
-	     url: {{ url_for('arcfeedback.arcfeedback_add_msg') }},
+	     url: "{{ url_for('arcfeedback.arcfeedback_add_msg', id=complaint['uuid']) }}",
 	     data: $('#addMessage').serialize(),
 	     type: 'POST',
 	     success: addMessage,
 	     error: addMessageError
 	 }); 
+	 $('#addMessage')[0].reset()
      });
  });
 </script>

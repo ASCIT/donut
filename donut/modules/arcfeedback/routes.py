@@ -43,6 +43,7 @@ def arcfeedback_view_complaint(id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     complaint = helpers.get_all_fields(complaint_id)
+    complaint['uuid'] = id
     return flask.render_template('complaint.html', complaint=complaint)
 
 
@@ -58,7 +59,7 @@ def arcfeedback_add_msg(id):
         content = {'ERROR': 'Cannot insert empty message'}
         return content, flask.ext.api.status.HTTP_400_BAD_REQUEST
     helpers.add_msg(complaint_id, data['message'], data['poster'])
-    return {'poster': data[poster], 'message': data[message]}
+    return flask.jsonify({'poster': data['poster'], 'message': data['message']})
 
 
 # TODO: summary page for arc members
