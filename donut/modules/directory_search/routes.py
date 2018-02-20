@@ -9,9 +9,9 @@ VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 VALID_EXTENSIONS |= set(map(lambda ext: ext.upper(), VALID_EXTENSIONS))
 
 
-@blueprint.route("/directory")
+@blueprint.route('/directory')
 def directory_search():
-    return flask.render_template("directory_search.html")
+    return flask.render_template('directory_search.html')
 
 
 @blueprint.route('/1/users/me')
