@@ -44,6 +44,14 @@ def get_user(user_id):
             user['hometown_string'] = (city + ', ' if city else
                                        '') + state + (', ' + country
                                                       if country else '')
+        option_query = """
+            SELECT option_name FROM member_options NATURAL JOIN options
+            WHERE user_id = %s ORDER BY option_name
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(option_query, [user_id])
+            user['options'] = list(
+                map(lambda option: option['option_name'], cursor.fetchall()))
     return user
 
 

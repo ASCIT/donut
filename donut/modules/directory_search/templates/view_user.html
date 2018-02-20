@@ -75,6 +75,12 @@
 						{{ user['graduation_year'] }}
 					</li>
 				{% endif %}
+				{% if user['options'] %}
+					<li class='list-group-item'>
+						<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
+						{{ ', '.join(user['options']) }}
+					</li>
+				{% endif %}
 			</ul>
 		{% endif %}
 	</div>
