@@ -47,21 +47,28 @@ def get_user(user_id):
     return user
 
 
+def make_name_query(search):
+    """
+    Query is split on spaces, so 'abc def' would
+    find all users whose names contain 'abc' and 'def',
+    case insensitive.
+    """
+    query = ''
+    for i in range(len(search)):
+        if i:
+            query += ' AND '
+        query += 'INSTR(LOWER(full_name), %s) > 0'
+    return query
+
+
 def get_users_by_name_query(search):
     """
     Finds users whose names match the given query.
-    Query is split on spaces, so 'abc def ghi' would
-    find all users whose names contain 'abc', 'def', and 'ghi',
-    case insensitive. Max 10 users returned, in alphabetical order.
+    Max 10 users returned, in alphabetical order.
     """
     search = search.lower().split(' ')
-    query = 'SELECT * FROM members_full_name'
-    for i, fragment in enumerate(search):
-        if i:
-            query += ' AND'
-        else:
-            query += ' WHERE'
-        query += ' INSTR(LOWER(full_name), %s) > 0'
+    query = 'SELECT * FROM members_full_name WHERE '
+    query += make_name_query(search)
     query += ' ORDER BY LOWER(full_name) LIMIT 10'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, search)
@@ -95,3 +102,30 @@ def get_image(user_id):
     if image is None:
         raise Exception('No image found for user')
     return image['extension'], image['image']
+
+
+def get_options():
+    query = 'SELECT * FROM options ORDER BY option_name'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchall()
+
+
+def execute_search(**kwargs):
+    query = """
+        SELECT DISTINCT user_id, full_name, graduation_year
+        FROM members NATURAL JOIN members_full_name NATURAL LEFT JOIN member_options
+    """
+    query += ' WHERE TRUE'
+    substitution_arguments = []
+    if kwargs['name']:
+        name_search = kwargs['name'].lower().split(' ')
+        query += ' AND ' + make_name_query(name_search)
+        substitution_arguments += name_search
+    if kwargs['option_id']:
+        query += ' AND option_id = %s'
+        substitution_arguments.append(kwargs['option_id'])
+    query += ' ORDER BY LOWER(last_name), LOWER(full_name)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, substitution_arguments)
+        return cursor.fetchall()

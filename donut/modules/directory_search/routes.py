@@ -11,7 +11,8 @@ VALID_EXTENSIONS |= set(map(lambda ext: ext.upper(), VALID_EXTENSIONS))
 
 @blueprint.route('/directory')
 def directory_search():
-    return flask.render_template('directory_search.html')
+    return flask.render_template(
+        'directory_search.html', options=helpers.get_options())
 
 
 @blueprint.route('/1/users/me')
@@ -45,7 +46,8 @@ def set_image(user_id):
 
     def flash_error(message):
         flash(message)
-        return redirect(url_for('directory_search.edit_user', user_id=user_id))
+        return redirect(
+            flask.url_for('directory_search.edit_user', user_id=user_id))
 
     file = flask.request.files['file']
     if not file.filename:
@@ -72,3 +74,22 @@ def get_image(user_id):
 @blueprint.route('/1/users/search/<name_query>')
 def search_by_name(name_query):
     return jsonify(helpers.get_users_by_name_query(name_query))
+
+
+@blueprint.route('/1/users', methods=['POST'])
+def search():
+    form = flask.request.form
+    name = form['name']
+    if name.strip() == '':
+        name = None
+    option_id = form['option']
+    if option_id:
+        option_id = int(option_id)
+    else:
+        option_id = None
+    users = helpers.execute_search(name=name, option_id=option_id)
+    if len(users) == 1:  #1 result
+        return redirect(
+            flask.url_for(
+                'directory_search.view_user', user_id=users[0]['user_id']))
+    return flask.render_template('search_results.html', users=users)

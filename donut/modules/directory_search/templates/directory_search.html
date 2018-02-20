@@ -3,11 +3,23 @@
 	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
 		<h1>Directory Search</h1>
 		<h4>I'm looking for someone...</h4>
-		<form>
+		<form action='{{ url_for("directory_search.search") }}' method='POST'>
 			<div class='form-group'>
 				<label for='name'>Named</label>
-				<input class='form-control' id='name' name='name' placeholder='Name' />
+				<input class='form-control' id='name' name='name' placeholder='Name' autofocus />
 				<ul class='list-group' id='name-search'></ul>
+			</div>
+			<div class='form-group'>
+				<label for='option'>In</label>
+				<select class='form-control' id='option' name='option'>
+					<option value=''>Any option</option>
+					{% for option in options %}
+						<option value={{ option['option_id'] }}>{{ option['option_name'] }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<input type='submit' class='btn btn-primary' value='Search' />
 			</div>
 		</form>
 	</div>
@@ -23,7 +35,7 @@
 			var nameInput = $('input#name'), nameSearch = $('ul#name-search')
 			nameInput.keyup(function() {
 				var name = nameInput.val()
-				if (name.length < MIN_SEARCH_LENGTH) return
+				if (name.length < MIN_SEARCH_LENGTH) return nameSearch.children().remove()
 				var token = {}
 				searchToken = token
 				setTimeout(function() {
