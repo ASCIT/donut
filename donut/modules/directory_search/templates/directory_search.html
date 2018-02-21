@@ -19,6 +19,24 @@
 				</select>
 			</div>
 			<div class='form-group'>
+				<label for='residence'>Living in</label>
+				<select class='form-control' id='residence' name='residence'>
+					<option value=''>Any residence</option>
+					{% for residence in residences %}
+						<option>{{ residence }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='state'>Home state</label>
+				<select class='form-control' id='state' name='state'>
+					<option value=''>Any state</option>
+					{% for state in states %}
+						<option>{{ state }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
 				<input type='submit' class='btn btn-primary' value='Search' />
 			</div>
 		</form>

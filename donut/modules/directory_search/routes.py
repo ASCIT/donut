@@ -12,7 +12,10 @@ VALID_EXTENSIONS |= set(map(lambda ext: ext.upper(), VALID_EXTENSIONS))
 @blueprint.route('/directory')
 def directory_search():
     return flask.render_template(
-        'directory_search.html', options=helpers.get_options())
+        'directory_search.html',
+        options=helpers.get_options(),
+        residences=helpers.get_residences(),
+        states=helpers.get_states())
 
 
 @blueprint.route('/1/users/me')
@@ -87,7 +90,10 @@ def search():
         option_id = int(option_id)
     else:
         option_id = None
-    users = helpers.execute_search(name=name, option_id=option_id)
+    residence = form['residence'] or None
+    state = form['state'] or None
+    users = helpers.execute_search(
+        name=name, option_id=option_id, residence=residence, state=state)
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(

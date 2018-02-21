@@ -133,7 +133,28 @@ def execute_search(**kwargs):
     if kwargs['option_id']:
         query += ' AND option_id = %s'
         substitution_arguments.append(kwargs['option_id'])
+    if kwargs['residence']:
+        query += ' AND building = %s'
+        substitution_arguments.append(kwargs['residence'])
+    if kwargs['state']:
+        query += ' AND state = %s'
+        substitution_arguments.append(kwargs['state'])
     query += ' ORDER BY LOWER(last_name), LOWER(full_name)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, substitution_arguments)
         return cursor.fetchall()
+
+
+def members_unique_values(field):
+    query = 'SELECT DISTINCT ' + field + ' FROM members WHERE ' + field + ' IS NOT NULL AND ' + field + '!= "" ORDER BY ' + field
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return map(lambda member: member[field], cursor.fetchall())
+
+
+def get_residences():
+    return members_unique_values('building')
+
+
+def get_states():
+    return members_unique_values('state')
