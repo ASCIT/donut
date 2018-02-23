@@ -88,6 +88,18 @@
 							{% endfor %}
 						</ul>
 					{% endif %}
+					{% if user['houses'] %}
+						<li class='list-group-item'>
+							<strong>House{% if user['houses']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for house in user['houses'] %}
+								<li class='list-group-item'>
+									{{ house['group_name'] + ' - ' + house['pos_name'] }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
 					{% if user['positions'] %}
 						<li class='list-group-item'>
 							<strong>Position{% if user['positions']|length > 1 %}s{% endif %}</strong>:

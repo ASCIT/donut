@@ -63,6 +63,14 @@ def get_user(user_id):
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(groups_query, [user_id])
             user['positions'] = cursor.fetchall()
+        houses_query = """
+            SELECT group_name, pos_name
+            FROM group_house_membership NATURAL JOIN groups NATURAL JOIN positions
+            WHERE user_id = %s
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(houses_query, [user_id])
+            user['houses'] = cursor.fetchall()
     return user
 
 

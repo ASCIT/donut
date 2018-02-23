@@ -33,9 +33,8 @@ with open('create_directory.sql', 'w') as sql_file:
             "INSERT INTO options (option_name) SELECT * FROM (SELECT '" + name
             + "') AS tmp\n",
             "WHERE NOT EXISTS (SELECT * from options WHERE option_name = '" +
-            name + "') LIMIT 1;\n"
+            name + "' LIMIT 1);\n"
         ])
-    sql_file.write('\n')
 
     # Insert members
     members = {}  #map of inums to dicts of corresponding information
@@ -128,7 +127,6 @@ with open('create_directory.sql', 'w') as sql_file:
             'INSERT INTO members (' + keys + ') VALUES (' + values + ')\n',
             'ON DUPLICATE KEY UPDATE uid = uid;\n'  #do nothing if member already exists
         ])
-    sql_file.write('\n')
     for option_member in read_csv('undergrad_option_objectives'):
         member_uid = members[option_member['inum']]['uid']
         option_name = options[option_member['option_id']]
@@ -139,4 +137,50 @@ with open('create_directory.sql', 'w') as sql_file:
             "    (SELECT option_id FROM options WHERE option_name = '" +
             option_name + "' LIMIT 1),\n", "    'Major'\n",
             ') ON DUPLICATE KEY UPDATE user_id=user_id;\n'
+        ])
+
+    # Insert house memberships
+    houses = {}  #map of house IDs to names
+    memberships_by_house = {
+    }  #map of houses IDs to sets of membership type IDs
+    for house in read_csv('hovses'):
+        name = house['name'] + ' House'
+        house_id = house['id']
+        houses[house_id] = name
+        sql_file.writelines([
+            'INSERT INTO groups (group_name, type) VALUES\n',
+            "    ('" + name + "', 'house')\n",
+            "    ON DUPLICATE KEY UPDATE group_id=group_id;\n"
+        ])
+        memberships_by_house[house_id] = set()
+    house_membership_types = {}  #map of membership type IDs to descriptions
+    for house_membership_type in read_csv('hovse_membership_types'):
+        house_membership_types[house_membership_type[
+            'id']] = house_membership_type['description']
+    for house_member in read_csv('hovse_members'):
+        member_uid = members[house_member['inum']].get('uid')
+        if member_uid is None:
+            continue
+        house_id = house_member['hovse_id']
+        membership_type = house_member['membership_type']
+        membership_name = house_membership_types[membership_type]
+        house_memberships = memberships_by_house[house_id]
+        house_name = houses[house_id]
+        group_id_query = "(SELECT group_id FROM groups WHERE group_name = '" + house_name + "' LIMIT 1)"
+        pos_id_query = "(SELECT pos_id FROM positions NATURAL JOIN groups WHERE group_name = '" + house_name + "' AND pos_name = '" + membership_name + "' LIMIT 1)"
+        if membership_type not in house_memberships:
+            house_memberships.add(membership_type)
+            sql_file.writelines([
+                'INSERT INTO positions (group_id, pos_name) SELECT * FROM (SELECT '
+                + group_id_query + ", '" + membership_name + "') AS tmp\n",
+                'WHERE NOT EXISTS ' + pos_id_query + ';\n'
+            ])
+        user_id_query = "(SELECT user_id FROM members WHERE uid = '" + member_uid + "' LIMIT 1)"
+        sql_file.writelines([
+            'INSERT INTO position_holders (group_id, pos_id, user_id) SELECT * FROM (SELECT'
+            + group_id_query + ', ' + pos_id_query + ', ' + user_id_query +
+            ') AS tmp\n',
+            'WHERE NOT EXISTS (SELECT * FROM position_holders WHERE group_id = '
+            + group_id_query + ' AND pos_id = ' + pos_id_query +
+            ' AND user_id = ' + user_id_query + ');\n'
         ])
