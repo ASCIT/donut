@@ -82,9 +82,11 @@ def test_process_edition(client):
 
 
 def count_textbooks():
-    query = sqlalchemy.sql.text("SELECT COUNT(*) FROM marketplace_textbooks")
-    result = list(flask.g.db.execute(query))
-    return result[0][0]
+    s = "SELECT COUNT(*) FROM marketplace_textbooks"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+        result = cursor.fetchone()
+    return result['COUNT(*)']
 
 
 def test_add_textbook(client):
