@@ -19,7 +19,7 @@
     </div>
   </div>
 </div>
-<!--<script src="bower_components/showdown/1.0.1/showdown.min.js"></script>-->
-<script src="static/script.js"></script>
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+    <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
 {% endblock %}
 
