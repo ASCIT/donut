@@ -21,9 +21,11 @@
     <div class="col-md-8 col-md-offset-2">
 	<div >
 	    <table class="table table-bordered" id="messageList">
-		<tr> <td>Name</td> <td>Message</td> </tr>
+		<thead class="thead-default">
+		    <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
+		</thead>
 		{% for message in complaint['messages'] %}
-		<tr> <td>{{ message['poster'] }}</td> <td>{{ message['message'] }}</td></tr>
+		<tr> <th>{{message['time']}}</th> <th>{{ message['poster'] }}</th> <td>{{ message['message'] }}</td></tr>
     {% endfor %}
 	    </table>
 	</div>

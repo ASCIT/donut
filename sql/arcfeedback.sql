@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS `arc_complaint_messages`;
 
 CREATE TABLE `arc_complaint_messages` (
   `complaint_id` int(11) DEFAULT NULL,
-  `time` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `time` timestamp,
   `message` text,
   `poster` varchar(50) DEFAULT NULL,
   `message_id` int(11) NOT NULL AUTO_INCREMENT,

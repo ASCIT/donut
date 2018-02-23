@@ -59,18 +59,20 @@ def add_msg(complaint_id, message, poster):
     '''
     Adds a message to a complaint in the database
     and updates status of complaint to 'new_msg'
+    if poster is None or an empty string, it will be replaced with 
+    "(anonymous)"
     '''
     #add the message
     query = """
-    INSERT INTO arc_complaint_messages (complaint_id, message, poster)
-    VALUES (%s, %s, %s)
+    INSERT INTO arc_complaint_messages (complaint_id, message, poster, time)
+    VALUES (%s, %s, %s, NOW())
     """
     # update the status to new_msg
     query2 = """
     UPDATE arc_complaint_info SET status = 'new_msg' WHERE complaint_id = %s
     """
-    if poster == "" :
-        poster = 'NULL'
+    if poster == "" or poster is None :
+        poster = '(anonymous)'
     with flask.g.pymysql_db.cursor() as cursor: 
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
@@ -106,11 +108,11 @@ def get_id(uuid):
 
 def get_messages(complaint_id):
     """
-    Returns posters and messages on this complaint
-    in the order they were added to the database
+    Returns timestamps, posters, and messages on this complaint
+    in ascending order of timestamp
     """
     query ="""
-    SELECT poster, message FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
+    SELECT time, poster, message FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -146,7 +148,10 @@ def get_emails(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
-    return res
+    emails = []
+    for row in res:
+        emails.append(row['email'])
+    return emails
 
 
 def get_all_fields(complaint_id):
