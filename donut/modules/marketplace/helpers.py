@@ -894,18 +894,22 @@ def add_textbook(title, author):
         already exists)
     """
     # check if the textbook exists
-    query = sqlalchemy.sql.text('''SELECT textbook_title FROM
-            marketplace_textbooks WHERE textbook_title = :title AND
-            textbook_author = :author LIMIT 1''')
-    result = list(flask.g.db.execute(query, title=title, author=author))
-    if len(result) != 0:
+    s = '''SELECT textbook_title FROM
+            marketplace_textbooks WHERE textbook_title = %s AND
+            textbook_author = %s LIMIT 1'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [title, author])
+        result = cursor.fetchone()
+    if result != None:
         # the textbook already exists
         return False
 
-    query = sqlalchemy.sql.text('''INSERT INTO marketplace_textbooks
-            (textbook_title, textbook_author) VALUES (:title,
-            :author)''')
-    flask.g.db.execute(query, title=title, author=author)
+    s = '''INSERT INTO marketplace_textbooks
+            (textbook_title, textbook_author) VALUES (%s,
+            %s)'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [title, author])
+
     return True
 
 
@@ -919,12 +923,13 @@ def get_name_from_user_id(user_id):
         result: A string of the user's full name.
                 (first + ' ' + last)
     """
-    query = sqlalchemy.text(
-        '''SELECT full_name FROM members_full_name WHERE user_id=:user_id''')
-    result = flask.g.db.execute(query, user_id=user_id).first()
+    s = '''SELECT full_name FROM members_full_name WHERE user_id=%s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [user_id])
+        result = cursor.fetchone()
     if result == None:
         return None
-    return result[0]
+    return result['full_name']
 
 
 def get_textbook_info_from_textbook_id(textbook_id):
@@ -936,13 +941,15 @@ def get_textbook_info_from_textbook_id(textbook_id):
     Returns:
         result: A list of the textbook title and author.
     """
-    query = sqlalchemy.text(
-        '''SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=:textbook_id'''
-    )
-    result = flask.g.db.execute(query, textbook_id=textbook_id).first()
+    s = '''SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=%s'''
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [textbook_id])
+        result = cursor.fetchone()
+
     if result == None:
         return None
-    return list(result)
+    return [result['textbook_title'], result['textbook_author']]
 
 
 def get_category_name_from_id(cat_id):
@@ -954,10 +961,11 @@ def get_category_name_from_id(cat_id):
     Returns:
         result: A string with the name of the category.
     """
-    query = sqlalchemy.text(
-        '''SELECT cat_title FROM marketplace_categories WHERE cat_id=:cat_id'''
-    )
-    result = flask.g.db.execute(query, cat_id=cat_id).first()
+    s = '''SELECT cat_title FROM marketplace_categories WHERE cat_id=%s'''
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [cat_id])
+        result = cursor.fetchone()
     if result == None:
         return None
-    return result[0]
+    return result['cat_title']
