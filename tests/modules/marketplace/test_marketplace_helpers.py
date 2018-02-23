@@ -3,7 +3,7 @@ from donut import app
 from donut.modules.marketplace.helpers import (
     get_category_name_from_id, get_name_from_user_id, get_table_list_data,
     get_matches, tokenize_query, validate_isbn, process_edition, add_textbook)
-import sqlalchemy, flask
+import flask
 from decimal import Decimal
 
 

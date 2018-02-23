@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 import re
 from math import ceil
 
