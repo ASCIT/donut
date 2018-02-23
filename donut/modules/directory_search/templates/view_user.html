@@ -15,73 +15,113 @@
 			{% if user['extension'] %}
 				<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
 			{% endif %}
-			<ul class='list-group'>
-				<li class='list-group-item'>
-					<strong>UID</strong>:
-					{{ user['uid'] }}
-				</li>
-				{% if user['birthday'] %}
+			<div>
+				<ul class='list-group list-group-root'>
 					<li class='list-group-item'>
-						<strong>Birthday</strong>:
-						{{ user['birthday'].strftime('%b %-d, %Y') }}
+						<strong>UID</strong>:
+						{{ user['uid'] }}
 					</li>
-				{% endif %}
-				{% if 'gender_string' in user %}
-					<li class='list-group-item'>
-						<strong>Gender</strong>:
-						{{ user['gender_string'] }}
-					</li>
-				{% endif %}
-				{% if user['email'] %}
-					<li class='list-group-item'>
-						<strong>Email</strong>:
-						<a href='mailto:{{ user["email"] }}'>{{ user['email'] }}</a>
-					</li>
-				{% endif %}
-				{% if 'phone_string' in user %}
-					<li class='list-group-item'>
-						<strong>Phone</strong>:
-						{{ user['phone_string'] }}
-					</li>
-				{% endif %}
-				{% if user['msc'] %}
-					<li class='list-group-item'>
-						<strong>Mail Stop Code (MSC)</strong>:
-						{{ user['msc'] }}
-					</li>
-				{% endif %}
-				{% if user['building'] %}
-					<li class='list-group-item'>
-						<strong>Residence</strong>:
-						{{ user['building'] }}
-						{% if user['room_num'] %}{{ user['room_num'] }}{% endif %}
-					</li>
-				{% endif %}
-				{% if 'hometown_string' in user %}
-					<li class='list-group-item'>
-						<strong>Hometown</strong>:
-						{{ user['hometown_string'] }}
-					</li>
-				{% endif %}
-				{% if user['entry_year'] %}
-					<li class='list-group-item'>
-						<strong>Matriculation</strong>:
-						{{ user['entry_year'] }}
-					</li>
-				{% endif %}
-				{% if user['graduation_year'] %}
-					<li class='list-group-item'>
-						<strong>Graduation</strong>:
-						{{ user['graduation_year'] }}
-					</li>
-				{% endif %}
-				{% if user['options'] %}
-					<li class='list-group-item'>
-						<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
-						{{ ', '.join(user['options']) }}
-					</li>
-				{% endif %}
-			</ul>
+					{% if user['birthday'] %}
+						<li class='list-group-item'>
+							<strong>Birthday</strong>:
+							{{ user['birthday'].strftime('%b %-d, %Y') }}
+						</li>
+					{% endif %}
+					{% if 'gender_string' in user %}
+						<li class='list-group-item'>
+							<strong>Gender</strong>:
+							{{ user['gender_string'] }}
+						</li>
+					{% endif %}
+					{% if user['email'] %}
+						<li class='list-group-item'>
+							<strong>Email</strong>:
+							<a href='mailto:{{ user["email"] }}'>{{ user['email'] }}</a>
+						</li>
+					{% endif %}
+					{% if 'phone_string' in user %}
+						<li class='list-group-item'>
+							<strong>Phone</strong>:
+							{{ user['phone_string'] }}
+						</li>
+					{% endif %}
+					{% if user['msc'] %}
+						<li class='list-group-item'>
+							<strong>Mail Stop Code (MSC)</strong>:
+							{{ user['msc'] }}
+						</li>
+					{% endif %}
+					{% if user['building'] %}
+						<li class='list-group-item'>
+							<strong>Residence</strong>:
+							{{ user['building'] }}
+							{% if user['room_num'] %}{{ user['room_num'] }}{% endif %}
+						</li>
+					{% endif %}
+					{% if 'hometown_string' in user %}
+						<li class='list-group-item'>
+							<strong>Hometown</strong>:
+							{{ user['hometown_string'] }}
+						</li>
+					{% endif %}
+					{% if user['entry_year'] %}
+						<li class='list-group-item'>
+							<strong>Matriculation</strong>:
+							{{ user['entry_year'] }}
+						</li>
+					{% endif %}
+					{% if user['graduation_year'] %}
+						<li class='list-group-item'>
+							<strong>Graduation</strong>:
+							{{ user['graduation_year'] }}
+						</li>
+					{% endif %}
+					{% if user['options'] %}
+						<li class='list-group-item'>
+							<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for option in user['options'] %}
+								<li class='list-group-item'>
+									{{ option['option_name'] + ' (' + option['option_type'] + ')' }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{% if user['positions'] %}
+						<li class='list-group-item'>
+							<strong>Position{% if user['positions']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for position in user['positions'] %}
+								<li class='list-group-item'>
+									{{ position['group_name'] + ' - ' + position['pos_name'] }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</ul>
+			</div>
 		{% endif %}
 	</div>
+{% endblock %}
+{% block styles %}
+	{{ super() }}
+	<style>
+		/*Somewhat from https://stackoverflow.com/a/33571268*/
+		.list-group:not(:first-child) > .list-group-item, .list-group > .list-group-item:not(:first-child) {
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+		.list-group:not(:last-child) > .list-group-item, .list-group > .list-group-item:not(:last-child) {
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+		.list-group.list-group-root .list-group {
+			margin-bottom: -1px;
+		}
+		.list-group.list-group-root > .list-group > .list-group-item {
+			padding-left: 50px;
+		}
+	</style>
 {% endblock %}

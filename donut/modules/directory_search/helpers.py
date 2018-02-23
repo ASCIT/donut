@@ -45,13 +45,24 @@ def get_user(user_id):
                                        '') + state + (', ' + country
                                                       if country else '')
         option_query = """
-            SELECT option_name FROM member_options NATURAL JOIN options
-            WHERE user_id = %s ORDER BY option_name
+            SELECT option_name, option_type
+            FROM member_options NATURAL JOIN options
+            WHERE user_id = %s ORDER BY option_type, option_name
         """
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(option_query, [user_id])
-            user['options'] = list(
-                map(lambda option: option['option_name'], cursor.fetchall()))
+            user['options'] = cursor.fetchall()
+        groups_query = """
+            SELECT group_name, pos_name
+            FROM position_holders NATURAL JOIN positions NATURAL JOIN groups
+            WHERE group_id NOT IN (SELECT group_id FROM group_houses)
+            AND (start_date IS NULL OR start_date < NOW())
+            AND (end_date IS NULL OR end_date > NOW())
+            AND user_id = %s
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(groups_query, [user_id])
+            user['positions'] = cursor.fetchall()
     return user
 
 
