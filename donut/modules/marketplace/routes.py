@@ -396,6 +396,8 @@ def sell():
             'textbook_id', 'textbook_title', 'textbook_author'
         ])
         textbook_id = flask.request.form.get('textbook_id', None)
+        if textbook_id == None and stored['textbook_id'] != '':
+            textbook_id = stored['textbook_id']
 
         # generate the hidden values
         hidden = helpers.generate_hidden_form_elements(

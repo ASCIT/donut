@@ -489,7 +489,7 @@ def validate_data():
     if cat_title == 'Textbooks':
         # regex to make sure the textbook edition is valid
         if 'textbook_edition' in flask.request.form:
-            edition_regex = '^([0-9]+|international)$'
+            edition_regex = '^(|[0-9]+|international)$'
             if re.match(edition_regex,
                         str(flask.request.form['textbook_edition']),
                         re.IGNORECASE) == None:
@@ -562,47 +562,39 @@ def create_new_listing(stored):
         textbook_id = int(stored['textbook_id'])
         textbook_edition = stored['textbook_edition']
         textbook_isbn = stored['textbook_isbn'].replace('-', '')
-        query = sqlalchemy.sql.text('''INSERT INTO marketplace_items
+        s = '''INSERT INTO marketplace_items
                 (user_id, cat_id, item_condition, item_details, item_price, textbook_id, textbook_edition, textbook_isbn)
-                VALUES (:user_id, :cat_id, :item_condition, :item_details, :item_price, :textbook_id, :textbook_edition, :textbook_isbn)'''
-                                    )
-        result = flask.g.db.execute(
-            query,
-            user_id=user_id,
-            cat_id=cat_id,
-            item_condition=item_condition,
-            item_details=item_details,
-            item_price=item_price,
-            textbook_id=textbook_id,
-            textbook_edition=textbook_edition,
-            textbook_isbn=textbook_isbn)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'''
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [
+                user_id, cat_id, item_condition, item_details, item_price,
+                textbook_id, textbook_edition, textbook_isbn
+            ])
     else:
         item_title = stored['item_title']
-        query = sqlalchemy.sql.text(
-            '''INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (:user_id, :cat_id, :item_title, :item_condition, :item_details, :item_price)'''
-        )
-        result = flask.g.db.execute(
-            query,
-            user_id=user_id,
-            cat_id=cat_id,
-            item_title=item_title,
-            item_condition=item_condition,
-            item_details=item_details,
-            item_price=item_price)
+        s = '''INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (%s, %s, %s, %s, %s, %s)'''
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [
+                user_id, cat_id, item_title, item_condition, item_details,
+                item_price
+            ])
 
-    query = sqlalchemy.sql.text('SELECT LAST_INSERT_ID()')
-    result = list(flask.g.db.execute(query))
+    s = 'SELECT LAST_INSERT_ID()'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+        result = cursor.fetchone()['LAST_INSERT_ID()']
     item_id = -1
-    if result[0][0] != 0:
-        item_id = result[0][0]
+    if result != 0:
+        item_id = result
     else:
         return -1
 
     # TODO: images
     """
     for image in item_images:
-        query = sqlalchemy.sql.text('''INSERT INTO marketplace.images (item_id, img_link) VALUES (:item_id, :image);''')
-        result = flask.g.db.execute(query, item_id=item_id, image=image)
+        s = '''INSERT INTO marketplace.images (item_id, img_link) VALUES (%s, %s);'''
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [item_id, image])
     """
     return item_id
 
@@ -629,46 +621,33 @@ def update_current_listing(item_id, stored):
         textbook_id = int(stored['textbook_id'])
         textbook_edition = stored['textbook_edition']
         textbook_isbn = stored['textbook_isbn'].replace('-', '')
-        query = sqlalchemy.sql.text('''UPDATE marketplace_items SET
-                user_id=:user_id, cat_id=:cat_id, item_condition=:item_condition, item_details=:item_details, item_price=:item_price,
-                textbook_id=:textbook_id, textbook_edition=:textbook_edition, textbook_isbn=:textbook_isbn WHERE item_id=:item_id'''
-                                    )
-        result = flask.g.db.execute(
-            query,
-            user_id=user_id,
-            cat_id=cat_id,
-            item_id=item_id,
-            item_condition=item_condition,
-            item_details=item_details,
-            item_price=item_price,
-            textbook_id=textbook_id,
-            textbook_edition=textbook_edition,
-            textbook_isbn=textbook_isbn)
+        s = '''UPDATE marketplace_items SET
+                user_id=%s, cat_id=%s, item_condition=%s, item_details=%s, item_price=%s,
+                textbook_id=%s, textbook_edition=%s, textbook_isbn=%s WHERE item_id=%s'''
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [
+                user_id, cat_id, item_condition, item_details, item_price,
+                textbook_id, textbook_edition, textbook_isbn, item_id
+            ])
     else:
         item_title = stored['item_title']
-        query = sqlalchemy.sql.text('''UPDATE marketplace_items SET
-                user_id=:user_id, cat_id=:cat_id, item_title=:item_title, item_condition=:item_condition, item_details=:item_details,
-                item_price=:item_price WHERE item_id=:item_id''')
-        result = flask.g.db.execute(
-            query,
-            user_id=user_id,
-            cat_id=cat_id,
-            item_id=item_id,
-            item_title=item_title,
-            item_condition=item_condition,
-            item_details=item_details,
-            item_price=item_price)
-
-    return item_id
+        s = '''UPDATE marketplace_items SET
+                user_id=%s, cat_id=%s, item_title=%s, item_condition=%s, item_details=%s,
+                item_price=%s WHERE item_id=%s'''
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [
+                user_id, cat_id, item_title, item_condition, item_details,
+                item_price, item_id
+            ])
 
     # TODO: images
     """
     for image in item_images:
-        query = sqlalchemy.sql.text('''INSERT INTO marketplace.images (item_id, img_link) VALUES (:item_id, :image);''')
-        result = flask.g.db.execute(query, item_id=item_id, image=image)
+        s = '''INSERT INTO marketplace.images (item_id, img_link) VALUES (%s, %s);''')
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(s, [item_id, image])
     """
     return item_id
-    pass
 
 
 def search_datalist(fields, datalist, query):

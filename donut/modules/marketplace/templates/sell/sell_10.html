@@ -35,7 +35,7 @@
                     {% for textbook in textbooks %}
                         <tr style="text-align:left" id={{ "td-"+textbook[0]|string }}>
                             <td><input type="radio" name="textbook_id" value="{{ textbook[0] }}"
-                                {% if textbook[0]|string == old_textbook_id %} checked {% endif %}>
+                                {% if textbook[0]|string == old_textbook_id|string %} checked {% endif %}>
                             </td>
                             <td>{{ textbook[1] }}</td>
                             <td>{{ textbook[2] }}</td>
@@ -57,7 +57,11 @@
     <br>
     <br>
     <p>Alternatively, if you can't find your textbook, you can add it here.</p>
-    <form action={{ url_for(".sell", state=state) }} method="post">
+    {% if state=='edit' %}
+    <form action={{ url_for(".sell", state=state, item_id=request.args['item_id']) }} method='post'>
+    {% else %}
+    <form action={{ url_for(".sell", state=state) }} method='post'>
+    {% endif %}
         {% for h in hidden %}
         <input type="hidden" name="{{ h[0] }}" value="{{ h[1] }}">
         {% endfor %}
