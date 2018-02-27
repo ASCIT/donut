@@ -63,3 +63,10 @@ def arcfeedback_add_msg(id):
 
 
 # TODO: summary page for arc members
+@blueprint.route('/arcfeedback/view/summary')
+def arcfeedback_view_summary():
+    #autheticate
+
+    #get a list containing data for each post
+
+    return
