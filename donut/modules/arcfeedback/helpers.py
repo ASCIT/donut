@@ -109,11 +109,11 @@ def get_id(uuid):
 
 def get_messages(complaint_id):
     """
-    Returns timestamps, posters, and messages on this complaint
+    Returns timestamps, posters, messages, and message_id's on this complaint
     in ascending order of timestamp
     """
     query ="""
-    SELECT time, poster, message FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
+    SELECT time, poster, message, message_id FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)

@@ -33,7 +33,7 @@ def arcfeedback_api_view_complaint(id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     #pack all the data we need into a dict
-    return flask.jsonify(helpers.get_all_fields(complaint_id)) #flask.render_template('complaint.html', data=data)
+    return flask.jsonify(helpers.get_all_fields(complaint_id))
 
 
 # view a complaint
