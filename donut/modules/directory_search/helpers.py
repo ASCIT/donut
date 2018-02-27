@@ -14,9 +14,11 @@ def get_user(user_id):
     query = """
         SELECT uid, first_name, middle_name, last_name, preferred_name,
             email, phone, gender, birthday, entry_year, graduation_year,
-            msc, building, room_num, address, city, state, zip, country,
+            msc, building_name, room, address, city, state, zip, country,
             extension
-        FROM members NATURAL LEFT JOIN images
+        FROM members
+            NATURAL LEFT JOIN buildings
+            NATURAL LEFT JOIN images
         WHERE user_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -141,7 +143,10 @@ def get_options():
 def execute_search(**kwargs):
     query = """
         SELECT DISTINCT user_id, full_name, graduation_year
-        FROM members NATURAL JOIN members_full_name NATURAL LEFT JOIN member_options
+        FROM members
+            NATURAL JOIN members_full_name
+            NATURAL LEFT JOIN member_options
+            NATURAL LEFT JOIN buildings
     """
     query += ' WHERE TRUE'
     substitution_arguments = []
@@ -153,8 +158,8 @@ def execute_search(**kwargs):
         query += ' AND option_id = %s'
         substitution_arguments.append(kwargs['option_id'])
     if kwargs['residence']:
-        query += ' AND building = %s'
-        substitution_arguments.append(kwargs['residence'])
+        query += ' AND building_id = %s'
+        substitution_arguments.append(int(kwargs['residence']))
     if kwargs['state']:
         query += ' AND state = %s'
         substitution_arguments.append(kwargs['state'])
@@ -172,7 +177,10 @@ def members_unique_values(field):
 
 
 def get_residences():
-    return members_unique_values('building')
+    query = 'SELECT DISTINCT building_id, building_name FROM members NATURAL JOIN buildings ORDER BY building_name'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchall()
 
 
 def get_states():

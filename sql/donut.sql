@@ -14,6 +14,16 @@ DROP TABLE IF EXISTS member_options;
 DROP TABLE IF EXISTS options;
 DROP VIEW IF EXISTS members_full_name;
 DROP TABLE IF EXISTS members;
+DROP TABLE IF EXISTS buildings;
+
+-- Residential Buildings
+CREATE TABLE buildings (
+    building_id     INT             NOT NULL AUTO_INCREMENT,
+    building_name   VARCHAR(100)    NOT NULL,
+    PRIMARY KEY (building_id),
+    UNIQUE (building_name)
+);
+
 -- Members Table
 CREATE TABLE members (
     user_id            INT          NOT NULL AUTO_INCREMENT,
@@ -32,8 +42,8 @@ CREATE TABLE members (
     entry_year         YEAR(4)      DEFAULT NULL,
     graduation_year    YEAR(4)      DEFAULT NULL,
     msc                SMALLINT     DEFAULT NULL,
-    building           VARCHAR(32)  DEFAULT NULL,
-    room_num           SMALLINT     DEFAULT NULL,
+    building_id        INT          DEFAULT NULL,
+    room               VARCHAR(5)   DEFAULT NULL,
     address            VARCHAR(255) DEFAULT NULL,
     city               VARCHAR(64)  DEFAULT NULL,
     state              VARCHAR(64)  DEFAULT NULL,
@@ -41,6 +51,7 @@ CREATE TABLE members (
     country            VARCHAR(64)  DEFAULT NULL,
     create_account_key CHAR(32)     DEFAULT NULL,
     PRIMARY KEY (user_id),
+    FOREIGN KEY (building_id) REFERENCES buildings(building_id),
     UNIQUE (uid)
 );
 

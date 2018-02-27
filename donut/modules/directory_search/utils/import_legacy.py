@@ -23,6 +23,10 @@ def read_csv(table_name):
             yield row_dict
 
 
+def escape_quote(string):
+    return string.replace("\\", "\\\\").replace("'", "\\'")
+
+
 with open('create_directory.sql', 'w') as sql_file:
     # Insert options
     options = {}  #map of option legacy ids to names
@@ -77,22 +81,25 @@ with open('create_directory.sql', 'w') as sql_file:
         member['birthday'] = birthday
     buildings = {}  #map of building IDs to names
     for building in read_csv('campus_buildings'):
-        buildings[building['id']] = building['name']
+        name = building['name']
+        buildings[building['id']] = name
+        sql_file.writelines([
+            "INSERT INTO buildings (building_name) VALUES ('" +
+            escape_quote(name) + "')\n",
+            'ON DUPLICATE KEY UPDATE building_id = building_id;\n'
+        ])
     for address in read_csv('directory_campus_addresses'):
         member = members.get(address['inum'])
         if member is None:
             continue
         building = address['building']
         number = address['number']
+        if not number:  #no address given
+            continue
         if building:  #residential address
-            member['building'] = buildings[building]
-            try:
-                member['room_num'] = int(number)
-            except ValueError:  #room number is not numeric
-                pass
+            member['building_id'] = buildings[building]
+            member['room'] = number
         else:  #MSC
-            if not number:  #no address given
-                continue
             member['msc'] = int(number)
     for address in read_csv('directory_addresses'):
         member = members.get(address['inum'])
@@ -116,9 +123,10 @@ with open('create_directory.sql', 'w') as sql_file:
                 values += ', '
             keys += key
             value_type = type(value)
-            if value_type is str:
-                values += "'" + value.replace("\\", "\\\\").replace(
-                    "'", "\\'") + "'"
+            if key is 'building_id':
+                values += "(SELECT building_id FROM buildings WHERE building_name = '" + value + "' LIMIT 1)"
+            elif value_type is str:
+                values += "'" + escape_quote(value) + "'"
             elif value_type is int:
                 values += str(value)
             else:

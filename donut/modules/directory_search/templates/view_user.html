@@ -51,11 +51,11 @@
 							{{ user['msc'] }}
 						</li>
 					{% endif %}
-					{% if user['building'] %}
+					{% if user['building_name'] %}
 						<li class='list-group-item'>
 							<strong>Residence</strong>:
-							{{ user['building'] }}
-							{% if user['room_num'] %}{{ user['room_num'] }}{% endif %}
+							{{ user['building_name'] }}
+							{{ user['room'] }}
 						</li>
 					{% endif %}
 					{% if 'hometown_string' in user %}

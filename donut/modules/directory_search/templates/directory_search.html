@@ -23,7 +23,7 @@
 				<select class='form-control' id='residence' name='residence'>
 					<option value=''>Any residence</option>
 					{% for residence in residences %}
-						<option>{{ residence }}</option>
+						<option value={{ residence['building_id'] }}>{{ residence['building_name'] }}</option>
 					{% endfor %}
 				</select>
 			</div>
