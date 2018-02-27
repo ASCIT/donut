@@ -13,6 +13,7 @@ VALID_EXTENSIONS |= set(map(lambda ext: ext.upper(), VALID_EXTENSIONS))
 def directory_search():
     return flask.render_template(
         'directory_search.html',
+        houses=helpers.get_houses(),
         options=helpers.get_options(),
         residences=helpers.get_residences(),
         states=helpers.get_states())
@@ -85,15 +86,28 @@ def search():
     name = form['name']
     if name.strip() == '':
         name = None
+    house_id = form['house']
+    if house_id:
+        house_id = int(house_id)
+    else:
+        house_id = None
     option_id = form['option']
     if option_id:
         option_id = int(option_id)
     else:
         option_id = None
-    residence = form['residence'] or None
+    building_id = form['residence']
+    if building_id:
+        building_id = int(building_id)
+    else:
+        building_id = None
     state = form['state'] or None
     users = helpers.execute_search(
-        name=name, option_id=option_id, residence=residence, state=state)
+        name=name,
+        house_id=house_id,
+        option_id=option_id,
+        building_id=building_id,
+        state=state)
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(

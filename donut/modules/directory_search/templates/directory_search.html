@@ -10,6 +10,15 @@
 				<ul class='list-group' id='name-search'></ul>
 			</div>
 			<div class='form-group'>
+				<label for='house'>Affiliated with</label>
+				<select class='form-control' id='house' name='house'>
+					<option value=''>Any house</option>
+					{% for house in houses %}
+						<option value={{ house['group_id'] }}>{{ house['group_name'] }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
 				<label for='option'>In</label>
 				<select class='form-control' id='option' name='option'>
 					<option value=''>Any option</option>

@@ -133,18 +133,12 @@ def get_image(user_id):
     return image['extension'], image['image']
 
 
-def get_options():
-    query = 'SELECT * FROM options ORDER BY option_name'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
-        return cursor.fetchall()
-
-
 def execute_search(**kwargs):
     query = """
         SELECT DISTINCT user_id, full_name, graduation_year
         FROM members
             NATURAL JOIN members_full_name
+            NATURAL LEFT JOIN group_house_membership AS house
             NATURAL LEFT JOIN member_options
             NATURAL LEFT JOIN buildings
     """
@@ -154,12 +148,15 @@ def execute_search(**kwargs):
         name_search = kwargs['name'].lower().split(' ')
         query += ' AND ' + make_name_query(name_search)
         substitution_arguments += name_search
+    if kwargs['house_id']:
+        query += ' AND house.group_id = %s'
+        substitution_arguments.append(kwargs['house_id'])
     if kwargs['option_id']:
         query += ' AND option_id = %s'
         substitution_arguments.append(kwargs['option_id'])
-    if kwargs['residence']:
+    if kwargs['building_id']:
         query += ' AND building_id = %s'
-        substitution_arguments.append(int(kwargs['residence']))
+        substitution_arguments.append(kwargs['building_id'])
     if kwargs['state']:
         query += ' AND state = %s'
         substitution_arguments.append(kwargs['state'])
@@ -174,6 +171,20 @@ def members_unique_values(field):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return map(lambda member: member[field], cursor.fetchall())
+
+
+def get_houses():
+    query = 'SELECT * FROM group_houses ORDER BY group_name'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchall()
+
+
+def get_options():
+    query = 'SELECT * FROM options ORDER BY option_name'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchall()
 
 
 def get_residences():
