@@ -19,6 +19,7 @@ def register_complaint(data):
     """
     Inputs a complaint into the database and returns the complaint id
     associated with this complaint
+    data should be a dict with keys 'course', 'msg' and optionally 'name', 'email'
     """
     # register complaint
     query = """

@@ -25,7 +25,7 @@
 		    <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
 		</thead>
 		{% for message in complaint['messages'] %}
-		<tr> <th>{{message['time']}}</th> <th>{{ message['poster'] }}</th> <td>{{ message['message'] }}</td></tr>
+		<tr> <th>{{message['time'].strftime('%b %d %Y %-I:%M%p')}}</th> <th>{{ message['poster'] }}</th> <td>{{ message['message'] }}</td></tr>
     {% endfor %}
 	    </table>
 	</div>
