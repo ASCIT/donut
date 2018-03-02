@@ -38,10 +38,8 @@ def get_group_list_data(fields=None, attrs={}):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, values)
         result = cursor.fetchall()
-    
-    return list(result)
-   
 
+    return list(result)
 
 
 def get_group_positions(group_id):
@@ -53,7 +51,7 @@ def get_group_positions(group_id):
     """
     s = "SELECT `pos_id`, `pos_name` FROM `positions` "
     s += "WHERE `group_id` = %s"
-    
+
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [str(group_id)])
         result = cursor.fetchall()

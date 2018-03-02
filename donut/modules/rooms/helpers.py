@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from itertools import groupby
 import flask
-import sqlalchemy
+import pymysql.cursors
 
 from donut.auth_utils import get_user_id
 
@@ -9,68 +9,59 @@ from donut.auth_utils import get_user_id
 def get_rooms():
     """Gets a list of rooms in the form {id, name, title, desc}"""
 
-    query = sqlalchemy.text(
-        "SELECT room_id, location, title, description FROM rooms")
-    rooms = flask.g.db.execute(query).fetchall()
-
-    return [{
-        "id": id,
-        "name": location,
-        "title": title,
-        "desc": description
-    } for id, location, title, description in rooms]
+    s = 'SELECT `room_id`, `location`, `title`, `description` FROM `rooms`'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+        results = cursor.fetchall()
+    return results
 
 
 def is_room(room_id_string):
-    query = sqlalchemy.text(
-        "SELECT room_id FROM rooms WHERE room_id = :room_id")
-    room = flask.g.db.execute(query, room_id=int(room_id_string)).fetchone()
-    return room is not None
+    s = "SELECT room_id FROM rooms WHERE room_id = %s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [room_id_string])
+        result = cursor.fetchone()
+    return result is not None
 
 
 def add_reservation(room, username, reason, start, end):
-    insertion = sqlalchemy.text("""
+    insertion = """
         INSERT INTO room_reservations
         (room_id, user_id, reason, start_time, end_time)
-        VALUES (:room, :user, :reason, :start, :end)
-    """)
-    flask.g.db.execute(
-        insertion,
-        room=room,
-        user=get_user_id(username),
-        reason=reason,
-        start=start,
-        end=end)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(insertion,
+                       [room,
+                        str(get_user_id(username)), reason, start, end])
 
 
 def get_all_reservations(rooms, start, end):
     if not rooms:
-        rooms = [room["id"] for room in get_rooms()]
-    query = sqlalchemy.text("""
-        SELECT reservation_id, location, start_time, end_time
-        FROM room_reservations AS reservation LEFT OUTER JOIN rooms AS room
+        rooms = [room["room_id"] for room in get_rooms()]
+    query = """
+        SELECT `reservation_id`, `location`, start_time, end_time
+        FROM `room_reservations` AS reservation LEFT OUTER JOIN `rooms` AS room
         ON reservation.room_id = room.room_id
-        WHERE :start <= end_time AND start_time <= :end
-        AND room.room_id IN (""" + ",".join(map(str, rooms)) + """)
+        WHERE %s <= `end_time` AND `start_time` <= %s
+        AND room.room_id IN (""" + ",".join(["%s" for _ in range(len(rooms))
+                                             ]) + """)
         ORDER BY start_time
-    """)
-    reservations = flask.g.db.execute(
-        query,
-        start=start,
-        end=end + timedelta(days=1),  # until start of following day
-        rooms=rooms)
-    reservations = [{
-        "id": id,
-        "room": room,
-        "start": start,
-        "end": end
-    } for id, room, start, end in reservations]
-    return [{
-        "day": day,
-        "reservations": list(day_rooms)
-    }
-            for day, day_rooms in groupby(
-                reservations, lambda reservation: reservation["start"].date())]
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        values = [str(start), str(end + timedelta(days=1))]
+        values.extend(map(str, rooms))
+        cursor.execute(query, values)
+        reservations = cursor.fetchall()
+
+    return [
+        {
+            "day": day,
+            "reservations": list(day_rooms)
+        }
+        for day, day_rooms in groupby(
+            reservations, lambda reservation: reservation["start_time"].date())
+    ]
 
 
 def split(lst, pred):
@@ -83,25 +74,21 @@ def split(lst, pred):
 
 
 def get_my_reservations(username):
-    query = sqlalchemy.text("""
+    query = """
         SELECT reservation_id, location, start_time, end_time
         FROM room_reservations AS reservation
             LEFT OUTER JOIN users AS user
             ON reservation.user_id = user.user_id
             LEFT OUTER JOIN rooms AS room
             ON reservation.room_id = room.room_id
-        WHERE user.username = :username
+        WHERE user.username = %s
         ORDER BY start_time
-    """)
-    reservations = flask.g.db.execute(query, username=username)
-    reservations = [{
-        "id": id,
-        "room": room,
-        "start": start,
-        "end": end
-    } for id, room, start, end in reservations]
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [username])
+        reservations = cursor.fetchall()
     now = datetime.now()
-    past, upcoming = split(reservations, lambda res: res["start"] < now)
+    past, upcoming = split(reservations, lambda res: res["start_time"] < now)
     return {
         "past": past[::-1],  #show most recent past first
         "upcoming": upcoming
@@ -109,7 +96,7 @@ def get_my_reservations(username):
 
 
 def get_reservation(id):
-    query = sqlalchemy.text("""
+    query = """
         SELECT location, title, full_name, start_time, end_time, reason, username
         FROM room_reservations AS reservation
             LEFT OUTER JOIN members_full_name as member
@@ -118,40 +105,37 @@ def get_reservation(id):
             ON reservation.user_id = user.user_id
             LEFT OUTER JOIN rooms AS room
             ON reservation.room_id = room.room_id
-        WHERE reservation_id = :id
-    """)
-    location, title, name, start, end, reason, username = flask.g.db.execute(
-        query, id=id).fetchone()
-    return {
-        "location": location,
-        "title": title,
-        "name": name,
-        "start": start,
-        "end": end,
-        "reason": reason,
-        "username": username
-    }
+        WHERE reservation_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [str(id)])
+        results = cursor.fetchone()
+    return results
 
 
 def delete_reservation(id, username):
     if username is None:
         raise "Not logged in"
 
-    query = sqlalchemy.text("""
+    query = """
         DELETE FROM room_reservations
-        WHERE reservation_id = :id
+        WHERE reservation_id = %s
         AND user_id IN (
-            SELECT user_id FROM users WHERE username = :username
+            SELECT user_id FROM users WHERE username = %s
         )
-    """)
-    flask.g.db.execute(query, id=id, username=username)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [str(id), username])
 
 
 def conflicts(room, start, end):
     """Returns a list of overlapping [start_time, end_time] tuples"""
-    query = sqlalchemy.text("""
+    query = """
         SELECT start_time, end_time FROM room_reservations
-        WHERE room_id = :room AND :start < end_time AND start_time < :end
+        WHERE room_id = %s AND %s < end_time AND start_time < %s
         ORDER BY start_time
-    """)
-    return list(flask.g.db.execute(query, room=room, start=start, end=end))
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [str(room), str(start), str(end)])
+        results = cursor.fetchall()
+    return [(r['start_time'], r['end_time']) for r in results]
