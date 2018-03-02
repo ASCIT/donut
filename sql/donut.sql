@@ -66,7 +66,8 @@ CREATE VIEW members_full_name AS (
 CREATE TABLE options (
     option_id     INT         NOT NULL AUTO_INCREMENT,
     option_name   VARCHAR(50) NOT NULL,
-    PRIMARY KEY (option_id)
+    PRIMARY KEY (option_id),
+    UNIQUE (option_name)
 );
 
 -- Option to Member Table

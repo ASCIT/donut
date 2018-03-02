@@ -1,4 +1,7 @@
-"""Exports directory tables from donut-legacy as CSV files"""
+"""
+Exports directory tables from donut-legacy as CSV files
+and images as a zip file
+"""
 import os
 from sys import argv
 
@@ -19,3 +22,5 @@ for table in TABLES:
         echo "COPY """ + table +
               """ TO STDOUT DELIMITER ',' CSV HEADER;" | psql ascit devel > """
               + table + '.csv')
+print('Exporting directory images')
+os.system('zip -r9 images /home/demo/www/id_photo > /dev/null')

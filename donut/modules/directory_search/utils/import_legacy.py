@@ -2,31 +2,22 @@
 Converts CSV files storing donut-legacy directory tables
 into SQL insert statements
 """
-import csv
 from datetime import datetime
 import os
 import sys
 sys.path.append('../../..')
+from pymysql_connection import make_db
 from constants import MALE, FEMALE, NO_GENDER
-
-
-def read_csv(table_name):
-    with open(table_name + '.csv', encoding='latin-1') as csv_file:
-        headers = None
-        for row in csv.reader(csv_file):
-            if headers is None:
-                headers = row
-                continue
-            row_dict = {}
-            for k, v in zip(headers, row):
-                row_dict[k] = v
-            yield row_dict
+from read_csv import read_csv
 
 
 def escape_quote(string):
     return string.replace("\\", "\\\\").replace("'", "\\'")
 
 
+db = make_db('dev')
+
+members = {}  #map of inums to dicts of corresponding information
 with open('create_directory.sql', 'w') as sql_file:
     # Insert options
     options = {}  #map of option legacy ids to names
@@ -41,7 +32,6 @@ with open('create_directory.sql', 'w') as sql_file:
         ])
 
     # Insert members
-    members = {}  #map of inums to dicts of corresponding information
     for user in read_csv('inums'):
         first_middle_names = user['prename'].split(' ', 1)
         if len(first_middle_names) == 1:
@@ -161,10 +151,10 @@ with open('create_directory.sql', 'w') as sql_file:
             "    ON DUPLICATE KEY UPDATE group_id=group_id;\n"
         ])
         memberships_by_house[house_id] = set()
-    house_membership_types = {}  #map of membership type IDs to descriptions
-    for house_membership_type in read_csv('hovse_membership_types'):
-        house_membership_types[house_membership_type[
-            'id']] = house_membership_type['description']
+    house_membership_types = {
+        house_membership_type['id']: house_membership_type['description']
+        for house_membership_type in read_csv('hovse_membership_types')
+    }
     for house_member in read_csv('hovse_members'):
         member_uid = members[house_member['inum']].get('uid')
         if member_uid is None:
@@ -192,3 +182,31 @@ with open('create_directory.sql', 'w') as sql_file:
             + group_id_query + ' AND pos_id = ' + pos_id_query +
             ' AND user_id = ' + user_id_query + ');\n'
         ])
+
+#Import images
+# os.system('rm -r images 2> /dev/null')
+# os.system('unzip images.zip -d images_tmp > /dev/null && mv images_tmp/home/demo/www/id_photo images && rm -r images_tmp')
+inum_images = [image_inum for image_inum in read_csv('image_inums')
+               ]  #list of {inum, image_id} pairs
+image_files = {image['id']: image['file'] for image in read_csv('images')}
+for inum_image in inum_images:
+    inum = inum_image['inum']
+    if inum not in members:
+        continue
+    uid = members[inum].get('uid')
+    if uid is None:
+        continue
+    file = image_files[inum_image['image_id']]
+    extension = file.split('.')[-1]
+    try:
+        with open('images/' + file, 'rb') as image_file:
+            contents = image_file.read()
+    except FileNotFoundError:
+        continue
+    query = """
+        INSERT INTO images (user_id, extension, image)
+        VALUES ((SELECT user_id FROM members WHERE uid = %s), %s, %s)
+        ON DUPLICATE KEY UPDATE user_id = user_id
+    """
+    with db.cursor() as cursor:
+        cursor.execute(query, [uid, extension, contents])
