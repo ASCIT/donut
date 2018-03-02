@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
+	<div class='col-md-6 col-md-offset-3' id='dir-info' style='float: none; padding-bottom: 25px'>
 		{% if user is none %}
 			No such user!
 		{% else %}
@@ -13,9 +13,10 @@
 				{% endif %}
 			</h2>
 			{% if user['extension'] %}
-				<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
-			{% endif %}
+			<div class='col-md-8'>
+			{% else %}
 			<div>
+			{% endif %}
 				<ul class='list-group list-group-root'>
 					<li class='list-group-item'>
 						<strong>UID</strong>:
@@ -114,12 +115,25 @@
 					{% endif %}
 				</ul>
 			</div>
+			{% if user['extension'] %}
+				<div class='col-md-4'>
+					<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
+				</div>
+			{% endif %}
 		{% endif %}
 	</div>
 {% endblock %}
 {% block styles %}
 	{{ super() }}
 	<style>
+		#dir-info:before, #dir-info:after {
+			content: " ";
+			display: table;
+		}
+		#dir-info:after {
+			clear: both;
+		}
+
 		/*Somewhat from https://stackoverflow.com/a/33571268*/
 		.list-group:not(:first-child) > .list-group-item, .list-group > .list-group-item:not(:first-child) {
 			border-top-left-radius: 0;
