@@ -1,13 +1,12 @@
+#!/usr/bin/env python
 """
 Converts CSV files storing donut-legacy directory tables
 into SQL insert statements
 """
 from datetime import datetime
 import os
-import sys
-sys.path.append('../../..')
-from pymysql_connection import make_db
-from constants import MALE, FEMALE, NO_GENDER
+from donut.pymysql_connection import make_db
+from donut.constants import MALE, FEMALE, NO_GENDER
 from read_csv import read_csv
 
 
@@ -24,60 +23,63 @@ with open('create_directory.sql', 'w') as sql_file:
     for option in read_csv('undergrad_options'):
         name = option['name']
         options[option['id']] = name
-        sql_file.writelines([
-            "INSERT INTO options (option_name) SELECT * FROM (SELECT '" + name
-            + "') AS tmp\n",
-            "WHERE NOT EXISTS (SELECT * from options WHERE option_name = '" +
-            name + "' LIMIT 1);\n"
-        ])
+        query = """
+            INSERT INTO options (option_name) VALUES (%s)
+            ON DUPLICATE KEY UPDATE option_id = option_id
+        """
+        with db.cursor() as cursor:
+            cursor.execute(query, [name])
 
     # Insert members
     for user in read_csv('inums'):
         first_middle_names = user['prename'].split(' ', 1)
         if len(first_middle_names) == 1:
-            first_middle_names.append(None)
+            first_middle_names.append('')
         first_name, middle_name = first_middle_names
         first_name = first_name.title()
-        if middle_name is not None:
-            middle_name = middle_name.title()
-        members[user['inum']] = {
+        member = {
             'email': user['email'],
             'last_name': user['name'].title(),
             'first_name': first_name,
             'middle_name': middle_name
         }
+        if middle_name:
+            member['middle_name'] = middle_name.title()
+        members[user['inum']] = member
     for user in read_csv('undergrads'):
         member = members[user['inum']]
         member['uid'] = user['uid']
         entry_year = user['entryear']
-        member['entry_year'] = int(entry_year) if entry_year else None
+        if entry_year:
+            member['entry_year'] = int(entry_year)
         grad_year = user['gradyear']
-        member['graduation_year'] = int(grad_year) if grad_year else None
-    for user in read_csv(
-            'directory_phones'
-    ):  #legacy database doesn't appear to have more than 1 phone for any person
+        if grad_year:
+            member['graduation_year'] = int(grad_year)
+    for user in read_csv('directory_phones'):
         member = members.get(user['inum'])
         if member is None:
             continue
+        #legacy database doesn't appear to have more than 1 phone for any person
         member['phone'] = user['phone']
     for user in read_csv('people'):
         member = members[user['inum']]
         member['gender'] = MALE if user['gender'] == 'm' else FEMALE if user[
             'gender'] == 'f' else NO_GENDER
         birthday = user['birthday']
-        if birthday[
-                -3:] == ' BC':  #not sure why someone's birthday is in 1987 BC
+        #not sure why someone's birthday is in 1987 BC
+        if birthday.endswith(' BC'):
             birthday = birthday[:-3]
         member['birthday'] = birthday
     buildings = {}  #map of building IDs to names
     for building in read_csv('campus_buildings'):
         name = building['name']
         buildings[building['id']] = name
-        sql_file.writelines([
-            "INSERT INTO buildings (building_name) VALUES ('" +
-            escape_quote(name) + "')\n",
-            'ON DUPLICATE KEY UPDATE building_id = building_id;\n'
-        ])
+        query = """
+            INSERT INTO buildings (building_name) VALUES (%s)
+            ON DUPLICATE KEY UPDATE building_id = building_id
+        """
+        with db.cursor() as cursor:
+            cursor.execute(query, [name])
     for address in read_csv('directory_campus_addresses'):
         member = members.get(address['inum'])
         if member is None:
@@ -103,8 +105,11 @@ with open('create_directory.sql', 'w') as sql_file:
         if country:  #don't store USA
             member['country'] = country
     for member in members.values():
+        if 'uid' not in member:
+            continue  #database requires UID
         keys = ''
         values = ''
+        substitution_args = []
         for key, value in member.items():
             if value is None:
                 continue
@@ -114,86 +119,87 @@ with open('create_directory.sql', 'w') as sql_file:
             keys += key
             value_type = type(value)
             if key is 'building_id':
-                values += "(SELECT building_id FROM buildings WHERE building_name = '" + value + "' LIMIT 1)"
-            elif value_type is str:
-                values += "'" + escape_quote(value) + "'"
-            elif value_type is int:
-                values += str(value)
+                values += '(SELECT building_id FROM buildings WHERE building_name = %s LIMIT 1)'
+            elif value_type is str or value_type is int:
+                values += '%s'
             else:
                 raise Exception('Unexpected type: ' + str(value_type))
-        sql_file.writelines([
-            'INSERT INTO members (' + keys + ') VALUES (' + values + ')\n',
-            'ON DUPLICATE KEY UPDATE uid = uid;\n'  #do nothing if member already exists
-        ])
+            substitution_args.append(value)
+        query = 'INSERT INTO members (' + keys + ') VALUES (' + values + ') ON DUPLICATE KEY UPDATE user_id = user_id'
+        with db.cursor() as cursor:
+            cursor.execute(query, substitution_args)
     for option_member in read_csv('undergrad_option_objectives'):
-        member_uid = members[option_member['inum']]['uid']
+        uid = members[option_member['inum']]['uid']
         option_name = options[option_member['option_id']]
-        sql_file.writelines([
-            'INSERT INTO member_options (user_id, option_id, option_type) VALUES (\n',
-            "    (SELECT user_id FROM members WHERE uid = '" + member_uid +
-            "' LIMIT 1),\n",
-            "    (SELECT option_id FROM options WHERE option_name = '" +
-            option_name + "' LIMIT 1),\n", "    'Major'\n",
-            ') ON DUPLICATE KEY UPDATE user_id=user_id;\n'
-        ])
+        query = """
+            INSERT INTO member_options (user_id, option_id, option_type) VALUES (
+                (SELECT user_id FROM members WHERE uid = %s LIMIT 1),
+                (SELECT option_id FROM options WHERE option_name = %s LIMIT 1),
+                'Major'
+            ) ON DUPLICATE KEY UPDATE user_id = user_id
+        """
+        with db.cursor() as cursor:
+            cursor.execute(query, [uid, option_name])
 
     # Insert house memberships
     houses = {}  #map of house IDs to names
-    memberships_by_house = {
-    }  #map of houses IDs to sets of membership type IDs
+    #map of houses IDs to sets of membership type IDs
+    memberships_by_house = {}
     for house in read_csv('hovses'):
         name = house['name'] + ' House'
         house_id = house['id']
         houses[house_id] = name
-        sql_file.writelines([
-            'INSERT INTO groups (group_name, type) VALUES\n',
-            "    ('" + name + "', 'house')\n",
-            "    ON DUPLICATE KEY UPDATE group_id=group_id;\n"
-        ])
+        query = """
+            INSERT INTO groups (group_name, type) VALUES (%s, 'house')
+            ON DUPLICATE KEY UPDATE group_id = group_id
+        """
+        with db.cursor() as cursor:
+            cursor.execute(query, [name])
         memberships_by_house[house_id] = set()
     house_membership_types = {
         house_membership_type['id']: house_membership_type['description']
         for house_membership_type in read_csv('hovse_membership_types')
     }
     for house_member in read_csv('hovse_members'):
-        member_uid = members[house_member['inum']].get('uid')
-        if member_uid is None:
+        uid = members[house_member['inum']].get('uid')
+        if uid is None:
             continue
         house_id = house_member['hovse_id']
         membership_type = house_member['membership_type']
         membership_name = house_membership_types[membership_type]
         house_memberships = memberships_by_house[house_id]
         house_name = houses[house_id]
-        group_id_query = "(SELECT group_id FROM groups WHERE group_name = '" + house_name + "' LIMIT 1)"
-        pos_id_query = "(SELECT pos_id FROM positions NATURAL JOIN groups WHERE group_name = '" + house_name + "' AND pos_name = '" + membership_name + "' LIMIT 1)"
+        group_id_query = '(SELECT group_id FROM groups WHERE group_name = %s LIMIT 1)'
+        group_id_args = [house_name]
+        pos_id_query = '(SELECT pos_id FROM positions NATURAL JOIN groups WHERE group_name = %s AND pos_name = %s LIMIT 1)'
+        pos_id_args = [house_name, membership_name]
         if membership_type not in house_memberships:
             house_memberships.add(membership_type)
-            sql_file.writelines([
-                'INSERT INTO positions (group_id, pos_name) SELECT * FROM (SELECT '
-                + group_id_query + ", '" + membership_name + "') AS tmp\n",
-                'WHERE NOT EXISTS ' + pos_id_query + ';\n'
-            ])
-        user_id_query = "(SELECT user_id FROM members WHERE uid = '" + member_uid + "' LIMIT 1)"
-        sql_file.writelines([
-            'INSERT INTO position_holders (group_id, pos_id, user_id) SELECT * FROM (SELECT'
-            + group_id_query + ', ' + pos_id_query + ', ' + user_id_query +
-            ') AS tmp\n',
-            'WHERE NOT EXISTS (SELECT * FROM position_holders WHERE group_id = '
-            + group_id_query + ' AND pos_id = ' + pos_id_query +
-            ' AND user_id = ' + user_id_query + ');\n'
-        ])
+            query = 'INSERT INTO positions (group_id, pos_name) SELECT * FROM (SELECT ' + group_id_query + ', %s) as tmp\n'
+            query += 'WHERE NOT EXISTS ' + pos_id_query
+            with db.cursor() as cursor:
+                cursor.execute(query, pos_id_args * 2)
+        user_id_query = '(SELECT user_id FROM members WHERE uid = %s LIMIT 1)'
+        user_id_args = [uid]
+        query = 'INSERT INTO position_holders (group_id, pos_id, user_id)\n'
+        query += 'SELECT * FROM (SELECT ' + group_id_query + ', ' + pos_id_query + ', ' + user_id_query + ') as tmp\n'
+        query += 'WHERE NOT EXISTS (SELECT * FROM position_holders WHERE group_id = ' + group_id_query + ' AND pos_id = ' + pos_id_query + ' AND user_id = ' + user_id_query + ')'
+        with db.cursor() as cursor:
+            cursor.execute(query,
+                           (group_id_args + pos_id_args + user_id_args) * 2)
 
 #Import images
-# os.system('rm -r images 2> /dev/null')
-# os.system('unzip images.zip -d images_tmp > /dev/null && mv images_tmp/home/demo/www/id_photo images && rm -r images_tmp')
-inum_images = [image_inum for image_inum in read_csv('image_inums')
-               ]  #list of {inum, image_id} pairs
+os.system('rm -r images 2> /dev/null')
+os.system("""
+    unzip images.zip -d images_tmp > /dev/null &&
+    mv images_tmp/home/demo/www/id_photo images &&
+    rm -r images_tmp
+""")
+#list of {inum, image_id} pairs
+inum_images = [image_inum for image_inum in read_csv('image_inums')]
 image_files = {image['id']: image['file'] for image in read_csv('images')}
 for inum_image in inum_images:
-    inum = inum_image['inum']
-    if inum not in members:
-        continue
-    uid = members[inum].get('uid')
+    uid = members.get(inum_image['inum'], {}).get('uid')
     if uid is None:
         continue
     file = image_files[inum_image['image_id']]

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Exports directory tables from donut-legacy as CSV files
 and images as a zip file
