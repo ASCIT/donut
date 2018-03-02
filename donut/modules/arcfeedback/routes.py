@@ -65,8 +65,11 @@ def arcfeedback_add_msg(id):
 # TODO: summary page for arc members
 @blueprint.route('/arcfeedback/view/summary')
 def arcfeedback_view_summary():
-    #autheticate
+    #authenticate
 
     #get a list containing data for each post
-
-    return
+    complaints = helpers.get_new_posts()
+    #add links to each complaint
+    for complaint in complaints:
+        complaint['link'] = helpers.get_link(complaint['complaint_id'])
+    return flask.render_template('summary.html', complaints=complaints)

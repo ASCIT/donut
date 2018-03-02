@@ -165,3 +165,26 @@ def get_all_fields(complaint_id):
     data['course'] = get_course(complaint_id)
     data['status'] = get_status(complaint_id)
     return data
+
+
+def get_new_posts():
+    '''
+    Returns all posts with status 'new_msg' and their associated list
+    of messages. Will be an array of dicts with keys complaint_id, course, 
+    status, uuid, message, poster, time
+    Note that message and poster refer to the latest comment on this complaint
+    '''
+    query = """SELECT post.complaint_id AS complaint_id, post.course AS course, post.status AS status,
+    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time FROM arc_complaint_info post 
+    INNER JOIN arc_complaint_messages comment 
+    ON comment.complaint_id = post.complaint_id
+    INNER JOIN (
+    SELECT complaint_id, max(time) AS time FROM arc_complaint_messages GROUP BY complaint_id
+    ) maxtime 
+    ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
+    WHERE post.status = 'new_msg'
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        res = cursor.fetchall()
+    return res
