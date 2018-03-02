@@ -184,8 +184,7 @@ for house_member in read_csv('hovse_members'):
     query += 'SELECT * FROM (SELECT ' + group_id_query + ', ' + pos_id_query + ', ' + user_id_query + ') as tmp\n'
     query += 'WHERE NOT EXISTS (SELECT * FROM position_holders WHERE group_id = ' + group_id_query + ' AND pos_id = ' + pos_id_query + ' AND user_id = ' + user_id_query + ')'
     with db.cursor() as cursor:
-        cursor.execute(query,
-                        (group_id_args + pos_id_args + user_id_args) * 2)
+        cursor.execute(query, (group_id_args + pos_id_args + user_id_args) * 2)
 
 #Import images
 os.system('rm -r images 2> /dev/null')
