@@ -15,10 +15,11 @@ def get_user(user_id):
         SELECT uid, first_name, middle_name, last_name, preferred_name,
             email, phone, gender, birthday, entry_year, graduation_year,
             msc, building_name, room, address, city, state, zip, country,
-            extension
+            username, extension IS NOT NULL as image
         FROM members
             NATURAL LEFT JOIN buildings
             NATURAL LEFT JOIN images
+            NATURAL LEFT JOIN users
         WHERE user_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:

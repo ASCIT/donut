@@ -12,12 +12,18 @@
 					<a href='{{ url_for("directory_search.edit_user", user_id=user_id) }}' style='float: right'>(Update)</a>
 				{% endif %}
 			</h2>
-			{% if user['extension'] %}
+			{% if user['image'] %}
 			<div class='col-md-8'>
 			{% else %}
 			<div>
 			{% endif %}
 				<ul class='list-group list-group-root'>
+					{% if user['username'] %}
+						<li class='list-group-item'>
+							<strong>Username</strong>:
+							{{ user['username'] }}
+						</li>
+					{% endif %}
 					<li class='list-group-item'>
 						<strong>UID</strong>:
 						{{ user['uid'] }}
@@ -115,7 +121,7 @@
 					{% endif %}
 				</ul>
 			</div>
-			{% if user['extension'] %}
+			{% if user['image'] %}
 				<div class='col-md-4'>
 					<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
 				</div>
