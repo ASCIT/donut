@@ -172,27 +172,33 @@ def manage():
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 
     if 'state' in flask.request.args:
-        has_edit_privs = False
-        current_user_id = get_user_id(flask.session['username'])
-        #if stored['user_id'] == current_user_id or check_permission( Permissions.ADMIN):
-        # has_edit_privs = True
+        if 'item' not in flask.request.args:
+            return flask.render_template('404.html'), 404
+        item = flask.request.args['item']
 
         # archive, unarchive, delete
         if flask.request.args['state'] == 'archive':
-            if 'item' not in flask.request.args:
+            result = helpers.manage_set_active_status(item, 0)
+            if result == False:
                 return flask.render_template('404.html'), 404
-            item = flask.request.args['item']
-            helpers.manage_set_active_status(item, 0)
+
             return helpers.display_managed_items()
 
         elif flask.request.args['state'] == 'unarchive':
-            if 'item' not in flask.request.args:
+            result = helpers.manage_set_active_status(item, 1)
+            if result == False:
                 return flask.render_template('404.html'), 404
-            item = flask.request.args['item']
-            helpers.manage_set_active_status(item, 1)
+
             return helpers.display_managed_items()
 
         elif flask.request.args['state'] == 'delete':
+            result = helpers.manage_delete_item(item)
+            if result == False:
+                return flask.render_template('404.html'), 404
+
+            return helpers.display_managed_items()
+
+        elif flask.request.args['state'] == 'confirmation':
             pass
 
         else:

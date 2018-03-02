@@ -3,7 +3,8 @@ import re
 from math import ceil
 
 from donut.modules.core.helpers import get_member_data
-from donut.auth_utils import get_user_id
+from donut.auth_utils import get_user_id, check_permission
+from donut.resources import Permissions
 
 from . import routes
 
@@ -81,12 +82,31 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
 
 def manage_set_active_status(item, is_active):
     """
-    Set the is_active status of item <item> to <is_active>
+    Checks permissions and then sets the is_active status of item <item> to <is_active>.
     """
+    current_user_id = get_user_id(flask.session['username'])
+    if current_user_id != get_user_id_of_item and not check_permission(
+            Permissions.ADMIN):
+        return False
+
     s = 'UPDATE `marketplace_items` SET `item_active`=%s WHERE `item_id`=%s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (is_active, item))
         result = cursor.fetchone()
+
+    return True
+
+
+def manage_delete_item(item):
+    """
+    Checks permissions and then deletes the item.
+    """
+    current_user_id = get_user_id(flask.session['username'])
+    if current_user_id != get_user_id_of_item and not check_permission(
+            Permissions.ADMIN):
+        return False
+
+    return delete_item(item)
 
 
 def display_managed_items():
@@ -895,7 +915,7 @@ def add_textbook(title, author):
     # check if the textbook exists
     s = '''SELECT textbook_title FROM
             marketplace_textbooks WHERE textbook_title = %s AND
-            textbook_author = %s LIMIT 1'''
+            textbook_author = %s'''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [title, author])
         result = cursor.fetchone()
@@ -910,6 +930,50 @@ def add_textbook(title, author):
         cursor.execute(s, [title, author])
 
     return True
+
+
+def delete_item(item_id):
+    """
+    Deletes an item.
+
+    Arguments:
+        item_id: The id of the item to delete.
+
+    Returns:
+        True if the delete succeeds, and False if not (the item doesn't exist)
+    """
+    s = '''SELECT item_id FROM marketplace_items WHERE item_id = %s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
+        result = cursor.fetchone()
+    if result == None:
+        # the item doesn't exist
+        return False
+
+    s = '''DELETE FROM marketplace_items WHERE item_id=%s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
+    return True
+
+
+def get_user_id_of_item(item_id):
+    """
+    Gets the user_id of the user who owns the item <item_id>.
+
+    Arguments:
+        item_id: The id of the item.
+
+    Returns:
+        The user_id
+    """
+    s = '''SELECT user_id FROM marketplace_items WHERE item_id = %s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
+        result = cursor.fetchone()
+    if result == None:
+        # the item doesn't exist
+        return False
+    return result['user_id']
 
 
 def get_name_from_user_id(user_id):
