@@ -5,21 +5,44 @@
     <div class="jumbotron">
       <h1 id = "title" class="text-center">Editing</h1>
 
-      <textarea id="title" rows="10" cols="82"></textarea>
-      <button id="change_title" onClick="change_title()">Change Title</button>
-      <hr/>
+      <textarea id="title" rows="2">{{input_text}}</textarea>
 
-      <textarea id="source" rows="10" cols="82"></textarea>
+      <br>
+
+      <div class="dropdown">
+        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Styles
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a type="button" onClick="insert_italic()" class="btn btn-secondary btn-sm">italic</a></li>
+          <li><a type="button" onClick="insert_bold()" class="btn btn-secondary btn-sm">bold</a></li>
+          <li><a type="button" onClick="insert_strike_through()" class="btn btn-secondary btn-sm">strike_through</a></li>
+        </ul>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Headings
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(2)" style="font-size:18px">Heading</a></li>
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(3)" style="font-size:16px">Heading</a></li>
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(4)" style="font-size:14px">Heading</a></li>
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(5)" style="font-size:12px">Heading</a></li>
+          <li><a class="dropdown-item" type="button" onClick="insert_heading(6)" style="font-size:10px">Heading</a></li>
+        </ul>
+      </div>
+
+      <textarea id="source" rows="10" width="80%">{{input_text}}
+      </textarea>
       <hr/>
       <button id="runBtn" onClick="run()">preview</button>
       <button id="save" onClick="save()">Save Changes</button>
       <div id="preview">
-
       </div>
     </div>
   </div>
 </div>
   <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-    <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+  <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
 {% endblock %}
 
