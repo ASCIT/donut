@@ -115,5 +115,6 @@ def search():
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
-    
-    return flask.render_template('search_results.html',users=users,show_images=show_images)
+
+    return flask.render_template(
+        'search_results.html', users=users, show_images=show_images)
