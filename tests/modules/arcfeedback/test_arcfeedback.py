@@ -1,14 +1,18 @@
-from donut.modules.arcfeedback import modules
+import flask
 from donut.modules.arcfeedback import helpers
 from donut.testing.fixtures import client
 
 def test_get_link(client):
-    
-
+    assert(helpers.get_link(1) == flask.url_for('home') + 'arcfeedback/view/sample_uuid')    
+    assert(helpers.get_link(500) is None)
+    return
+        
 def test_get_id(client):
+    assert(helpers.get_id('sample_uuid') == 1)
+    assert(helpers.get_id('nonsense') == False)
+    return
 
-
-def test_get_messages(client):
+'''def test_get_messages(client):
     
 
 def test_get_summary(client):
@@ -42,3 +46,5 @@ def test_api_add_message(client):
 
 
 def test_api_view_complaint(client):
+
+'''

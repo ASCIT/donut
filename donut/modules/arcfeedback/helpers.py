@@ -88,8 +88,11 @@ def get_link(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
-        uuid = res['uuid']
-    return flask.url_for('arcfeedback.arcfeedback_view_complaint', id=uuid, _external=True)
+        if res and 'uuid' in res: 
+            uuid = res['uuid']
+        else:
+            uuid = None
+    return flask.url_for('arcfeedback.arcfeedback_view_complaint', id=uuid, _external=True) if uuid else None
 
 
 def get_id(uuid):
