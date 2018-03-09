@@ -96,13 +96,21 @@ def search():
         option_id = int(option_id)
     else:
         option_id = None
-    building_id = form['residence'] 
+    building_id = form['residence']
+    if building_id:
+        building_id = int(building_id)
+    else:
+        building_id = None
+    state = form['state'] or None
+    show_images = True if 'show_images' in form else None
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
-        state=state)
+        state=state,
+        username=form['username'],
+        email=form['email'])
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(
