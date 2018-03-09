@@ -23,6 +23,11 @@ from donut.modules import editor
 from donut.modules import rooms
 
 app = flask.Flask(__name__)
+
+UPLOAD_FOLDER = '/donut/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
