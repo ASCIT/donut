@@ -136,13 +136,16 @@ def get_image(user_id):
 
 def execute_search(**kwargs):
     query = """
-        SELECT DISTINCT user_id, full_name, graduation_year
+        SELECT DISTINCT
+            user_id, full_name, graduation_year,
+            extension IS NOT NULL as image
         FROM members
             NATURAL JOIN members_full_name
             NATURAL LEFT JOIN group_house_membership AS house
             NATURAL LEFT JOIN member_options
             NATURAL LEFT JOIN buildings
             NATURAL LEFT JOIN users
+            NATURAL LEFT JOIN images
     """
     query += ' WHERE INSTR(email, %s) > 0'
     substitution_arguments = [kwargs['email'].lower()]

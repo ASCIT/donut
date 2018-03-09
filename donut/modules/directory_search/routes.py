@@ -102,7 +102,6 @@ def search():
     else:
         building_id = None
     state = form['state'] or None
-    show_images = True if 'show_images' in form else None
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
@@ -116,5 +115,6 @@ def search():
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
 
+    show_images = 'show_images' in form
     return flask.render_template(
         'search_results.html', users=users, show_images=show_images)
