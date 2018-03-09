@@ -96,12 +96,7 @@ def search():
         option_id = int(option_id)
     else:
         option_id = None
-    building_id = form['residence']
-    if building_id:
-        building_id = int(building_id)
-    else:
-        building_id = None
-    state = form['state'] or None
+    building_id = form['residence'] 
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
@@ -112,4 +107,5 @@ def search():
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
-    return flask.render_template('search_results.html', users=users)
+    
+    return flask.render_template('search_results.html',users=users,show_images=show_images)

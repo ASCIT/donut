@@ -11,6 +11,9 @@
 					<tr>
 						<th>Name</th>
 						<th>Graduation Year</th>
+						{% if show_images %}
+							<th> Image </th>
+						{% endif %}
 					</tr>
 				</thead>
 				<tbody>
@@ -22,6 +25,11 @@
 								</a>
 							</td>
 							<td>{{ user['graduation_year'] or '' }}</td>
+							{% if show_images %}
+								<td>
+									<img src='{{ url_for("directory_search.get_image", user_id=user["user_id"]) }}' style='max-width: 100px; max-height: 150px' />
+								</td>
+							{% endif %}
 						</tr>
 					{% endfor %}
 				</tbody>
