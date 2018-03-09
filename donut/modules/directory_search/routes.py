@@ -107,7 +107,9 @@ def search():
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
-        state=state)
+        state=state,
+        username=form['username'],
+        email=form['email'])
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(

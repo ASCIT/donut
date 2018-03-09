@@ -142,9 +142,13 @@ def execute_search(**kwargs):
             NATURAL LEFT JOIN group_house_membership AS house
             NATURAL LEFT JOIN member_options
             NATURAL LEFT JOIN buildings
+            NATURAL LEFT JOIN users
     """
-    query += ' WHERE TRUE'
-    substitution_arguments = []
+    query += ' WHERE INSTR(email, %s) > 0'
+    substitution_arguments = [kwargs['email'].lower()]
+    if kwargs['username']:
+        query += ' AND INSTR(username, %s) > 0'
+        substitution_arguments.append(kwargs['username'])
     if kwargs['name']:
         name_search = kwargs['name'].lower().split(' ')
         query += ' AND ' + make_name_query(name_search)
