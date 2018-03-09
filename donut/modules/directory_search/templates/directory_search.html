@@ -37,6 +37,15 @@
 				</select>
 			</div>
 			<div class='form-group'>
+				<label for='graduation'>Graduating in</label>
+				<select class='form-control' id='graduation' name='graduation'>
+					<option value=''>Any year</option>
+					{% for year in grad_years %}
+						<option>{{ year }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
 				<label for='state'>Home state</label>
 				<select class='form-control' id='state' name='state'>
 					<option value=''>Any state</option>

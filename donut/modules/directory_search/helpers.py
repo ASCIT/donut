@@ -6,10 +6,6 @@ import pymysql.cursors
 from donut.constants import MALE, FEMALE
 
 
-def get_user_list(field=None):
-    print("HI")
-
-
 def get_user(user_id):
     query = """
         SELECT uid, first_name, middle_name, last_name, preferred_name,
@@ -165,6 +161,9 @@ def execute_search(**kwargs):
     if kwargs['building_id']:
         query += ' AND building_id = %s'
         substitution_arguments.append(kwargs['building_id'])
+    if kwargs['grad_year']:
+        query += ' AND graduation_year = %s'
+        substitution_arguments.append(kwargs['grad_year'])
     if kwargs['state']:
         query += ' AND state = %s'
         substitution_arguments.append(kwargs['state'])
@@ -178,7 +177,7 @@ def members_unique_values(field):
     query = 'SELECT DISTINCT ' + field + ' FROM members WHERE ' + field + ' IS NOT NULL AND ' + field + '!= "" ORDER BY ' + field
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        return map(lambda member: member[field], cursor.fetchall())
+        return [member[field] for member in cursor.fetchall()]
 
 
 def get_houses():
@@ -200,6 +199,13 @@ def get_residences():
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
+
+
+def get_grad_years():
+    query = 'SELECT DISTINCT graduation_year FROM members WHERE graduation_year IS NOT NULL ORDER BY graduation_year'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return [row['graduation_year'] for row in cursor.fetchall()]
 
 
 def get_states():

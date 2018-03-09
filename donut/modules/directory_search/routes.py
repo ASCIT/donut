@@ -16,6 +16,7 @@ def directory_search():
         houses=helpers.get_houses(),
         options=helpers.get_options(),
         residences=helpers.get_residences(),
+        grad_years=helpers.get_grad_years(),
         states=helpers.get_states())
 
 
@@ -101,12 +102,18 @@ def search():
         building_id = int(building_id)
     else:
         building_id = None
+    grad_year = form['graduation']
+    if grad_year:
+        grad_year = int(grad_year)
+    else:
+        grad_year = None
     state = form['state'] or None
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
+        grad_year=grad_year,
         state=state,
         username=form['username'],
         email=form['email'])
