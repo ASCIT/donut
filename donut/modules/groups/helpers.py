@@ -136,8 +136,6 @@ def get_position_data(fields=None):
         cursor.execute(s)
         return cursor.fetchall()
 
-    return result
-
 
 def get_members_by_group(group_id):
     s = "SELECT `user_id` FROM `group_members` "
