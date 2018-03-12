@@ -3,7 +3,7 @@ import json
 import os
 
 from donut.modules.editor import blueprint, helpers
-
+from flask import current_app, redirect, url_for
 
 
 @blueprint.route('/editor')
@@ -16,16 +16,22 @@ def save():
     if flask.request.method == 'POST':
         html = flask.request.form['html']
         title = flask.request.form['html']
-    root = 'donut/modules/upload'
+    root = current_app.config["UPLOAD_FOLDER"]
     root += "/templates"
+
+    title = title.replace('</p>', '')
+    title = title.replace('<p>', '')
     path = os.path.join(root, title+".html")
-    f= open(path,"w+")
+    f = open(path,"w+")
     f.write(html)
     f.close()
 
-    f = open(root + "routes.py", "w")
-    f.write("@blueprint.route('/"+title+"'\n")
+
+
+    f = open(current_app.config["UPLOAD_FOLDER"] + "/routes.py", "a")
+    f.write("@blueprint.route('/"+title+"')\n")
     f.write("def "+title+"():\n")
-    f.write("flask.render_template()\n\n")
+    f.write("\tflask.render_template('"+title + ".html')\n\n")
     f.close()
-    return redirect(url_for('uploaded_file', filename=filename))
+    return flask.render_template('editor_page.html',input_text = "new")
+    #redirect(url_for('uploads.'+title))

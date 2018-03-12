@@ -25,7 +25,7 @@ from donut.modules import rooms
 
 app = flask.Flask(__name__)
 
-UPLOAD_FOLDER = '/donut/modules/uploads'
+UPLOAD_FOLDER = 'donut/modules/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
