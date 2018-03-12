@@ -1,7 +1,6 @@
 donut/config.py
 donut/config_py3.py
 donut/modules/directory_search/utils/*.csv
-donut/modules/directory_search/utils/create_directory.sql
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
