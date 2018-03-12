@@ -37,9 +37,7 @@ def get_group_list_data(fields=None, attrs={}):
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, values)
-        result = cursor.fetchall()
-
-    return list(result)
+        return list(cursor.fetchall())
 
 
 def get_group_positions(group_id):
@@ -53,10 +51,8 @@ def get_group_positions(group_id):
     s += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(group_id)])
-        result = cursor.fetchall()
-
-    return list(result)
+        cursor.execute(s, [group_id])
+        return list(cursor.fetchall())
 
 
 def get_position_holders(pos_id):
@@ -78,10 +74,8 @@ def get_position_holders(pos_id):
     s += "WHERE `pos_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(pos_id)])
-        result = cursor.fetchall()
-
-    return result
+        cursor.execute(s, [pos_id])
+        return cursor.fetchall()
 
 
 def get_group_data(group_id, fields=None):
@@ -112,7 +106,7 @@ def get_group_data(group_id, fields=None):
     s += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(group_id)])
+        cursor.execute(s, [group_id])
         result = cursor.fetchone()
 
     return result if result else {}
@@ -140,7 +134,7 @@ def get_position_data(fields=None):
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
-        result = cursor.fetchall()
+        return cursor.fetchall()
 
     return result
 
@@ -150,7 +144,7 @@ def get_members_by_group(group_id):
     s += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(group_id)])
+        cursor.execute(s, [group_id])
         result = cursor.fetchall()
 
     # Get data for each user id

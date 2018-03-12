@@ -12,16 +12,14 @@ def get_rooms():
     s = 'SELECT `room_id`, `location`, `title`, `description` FROM `rooms`'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
-        results = cursor.fetchall()
-    return results
+        return cursor.fetchall()
 
 
 def is_room(room_id_string):
     s = "SELECT room_id FROM rooms WHERE room_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [room_id_string])
-        result = cursor.fetchone()
-    return result is not None
+        return cursor.fetchone() is not None
 
 
 def add_reservation(room, username, reason, start, end):
@@ -33,7 +31,7 @@ def add_reservation(room, username, reason, start, end):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(insertion,
                        [room,
-                        str(get_user_id(username)), reason, start, end])
+                        get_user_id(username), reason, start, end])
 
 
 def get_all_reservations(rooms, start, end):
@@ -49,8 +47,8 @@ def get_all_reservations(rooms, start, end):
         ORDER BY start_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        values = [str(start), str(end + timedelta(days=1))]
-        values.extend(map(str, rooms))
+        values = [start, end + timedelta(days=1)]
+        values.extend(rooms)
         cursor.execute(query, values)
         reservations = cursor.fetchall()
 
@@ -108,9 +106,8 @@ def get_reservation(id):
         WHERE reservation_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [str(id)])
-        results = cursor.fetchone()
-    return results
+        cursor.execute(query, [id])
+        return cursor.fetchone()
 
 
 def delete_reservation(id, username):
@@ -125,7 +122,7 @@ def delete_reservation(id, username):
         )
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [str(id), username])
+        cursor.execute(query, [id, username])
 
 
 def conflicts(room, start, end):
@@ -136,6 +133,6 @@ def conflicts(room, start, end):
         ORDER BY start_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [str(room), str(start), str(end)])
+        cursor.execute(query, [room, start, end])
         results = cursor.fetchall()
     return [(r['start_time'], r['end_time']) for r in results]

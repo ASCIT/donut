@@ -16,9 +16,8 @@ def get_user_data(user_id):
     WHERE user_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(user_id)])
-        result = cursor.fetchone()
-    return result
+        cursor.execute(s, [user_id])
+        return cursor.fetchone()
 
 
 def handle_create_account(user_id, username, password, password2, birthday):
@@ -50,7 +49,7 @@ def handle_create_account(user_id, username, password, password2, birthday):
       VALUES (%s, %s, %s)
       """
         with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [str(user_id), username, ""])
+            cursor.execute(s, [user_id, username, ""])
         # Set the password.
         auth_utils.set_password(username, password)
         # Set the birthday and invalidate the account creation key.
@@ -61,7 +60,7 @@ def handle_create_account(user_id, username, password, password2, birthday):
       WHERE user_id = %s
       """
         with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [birthday, str(user_id)])
+            cursor.execute(s, [birthday, user_id])
         transaction.commit()
     except Exception:
         transaction.rollback()
@@ -103,7 +102,7 @@ def handle_request_account(uid, last_name):
     WHERE uid = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(uid)])
+        cursor.execute(s, [uid])
         result = cursor.fetchone()
     if result is None or result["last_name"].lower() != last_name.lower():
         return (False, "Incorrect UID and/or name.")
@@ -120,7 +119,7 @@ def handle_request_account(uid, last_name):
     WHERE uid = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [create_account_key, str(uid)])
+        cursor.execute(s, [create_account_key, uid])
 
     create_account_link = flask.url_for(
         "account.create_account",

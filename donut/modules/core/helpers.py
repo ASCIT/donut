@@ -95,9 +95,7 @@ def get_member_list_data(fields=None, attrs={}):
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, values)
-        result = cursor.fetchall()
-
-    return result
+        return cursor.fetchall()
 
 
 def get_name_and_email(user_id):
@@ -115,7 +113,7 @@ def get_name_and_email(user_id):
     WHERE `user_id`=%s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(user_id)])
+        cursor.execute(s, [user_id])
         result = cursor.fetchall()
 
     return (result[0]["full_name"], result[0]["email"])
@@ -135,7 +133,6 @@ def get_group_list_of_member(user_id):
     WHERE `user_id` = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [str(user_id)])
-        result = cursor.fetchall()
-
-    return result if result else []
+        cursor.execute(s, [user_id])
+        return list(cursor.fetchall())
+   
