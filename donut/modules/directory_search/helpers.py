@@ -8,10 +8,11 @@ from donut.constants import MALE, FEMALE
 
 def get_user(user_id):
     query = """
-        SELECT uid, first_name, middle_name, last_name, preferred_name,
-            email, phone, gender, birthday, entry_year, graduation_year,
+        SELECT
+            uid, first_name, middle_name, last_name, preferred_name,
+            gender, gender_custom, birthday, entry_year, graduation_year,
             msc, building_name, room, address, city, state, zip, country,
-            username, extension IS NOT NULL as image
+            email, phone, username, extension IS NOT NULL as image
         FROM members
             NATURAL LEFT JOIN buildings
             NATURAL LEFT JOIN images
@@ -22,20 +23,20 @@ def get_user(user_id):
         cursor.execute(query, [user_id])
         user = cursor.fetchone()
     if user is not None:
-        if user['gender'] == MALE:
+        if user['gender_custom']:
+            user['gender_string'] = user['gender_custom']
+        elif user['gender'] == MALE:
             user['gender_string'] = 'Male'
         elif user['gender'] == FEMALE:
             user['gender_string'] = 'Female'
         phone = user['phone']
         if phone:
             if len(phone) == 10 and all(map(lambda d: '0' <= d <= '9', phone)):
-                user[
-                    'phone_string'] = '(' + phone[:
-                                                  3] + ') ' + phone[3:
-                                                                    6] + '-' + phone[6:]
-            else:
-                user[
-                    'phone_string'] = phone  #what sort of phone number is that
+                phone_str = '(' + phone[:3] + ') '
+                phone_str += phone[3:6] + '-' + phone[6:]
+                user['phone_string'] = phone_str
+            else:  #what sort of phone number is that
+                user['phone_string'] = phone
         state = user['state']
         if state:
             city = user['city']
@@ -210,3 +211,29 @@ def get_grad_years():
 
 def get_states():
     return members_unique_values('state')
+
+
+def get_preferred_name(user_id):
+    query = 'SELECT preferred_name FROM members WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchone()['preferred_name'] or ''
+
+
+def set_preferred_name(user_id, name):
+    query = 'UPDATE members SET preferred_name = %s WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [name, user_id])
+
+
+def get_gender(user_id):
+    query = 'SELECT gender_custom FROM members WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchone()['gender_custom'] or ''
+
+
+def set_gender(user_id, gender):
+    query = 'UPDATE members SET gender_custom = %s WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [gender, user_id])

@@ -37,17 +37,17 @@ def view_user(user_id):
         'view_user.html', user=user, is_me=is_me, user_id=user_id)
 
 
-@blueprint.route('/1/users/<int:user_id>/edit')
-def edit_user(user_id):
-    if user_id != helpers.get_user_id(flask.session['username']):
-        raise Exception('Can only edit your own page')
-    return flask.render_template('edit_user.html', user_id=user_id)
+@blueprint.route('/1/users/me/edit')
+def edit_user():
+    user_id = helpers.get_user_id(flask.session['username'])
+    name = helpers.get_preferred_name(user_id)
+    gender = helpers.get_gender(user_id)
+    return flask.render_template('edit_user.html', name=name, gender=gender)
 
 
-@blueprint.route('/1/users/<int:user_id>/image', methods=['POST'])
-def set_image(user_id):
-    if user_id != helpers.get_user_id(flask.session['username']):
-        raise Exception('Can only set your own image')
+@blueprint.route('/1/users/me/image', methods=['POST'])
+def set_image():
+    user_id = helpers.get_user_id(flask.session['username'])
 
     def flash_error(message):
         flash(message)
@@ -63,6 +63,22 @@ def set_image(user_id):
     file_contents = file.read()
     file.close()
     helpers.set_image(user_id, extension, file_contents)
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))
+
+
+@blueprint.route('/1/users/me/name', methods=['POST'])
+def set_name():
+    user_id = helpers.get_user_id(flask.session['username'])
+    helpers.set_preferred_name(user_id, flask.request.form['name'])
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))
+
+
+@blueprint.route('/1/users/me/gender', methods=['POST'])
+def set_gender():
+    user_id = helpers.get_user_id(flask.session['username'])
+    helpers.set_gender(user_id, flask.request.form['gender'])
     return redirect(
         flask.url_for('directory_search.view_user', user_id=user_id))
 
