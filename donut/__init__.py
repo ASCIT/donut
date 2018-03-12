@@ -20,11 +20,12 @@ from donut.modules import core
 from donut.modules import groups
 from donut.modules import committee_sites
 from donut.modules import editor
+from donut.modules import uploads
 from donut.modules import rooms
 
 app = flask.Flask(__name__)
 
-UPLOAD_FOLDER = '/donut/uploads'
+UPLOAD_FOLDER = '/donut/modules/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -39,6 +40,7 @@ app.register_blueprint(groups.blueprint)
 app.register_blueprint(committee_sites.blueprint)
 app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
+app.register_blueprint(uploads.blueprint)
 
 
 def init(environment_name):

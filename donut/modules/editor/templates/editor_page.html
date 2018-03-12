@@ -20,17 +20,19 @@
       </div>
 
       <div class="dropdown">
-        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Headings
+        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Headings
         <span class="caret"></span></button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(2)" style="font-size:18px">Heading</a></li>
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(3)" style="font-size:16px">Heading</a></li>
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(4)" style="font-size:14px">Heading</a></li>
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(5)" style="font-size:12px">Heading</a></li>
-          <li><a class="dropdown-item" type="button" onClick="insert_heading(6)" style="font-size:10px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(2)" style="font-size:18px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(3)" style="font-size:16px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(4)" style="font-size:14px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(5)" style="font-size:12px">Heading</a></li>
+          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(6)" style="font-size:10px">Heading</a></li>
         </ul>
       </div>
+
+      <button class="btn btn-primary btn-sm" type="button" onClick="insert_link">Links</button>
 
       <textarea id="source" rows="10" width="80%">{{input_text}}
       </textarea>
@@ -44,5 +46,8 @@
 </div>
   <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
   <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+  <script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
 {% endblock %}
 

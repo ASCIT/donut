@@ -53,3 +53,25 @@ function insert(string){
   document.getElementById('source').value = txt2;
 }
 
+function save(){
+  var text = document.getElementById('source').value,
+      target = document.getElementById('preview'),
+      converter = new showdown.Converter(),
+      html = converter.makeHtml(text),
+      title = document.getElementById('title');
+	    console.log(title);
+	console.log(title);
+	console.log(html);
+  if (title = '')
+  {
+    window.alert("Enter a title for your new page!");
+  }
+  else {
+    $.ajax({
+          url: $SCRIPT_ROOT+'/_save',
+          type: 'POST',
+          data:{html: html, title:title}
+    });
+  }
+}
+
