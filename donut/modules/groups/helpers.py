@@ -31,8 +31,8 @@ def get_group_list_data(fields=None, attrs={}):
     s = "SELECT " + ', '.join(fields) + " FROM `groups` "
     if attrs:
         s += "WHERE "
-        s += " AND ".join([key + "= %s" for key, value in attrs.items()])
-    values = [value for key, value in attrs.items()]
+        s += " AND ".join([key + "= %s" for key in attrs.keys()])
+    values = list(attrs.values())
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
@@ -109,7 +109,7 @@ def get_group_data(group_id, fields=None):
         cursor.execute(s, [group_id])
         result = cursor.fetchone()
 
-    return result if result else {}
+    return result or {}
 
 
 def get_position_data(fields=None):

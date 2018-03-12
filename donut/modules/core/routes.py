@@ -39,7 +39,7 @@ def get_members(user_id):
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
 
-    return json.dumps(helpers.get_member_data(user_id, fields=fields))
+    return jsonify(helpers.get_member_data(user_id, fields=fields))
 
 
 @blueprint.route("/1/members/<int:user_id>/groups/")

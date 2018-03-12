@@ -38,12 +38,10 @@ def get_all_reservations(rooms, start, end):
     if not rooms:
         rooms = [room["room_id"] for room in get_rooms()]
     query = """
-        SELECT `reservation_id`, `location`, start_time, end_time
-        FROM `room_reservations` AS reservation LEFT OUTER JOIN `rooms` AS room
-        ON reservation.room_id = room.room_id
+        SELECT reservation_id, location, start_time, end_time
+        FROM `room_reservations` NATURAL JOIN `rooms` AS room
         WHERE %s <= `end_time` AND `start_time` <= %s
-        AND room.room_id IN (""" + ",".join(["%s" for _ in range(len(rooms))
-                                             ]) + """)
+        AND room.room_id IN (""" + ",".join(["%s"] * len(rooms)) + """)
         ORDER BY start_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
