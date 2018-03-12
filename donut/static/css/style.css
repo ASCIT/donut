@@ -22,12 +22,24 @@ body {
 }
 
 a:hover {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+
   opacity: 1;
+  color: #CD6600;
 }
 
 a {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+
   transition: opacity 0.5s;
   opacity: 0.9;
+  color: #FF8C00;
 }
 
 button:hover {
@@ -39,8 +51,55 @@ button {
   opacity: 0.9;
 }
 
+table {
+  border-collapse: separate;
+}
+
+.btn {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+
+  background-color: #FFF;
+  color: #333;
+  margin-bottom: 5%;
+}
+
+.btn:hover {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+
+  background-color: orange;
+  color: #FFF;
+}
+
+.btn-primary {
+  border-color: orange;
+}
+
+.btn-primary:hover {
+  border-color: orange;
+}
+
 .container {
   width: 90%;
+}
+
+.half-float-right {
+  width: 50%;
+  float: right;
+  display: inline-block;
+  margin: 0;
+}
+
+.half-float-left {
+  width: 45%;
+  float: left;
+  display: inline-block;
+  margin: 0;
 }
 
 .jumbotron {
@@ -49,16 +108,41 @@ button {
   padding-top: 30px;
 }
 
-.jumbotron img {
+.jumbotron embed {
   padding-bottom: 30px;
+  width: 60%;
 }
 
 .jumbotron form input {
   padding: 0.5%;
   margin-top: 1%;
-  border: 1px #333 solid;
+  border: 1px orange solid;
   border-radius: 5px;
   padding: 5px;
+}
+
+.jumbotron form input:focus {
+  border: 1px orange solid;
+}
+
+.jumbotron form textarea {
+  border: 1px orange solid;
+}
+
+.jumbotron form textarea:focus {
+  border: 1px orange solid;
+}
+
+.large-text p {
+  font-size: 150%;
+}
+
+.medium-text p {
+  font-size: 120%;
+}
+
+.small-text p {
+  font-size: 90%;
 }
 
 .navbar:before {
@@ -73,6 +157,18 @@ button {
 .message {
   text-align: center;
   font-weight: 600;
+}
+
+.pos-center {
+  text-align: center;
+}
+
+.pos-left {
+  text-align: left;
+}
+
+.pos-right {
+  text-align: right;
 }
 
 #content {
@@ -109,13 +205,21 @@ label.required:after {
     display: none;
   }
 
+  .half-float-left {
+    width: 100%;
+  }
+
+  .half-float-right {
+    width: 100%;
+  }
+
   .jumbotron button {
     font-size: 2vh;
   }
 
-  .jumbotron img {
+  .jumbotron embed {
     padding-bottom: 5%;
-    width: 80%;
+    width: 100%;
   }
 
   .jumbotron p {
@@ -130,15 +234,15 @@ label.required:after {
   .jumbotron form input {
     padding: 1%;
     margin-top: 5%;
-    border: 1px #222 solid;
+    border: 1px orange solid;
     border-radius: 5px;
   }
 
   .jumbotron {
     position: absolute;
-    width: 70%;
-    right: 0;
+    width: 60%;
     top: 0;
+    right: 0;
   }
 
   .navbar {
@@ -146,14 +250,25 @@ label.required:after {
     height: 100%;
   }
 
+  .navbar-collapse {
+    height: 100%;
+  }
+
+  .navbar-fixed-top .navbar-collapse {
+    max-height: 100%;
+  }
+
   .navbar-brand {
-    font-size: 2vh;
-    margin-top: 20%;
-    margin-bottom: 20%;
+    display: none;
+  }
+
+  .navbar-toggle {
+    float: left;
+    margin-left: 5%;
   }
 
   .message {
-    width: 70%;
+    width: 100%;
     position: absolute;
     right: 0;
     top: 0;

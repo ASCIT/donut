@@ -5,7 +5,8 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-        <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+	<div class="medium-text">
+	<div class="half-float-left">
         <p>This is the ARC anonymous course feedback form.</p>
 	
 	<p>Do feel free to send us
@@ -24,7 +25,10 @@
 
 	<p>After you submit your feedback, you'll be given a URL
 	 where you can follow up on what the ARC is doing in response.</p>
-	<div class="col-md-8 col-md-offset-2">
+
+	</div>
+	</div>
+	<div class="half-float-right" class="col-md-8 col-md-offset-2">
 	  <div class="row">
 	    <form method="POST" action="{{  url_for('arcfeedback.arcfeedback_submit')  }}">
 	      <table id="feedback" class="table">
@@ -42,19 +46,19 @@
 		</tr>
 		<tr>
 		  <div class="form-group">
-		  <td class="feedback">Course*: </td>
+		  <td class="feedback">Course<p style="color: red; display: inline; font-size: 12px;">*</p>: </td>
 		  <td class="feedback"><input type="text" name="course" class="form-control" required /></td>
 		  </div>
 		</tr>
 		<tr>
 		  <div class="form-group">
-		  <td class="feedback">Feedback*: </td>
+		  <td class="feedback">Feedback<p style="color: red; display: inline; font-size: 12px;">*</p>: </td>
 		  <td class="feedback"><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
 		  </div>
 		</tr>
 	      </table>
 	      <div class="row">
-		<div class="text-center">
+		<div class="pos-center">
 		     <input class="btn" type="submit" value="Submit" />
 		</div>
 	      </div>
