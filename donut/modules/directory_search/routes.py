@@ -6,7 +6,7 @@ from flask import jsonify, redirect
 from donut.modules.directory_search import blueprint, helpers
 
 VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-VALID_EXTENSIONS |= set(map(lambda ext: ext.upper(), VALID_EXTENSIONS))
+VALID_EXTENSIONS |= set(ext.upper() for ext in VALID_EXTENSIONS)
 
 
 @blueprint.route('/directory')

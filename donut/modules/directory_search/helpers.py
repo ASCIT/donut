@@ -31,10 +31,9 @@ def get_user(user_id):
             user['gender_string'] = 'Female'
         phone = user['phone']
         if phone:
-            if len(phone) == 10 and all(map(lambda d: '0' <= d <= '9', phone)):
-                phone_str = '(' + phone[:3] + ') '
-                phone_str += phone[3:6] + '-' + phone[6:]
-                user['phone_string'] = phone_str
+            if len(phone) == 10 and all(['0' <= d <= '9' for d in phone]):
+                user['phone_string'] = '(' + phone[:3] + ') '
+                user['phone_string'] += phone[3:6] + '-' + phone[6:]
             else:  #what sort of phone number is that
                 user['phone_string'] = phone
         state = user['state']
@@ -80,12 +79,8 @@ def make_name_query(search):
     find all users whose names contain 'abc' and 'def',
     case insensitive.
     """
-    query = ''
-    for i in range(len(search)):
-        if i:
-            query += ' AND '
-        query += 'INSTR(LOWER(full_name), %s) > 0'
-    return query
+    #INSTR is case-insensitive
+    return ' AND '.join(['INSTR(full_name, %s) > 0'] * len(search))
 
 
 def get_users_by_name_query(search):
@@ -203,10 +198,7 @@ def get_residences():
 
 
 def get_grad_years():
-    query = 'SELECT DISTINCT graduation_year FROM members WHERE graduation_year IS NOT NULL ORDER BY graduation_year'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
-        return [row['graduation_year'] for row in cursor.fetchall()]
+    return members_unique_values('graduation_year')
 
 
 def get_states():
