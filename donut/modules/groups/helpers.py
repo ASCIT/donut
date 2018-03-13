@@ -28,15 +28,15 @@ def get_group_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ', '.join(fields) + " FROM `groups` "
+    query = "SELECT " + ', '.join(fields) + " FROM `groups` "
     if attrs:
-        s += "WHERE "
-        s += " AND ".join([key + "= %s" for key in attrs.keys()])
+        query += "WHERE "
+        query += " AND ".join([key + "= %s" for key in attrs.keys()])
     values = list(attrs.values())
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, values)
+        cursor.execute(query, values)
         return list(cursor.fetchall())
 
 
@@ -47,11 +47,11 @@ def get_group_positions(group_id):
     Arguments:
         group_id: The integer id of the group
     """
-    s = "SELECT `pos_id`, `pos_name` FROM `positions` "
-    s += "WHERE `group_id` = %s"
+    query = "SELECT `pos_id`, `pos_name` FROM `positions` "
+    query += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [group_id])
+        cursor.execute(query, [group_id])
         return list(cursor.fetchall())
 
 
@@ -69,12 +69,12 @@ def get_position_holders(pos_id):
                     columnname:columnvalue
     """
     fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
-    s = "SELECT " + ', '.join(fields) + " "
-    s += "FROM `position_holders` NATURAL JOIN `members` "
-    s += "WHERE `pos_id` = %s"
+    query = "SELECT " + ', '.join(fields) + " "
+    query += "FROM `position_holders` NATURAL JOIN `members` "
+    query += "WHERE `pos_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [pos_id])
+        cursor.execute(query, [pos_id])
         return cursor.fetchall()
 
 
@@ -102,11 +102,11 @@ def get_group_data(group_id, fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ', '.join(fields) + " FROM `groups` "
-    s += "WHERE `group_id` = %s"
+    query = "SELECT " + ', '.join(fields) + " FROM `groups` "
+    query += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [group_id])
+        cursor.execute(query, [group_id])
         result = cursor.fetchone()
 
     return result or {}
@@ -128,21 +128,21 @@ def get_position_data(fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ', '.join(fields) + " "
-    s += "FROM `members` NATURAL JOIN `positions` NATURAL JOIN `groups` "
-    s += "NATURAL JOIN `position_holders` "
+    query = "SELECT " + ', '.join(fields) + " "
+    query += "FROM `members` NATURAL JOIN `positions` NATURAL JOIN `groups` "
+    query += "NATURAL JOIN `position_holders` "
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(query)
         return cursor.fetchall()
 
 
 def get_members_by_group(group_id):
-    s = "SELECT `user_id` FROM `group_members` "
-    s += "WHERE `group_id` = %s"
+    query = "SELECT `user_id` FROM `group_members` "
+    query += "WHERE `group_id` = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [group_id])
+        cursor.execute(query, [group_id])
         result = cursor.fetchall()
 
     # Get data for each user id

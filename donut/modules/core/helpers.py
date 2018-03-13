@@ -40,12 +40,12 @@ def get_member_data(user_id, fields=None):
     if len(user_id) == 0:
         return {}
 
-    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE "
-    s += ' OR '.join(["`user_id`=%s" for _ in user_id])
+    query = "SELECT " + ', '.join(fields) + " FROM `members` WHERE "
+    query += ' OR '.join(["`user_id`=%s" for _ in user_id])
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, user_id)
+        cursor.execute(query, user_id)
         result = cursor.fetchall()
 
     if len(result) == 0:
@@ -85,16 +85,16 @@ def get_member_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ', '.join(fields) + " FROM `members`"
+    query = "SELECT " + ', '.join(fields) + " FROM `members`"
 
     if attrs:
-        s += " WHERE "
-        s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
+        query += " WHERE "
+        query += ' AND '.join([key + "= %s" for key, value in attrs.items()])
     values = [value for key, value in attrs.items()]
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, values)
+        cursor.execute(query, values)
         return cursor.fetchall()
 
 
@@ -108,12 +108,12 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    s = """SELECT `full_name`, `email` 
+    query = """SELECT `full_name`, `email` 
     FROM `members` NATURAL LEFT JOIN `members_full_name` 
     WHERE `user_id`=%s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [user_id])
+        cursor.execute(query, [user_id])
         result = cursor.fetchall()
 
     return (result[0]["full_name"], result[0]["email"])
@@ -128,10 +128,10 @@ def get_group_list_of_member(user_id):
     Returns:
         result: All the groups that an user_id is a part of
     """
-    s = """SELECT `group_id`, `group_name`, `control` 
+    query = """SELECT `group_id`, `group_name`, `control` 
     FROM `group_members` NATURAL JOIN `groups` NATURAL JOIN `members` 
     WHERE `user_id` = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [user_id])
+        cursor.execute(query, [user_id])
         return list(cursor.fetchall())

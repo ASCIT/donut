@@ -9,16 +9,16 @@ from donut.auth_utils import get_user_id
 def get_rooms():
     """Gets a list of rooms in the form {id, name, title, desc}"""
 
-    s = 'SELECT `room_id`, `location`, `title`, `description` FROM `rooms`'
+    query = 'SELECT `room_id`, `location`, `title`, `description` FROM `rooms`'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(query)
         return cursor.fetchall()
 
 
 def is_room(room_id_string):
-    s = "SELECT room_id FROM rooms WHERE room_id = %s"
+    query = "SELECT room_id FROM rooms WHERE room_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [room_id_string])
+        cursor.execute(query, [room_id_string])
         return cursor.fetchone() is not None
 
 

@@ -54,11 +54,11 @@ def handle_forgotten_password(username, email):
   success, False if the (username, email) pair is not valid.
   """
     # Check username, email pair.
-    s = """SELECT `user_id`, `first_name`, `email` 
+    query = """SELECT `user_id`, `first_name`, `email` 
     FROM `members` NATURAL JOIN `users` WHERE `username` = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [username])
+        cursor.execute(query, [username])
         result = cursor.fetchone()
 
     if result is not None and email == result['email']:
@@ -66,7 +66,7 @@ def handle_forgotten_password(username, email):
         user_id = result['user_id']
         # Generate a reset key for the user.
         reset_key = auth_utils.generate_reset_key()
-        s = """
+        query = """
             UPDATE users
             SET password_reset_key = %s,
             password_reset_expiration = NOW() + INTERVAL %s MINUTE
@@ -74,7 +74,7 @@ def handle_forgotten_password(username, email):
             """
         with flask.g.pymysql_db.cursor() as cursor:
             values = [reset_key, constants.PWD_RESET_KEY_EXPIRATION, username]
-            cursor.execute(s, values)
+            cursor.execute(query, values)
         # Determine if we want to say "your link expires in _ minutes" or
         # "your link expires in _ hours".
         if constants.PWD_RESET_KEY_EXPIRATION < 60:
@@ -105,22 +105,22 @@ def handle_password_reset(username, new_password, new_password2):
 
     auth_utils.set_password(username, new_password)
     # Clean up the password reset key, so that it cannot be used again.
-    s = """
+    query = """
     UPDATE users
     SET password_reset_key = NULL, password_reset_expiration = NULL
     WHERE username = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [username])
+        cursor.execute(query, [username])
     # Get the user's email.
-    s = """
+    query = """
     SELECT first_name, email
     FROM members
       NATURAL JOIN users
     WHERE username = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [username])
+        cursor.execute(query, [username])
         result = cursor.fetchone()
     # Send confirmation email to user.
     email = result['email']
