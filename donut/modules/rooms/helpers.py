@@ -30,8 +30,7 @@ def add_reservation(room, username, reason, start, end):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(insertion,
-                       [room,
-                        get_user_id(username), reason, start, end])
+                       [room, get_user_id(username), reason, start, end])
 
 
 def get_all_reservations(rooms, start, end):

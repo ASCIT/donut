@@ -135,4 +135,3 @@ def get_group_list_of_member(user_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [user_id])
         return list(cursor.fetchall())
-   
