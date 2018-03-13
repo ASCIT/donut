@@ -10,6 +10,7 @@ USE donut_test;
 -- Create the database schema.
 SOURCE sql/donut.sql
 SOURCE sql/marketplace.sql
+SOURCE sql/arcfeedback.sql
 SOURCE sql/rooms.sql
 
 -- Populate with test data.
