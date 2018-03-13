@@ -14,11 +14,13 @@ html {
 }
 
 body {
+  padding-bottom: 5%;
   padding-top: 3%;
   font-family: 'Open Sans', 'sans-serif';
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   position: relative;
+  min-height: 100%;
 }
 
 a:hover {
@@ -184,6 +186,7 @@ table {
   text-align: center;
   background-color: orange;
   z-index: 9999;
+  bottom: 0;
 }
 
 #copyright {
