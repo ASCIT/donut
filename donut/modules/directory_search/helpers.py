@@ -78,9 +78,11 @@ def make_name_query(search):
     Query is split on spaces, so 'abc def' would
     find all users whose names contain 'abc' and 'def',
     case insensitive.
+    Returns arguments to substitute and SQL query.
     """
+    terms = search.split(' ')
     #INSTR is case-insensitive
-    return ' AND '.join(['INSTR(full_name, %s) > 0'] * len(search))
+    return terms, ' AND '.join(['INSTR(full_name, %s) > 0'] * len(terms))
 
 
 def get_users_by_name_query(search):
@@ -88,9 +90,9 @@ def get_users_by_name_query(search):
     Finds users whose names match the given query.
     Max 10 users returned, in alphabetical order.
     """
-    search = search.lower().split(' ')
     query = 'SELECT * FROM members_full_name WHERE '
-    query += make_name_query(search)
+    search, name_query = make_name_query(search)
+    query += name_query
     query += ' ORDER BY LOWER(full_name) LIMIT 10'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, search)
@@ -145,8 +147,8 @@ def execute_search(**kwargs):
         query += ' AND INSTR(username, %s) > 0'
         substitution_arguments.append(kwargs['username'])
     if kwargs['name']:
-        name_search = kwargs['name'].lower().split(' ')
-        query += ' AND ' + make_name_query(name_search)
+        name_search, name_query = make_name_query(kwargs['name'])
+        query += ' AND ' + name_query
         substitution_arguments += name_search
     if kwargs['house_id']:
         query += ' AND house.group_id = %s'
