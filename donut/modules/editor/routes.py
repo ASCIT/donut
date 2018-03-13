@@ -10,7 +10,10 @@ from flask import current_app, redirect, url_for
 def editor(input_text='Hello World!!!'):
     return flask.render_template('editor_page.html', input_text=input_text)
 
-
+@blueprint.route('/redirecting')
+def redirecting(title='uploads.aaa'):
+    return flask.render_template('redirecting.html', input_text=url_for(title))
+    
 @blueprint.route('/_save', methods = ['POST'])
 def save():
     if flask.request.method == 'POST':
@@ -31,7 +34,7 @@ def save():
     f = open(current_app.config["UPLOAD_FOLDER"] + "/routes.py", "a")
     f.write("@blueprint.route('/"+title+"')\n")
     f.write("def "+title+"():\n")
-    f.write("\tflask.render_template('"+title + ".html')\n\n")
+    f.write("\treturn flask.render_template('"+title + ".html')\n\n")
     f.close()
-    return flask.render_template('editor_page.html',input_text = "new")
-    #redirect(url_for('uploads.'+title))
+    return redirect(url_for('editor.redirecting', title=title))
+
