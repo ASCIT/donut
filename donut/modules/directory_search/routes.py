@@ -83,7 +83,7 @@ def set_gender():
         flask.url_for('directory_search.view_user', user_id=user_id))
 
 
-@blueprint.route('/1/users/<int:user_id>/image', methods=['GET'])
+@blueprint.route('/1/users/<int:user_id>/image')
 def get_image(user_id):
     extension, image = helpers.get_image(user_id)
     response = flask.make_response(image)
