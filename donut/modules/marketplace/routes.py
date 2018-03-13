@@ -164,54 +164,74 @@ def view_item():
         has_edit_privs=has_edit_privs)
 
 
-@blueprint.route('/marketplace/manage', methods=['GET'])
+@blueprint.route('/marketplace/manage', methods=['GET', 'POST'])
 def manage():
     if 'username' not in flask.session:
         # they're not logged in, kick them out
+        flask.flash('Login required to access that page.')
+        flask.session['next'] = flask.url_for('.manage')
+        return helpers.render_with_top_marketplace_bar('requires_login.html')
+
+    if flask.request.method == 'POST':
+        if 'item' not in flask.request.form:
+            flask.flash('Invalid request')
+        else:
+            item = flask.request.form['item']
+            # archive, unarchive, delete
+            if flask.request.form['state'] == 'archive':
+                result = helpers.manage_set_active_status(item, 0)
+                if result == False:
+                    flask.flash('You do not own that item.')
+
+            elif flask.request.form['state'] == 'unarchive':
+                result = helpers.manage_set_active_status(item, 1)
+                if result == False:
+                    flask.flash('You do not own that item.')
+
+            elif flask.request.form['state'] == 'delete':
+                result = helpers.manage_delete_item(item)
+                if result == False:
+                    flask.flash('You do not own that item.')
+
+    return helpers.display_managed_items()
+
+
+@blueprint.route('/marketplace/manage_confirm', methods=['GET'])
+def manage_confirm():
+    if 'username' not in flask.session:
+        # they're not logged in, kick them out
+        flask.flash('Login required to access that page.')
         flask.session['next'] = flask.url_for('.manage')
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 
     if 'state' in flask.request.args:
         if 'item' not in flask.request.args:
-            return flask.render_template('404.html'), 404
-        item = flask.request.args['item']
-
-        # archive, unarchive, delete
-        if flask.request.args['state'] == 'archive':
-            result = helpers.manage_set_active_status(item, 0)
-            if result == False:
-                return flask.render_template('404.html'), 404
-
-            return helpers.display_managed_items()
-
-        elif flask.request.args['state'] == 'unarchive':
-            result = helpers.manage_set_active_status(item, 1)
-            if result == False:
-                return flask.render_template('404.html'), 404
-
-            return helpers.display_managed_items()
-
-        elif flask.request.args['state'] == 'delete':
-            result = helpers.manage_delete_item(item)
-            if result == False:
-                return flask.render_template('404.html'), 404
-
-            return helpers.display_managed_items()
-
-        elif flask.request.args['state'] == 'confirmation':
-            pass
+            flask.flash('Invalid URL')
 
         else:
-            return flask.render_template('404.html'), 404
+            item = flask.request.args['item']
 
-    else:
-        return helpers.display_managed_items()
+            # archive, unarchive, delete
+            if flask.request.args['state'] == 'archive':
+                return helpers.manage_display_confirmation(
+                    action='archive', item_id=item)
+
+            elif flask.request.args['state'] == 'unarchive':
+                return helpers.manage_display_confirmation(
+                    action='unarchive', item_id=item)
+
+            elif flask.request.args['state'] == 'delete':
+                return helpers.manage_display_confirmation(
+                    action='delete', item_id=item)
+
+    return helpers.display_managed_items()
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
     if 'username' not in flask.session:
         # they're not logged in, kick them out
+        flask.flash('Login required to access that page.')
         flask.session['next'] = flask.url_for('.sell')
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 

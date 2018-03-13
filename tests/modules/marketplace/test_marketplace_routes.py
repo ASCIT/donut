@@ -53,7 +53,7 @@ def page_has_no_alerts(page):
 def test_marketplace_sell(client):
     rv = client.get(flask.url_for('marketplace.sell'))
     assert rv.status_code == 200
-    assert page_has_no_alerts(rv.data)
+    assert not page_has_no_alerts(rv.data)
 
     with client as c:
         with c.session_transaction() as sess:

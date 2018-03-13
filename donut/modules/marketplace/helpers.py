@@ -85,7 +85,7 @@ def manage_set_active_status(item, is_active):
     Checks permissions and then sets the is_active status of item <item> to <is_active>.
     """
     current_user_id = get_user_id(flask.session['username'])
-    if current_user_id != get_user_id_of_item and not check_permission(
+    if current_user_id != get_user_id_of_item(item) and not check_permission(
             Permissions.ADMIN):
         return False
 
@@ -97,16 +97,70 @@ def manage_set_active_status(item, is_active):
     return True
 
 
-def manage_delete_item(item):
+def manage_delete_item(item_id):
     """
     Checks permissions and then deletes the item.
     """
     current_user_id = get_user_id(flask.session['username'])
-    if current_user_id != get_user_id_of_item and not check_permission(
-            Permissions.ADMIN):
+    if current_user_id != get_user_id_of_item(
+            item_id) and not check_permission(Permissions.ADMIN):
         return False
 
-    return delete_item(item)
+    return delete_item(item_id)
+
+
+def manage_display_confirmation(action, item_id):
+    """
+    Displays a confirmation message where the user can confirm
+    that they want to delete of one of their items.
+    """
+    headers = ['Category', 'Item', 'Price', 'Date']
+
+    fields = [
+        'cat_id', 'item_title', 'textbook_title', 'item_price',
+        'item_timestamp'
+    ]
+
+    field_index_map = {k: v for v, k in enumerate(fields)}
+
+    item_details = get_table_list_data(
+        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
+        fields=fields,
+        attrs={'item_id': item_id})
+
+    if item_details == None:
+        # item doesn't exist, something went wrong
+        return flask.render_template('404.html'), 404
+
+    item_details = item_details[0]  # unwrap
+
+    if item_details[field_index_map['item_title']] == '':
+        item_details[field_index_map['item_title']] = item_details[
+            field_index_map['textbook_title']]
+
+    # pretty timestamps
+    item_details[field_index_map['item_timestamp']] = item_details[
+        field_index_map['item_timestamp']].strftime('%m/%d/%y')
+    # convert category ids to category names
+    item_details[field_index_map['cat_id']] = get_category_name_from_id(
+        item_details[field_index_map['cat_id']])
+
+    if item_details[field_index_map['item_title']] == '':
+        item_details[field_index_map['item_title']] = item_details[
+            field_index_map['textbook_title']]
+    del item_details[field_index_map['textbook_title']]
+
+    links = [0] * len(item_details)
+    links[field_index_map['item_title']] = flask.url_for(
+        '.view_item', item_id=item_id)
+
+    return render_with_top_marketplace_bar(
+        'manage/confirm.html',
+        action=action,
+        headers=headers,
+        item=item_details,
+        links=links,
+        item_id=item_id)
 
 
 def display_managed_items():
@@ -146,7 +200,7 @@ def display_managed_items():
             inactive_links.append(links)
 
     return render_with_top_marketplace_bar(
-        'manage.html',
+        'manage/manage.html',
         headers=headers,
         activelist=active_items,
         activelinks=active_links,
@@ -206,13 +260,13 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
 
     if item_active:
         links[field_index_map['archive']] = flask.url_for(
-            '.manage', item=item_id, state='archive')
+            '.manage_confirm', item=item_id, state='archive')
     else:
         links[field_index_map['archive']] = flask.url_for(
-            '.manage', item=item_id, state='unarchive')
+            '.manage_confirm', item=item_id, state='unarchive')
 
-    # TODO: update when delete page is finished
-    links[field_index_map['delete']] = '#'
+    links[field_index_map['delete']] = flask.url_for(
+        '.manage_confirm', item=item_id, state='delete')
     return links
 
 
