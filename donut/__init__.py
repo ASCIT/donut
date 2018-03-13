@@ -28,7 +28,6 @@ app = flask.Flask(__name__)
 UPLOAD_FOLDER = 'donut/modules/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
 Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
