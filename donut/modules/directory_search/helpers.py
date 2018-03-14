@@ -3,7 +3,7 @@ import sqlalchemy
 
 import pymysql.cursors
 
-from donut.constants import MALE, FEMALE
+from donut.constants import Gender
 
 
 def get_user(user_id):
@@ -25,9 +25,9 @@ def get_user(user_id):
     if user is not None:
         if user['gender_custom']:
             user['gender_string'] = user['gender_custom']
-        elif user['gender'] == MALE:
+        elif user['gender'] == Gender.MALE.value:
             user['gender_string'] = 'Male'
-        elif user['gender'] == FEMALE:
+        elif user['gender'] == Gender.FEMALE.value:
             user['gender_string'] = 'Female'
         phone = user['phone']
         if phone:

@@ -6,7 +6,7 @@ into SQL insert statements
 from datetime import datetime
 import os
 from donut.pymysql_connection import make_db
-from donut.constants import MALE, FEMALE, NO_GENDER
+from donut.constants import Gender
 from read_csv import read_csv
 
 
@@ -62,8 +62,9 @@ for user in read_csv('directory_phones'):
     member['phone'] = user['phone']
 for user in read_csv('people'):
     member = members[user['inum']]
-    member['gender'] = MALE if user['gender'] == 'm' else FEMALE if user[
-        'gender'] == 'f' else NO_GENDER
+    member['gender'] = Gender.MALE.value if user[
+        'gender'] == 'm' else Gender.FEMALE.value if user[
+            'gender'] == 'f' else Gender.NO_GENDER.value
     birthday = user['birthday']
     #not sure why someone's birthday is in 1987 BC
     if birthday.endswith(' BC'):
