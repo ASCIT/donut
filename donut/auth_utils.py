@@ -316,7 +316,7 @@ def get_permissions(username):
   Returns a list with all of the permissions available to the user.
   A list is returned because Python sets cannot be stored in cookie data.
   """
-    return list([])
+    return []
     query = sqlalchemy.text("""
     (SELECT permission_id
       FROM users

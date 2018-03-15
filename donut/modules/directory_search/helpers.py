@@ -1,9 +1,20 @@
 import flask
-import sqlalchemy
-
 import pymysql.cursors
-
+from donut.auth_utils import get_permissions
 from donut.constants import Gender
+from donut.resources import Permissions
+
+
+def get_hidden_fields(viewer_name, viewee_id):
+    """
+    Returns a set of strings corresponding to fields
+    on view_user page for viewee that viewer should not see
+    """
+    if viewer_name is not None:
+        is_me = get_user_id(viewer_name) == viewee_id
+        if is_me or Permissions.ADMIN in get_permissions(viewer_name):
+            return set()
+    return set(['uid', 'birthday', 'phone_string'])
 
 
 def get_user(user_id):

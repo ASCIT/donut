@@ -18,72 +18,74 @@
 			<div>
 			{% endif %}
 				<ul class='list-group list-group-root'>
-					{% if user['username'] %}
+					{% if user['username'] and 'username' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Username</strong>:
 							{{ user['username'] }}
 						</li>
 					{% endif %}
-					<li class='list-group-item'>
-						<strong>UID</strong>:
-						{{ user['uid'] }}
-					</li>
-					{% if user['birthday'] %}
+					{% if 'uid' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>UID</strong>:
+							{{ user['uid'] }}
+						</li>
+					{% endif %}
+					{% if user['birthday'] and 'birthday' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Birthday</strong>:
 							{{ user['birthday'].strftime('%b %-d, %Y') }}
 						</li>
 					{% endif %}
-					{% if 'gender_string' in user %}
+					{% if 'gender_string' in user and 'gender_string' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Gender</strong>:
 							{{ user['gender_string'] }}
 						</li>
 					{% endif %}
-					{% if user['email'] %}
+					{% if user['email'] and 'email' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Email</strong>:
 							<a href='mailto:{{ user["email"] }}'>{{ user['email'] }}</a>
 						</li>
 					{% endif %}
-					{% if 'phone_string' in user %}
+					{% if 'phone_string' in user and 'phone_string' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Phone</strong>:
 							{{ user['phone_string'] }}
 						</li>
 					{% endif %}
-					{% if user['msc'] %}
+					{% if user['msc'] and 'msc' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Mail Stop Code (MSC)</strong>:
 							{{ user['msc'] }}
 						</li>
 					{% endif %}
-					{% if user['building_name'] %}
+					{% if user['building_name'] and 'building_name' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Residence</strong>:
 							{{ user['building_name'] }}
 							{{ user['room'] }}
 						</li>
 					{% endif %}
-					{% if 'hometown_string' in user %}
+					{% if 'hometown_string' in user and 'hometown_string' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Hometown</strong>:
 							{{ user['hometown_string'] }}
 						</li>
 					{% endif %}
-					{% if user['entry_year'] %}
+					{% if user['entry_year'] and 'entry_year' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Matriculation</strong>:
 							{{ user['entry_year'] }}
 						</li>
 					{% endif %}
-					{% if user['graduation_year'] %}
+					{% if user['graduation_year'] and 'graduation_year' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Graduation</strong>:
 							{{ user['graduation_year'] }}
 						</li>
 					{% endif %}
-					{% if user['options'] %}
+					{% if user['options'] and 'options' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -95,7 +97,7 @@
 							{% endfor %}
 						</ul>
 					{% endif %}
-					{% if user['houses'] %}
+					{% if user['houses'] and 'houses' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>House{% if user['houses']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -107,7 +109,7 @@
 							{% endfor %}
 						</ul>
 					{% endif %}
-					{% if user['positions'] %}
+					{% if user['positions'] and 'positions' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Position{% if user['positions']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -121,7 +123,7 @@
 					{% endif %}
 				</ul>
 			</div>
-			{% if user['image'] %}
+			{% if user['image'] and 'image' not in hidden_fields %}
 				<div class='col-md-4'>
 					<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
 				</div>

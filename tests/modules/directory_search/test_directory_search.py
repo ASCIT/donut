@@ -11,6 +11,13 @@ from donut.modules.directory_search import routes
 
 
 #Helpers
+def test_hidden_fields(client):
+    user_id = helpers.get_user_id('csander')
+    assert not helpers.get_hidden_fields('csander', user_id)
+    assert helpers.get_hidden_fields('dqu', user_id)
+    assert helpers.get_hidden_fields(None, user_id)
+
+
 def test_get_user(client):
     assert helpers.get_user_id('csander') == 3
     assert helpers.get_user_id('whodis') == 0

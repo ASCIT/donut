@@ -33,8 +33,14 @@ def view_user(user_id):
     user = helpers.get_user(user_id)
     is_me = 'username' in flask.session and helpers.get_user_id(
         flask.session['username']) == user_id
+    hidden_fields = helpers.get_hidden_fields(
+        flask.session.get('username'), user_id)
     return flask.render_template(
-        'view_user.html', user=user, is_me=is_me, user_id=user_id)
+        'view_user.html',
+        user=user,
+        is_me=is_me,
+        user_id=user_id,
+        hidden_fields=hidden_fields)
 
 
 @blueprint.route('/1/users/me/edit')
