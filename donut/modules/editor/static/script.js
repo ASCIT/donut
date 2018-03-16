@@ -1,3 +1,4 @@
+var TITLE_CUTOFF = 16;
 
 function run() {
   var text = document.getElementById('source').value,
@@ -7,6 +8,7 @@ function run() {
 
     target.innerHTML = html;
 }
+
 function save(){
 
 }
@@ -53,25 +55,47 @@ function insert(string){
   document.getElementById('source').value = txt2;
 }
 
+// Saves the page created
 function save(){
+  // Construct the html and get the info needed
   var text = document.getElementById('source').value,
       target = document.getElementById('preview'),
-      converter = new showdown.Converter(),
-      html = converter.makeHtml(text),
-      title = document.getElementById('title');
-	    console.log(title);
-	console.log(title);
+      //converter = new showdown.Converter(),
+      //html = converter.makeHtml(text),
+      title = document.getElementById('text_title').value;
+	console.log(text_title);
 	console.log(html);
-  if (title = '')
+  // Checking for valid titles
+  if (title === '')
   {
     window.alert("Enter a title for your new page!");
   }
   else {
-    $.ajax({
-          url: $SCRIPT_ROOT+'/_save',
-          type: 'POST',
-          data:{html: html, title:title}
-    });
+    // Checking for valid titles; should not have
+    // anything other than numbers, characters,
+    // period, front slash, and spaces.
+    var valid = true;
+    for(var i = 0; i<title.length; i++)
+    {
+      var c = title.charCodeAt(i);
+      if ((c < 46 && c > 57)||(c < 65 && c > 90)||(c < 97 && c > 122)||c === 32)
+      {
+        continue;
+      }
+      else {
+        valid = false;
+      }
+    }
+    if (valid && title.length < TITLE_CUTOFF)
+    {
+      $.ajax({
+            url: $SCRIPT_ROOT+'/_save',
+            type: 'POST',
+            data:{markdown:text, title:title}
+      });
+    }
+    else {
+      window.alert("Please enter a valid title!");
+    }
   }
 }
-

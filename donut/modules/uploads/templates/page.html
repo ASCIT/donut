@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block page %}
+<script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+<script src={{ url_for('upload.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+<div class="container">
+  <div class="col-md-24">
+    <div class="jumbotron">
+      <h1 id = "title" class="text-center">{{title}}</h1>
+
+      <div = 'content'>
+      <script>convert({{input_text}});</script>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

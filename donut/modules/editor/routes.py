@@ -7,9 +7,20 @@ from flask import current_app, redirect, url_for
 
 
 @blueprint.route('/editor')
-def editor(input_text='Hello World!!!'):
-    return flask.render_template('editor_page.html', input_text=input_text)
+def editor(input_text='Hello World!!!', title="TITLE", div_id = 'empty'):
+    if input_text == title:
+        input_text = read_markdown(input_text, div_id)
+    return flask.render_template('editor_page.html', input_text=input_text, title=title)
 
+'''
+def read_markdown(name):
+    underCommittee = ['BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants',
+    'BoC.FAQ', 'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook']
+    if name in underCommittee:
+        with open(new_root + '/template_page') as f:
+                template_html += f.read()
+            f.close()
+'''
 
 @blueprint.route('/redirecting')
 def redirecting(title='uploads.aaa'):
@@ -18,22 +29,9 @@ def redirecting(title='uploads.aaa'):
 
 @blueprint.route('/_save', methods=['POST'])
 def save():
-    if flask.request.method == 'POST':
-        html = flask.request.form['html']
-        title = flask.request.form['html']
-    root = current_app.config["UPLOAD_FOLDER"]
-    root += "/templates"
+    markdown = flask.request.form['markdown']
+    title = flask.request.form['html']
 
-    title = title.replace('</p>', '')
-    title = title.replace('<p>', '')
-    path = os.path.join(root, title + ".html")
-    f = open(path, "w+")
-    f.write(html)
-    f.close()
+    helpers.write_markdown(markdown, title)
 
-    f = open(current_app.config["UPLOAD_FOLDER"] + "/routes.py", "a")
-    f.write("@blueprint.route('/" + title + "')\n")
-    f.write("def " + title + "():\n")
-    f.write("\treturn flask.render_template('" + title + ".html')\n\n")
-    f.close()
     return redirect(url_for('editor.redirecting', title=title))

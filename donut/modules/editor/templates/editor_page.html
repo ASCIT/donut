@@ -5,7 +5,7 @@
     <div class="jumbotron">
       <h1 id = "title" class="text-center">Editing</h1>
 
-      <textarea id="title" rows="2">{{input_text}}</textarea>
+      <textarea id="text_title" rows="2">{{title}}</textarea>
 
       <br>
 
@@ -50,4 +50,3 @@
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
 {% endblock %}
-

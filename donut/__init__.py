@@ -25,9 +25,6 @@ from donut.modules import rooms
 
 app = flask.Flask(__name__)
 
-UPLOAD_FOLDER = 'donut/modules/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
@@ -68,6 +65,8 @@ def init(environment_name):
     app.config["DB_USER"] = environment.db_user
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
+    app.config["UPLOAD_FOLDER"] = 'donut/modules/uploads'
+    app.config["COMMITTEE_UPLOAD_FOLDER"] = 'donut/modules/committee_sites'
 
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH
