@@ -84,6 +84,9 @@ def get_user(user_id):
     return user
 
 
+SEARCH_NAME = "CONCAT(IFNULL(preferred_name, ''), ' ', first_name, ' ', last_name)"
+
+
 def make_name_query(search):
     """
     Query is split on spaces, so 'abc def' would
@@ -93,7 +96,8 @@ def make_name_query(search):
     """
     terms = search.split(' ')
     #INSTR is case-insensitive
-    return terms, ' AND '.join(['INSTR(full_name, %s) > 0'] * len(terms))
+    return terms, ' AND '.join(
+        ['INSTR(' + SEARCH_NAME + ', %s) > 0'] * len(terms))
 
 
 def get_users_by_name_query(search):
@@ -101,7 +105,7 @@ def get_users_by_name_query(search):
     Finds users whose names match the given query.
     Max 10 users returned, in alphabetical order.
     """
-    query = 'SELECT * FROM members_full_name WHERE '
+    query = 'SELECT user_id, full_name FROM members NATURAL JOIN members_full_name WHERE '
     search, name_query = make_name_query(search)
     query += name_query
     query += ' ORDER BY LOWER(full_name) LIMIT 10'
