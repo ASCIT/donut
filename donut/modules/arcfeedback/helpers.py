@@ -20,7 +20,9 @@ def register_complaint(data):
     Inputs a complaint into the database and returns the complaint id
     associated with this complaint
     data should be a dict with keys 'course', 'msg' and optionally 'name', 'email'
+    if required fields are missing, returns false
     """
+    if not data or not data['course'] or not data['msg']: return False
     # register complaint
     query = """
     INSERT INTO arc_complaint_info (course, status, uuid)
@@ -46,7 +48,9 @@ def register_complaint(data):
 def add_email(complaint_id, email):
     """
     Adds an email to list of addresses subscribed to this complaint
+    returns false if complaint_id is invalid
     """
+    if not get_course(complaint_id): return False
     query = """
     INSERT INTO arc_complaint_emails (complaint_id, email)
     VALUES (%s, %s)
@@ -121,6 +125,8 @@ def get_messages(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
+    if not res or 'message_id' not in res[0]:
+        return None
     return res
    
      
@@ -134,19 +140,25 @@ def get_summary(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
-    return res
+    return res if res else None
 
 def get_course(complaint_id):
-    return get_summary(complaint_id)['course']
+    res = get_summary(complaint_id)
+    if res: 
+        return res['course']
+    return None
+    
 
 
 def get_status(complaint_id):
-    return get_summary(complaint_id)['status']
+    res = get_summary(complaint_id)
+    return res['status'] if res else None
 
 
 def get_emails(complaint_id):
     """
-    Returns a list of subscribed emails for this complaint
+    Returns a list of subscribed emails for this complaint (which may be empty) 
+    or an empty list if complaint_id is invalid
     """
     query = 'SELECT email FROM arc_complaint_emails WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
@@ -161,13 +173,14 @@ def get_emails(complaint_id):
 def get_all_fields(complaint_id):
     '''
     Returns a dict with emails, messages, course, status
+    Returns None if complaint_id is invalid
     '''
     data = {}
     data['emails'] = get_emails(complaint_id)
     data['messages'] = get_messages(complaint_id)
     data['course'] = get_course(complaint_id)
     data['status'] = get_status(complaint_id)
-    return data
+    return data if data['course'] else None
 
 
 def get_new_posts():
