@@ -66,7 +66,9 @@ def add_msg(complaint_id, message, poster):
     and updates status of complaint to 'new_msg'
     if poster is None or an empty string, it will be replaced with 
     "(anonymous)"
+    If complaint_id is invalid, returns False
     '''
+    if not get_course(complaint_id): return False
     #add the message
     query = """
     INSERT INTO arc_complaint_messages (complaint_id, message, poster, time)

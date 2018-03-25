@@ -86,10 +86,17 @@ def test_add_email(client):
     assert helpers.get_emails(1) == ['test@example.com', 'test2@example.com', 'sample_text@example.com']
     assert helpers.add_email(500, 'text') == False
 
-'''def test_add_message(client):
-    
+def test_add_msg(client):
+    helpers.add_msg(2, 'Test message', 'Test user')
+    messages = helpers.get_messages(2)
+    assert len(messages) == 2
+    assert messages[0]['message'] == 'This course is fun'
+    assert messages[0]['poster'] == 'Davis'
+    assert messages[1]['message'] == 'Test message'
+    assert messages[1]['poster'] == 'Test user'
+    assert helpers.add_msg(500, '', '') == False
 
-def test_api_add_message(client):
+'''def test_api_add_message(client):
 
 
 def test_api_view_complaint(client):
