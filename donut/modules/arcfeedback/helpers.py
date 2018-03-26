@@ -144,18 +144,52 @@ def get_summary(complaint_id):
         res = cursor.fetchone()
     return res if res else None
 
+
 def get_course(complaint_id):
+    '''
+    Returns the course or None if complaint_id is invalid
+    '''
     res = get_summary(complaint_id)
     if res: 
         return res['course']
     return None
     
 
-
 def get_status(complaint_id):
+    '''
+    Returns the status of a post or None if complaint_id is invalid
+    '''
     res = get_summary(complaint_id)
     return res['status'] if res else None
 
+
+def mark_read(complaint_id):
+    '''
+    Sets the status of this complaint to 'read'
+    returns False if complaint_id is invalid
+    '''
+    query = """
+    UPDATE arc_complaint_info SET status = 'read' WHERE complaint_id = %s
+    """
+    if get_status(complaint_id) is None:
+        return False
+    with flask.g.pymysql_db.cursor() as cursor: 
+        cursor.execute(query, complaint_id)
+
+
+def mark_unread(complaint_id):
+    '''
+    Sets the status of this complaint to 'new_msg'
+    returns False if complaint_id is invalid
+    '''
+    query = """
+    UPDATE arc_complaint_info SET status = 'new_msg' WHERE complaint_id = %s
+    """
+    if get_status(complaint_id) is None:
+        return False
+    with flask.g.pymysql_db.cursor() as cursor: 
+        cursor.execute(query, complaint_id)
+    
 
 def get_emails(complaint_id):
     """

@@ -18,7 +18,7 @@ CREATE TABLE `arc_complaint_messages` (
   `poster` varchar(50) DEFAULT NULL,
   `message_id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`message_id`),
-  FOREIGN KEY (`complaint_id`) REFERENCES `arc_complaint_info` (`complaint_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`complaint_id`) REFERENCES `arc_complaint_info` (`complaint_id`) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS `arc_complaint_emails`;
@@ -28,5 +28,5 @@ CREATE TABLE `arc_complaint_emails` (
   `email` varchar(50) DEFAULT NULL,
   `email_id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`email_id`),
-  FOREIGN KEY (`complaint_id`) REFERENCES `arc_complaint_info` (`complaint_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`complaint_id`) REFERENCES `arc_complaint_info` (`complaint_id`) ON DELETE CASCADE
 );

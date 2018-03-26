@@ -42,6 +42,14 @@ def test_get_status(client):
     assert helpers.get_status(2) == 'read'
     assert helpers.get_status(500) is None
 
+def test_mark_read(client):
+    helpers.mark_read(1)
+    assert helpers.get_status(1) == 'read'
+    helpers.mark_unread(1)
+    assert helpers.get_status(1) == 'new_msg'
+    assert helpers.mark_read(500) == False
+    assert helpers.mark_unread(500) == False
+
 def test_get_emails(client):
     assert helpers.get_emails(1) == ['test@example.com','test2@example.com']
     assert helpers.get_emails(2) == []
