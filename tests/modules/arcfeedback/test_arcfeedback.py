@@ -55,7 +55,7 @@ def test_get_all_fields(client):
     assert fields['status'] == 'new_msg'
     assert helpers.get_all_fields(500) is None
 
-def get_new_posts(client):
+def test_get_new_posts(client):
     posts = helpers.get_new_posts()
     assert len(posts) == 1
     post = posts[0]
@@ -94,11 +94,10 @@ def test_add_msg(client):
     assert messages[0]['poster'] == 'Davis'
     assert messages[1]['message'] == 'Test message'
     assert messages[1]['poster'] == 'Test user'
+    helpers.add_msg(2, 'Anonymous message', '')
+    messages = helpers.get_messages(2)
+    assert len(messages) == 3
+    assert messages[2]['poster'] == '(anonymous)'
+    assert helpers.get_status(2) == 'new_msg'
     assert helpers.add_msg(500, '', '') == False
 
-'''def test_api_add_message(client):
-
-
-def test_api_view_complaint(client):
-
-'''

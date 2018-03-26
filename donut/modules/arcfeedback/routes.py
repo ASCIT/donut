@@ -50,7 +50,10 @@ def arcfeedback_view_complaint(id):
 # add a message to this post
 @blueprint.route('/1/arcfeedback/add/<uuid:id>', methods=['POST'])
 def arcfeedback_add_msg(id):
+    print("Hit the api")
     complaint_id = helpers.get_id(id)
+    if not complaint_id:
+        return {'ERROR', 'Cannot find this uuid'}, flask.ext.api.status.HTTP_400_BAD_REQUEST
     fields = ['message', 'poster']
     data = {}
     for field in fields:
