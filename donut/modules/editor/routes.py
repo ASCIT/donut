@@ -30,8 +30,8 @@ def redirecting(title='uploads.aaa'):
 @blueprint.route('/_save', methods=['POST'])
 def save():
     markdown = flask.request.form['markdown']
-    title = flask.request.form['html']
+    title = flask.request.form['title']
 
     helpers.write_markdown(markdown, title)
 
-    return redirect(url_for('editor.redirecting', title=title))
+    return redirect(url_for('uploads.'+title))

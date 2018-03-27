@@ -6,5 +6,5 @@ from donut.modules.uploads import blueprint, helpers
 
 blueprint.route('/<path:url>')
 def display(url):
-    (title, page) = helpers.readPage(url)
+    page = helpers.readPage(url.lower())
     return render_template('page.html', page = page, title = url)
