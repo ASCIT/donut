@@ -58,13 +58,15 @@ function insert(string){
 // Saves the page created
 function save(){
   // Construct the html and get the info needed
-  var text = document.getElementById('source').value,
-      target = document.getElementById('preview'),
+  var text = document.getElementById('source').value;
+  var target = document.getElementById('preview');
       //converter = new showdown.Converter(),
       //html = converter.makeHtml(text),
-      title = document.getElementById('text_title').value;
-	console.log(text_title);
-	console.log(html);
+  var title = document.getElementById("text_title").value;
+  //title = title.substring(38, title.length - 12);
+	console.log(typeof(title));
+	console.log(title);
+	//console.log(html);
   // Checking for valid titles
   if (title === '')
   {
@@ -78,7 +80,7 @@ function save(){
     for(var i = 0; i<title.length; i++)
     {
       var c = title.charCodeAt(i);
-      if ((c < 46 && c > 57)||(c < 65 && c > 90)||(c < 97 && c > 122)||c === 32)
+	if ((c >= 46 && c <= 57)||(c >= 65 && c <= 90)||(c >= 97 && c <= 122)||c === 32)
       {
         continue;
       }

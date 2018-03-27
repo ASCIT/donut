@@ -7,10 +7,12 @@ from flask import current_app, redirect, url_for
 
 
 @blueprint.route('/editor')
-def editor(input_text='Hello World!!!', title="TITLE", div_id = 'empty'):
+def editor(input_text='Hello World!!!', title="TITLE", div_id='empty'):
     if input_text == title:
         input_text = read_markdown(input_text, div_id)
-    return flask.render_template('editor_page.html', input_text=input_text, title=title)
+    return flask.render_template(
+        'editor_page.html', input_text=input_text, title=title)
+
 
 '''
 def read_markdown(name):
@@ -22,6 +24,7 @@ def read_markdown(name):
             f.close()
 '''
 
+
 @blueprint.route('/redirecting')
 def redirecting(title='uploads.aaa'):
     return flask.render_template('redirecting.html', input_text=url_for(title))
@@ -30,8 +33,8 @@ def redirecting(title='uploads.aaa'):
 @blueprint.route('/_save', methods=['POST'])
 def save():
     markdown = flask.request.form['markdown']
-    title = flask.request.form['html']
+    title = flask.request.form['title']
 
     helpers.write_markdown(markdown, title)
 
-    return redirect(url_for('editor.redirecting', title=title))
+    return redirect(url_for('editor.editor'))

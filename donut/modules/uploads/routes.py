@@ -4,7 +4,7 @@ import json
 from donut.modules.uploads import blueprint, helpers
 
 
-blueprint.route('/<path:url>')
+@blueprint.route('/<path:url>')
 def display(url):
-    (title, page) = helpers.readPage(url)
-    return render_template('page.html', page = page, title = url)
+    page = helpers.readPage(url.lower())
+    return flask.render_template('page.html', page=page, title=url)
