@@ -21,7 +21,6 @@ from donut.modules import groups
 from donut.modules import arcfeedback
 from donut.modules import rooms
 
-
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
 

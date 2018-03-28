@@ -1,5 +1,5 @@
 from donut import email_utils
-from donut.modules.arcfeedback import email_templates 
+from donut.modules.arcfeedback import email_templates
 import flask
 import pymysql.cursors
 
@@ -40,7 +40,7 @@ def register_complaint(data):
     # add message to database
     add_msg(complaint_id, data['msg'], data['name'])
     # add email to db if applicable
-    if data['email'] != "" :
+    if data['email'] != "":
         add_email(complaint_id, data['email'])
     return complaint_id
 
@@ -55,9 +55,8 @@ def add_email(complaint_id, email):
     INSERT INTO arc_complaint_emails (complaint_id, email)
     VALUES (%s, %s)
     """
-    with flask.g.pymysql_db.cursor() as cursor: 
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
-    
 
 
 def add_msg(complaint_id, message, poster):
@@ -78,9 +77,9 @@ def add_msg(complaint_id, message, poster):
     query2 = """
     UPDATE arc_complaint_info SET status = 'new_msg' WHERE complaint_id = %s
     """
-    if poster == "" or poster is None :
+    if poster == "" or poster is None:
         poster = '(anonymous)'
-    with flask.g.pymysql_db.cursor() as cursor: 
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
     return
@@ -94,11 +93,13 @@ def get_link(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
-        if res and 'uuid' in res: 
+        if res and 'uuid' in res:
             uuid = res['uuid']
         else:
             uuid = None
-    return flask.url_for('arcfeedback.arcfeedback_view_complaint', id=uuid, _external=True) if uuid else None
+    return flask.url_for(
+        'arcfeedback.arcfeedback_view_complaint', id=uuid,
+        _external=True) if uuid else None
 
 
 def get_id(uuid):
@@ -121,7 +122,7 @@ def get_messages(complaint_id):
     Returns timestamps, posters, messages, and message_id's on this complaint
     in ascending order of timestamp
     """
-    query ="""
+    query = """
     SELECT time, poster, message, message_id FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -130,15 +131,16 @@ def get_messages(complaint_id):
     if not res or 'message_id' not in res[0]:
         return None
     return res
-   
-     
+
+
 def get_summary(complaint_id):
     """
     Returns a dict with the following fields: course, status 
 
     """
     fields = ['course', 'status']
-    query = 'SELECT ' + ', '.join(fields) + ' FROM arc_complaint_info WHERE complaint_id = %s'
+    query = 'SELECT ' + ', '.join(
+        fields) + ' FROM arc_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
@@ -150,10 +152,10 @@ def get_course(complaint_id):
     Returns the course or None if complaint_id is invalid
     '''
     res = get_summary(complaint_id)
-    if res: 
+    if res:
         return res['course']
     return None
-    
+
 
 def get_status(complaint_id):
     '''
@@ -173,9 +175,9 @@ def mark_read(complaint_id):
     """
     if get_status(complaint_id) is None:
         return False
-    with flask.g.pymysql_db.cursor() as cursor: 
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        cursor.execute("COMMIT;") #not sure why this doesn't autocommit
+        cursor.execute("COMMIT;")  #not sure why this doesn't autocommit
 
 
 def mark_unread(complaint_id):
@@ -188,9 +190,10 @@ def mark_unread(complaint_id):
     """
     if get_status(complaint_id) is None:
         return False
-    with flask.g.pymysql_db.cursor() as cursor: 
+    with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        cursor.execute("COMMIT;") #not sure why this doesn't autocommit
+        cursor.execute("COMMIT;")  #not sure why this doesn't autocommit
+
 
 def get_emails(complaint_id):
     """

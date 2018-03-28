@@ -7,6 +7,7 @@ from donut.modules.arcfeedback import helpers
 def arcfeedback():
     return flask.render_template('arcfeedback.html')
 
+
 # submit feedback form
 @blueprint.route('/arcfeedback/submit', methods=['POST'])
 def arcfeedback_submit():
@@ -17,7 +18,8 @@ def arcfeedback_submit():
         data[field] = flask.request.form.get(field)
     for field in required:
         if (data[field] == ""):
-            flask.flash('Please fill in all required fields (marked with *)', 'error')
+            flask.flash('Please fill in all required fields (marked with *)',
+                        'error')
             return flask.redirect(flask.url_for('arcfeedback.arcfeedback'))
     complaint_id = helpers.register_complaint(data)
     if data['email'] != "":
@@ -53,7 +55,8 @@ def arcfeedback_add_msg(id):
     print("Hit the api")
     complaint_id = helpers.get_id(id)
     if not complaint_id:
-        return {'ERROR', 'Cannot find this uuid'}, flask.ext.api.status.HTTP_400_BAD_REQUEST
+        return {'ERROR', 'Cannot find this uuid'
+                }, flask.ext.api.status.HTTP_400_BAD_REQUEST
     fields = ['message', 'poster']
     data = {}
     for field in fields:
@@ -62,7 +65,10 @@ def arcfeedback_add_msg(id):
         content = {'ERROR': 'Cannot insert empty message'}
         return content, flask.ext.api.status.HTTP_400_BAD_REQUEST
     helpers.add_msg(complaint_id, data['message'], data['poster'])
-    return flask.jsonify({'poster': data['poster'], 'message': data['message']})
+    return flask.jsonify({
+        'poster': data['poster'],
+        'message': data['message']
+    })
 
 
 # TODO: summary page for arc members
