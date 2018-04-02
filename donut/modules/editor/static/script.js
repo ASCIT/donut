@@ -9,10 +9,6 @@ function run() {
     target.innerHTML = html;
 }
 
-function save(){
-
-}
-
 function change_title(){
  //var text = document.getElementById('title').value,
 
@@ -47,7 +43,9 @@ function insert_link(){
   insert("[linkTitle](example.com)");
 }
 
-
+function insert_image(){
+  insert("![Alt text](url/to/image");
+}
 function insert(string){
   var text = document.getElementById('source').value;
   var txt2 = text.slice(0, document.getElementById('source').selectionStart)
@@ -63,8 +61,10 @@ function save(){
       //converter = new showdown.Converter(),
       //html = converter.makeHtml(text),
   var title = document.getElementById("text_title").value;
-  title = title.substring(38, title.length - 12);
-	console.log(text_title);
+  //title = title.substring(38, title.length - 12);
+	console.log(typeof(title));
+	console.log(title);
+	//console.log(html);
   // Checking for valid titles
   if (title === '')
   {
@@ -74,18 +74,7 @@ function save(){
     // Checking for valid titles; should not have
     // anything other than numbers, characters,
     // period, front slash, and spaces.
-    var valid = true;
-    for(var i = 0; i<title.length; i++)
-    {
-      var c = title.charCodeAt(i);
-      if ((c >= 46 && c <= 57)||(c >= 65 && c <= 90)||(c >= 97 && c <= 122)||c === 32)
-      {
-        continue;
-      }
-      else {
-        valid = false;
-      }
-    }
+    var valid = /^[0-9a-zA-Z.\/ ]*$/.test(title);
     if (valid && title.length < TITLE_CUTOFF)
     {
       $.ajax({

@@ -22,39 +22,53 @@ def rename_title(oldfilename, newfilename):
     os.rename(oldfilename, newfilename)
     return
 
+
 def read_markdown(name, div_id):
     '''
     Reads in the mark down text from a file.
     '''
-    underCommittee = ['BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants',
-    'BoC.FAQ', 'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook']
+    underCommittee = [
+        'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
+        'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
+    ]
 
     if name in underCommittee:
-        curFile  = read_file(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
-            + '/static/' + name)
+        curFile = read_file(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
+                            + '/static/' + name)
         return curFile
     else:
-        curFile = read_file(flask.current_app.config["UPLOAD_FOLDER"]
-            + '/static/' + name)
+        curFile = read_file(flask.current_app.config["UPLOAD_FOLDER"] +
+                            '/static/' + name + '.md')
         return curFile
+
 
 def read_file(path):
     curFile = ''
     with open(path) as f:
-        curFile  += f.read()
-        f.close()
+        curFile += f.read()
     return template_html
 
-def write_markdown(markdown, old_title):
+
+def write_markdown(markdown, title):
     '''
         Creates an html file that was just created,
         as well as the routes for flask
     '''
+    # Special cases for exisiting BoC and currenly existing pages.
+    '''underCommittee = [
+            'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
+            'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
+    ]
+    if title in underCommittee:
+        root = flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
+        new_root = root + "/templates"
+        path = os.path.join(new_root, title + '/html')
+        f = open(path, "r*")
+        '''
+    # Non-special cases.
     root = flask.current_app.config["UPLOAD_FOLDER"]
-    new_root = root + "/templates"
+    new_root = root + "/static"
 
-    old_title = old_title.replace('</p>', '')
-    old_title = old_title.replace('<p>', '')
     title = title.replace(' ', '_')
     path = os.path.join(new_root, title + ".md")
 
@@ -63,4 +77,4 @@ def write_markdown(markdown, old_title):
     f.write(markdown)
     f.close()
 
-    return
+    return 1

@@ -1,4 +1,4 @@
-function run(input) {
+function convert(input) {
   var target = document.getElementById('content'),
       converter = new showdown.Converter(),
       html = converter.makeHtml(input);

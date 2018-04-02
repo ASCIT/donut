@@ -2,38 +2,45 @@
 {% block page %}
 <div class="container">
   <div class="col-md-24">
-    <div class="jumbotron">
+    <div class="jumbotron" style="text-align: center">
       <h1 id = "title" class="text-center">Editing</h1>
 
       <textarea id="text_title" rows="2">{{title}}</textarea>
 
       <br>
-
-      <div class="dropdown">
-        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Styles
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu">
-          <li><a type="button" onClick="insert_italic()" class="btn btn-secondary btn-sm">italic</a></li>
-          <li><a type="button" onClick="insert_bold()" class="btn btn-secondary btn-sm">bold</a></li>
-          <li><a type="button" onClick="insert_strike_through()" class="btn btn-secondary btn-sm">strike_through</a></li>
-        </ul>
-      </div>
-
-      <div class="dropdown">
-        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Headings
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu">
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(2)" style="font-size:18px">Heading</a></li>
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(3)" style="font-size:16px">Heading</a></li>
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(4)" style="font-size:14px">Heading</a></li>
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(5)" style="font-size:12px">Heading</a></li>
-          <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(6)" style="font-size:10px">Heading</a></li>
-        </ul>
-      </div>
-
-      <button class="btn btn-primary btn-sm" type="button" onClick="insert_link">Links</button>
-
+      <ul class="nav">
+        <li class="nav-item">
+          <div class="dropdown">
+            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Styles
+            <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a type="button" onClick="insert_italic()" class="btn btn-secondary btn-sm">italic</a></li>
+              <li><a type="button" onClick="insert_bold()" class="btn btn-secondary btn-sm">bold</a></li>
+              <li><a type="button" onClick="insert_strike_through()" class="btn btn-secondary btn-sm">strike_through</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="dropdown">
+            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Headings
+            <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(2)" style="font-size:18px">Heading</a></li>
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(3)" style="font-size:16px">Heading</a></li>
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(4)" style="font-size:14px">Heading</a></li>
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(5)" style="font-size:12px">Heading</a></li>
+              <li><a class="btn btn-secondary btn-sm" type="button" onClick="insert_heading(6)" style="font-size:10px">Heading</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-primary btn-sm" type="button" onClick="insert_link">Links</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-primary btn-sm" type="button" onClick="insert_image">Images</button>
+        </li>
+      </ul>
       <textarea id="source" rows="10" width="80%">{{input_text}}
       </textarea>
       <hr/>
