@@ -82,6 +82,7 @@ def arcfeedback_view_summary():
         complaint['link'] = helpers.get_link(complaint['complaint_id'])
     return flask.render_template('summary.html', complaints=complaints)
 
+
 # mark a complaint read
 @blueprint.route('/1/arcfeedback/markRead/<uuid:id>')
 def arcfeedback_mark_read(id):
@@ -91,8 +92,9 @@ def arcfeedback_mark_read(id):
     if helpers.mark_read(complaint_id) == False:
         flask.abort(400)
         return
-    else: 
+    else:
         return 'Success'
+
 
 # mark a complaint unread
 @blueprint.route('/1/arcfeedback/markUnread/<uuid:id>')
