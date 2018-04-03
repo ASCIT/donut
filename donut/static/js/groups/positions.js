@@ -41,9 +41,10 @@ function filterPositions(allPos) {
         }
     }
 }
+
 /*
- * Gathers the total list of groups from the groups endpoint.
- * for each group, it calls the collectPositions method on it
+ * Gathers all groups represented in the positions. For each group we add
+ * an option to the group select.
  */
 function getGroupList() {
     for (var i = 0; i < allPositions.length; i++) {
@@ -127,3 +128,61 @@ function changePosition(posName) {
     $('#positionSelect').val(posName);
     filterChange();
 }
+
+/*
+ *
+ */
+function groupDelChange() {
+    var groupIndex =$('#groupDel').val();
+    $('#position').find('option').remove();
+    var url = '/1/groups/' + groupIndex + '/positions/';
+    $.ajax({
+        type: 'GET',
+        url: url,
+        success: function(data){
+            for (var i = 0; i < data.length; i++) {
+                var newOption = '<option value=' + data[i].pos_id + '>' + 
+                    data[i].pos_name + '</option>';
+                $('#position').append(newOption);
+            }
+        }
+    })
+}
+
+// Setting up triggers for administration tasks
+$(document).ready(function() {
+    $('#submitPosBtn').click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/1/positions/',
+            data: $("#posCreate").serialize(),
+            success: function(data) {
+                p = JSON.parse(data);
+                if(p.success) {
+                    $('#posCreate').trigger("reset");
+                    alert("Position created!");
+                }
+            }
+        });
+    });
+    $('#delPosBtn').click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/1/positions/delete/',
+            data: $("#posDelete").serialize(),
+            success: function(data) {
+                p = JSON.parse(data);
+                if(p.success) {
+                    $('#posDelete').trigger("reset");
+                    $('#position').find('option')
+                                .remove()
+                                .end()
+                                .append('<option>Select a Position</option>');
+                    alert("Position Deleted");
+                }
+            }
+        });
+    });
+}); 
