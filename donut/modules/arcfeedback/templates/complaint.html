@@ -5,7 +5,7 @@
 	<div class="panel-heading">
 	    <h3>Feedback Summary</h3>
 	</div>
-	<div class="panel-body">
+	<div class="panel-body" id="summary-panel">
 	    <p>Course: {{complaint['course']}} </p>
 	    <p>Status: {{complaint['status']}} </p>
 	    {% if complaint['emails']|length == 0 %}
@@ -18,6 +18,8 @@
 	    {% endif %}
 	</div>
     </div>
+    <button class="btn btn-primary" id="markRead">Mark as read</button>
+    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
     <div class="row">
 	<div class="col-md-8 col-md-offset-2">
 	    <div >
@@ -72,6 +74,11 @@
  }
 
  $(document).ready(function() {
+     {% if complaint['status'] == 'new_msg' %}
+     $('#markUnread').hide();
+     {% else %}
+     $('#markRead').hide();
+     {% endif %}
      $('#addMessage').on('submit', function(e) {
 	 e.preventDefault();
 	 $.ajax({
@@ -83,7 +90,34 @@
 	 }); 
 	 $('#addMessage')[0].reset()
      });
+     $('#markRead').on('click', function() {
+	 $.ajax({
+	     url: "{{ url_for('arcfeedback.arcfeedback_mark_read', id=complaint['uuid']) }}",
+	     type: "GET",
+	     success: function(){
+		 $('#markRead').hide();
+		 $('#markUnread').show();
+	     },
+	     error: function(response){
+		 $('#summary-panel').append(response)
+	     }
+	 });
+     });
+     $('#markUnread').on('click', function() {
+	 $.ajax({
+	     url: "{{ url_for('arcfeedback.arcfeedback_mark_unread', id=complaint['uuid']) }}",
+	     type: 'GET',
+	     success: function(){
+		 $('#markUnread').hide();
+		 $('#markRead').show();
+	     },
+	     error: function(response){
+		 $('#summary-panel').append(response)
+	     }
+	 });
+     });
  });
+ 
 </script>
 
 {% endblock %}

@@ -52,18 +52,17 @@ def arcfeedback_view_complaint(id):
 # add a message to this post
 @blueprint.route('/1/arcfeedback/add/<uuid:id>', methods=['POST'])
 def arcfeedback_add_msg(id):
-    print("Hit the api")
     complaint_id = helpers.get_id(id)
     if not complaint_id:
-        return {'ERROR', 'Cannot find this uuid'
-                }, flask.ext.api.status.HTTP_400_BAD_REQUEST
+        flask.abort(400)
+        return
     fields = ['message', 'poster']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
     if data['message'] == "":
-        content = {'ERROR': 'Cannot insert empty message'}
-        return content, flask.ext.api.status.HTTP_400_BAD_REQUEST
+        flask.abort(400)
+        return
     helpers.add_msg(complaint_id, data['message'], data['poster'])
     return flask.jsonify({
         'poster': data['poster'],
@@ -82,3 +81,27 @@ def arcfeedback_view_summary():
     for complaint in complaints:
         complaint['link'] = helpers.get_link(complaint['complaint_id'])
     return flask.render_template('summary.html', complaints=complaints)
+
+# mark a complaint read
+@blueprint.route('/1/arcfeedback/markRead/<uuid:id>')
+def arcfeedback_mark_read(id):
+    #authenticate
+
+    complaint_id = helpers.get_id(id)
+    if helpers.mark_read(complaint_id) == False:
+        flask.abort(400)
+        return
+    else: 
+        return 'Success'
+
+# mark a complaint unread
+@blueprint.route('/1/arcfeedback/markUnread/<uuid:id>')
+def arcfeedback_mark_unread(id):
+    #authenticate
+
+    complaint_id = helpers.get_id(id)
+    if helpers.mark_unread(complaint_id) == False:
+        flask.abort(400)
+        return
+    else:
+        return 'Success'
