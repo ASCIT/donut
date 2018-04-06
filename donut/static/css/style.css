@@ -183,14 +183,16 @@ table {
 
 #footer {
   width: 100%;
-  text-align: center;
-  background-color: orange;
+  text-align: right;
   z-index: 9999;
   bottom: 0;
+  position: absolute;
 }
 
 #copyright {
   padding: 15px;
+  color: #EEE;
+  font-size: 10px;
 }
 
 label.required:after {
