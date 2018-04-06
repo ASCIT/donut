@@ -1,8 +1,22 @@
 #source {
     display: block;
+    margin: 30px;
+    margin-bottom: 100px;
+    
+
 }
 #targetDiv {
   border: 1px dashed #333333;
-  width: 600px;
+  width: 900px;
   height: 400px;
 }
+
+textarea{
+  margin: 30px;
+  width: 80%;
+
+}
+.btn{
+    margin: 5px;
+}
+

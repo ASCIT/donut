@@ -46,7 +46,7 @@ def read_file(path):
     curFile = ''
     with open(path) as f:
         curFile += f.read()
-    return template_html
+    return curFile
 
 
 def write_markdown(markdown, title):
@@ -70,11 +70,11 @@ def write_markdown(markdown, title):
     new_root = root + "/static"
 
     title = title.replace(' ', '_')
-    path = os.path.join(new_root, title + ".md")
+    path = os.path.join(new_root, title.lower() + ".md")
 
     # Writing to the new html file
     f = open(path, "w+")
     f.write(markdown)
     f.close()
 
-    return 1
+    return 0

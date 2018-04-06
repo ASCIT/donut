@@ -3,7 +3,7 @@ var TITLE_CUTOFF = 16;
 function run() {
   var text = document.getElementById('source').value,
       target = document.getElementById('preview'),
-      converter = new showdown.Converter(),
+      converter = new showdown.Converter({strikethrough: true}),
       html = converter.makeHtml(text);
 
     target.innerHTML = html;
@@ -20,36 +20,71 @@ function insert_heading(size){
   {
     string += "#";
   }
-  insert(string + "Heading_title" + string+ "\n");
+  if (window.getSelection().toString() != "")
+  {
+    var text = document.getElementById('source').value;
+    document.getElementById('source').value =
+    text.slice(0, window.getSelection().selectionStart) +
+    "*" + window.getSelection().toString() + "*"
+    text.slice(window.getSelection().selectionEnd);
+  }
+  else {
+    insert(string + "Heading_title" + string+ "\n");
+  }
 }
 
 function insert_italic(){
-  insert("*italicText*");
+  if (window.getSelection().toString() != "")
+  {
+    insert("*", false);
+  }
+  else {
+    insert("*italicText*");
+  }
 }
 
 function insert_bold(){
-  insert("**boldText**");
+  if (window.getSelection().toString() != "")
+  {
+    insert("**", false);
+  }
+  else {
+    insert("**boldText**");
+  }
 }
 
 function insert_strike_through(){
-  insert("~~strikeThroughText~~");
+  if (window.getSelection().toString() != "")
+  {
+    insert("~~", false);
+  }
+  else {
+    insert("~~strikeThroughText~~", true);
+  }
+
 }
 
 function insert_link(){
   insert("[linkTitle](example.com)");
 }
 
-function insert_link(){
-  insert("[linkTitle](example.com)");
-}
 
 function insert_image(){
   insert("![Alt text](url/to/image");
 }
-function insert(string){
+function insert(string, bool){
   var text = document.getElementById('source').value;
-  var txt2 = text.slice(0, document.getElementById('source').selectionStart)
+  if(!bool)
+  {
+    var txt2 = text.slice(0, document.getElementById('source').selectionStart)
+  + string + text.slice(document.getElementById('source').selectionStart,
+  document.getElementById('source').selectionEnd) + string
+  + text.slice(document.getElementById('source').selectionEnd);
+  }
+  else {
+    var txt2 = text.slice(0, document.getElementById('source').selectionStart)
   + string + text.slice(document.getElementById('source').selectionStart);
+  }
   document.getElementById('source').value = txt2;
 }
 
@@ -88,3 +123,4 @@ function save(){
     }
   }
 }
+
