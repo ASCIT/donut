@@ -7,7 +7,7 @@
 		<form
 			id='image'
 			enctype='multipart/form-data'
-			action='{{ url_for("directory_search.set_image") }}'
+			action='{{ url_for("core.set_image") }}'
 			method='POST'
 		>
 			<label class='btn btn-default'>
@@ -16,7 +16,7 @@
 		</form>
 		<br />
 		Set preferred name:
-		<form action='{{ url_for("directory_search.set_name") }}' method='POST'>
+		<form action='{{ url_for("core.set_name") }}' method='POST'>
 			<div class='input-group'>
 				<input class='form-control' name='name' placeholder='Preferred name' value='{{ name }}' />
 				<span class='input-group-btn'>
@@ -26,7 +26,7 @@
 		</form>
 		<br />
 		Set gender:
-		<form action='{{ url_for("directory_search.set_gender") }}' method='POST'>
+		<form action='{{ url_for("core.set_gender") }}' method='POST'>
 			<div class='input-group'>
 				<input class='form-control' name='gender' placeholder='Gender' value='{{ gender }}' />
 				<span class='input-group-btn'>

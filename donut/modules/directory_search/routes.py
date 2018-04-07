@@ -3,10 +3,8 @@ import json
 import mimetypes
 from flask import jsonify, redirect
 
+from donut.auth_utils import get_user_id
 from donut.modules.directory_search import blueprint, helpers
-
-VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-VALID_EXTENSIONS |= set(ext.upper() for ext in VALID_EXTENSIONS)
 
 
 @blueprint.route('/directory')
@@ -20,18 +18,10 @@ def directory_search():
         states=helpers.get_states())
 
 
-@blueprint.route('/1/users/me')
-def my_directory_page():
-    return redirect(
-        flask.url_for(
-            'directory_search.view_user',
-            user_id=helpers.get_user_id(flask.session['username'])))
-
-
 @blueprint.route('/1/users/<int:user_id>')
 def view_user(user_id):
     user = helpers.get_user(user_id)
-    is_me = 'username' in flask.session and helpers.get_user_id(
+    is_me = 'username' in flask.session and get_user_id(
         flask.session['username']) == user_id
     hidden_fields = helpers.get_hidden_fields(
         flask.session.get('username'), user_id)
@@ -41,52 +31,6 @@ def view_user(user_id):
         is_me=is_me,
         user_id=user_id,
         hidden_fields=hidden_fields)
-
-
-@blueprint.route('/1/users/me/edit')
-def edit_user():
-    user_id = helpers.get_user_id(flask.session['username'])
-    name = helpers.get_preferred_name(user_id)
-    gender = helpers.get_gender(user_id)
-    return flask.render_template('edit_user.html', name=name, gender=gender)
-
-
-@blueprint.route('/1/users/me/image', methods=['POST'])
-def set_image():
-    user_id = helpers.get_user_id(flask.session['username'])
-
-    def flash_error(message):
-        flash(message)
-        return redirect(
-            flask.url_for('directory_search.edit_user', user_id=user_id))
-
-    file = flask.request.files['file']
-    if not file.filename:
-        return flash_error('No file uploaded')
-    extension = file.filename.split('.')[-1]
-    if extension not in VALID_EXTENSIONS:
-        return flash_error('Unknown image extension')
-    file_contents = file.read()
-    file.close()
-    helpers.set_image(user_id, extension, file_contents)
-    return redirect(
-        flask.url_for('directory_search.view_user', user_id=user_id))
-
-
-@blueprint.route('/1/users/me/name', methods=['POST'])
-def set_name():
-    user_id = helpers.get_user_id(flask.session['username'])
-    helpers.set_preferred_name(user_id, flask.request.form['name'])
-    return redirect(
-        flask.url_for('directory_search.view_user', user_id=user_id))
-
-
-@blueprint.route('/1/users/me/gender', methods=['POST'])
-def set_gender():
-    user_id = helpers.get_user_id(flask.session['username'])
-    helpers.set_gender(user_id, flask.request.form['gender'])
-    return redirect(
-        flask.url_for('directory_search.view_user', user_id=user_id))
 
 
 @blueprint.route('/1/users/<int:user_id>/image')

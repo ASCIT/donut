@@ -1,6 +1,6 @@
 import flask
 import pymysql.cursors
-from donut.auth_utils import get_permissions
+from donut.auth_utils import get_permissions, get_user_id
 from donut.constants import Gender
 from donut.resources import Permissions
 
@@ -111,25 +111,6 @@ def get_users_by_name_query(search):
         return cursor.fetchall()
 
 
-def get_user_id(username):
-    query = 'SELECT user_id FROM users WHERE username = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [username])
-        user = cursor.fetchone()
-    if user is None:
-        return 0  #will show 'No such user' page
-    return user['user_id']
-
-
-def set_image(user_id, extension, contents):
-    delete_query = 'DELETE FROM images WHERE user_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(delete_query, [user_id])
-    add_query = 'INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s);'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(add_query, [user_id, extension, contents])
-
-
 def get_image(user_id):
     query = 'SELECT extension, image FROM images WHERE user_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
@@ -217,29 +198,3 @@ def get_grad_years():
 
 def get_states():
     return members_unique_values('state')
-
-
-def get_preferred_name(user_id):
-    query = 'SELECT preferred_name FROM members WHERE user_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        return cursor.fetchone()['preferred_name'] or ''
-
-
-def set_preferred_name(user_id, name):
-    query = 'UPDATE members SET preferred_name = %s WHERE user_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [name, user_id])
-
-
-def get_gender(user_id):
-    query = 'SELECT gender_custom FROM members WHERE user_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        return cursor.fetchone()['gender_custom'] or ''
-
-
-def set_gender(user_id, gender):
-    query = 'UPDATE members SET gender_custom = %s WHERE user_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [gender, user_id])

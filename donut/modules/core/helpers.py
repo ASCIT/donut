@@ -18,10 +18,10 @@ def get_member_data(user_id, fields=None):
                 For lists of user_id's result will be a list of dicts.
     """
     all_returnable_fields = [
-        "user_id", "uid", "last_name", "first_name", "middle_name", "email",
-        "phone", "gender", "gender_custom", "birthday", "entry_year",
-        "graduation_year", "msc", "building", "room_num", "address", "city",
-        "state", "zip", "country"
+        "user_id", "uid", "last_name", "first_name", "middle_name",
+        "preferred_name", "email", "phone", "gender", "gender_custom",
+        "birthday", "entry_year", "graduation_year", "msc", "building",
+        "room_num", "address", "city", "state", "zip", "country"
     ]
     default_fields = [
         "user_id", "first_name", "last_name", "email", "uid", "entry_year",
@@ -108,8 +108,8 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    query = """SELECT full_name, email 
-    FROM members NATURAL LEFT JOIN members_full_name 
+    query = """SELECT full_name, email
+    FROM members NATURAL LEFT JOIN members_full_name
     WHERE user_id=%s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
@@ -128,10 +128,33 @@ def get_group_list_of_member(user_id):
     Returns:
         result: All the groups that an user_id is a part of
     """
-    query = """SELECT group_id, group_name, control 
-    FROM group_members NATURAL JOIN groups NATURAL JOIN members 
+    query = """SELECT group_id, group_name, control
+    FROM group_members NATURAL JOIN groups NATURAL JOIN members
     WHERE user_id = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [user_id])
         return list(cursor.fetchall())
+
+
+def set_image(user_id, extension, contents):
+    delete_query = 'DELETE FROM images WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(delete_query, [user_id])
+    add_query = 'INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(add_query, [user_id, extension, contents])
+
+
+def get_preferred_name(user_id):
+    return get_member_data(user_id, ['preferred_name'])['preferred_name'] or ''
+
+
+def get_gender(user_id):
+    return get_member_data(user_id, ['gender_custom'])['gender_custom'] or ''
+
+
+def set_member_field(user_id, field, value):
+    query = 'UPDATE members SET `' + field + '` = %s WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [value, user_id])
