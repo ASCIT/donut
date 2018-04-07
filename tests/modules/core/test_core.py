@@ -47,4 +47,5 @@ def test_get_group_list_of_member(client):
 
 # Test Routes
 def test_get_members(client):
-    assert get_members(1) is not None
+    with app.test_request_context('/'):
+        assert get_members(1) is not None
