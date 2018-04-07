@@ -11,6 +11,7 @@ USE donut_test;
 SOURCE sql/donut.sql
 SOURCE sql/marketplace.sql
 SOURCE sql/rooms.sql
+SOURCE sql/voting.sql
 
 -- Populate with test data.
 SOURCE sql/test_data.sql
