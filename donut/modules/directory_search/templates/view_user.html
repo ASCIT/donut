@@ -67,7 +67,7 @@
 							{{ user['room'] }}
 						</li>
 					{% endif %}
-					{% if 'hometown_string' in user and 'hometown_string' not in hidden_fields %}
+					{% if user['hometown_string'] and 'hometown_string' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Hometown</strong>:
 							{{ user['hometown_string'] }}

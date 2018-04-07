@@ -47,13 +47,10 @@ def get_user(user_id):
                 user['phone_string'] += phone[3:6] + '-' + phone[6:]
             else:  #what sort of phone number is that
                 user['phone_string'] = phone
-        state = user['state']
-        if state:
-            city = user['city']
-            country = user['country']
-            user['hometown_string'] = (city + ', ' if city else
-                                       '') + state + (', ' + country
-                                                      if country else '')
+        place_names = [(user[field] or '').strip()
+                       for field in ['city', 'state', 'country']]
+        user['hometown_string'] = ', '.join(filter(None, place_names))
+
         option_query = """
             SELECT option_name, option_type
             FROM member_options NATURAL JOIN options
