@@ -22,7 +22,7 @@ def authenticate(username, password):
         return None
 
     # Get the correct password hash and user_id from the database.
-    s = "SELECT `user_id`, `password_hash` FROM `users` WHERE `username`=%s"
+    s = "SELECT user_id, password_hash FROM users WHERE username=%s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [username])
         result = cursor.fetchone()
@@ -54,8 +54,8 @@ def handle_forgotten_password(username, email):
   success, False if the (username, email) pair is not valid.
   """
     # Check username, email pair.
-    query = """SELECT `user_id`, `first_name`, `email` 
-    FROM `members` NATURAL JOIN `users` WHERE `username` = %s"""
+    query = """SELECT user_id, first_name, email 
+    FROM members NATURAL JOIN users WHERE username = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [username])

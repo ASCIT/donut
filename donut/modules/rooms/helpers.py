@@ -9,7 +9,7 @@ from donut.auth_utils import get_user_id
 def get_rooms():
     """Gets a list of rooms in the form {id, name, title, desc}"""
 
-    query = 'SELECT `room_id`, `location`, `title`, `description` FROM `rooms`'
+    query = 'SELECT room_id, location, title, description FROM rooms'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
@@ -38,8 +38,8 @@ def get_all_reservations(rooms, start, end):
         rooms = [room["room_id"] for room in get_rooms()]
     query = """
         SELECT reservation_id, location, start_time, end_time
-        FROM `room_reservations` NATURAL JOIN `rooms` AS room
-        WHERE %s <= `end_time` AND `start_time` <= %s
+        FROM room_reservations NATURAL JOIN rooms AS room
+        WHERE %s <= end_time AND start_time <= %s
         AND room.room_id IN (""" + ",".join(["%s"] * len(rooms)) + """)
         ORDER BY start_time
     """
