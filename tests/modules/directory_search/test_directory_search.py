@@ -368,8 +368,7 @@ def test_set_name(client):
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     assert helpers.get_user(3)['preferred_name'] == 'Belac'
-    res = client.post(
-        flask.url_for('core.set_name'), data={'name': 'Clb'})
+    res = client.post(flask.url_for('core.set_name'), data={'name': 'Clb'})
     assert res.status_code == 302
     assert res.headers['location'] == flask.url_for(
         'directory_search.view_user', user_id=3)
