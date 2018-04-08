@@ -11,12 +11,12 @@
 					{% for reservation in reservations["upcoming"] %}
 						<div class="list-group-item">
 							<p class='list-group-item-text'>
-								{{ reservation["room"] }} on
-								{{ reservation["start"].strftime("%-m/%-d/%y") }} from
-								{{ reservation["start"].strftime("%-I:%M %p") }} to
-								{{ reservation["end"].strftime("%-I:%M %p") }}
+								{{ reservation["location"] }} on
+								{{ reservation["start_time"].strftime("%-m/%-d/%y") }} from
+								{{ reservation["start_time"].strftime("%-I:%M %p") }} to
+								{{ reservation["end_time"].strftime("%-I:%M %p") }}
 
-								<a href="/1/reservation/{{ reservation['id'] }}">View</a>
+								<a href="/1/reservation/{{ reservation['reservation_id'] }}">View</a>
 							</p>
 						</div>
 					{% endfor %}
@@ -34,12 +34,12 @@
 					{% for reservation in reservations["past"] %}
 						<div class="list-group-item">
 							<p class='list-group-item-text'>
-								{{ reservation["room"] }} on
-								{{ reservation["start"].strftime("%-m/%-d/%y") }} from
-								{{ reservation["start"].strftime("%-I:%M %p") }} to
-								{{ reservation["end"].strftime("%-I:%M %p") }}
+								{{ reservation["location"] }} on
+								{{ reservation["start_time"].strftime("%-m/%-d/%y") }} from
+								{{ reservation["start_time"].strftime("%-I:%M %p") }} to
+								{{ reservation["end_time"].strftime("%-I:%M %p") }}
 
-								<a href="/1/reservation/{{ reservation['id'] }}">View</a>
+								<a href="/1/reservation/{{ reservation['reservation_id'] }}">View</a>
 							</p>
 						</div>
 					{% endfor %}

@@ -2,13 +2,13 @@
 	{% for room in rooms %}
 		<div class="list-group-item">
 			<h4 class="list-group-item-heading">
-				{{ room["name"] }}
+				{{ room["location"] }}
 			</h4>
 			<p class='list-group-item-text'>
 				{{ room["title"] }}
-				{% if room["desc"] %}
+				{% if room["description"] %}
 					<br />
-					<em>{{ room["desc"] }}</em>
+					<em>{{ room["description"] }}</em>
 				{% endif %}
 			</p>
 		</div>

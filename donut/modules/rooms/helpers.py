@@ -38,9 +38,9 @@ def get_all_reservations(rooms, start, end):
         rooms = [room["room_id"] for room in get_rooms()]
     query = """
         SELECT reservation_id, location, start_time, end_time
-        FROM room_reservations NATURAL JOIN rooms AS room
+        FROM room_reservations NATURAL JOIN rooms
         WHERE %s <= end_time AND start_time <= %s
-        AND room.room_id IN (""" + ",".join(["%s"] * len(rooms)) + """)
+        AND room_id IN (""" + ",".join(["%s"] * len(rooms)) + """)
         ORDER BY start_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -72,11 +72,9 @@ def get_my_reservations(username):
     query = """
         SELECT reservation_id, location, start_time, end_time
         FROM room_reservations AS reservation
-            LEFT OUTER JOIN users AS user
-            ON reservation.user_id = user.user_id
-            LEFT OUTER JOIN rooms AS room
-            ON reservation.room_id = room.room_id
-        WHERE user.username = %s
+            NATURAL JOIN rooms
+            NATURAL JOIN users
+        WHERE username = %s
         ORDER BY start_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -94,12 +92,9 @@ def get_reservation(id):
     query = """
         SELECT location, title, full_name, start_time, end_time, reason, username
         FROM room_reservations AS reservation
-            LEFT OUTER JOIN members_full_name as member
-            ON reservation.user_id = member.user_id
-            LEFT OUTER JOIN users as user
-            ON reservation.user_id = user.user_id
-            LEFT OUTER JOIN rooms AS room
-            ON reservation.room_id = room.room_id
+            NATURAL JOIN rooms
+            NATURAL JOIN members_full_name
+            NATURAL JOIN users
         WHERE reservation_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
