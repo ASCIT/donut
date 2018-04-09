@@ -24,7 +24,7 @@ CREATE TABLE surveys (
 CREATE TABLE survey_question_types (
     type_id    INT          NOT NULL AUTO_INCREMENT,
     type_name  VARCHAR(20)  NOT NULL,
-    options    BOOLEAN      NOT NULL,
+    options    BOOLEAN      NOT NULL, -- whether there is a list of options associated with this type of question
 
     PRIMARY KEY(type_id)
 );
