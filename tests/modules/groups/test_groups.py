@@ -20,11 +20,13 @@ def test_get_group_list_data(client):
     assert helpers.get_group_list_data(["group_name"]) == [{
         "group_name":
         "Donut Devteam"
+    }, {
+        "group_name":
+        "Ruddock House"
     }]
-    groups = [group]
-    assert helpers.get_group_list_data() == groups
-    assert helpers.get_group_list_data(None, {"group_id": 1}) == groups
-    assert helpers.get_group_list_data(None, {"group_id": 2}) == []
+    assert helpers.get_group_list_data()[0] == group
+    assert helpers.get_group_list_data(None, {"group_id": 1})[0] == group
+    assert helpers.get_group_list_data(None, {"group_id": 3}) == []
 
 
 def test_get_group_positions_data(client):
@@ -35,7 +37,7 @@ def test_get_group_positions_data(client):
         "pos_id": 2,
         "pos_name": "Secretary"
     }]
-    assert helpers.get_group_positions(2) == []
+    assert helpers.get_group_positions(3) == []
 
 
 def test_get_position_data(client):
@@ -50,7 +52,7 @@ def test_get_position_data(client):
 
 
 def test_get_group_data(client):
-    assert helpers.get_group_data(2) == {}
+    assert helpers.get_group_data(3) == {}
     assert helpers.get_group_data(1, ["not_a_real_field"]) == "Invalid field"
     assert helpers.get_group_data(1) == group
     assert helpers.get_group_data(1, ["group_name"]) == {
@@ -60,7 +62,7 @@ def test_get_group_data(client):
 
 def test_get_members_by_group(client):
     assert helpers.get_members_by_group(1)[0]["user_id"] == 1
-    assert helpers.get_members_by_group(2) == {}
+    assert helpers.get_members_by_group(3) == {}
 
 
 # Test Routes

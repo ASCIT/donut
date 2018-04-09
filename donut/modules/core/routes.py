@@ -1,8 +1,12 @@
 import flask
 import json
-from flask import jsonify
+from flask import jsonify, redirect
 
+from donut.auth_utils import get_user_id
 from donut.modules.core import blueprint, helpers
+
+VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+VALID_EXTENSIONS |= set(ext.upper() for ext in VALID_EXTENSIONS)
 
 
 @blueprint.route("/1/members/")
@@ -45,6 +49,65 @@ def get_members(user_id):
 @blueprint.route("/1/members/<int:user_id>/groups/")
 def get_group_list_of_member(user_id):
     '''GET /1/members/<int:user_id>/groups/
-       List all groups that a member is in  
+       List all groups that a member is in
     '''
     return jsonify(helpers.get_group_list_of_member(user_id))
+
+
+# Routes for interacting with your directory page
+
+
+@blueprint.route('/1/users/me')
+def my_directory_page():
+    return redirect(
+        flask.url_for(
+            'directory_search.view_user',
+            user_id=get_user_id(flask.session['username'])))
+
+
+@blueprint.route('/1/users/me/edit')
+def edit_user():
+    user_id = get_user_id(flask.session['username'])
+    name = helpers.get_preferred_name(user_id)
+    gender = helpers.get_gender(user_id)
+    return flask.render_template('edit_user.html', name=name, gender=gender)
+
+
+@blueprint.route('/1/users/me/image', methods=['POST'])
+def set_image():
+    user_id = get_user_id(flask.session['username'])
+
+    def flash_error(message):
+        flash(message)
+        return redirect(
+            flask.url_for('directory_search.edit_user', user_id=user_id))
+
+    file = flask.request.files['file']
+    if not file.filename:
+        return flash_error('No file uploaded')
+    extension = file.filename.split('.')[-1]
+    if extension not in VALID_EXTENSIONS:
+        return flash_error('Unknown image extension')
+    file_contents = file.read()
+    file.close()
+    helpers.set_image(user_id, extension, file_contents)
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))
+
+
+@blueprint.route('/1/users/me/name', methods=['POST'])
+def set_name():
+    user_id = get_user_id(flask.session['username'])
+    helpers.set_member_field(user_id, 'preferred_name',
+                             flask.request.form['name'])
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))
+
+
+@blueprint.route('/1/users/me/gender', methods=['POST'])
+def set_gender():
+    user_id = get_user_id(flask.session['username'])
+    helpers.set_member_field(user_id, 'gender_custom',
+                             flask.request.form['gender'])
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))

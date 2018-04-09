@@ -4,10 +4,10 @@
 	<form action={{ url_for(".all_reservations") }}>
 		<div class="form-group">
 			<label for="rooms">Rooms</label>
-			<select id="rooms" name="rooms" class="form-control" multiple>
+			<select id="rooms" name="rooms" class="form-control" multiple autofocus>
 				{% for room in rooms %}
-					<option value={{ room["id"] }} selected>
-						{{ room["name"] }}
+					<option value={{ room["room_id"] }} selected>
+						{{ room["location"] }} - {{ room["title"] }}
 					</option>
 				{% endfor %}
 			</select>
@@ -31,11 +31,11 @@
 				</h4>
 				{% for reservation in day_reservation["reservations"] %}
 					<p class='list-group-item-text'>
-						{{ reservation["room"] }} from
-						{{ reservation["start"].strftime("%-I:%M %p") }} to
-						{{ reservation["end"].strftime("%-I:%M %p") }}
+						{{ reservation["location"] }} from
+						{{ reservation["start_time"].strftime("%-I:%M %p") }} to
+						{{ reservation["end_time"].strftime("%-I:%M %p") }}
 
-						<a href="/1/reservation/{{ reservation['id'] }}">View</a>
+						<a href="/1/reservation/{{ reservation['reservation_id'] }}">View</a>
 					</p>
 				{% endfor %}
 			</div>

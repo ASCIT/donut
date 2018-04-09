@@ -9,6 +9,7 @@ USE donut_test;
 
 -- Create the database schema.
 SOURCE sql/donut.sql
+SOURCE sql/directory.sql
 SOURCE sql/marketplace.sql
 SOURCE sql/rooms.sql
 
