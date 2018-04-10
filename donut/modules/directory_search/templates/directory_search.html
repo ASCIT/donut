@@ -1,0 +1,112 @@
+{% extends 'layout.html' %}
+{% block page %}
+	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
+		<h1>Directory Search</h1>
+		<h4>I'm looking for someone...</h4>
+		<form action='{{ url_for("directory_search.search") }}' method='POST'>
+			<div class='form-group'>
+				<label for='name'>Named</label>
+				<input class='form-control' id='name' name='name' placeholder='Name' autofocus />
+				<ul class='list-group' id='name-search'></ul>
+			</div>
+			<div class='form-group'>
+				<label for='house'>Affiliated with</label>
+				<select class='form-control' id='house' name='house'>
+					<option value=''>Any house</option>
+					{% for house in houses %}
+						<option value={{ house['group_id'] }}>{{ house['group_name'] }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='option'>Pursuing</label>
+				<select class='form-control' id='option' name='option'>
+					<option value=''>Any option</option>
+					{% for option in options %}
+						<option value={{ option['option_id'] }}>{{ option['option_name'] }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='residence'>Living in</label>
+				<select class='form-control' id='residence' name='residence'>
+					<option value=''>Any residence</option>
+					{% for residence in residences %}
+						<option value={{ residence['building_id'] }}>{{ residence['building_name'] }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='graduation'>Graduating in</label>
+				<select class='form-control' id='graduation' name='graduation'>
+					<option value=''>Any year</option>
+					{% for year in grad_years %}
+						<option>{{ year }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='state'>Home state</label>
+				<select class='form-control' id='state' name='state'>
+					<option value=''>Any state</option>
+					{% for state in states %}
+						<option>{{ state }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class='form-group'>
+				<label for='username'>Username</label>
+				<input class='form-control' id='username' name='username' />
+			</div>
+			<div class='form-group'>
+				<label for='email'>Email</label>
+				<input class='form-control' id='email' name='email' />
+			</div>
+			<div class='form-check'>
+				<input type='checkbox' class='form-check-input' id='show_images' name='show_images' />
+				<label for='show_images'>Show images</label>
+			</div>
+			<div class='form-group'>
+				<input type='submit' class='btn btn-primary' value='Search' />
+			</div>
+		</form>
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		var MIN_SEARCH_LENGTH = 3
+		var SEARCH_TIMEOUT = 200 //ms
+		var searchToken
+
+		$(document).ready(function() {
+			var nameInput = $('input#name'), nameSearch = $('ul#name-search')
+			nameInput.keyup(function() {
+				var name = nameInput.val()
+				if (name.length < MIN_SEARCH_LENGTH) return nameSearch.children().remove()
+				var token = {}
+				searchToken = token
+				setTimeout(function() {
+					if (searchToken !== token) return //newer request issued
+					$.ajax({
+						url: '/1/users/search/' + encodeURIComponent(name),
+						dataType: 'json',
+						success: function(users) {
+							if (searchToken !== token) return //newer request issued
+							nameSearch.children().remove()
+							for (var i = 0; i < users.length; i++) {
+								var user = users[i]
+								nameSearch.append(
+									$('<li>').addClass('list-group-item').append(
+										$('<a>').attr('href', '/1/users/' + String(user.user_id)).text(user.full_name)
+									)
+								)
+							}
+							if (!users.length) nameSearch.append($('<li>').addClass('list-group-item').text('No users found'))
+						}
+					})
+				}, SEARCH_TIMEOUT)
+			})
+		})
+	</script>
+{% endblock %}

@@ -248,11 +248,13 @@ def check_reset_key(reset_key):
 
 def get_user_id(username):
     """Takes a username and returns the user's ID."""
-    query = sqlalchemy.text("SELECT user_id FROM users WHERE username = :u")
-    result = flask.g.db.execute(query, u=username).first()
-    if result is not None:
-        return int(result['user_id'])
-    return None
+    query = 'SELECT user_id FROM users WHERE username = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [username])
+        user = cursor.fetchone()
+    if user is None:
+        return None
+    return user['user_id']
 
 
 def update_last_login(username):
@@ -316,7 +318,7 @@ def get_permissions(username):
   Returns a list with all of the permissions available to the user.
   A list is returned because Python sets cannot be stored in cookie data.
   """
-    return list([])
+    return []
     query = sqlalchemy.text("""
     (SELECT permission_id
       FROM users
