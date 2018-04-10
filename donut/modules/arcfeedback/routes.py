@@ -1,6 +1,7 @@
 import flask
 from donut.modules.arcfeedback import blueprint
 from donut.modules.arcfeedback import helpers
+from donut import auth_utils
 
 
 @blueprint.route('/arcfeedback')
@@ -70,7 +71,7 @@ def arcfeedback_add_msg(id):
     })
 
 
-# TODO: summary page for arc members
+# allow arc members to see a summary
 @blueprint.route('/arcfeedback/view/summary')
 def arcfeedback_view_summary():
     #authenticate
