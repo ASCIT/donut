@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block page %}
+    Some survey stuff
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        var questionData = {{ questions_json|safe }}
+        console.log(questionData)
+    </script>
+{% endblock %}

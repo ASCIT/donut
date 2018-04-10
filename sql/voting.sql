@@ -13,7 +13,7 @@ CREATE TABLE surveys (
     group_id       INT,                    -- restrict to this group if non-NULL
     auth           BOOLEAN       NOT NULL, -- require authentication (UID and birthday)
     public         BOOLEAN       NOT NULL, -- whether survey should appear in the list of active surveys
-    results_shown  BOOLEAN       NOT NULL, -- whether survey should appear in the list of results
+    results_shown  BOOLEAN       DEFAULT FALSE, -- whether survey should appear in the list of results
     creator        INT           NOT NULL, -- user id of survey creator
 
     PRIMARY KEY(survey_id),
@@ -24,7 +24,7 @@ CREATE TABLE surveys (
 CREATE TABLE survey_question_types (
     type_id    INT          NOT NULL AUTO_INCREMENT,
     type_name  VARCHAR(20)  NOT NULL,
-    options    BOOLEAN      NOT NULL, -- whether there is a list of options associated with this type of question
+    choices    BOOLEAN      NOT NULL, -- whether there is a list of choices associated with this type of question
 
     PRIMARY KEY(type_id)
 );
@@ -42,7 +42,7 @@ CREATE TABLE survey_questions (
     FOREIGN KEY(type_id) REFERENCES survey_question_types(type_id)
 );
 
-CREATE TABLE survey_question_choices(
+CREATE TABLE survey_question_choices (
     choice_id    INT          NOT NULL AUTO_INCREMENT,
     question_id  INT          NOT NULL,
     choice       VARCHAR(50)  NOT NULL,
