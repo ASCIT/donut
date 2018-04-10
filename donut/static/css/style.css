@@ -185,32 +185,3 @@ label.required:after {
   }
 }
 
-/* BELOW IS THE CSS FOR THE DRAG AND DROP FORM MAKER. */
-[draggable] {
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
-  /* Required to make elements draggable in old WebKit */
-  -khtml-user-drag: element;
-  -webkit-user-drag: element;
-}
-
-.element_container {
-  list-style-type: none;
-}
-
-.element {
-  width: 162px;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  text-align: center;
-  cursor: move;
-}
-
-.element.over {
-  border-top: 2px dashed #000;
-
-  -webkit-transition: border 0.1s;
-}
-
