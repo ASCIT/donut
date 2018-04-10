@@ -15,4 +15,7 @@ def take_survey(access_key):
         flask.flash('Invalid access key or survey has closed')
         return list_surveys()
     questions_json = helpers.get_questions_json(survey_id)
-    return flask.render_template('take.html', questions_json=questions_json)
+    return flask.render_template(
+        'take.html',
+        question_types=helpers.get_question_types(),
+        questions_json=questions_json)

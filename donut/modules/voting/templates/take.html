@@ -5,6 +5,7 @@
 {% block scripts %}
     {{ super() }}
     <script>
+        var questionTypes = {{ question_types|safe }}
         var questionData = {{ questions_json|safe }}
     </script>
 {% endblock %}

@@ -2,6 +2,16 @@ import json
 import flask
 
 
+def get_question_types():
+    query = 'SELECT type_id, type_name FROM survey_question_types'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return {
+            question_type['type_name']: question_type['type_id']
+            for question_type in cursor.fetchall()
+        }
+
+
 def get_survey_id(access_key):
     query = 'SELECT survey_id FROM surveys WHERE access_key = %s AND start_time <= NOW() AND NOW() <= end_time'
     with flask.g.pymysql_db.cursor() as cursor:
