@@ -20,7 +20,7 @@ INSERT INTO positions(group_id, pos_id, pos_name) VALUES
 
 INSERT INTO position_holders(group_id, pos_id, user_id) VALUES
     (1, 1, 1),
-    (1, 1, 2);
+    (1, 2, 2);
 
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
