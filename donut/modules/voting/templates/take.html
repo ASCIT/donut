@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="conainter theme-showcase" role="main">
+	<div class="jumbotron">
+		{% for component in questions %}
+		{% if component['type_id'] == 0 %}
+		{% endif %}
+		{% if component['type_id'] == 1 %}
+		{% endif %}
+		{% if component['type_id'] == 2 %}
+		{% endif %}
+		{% if component['type_id'] == 3 %}
+		{% endif %}
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}
