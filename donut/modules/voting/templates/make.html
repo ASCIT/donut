@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+var dragSrcEl = null;
+
+function handleDragStart(e) {
+  dragSrcEl = this;
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.outerHTML);
+
+  this.classList.add('dragElem');
+}
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault(); // Necessary. Allows us to drop.
+  }
+  this.classList.add('over');
+
+  e.dataTransfer.dropEffect = 'move';
+
+  return false;
+}
+
+function handleDragEnter(e) {
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('over');
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation(); // Stops some browsers from redirecting.
+  }
+
+  // Don't do anything if dropping the same column we're dragging.
+  if (dragSrcEl != this) {
+    this.parentNode.removeChild(dragSrcEl);
+    var dropHTML = e.dataTransfer.getData('text/html');
+    this.insertAdjacentHTML('beforebegin',dropHTML);
+    var dropElem = this.previousSibling;
+    addDnDHandlers(dropElem);
+
+  }
+  this.classList.remove('over');
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('over');
+}
+
+function addDnDHandlers(elem) {
+  elem.addEventListener('dragstart', handleDragStart, false);
+  elem.addEventListener('dragenter', handleDragEnter, false)
+  elem.addEventListener('dragover', handleDragOver, false);
+  elem.addEventListener('dragleave', handleDragLeave, false);
+  elem.addEventListener('drop', handleDrop, false);
+  elem.addEventListener('dragend', handleDragEnd, false);
+
+}
+
+function addElement() {
+  selector = document.getElementById("element_options");
+  container = document.getElementById("element_container");
+  sel_index = selector.options[selector.selectedIndex].value;
+	
+  li = document.createElement("li");
+  
+  li.className = "element";
+  li.draggable = "true";
+
+  if (sel_index == 0) {
+    li.innerHTML =
+      '<ul id="elements_container"><li class="element"></li></ul>
+       <div class="remove_element"></div>';
+  }
+  else if (sel_index == 1) {
+    li.innerHTML =
+      '<input type="checkbox">
+       <div class="remove_element"></div>';
+  }
+  else if (sel_index == 2) {
+    li.innerHTML =
+      '<div>Something is going here!</div>
+       <div class="remove_element"></div>';
+  }
+  else if (sel_index == 3) {
+    li.innerHTML =
+       '<input type="text">
+        <div class="remove_element"></div>';
+  }
+  else if (sel_index == 4) {
+    li.innerHTML =
+       '<textarea></textarea>
+        <div class="remove_element"></div>';
+  }
+
+  document.getElementById("elements_container").removeChild(input.parentNode);
+}
+
+var cols = document.querySelectorAll('#element_container .element');
+[].forEach.call(cols, addDnDHandlers);
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container theme-showcase" role="main">
+	
+	<div class="jumbotron">
+		<ul id="elements_container">
+			<li draggable="true" class="element">
+				This is a temp example for when I start adding these dynamically in JS.
+				<div class="remove_element"></div>
+			</li>
+			<li draggable="true" class="element">
+				This is a temp example for when I start adding these dynamically in JS.
+				<div class="remove_element"></div>
+			</li>
+		</ul>
+		<button onclick="addElement()" value="Add Element">
+		<select id="element_options">
+  			<option value="0">Dropdown</option>
+  			<option value="1">Checkbox</option>
+  			<option value="2">Elected Position</option>
+			<option value="3">Short Text</option>
+			<option value="4">Long Text</option>
+		</select>
+	</div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+}
+
+#element_container {
+  list-style-type: none;
+}
+
+.element {
+  width: 162px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  text-align: center;
+  cursor: move;
+}
+
+.element.over {
+  border-top: 2px dashed #000;
+
+  -webkit-transition: border 0.1s;
+}
+{% endblock %}
+
+
