@@ -21,12 +21,12 @@ def get_question_types():
         }
 
 
-def get_survey_id(access_key):
-    query = 'SELECT survey_id FROM surveys WHERE access_key = %s AND start_time <= NOW() AND NOW() <= end_time'
+def get_survey_data(access_key):
+    query = 'SELECT survey_id, start_time, end_time, creator FROM surveys WHERE access_key = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [access_key])
         survey = cursor.fetchone()
-    return survey and survey['survey_id']
+    return survey
 
 
 def get_questions_json(survey_id):

@@ -16,11 +16,16 @@ def list_surveys():
 
 @blueprint.route('/1/surveys/<access_key>/take')
 def take_survey(access_key):
-    survey_id = helpers.get_survey_id(access_key)
-    if not survey_id:
-        flask.flash('Invalid access key or survey has closed')
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
         return list_surveys()
-    questions_json = helpers.get_questions_json(survey_id)
+    now = datetime.now()
+    if not (survey['start_time'] <= now <= survey['end_time']):
+        flask.flash('Survey is not currently accepting responses')
+        return list_surveys()
+
+    questions_json = helpers.get_questions_json(survey['survey_id'])
     return flask.render_template(
         'take.html',
         question_types=helpers.get_question_types(),
@@ -127,5 +132,21 @@ def make_survey():
 
 @blueprint.route('/1/surveys/<access_key>/questions', methods=['GET'])
 def edit_questions(access_key):
-    #Placeholder
-    return flask.render_template('edit.html')
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
+        return list_surveys()
+    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    if user_id != survey['creator']:
+        flask.flash('You are not the creator of this survey')
+        return list_surveys()
+    now = datetime.now()
+    if now > survey['end_time']:
+        flask.flash('Cannot modify a survey after it has closed')
+        return list_surveys()
+
+    questions_json = helpers.get_questions_json(survey['survey_id'])
+    return flask.render_template(
+        'edit.html',
+        question_types=helpers.get_question_types(),
+        questions_json=questions_json)
