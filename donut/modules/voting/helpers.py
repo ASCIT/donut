@@ -1,5 +1,14 @@
 import json
 import flask
+from donut.auth_utils import get_user_id
+from donut.misc_utils import generate_random_string
+from donut.modules.groups.helpers import get_group_list_data
+
+ACCESS_KEY_LENGTH = 64
+
+
+def get_groups():
+    return get_group_list_data(['group_id', 'group_name'])
 
 
 def get_question_types():
@@ -43,3 +52,20 @@ def get_questions_json(survey_id):
             del question['choices']
         del question['question_id']
     return json.dumps(questions)
+
+
+def make_survey(**params):
+    access_key = generate_random_string(ACCESS_KEY_LENGTH)
+    creator = get_user_id(params['username'])
+    query = """
+        INSERT INTO surveys (title, description, start_time, end_time,
+            access_key, group_id, auth, public, creator)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [
+            params['title'], params['description'], params['start'],
+            params['end'], access_key, params['group_id'], params['auth'],
+            params['public'], creator
+        ])
+    return access_key

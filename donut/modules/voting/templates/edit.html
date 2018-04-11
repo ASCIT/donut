@@ -67,9 +67,9 @@ function addElement() {
   selector = document.getElementById("element_options");
   container = document.getElementById("element_container");
   sel_index = selector.options[selector.selectedIndex].value;
-	
+
   li = document.createElement("li");
-  
+
   li.className = "element";
   li.draggable = "true";
 
@@ -109,27 +109,27 @@ var cols = document.querySelectorAll('#element_container .element');
 
 {% block content %}
 <div class="container theme-showcase" role="main">
-	
-	<div class="jumbotron">
-		<ul id="elements_container">
-			<li draggable="true" class="element">
-				This is a temp example for when I start adding these dynamically in JS.
-				<div class="remove_element"></div>
-			</li>
-			<li draggable="true" class="element">
-				This is a temp example for when I start adding these dynamically in JS.
-				<div class="remove_element"></div>
-			</li>
-		</ul>
-		<button onclick="addElement()" value="Add Element">
-		<select id="element_options">
-  			<option value="0">Dropdown</option>
-  			<option value="1">Checkbox</option>
-  			<option value="2">Elected Position</option>
-			<option value="3">Short Text</option>
-			<option value="4">Long Text</option>
-		</select>
-	</div>
+
+  <div class="jumbotron">
+    <ul id="elements_container">
+      <li draggable="true" class="element">
+        This is a temp example for when I start adding these dynamically in JS.
+        <div class="remove_element"></div>
+      </li>
+      <li draggable="true" class="element">
+        This is a temp example for when I start adding these dynamically in JS.
+        <div class="remove_element"></div>
+      </li>
+    </ul>
+    <button onclick="addElement()" value="Add Element">
+    <select id="element_options">
+        <option value="0">Dropdown</option>
+        <option value="1">Checkbox</option>
+        <option value="2">Elected Position</option>
+        <option value="3">Short Text</option>
+        <option value="4">Long Text</option>
+    </select>
+  </div>
 </div>
 {% endblock %}
 
@@ -163,5 +163,3 @@ var cols = document.querySelectorAll('#element_container .element');
   -webkit-transition: border 0.1s;
 }
 {% endblock %}
-
-

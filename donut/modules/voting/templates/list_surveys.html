@@ -1,6 +1,10 @@
 {% extends 'layout.html' %}
 {% block page %}
     <div class='col-md-8 col-md-offset-2' id='main' style='float: none; padding-bottom: 25px'>
+        <a href='{{ url_for("voting.make_survey_form") }}' style='padding-left: 15px'>
+            Make new survey
+        </a>
+        <br />
         <div class='col-md-6'>
             <div class='panel panel-default'>
                 <div class='panel-heading'>
