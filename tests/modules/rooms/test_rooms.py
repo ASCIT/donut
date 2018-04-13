@@ -12,13 +12,13 @@ from donut.modules.rooms import routes
 # Helpers
 def test_get_rooms(client):
     assert helpers.get_rooms() == [{
-        "id":
+        "room_id":
         1,
-        "name":
+        "location":
         "SAC 23",
         "title":
         "ASCIT Screening Room",
-        "desc":
+        "description":
         "A room for watching DVDs and videos"
     }]
 
@@ -45,10 +45,10 @@ def test_add_and_get_reservations(client):
         "day":
         datetime(2017, 11, 14).date(),
         "reservations": [{
-            "id": 1,
-            "room": "SAC 23",
-            "start": datetime(2017, 11, 14, 18),
-            "end": datetime(2017, 11, 14, 19)
+            "reservation_id": 1,
+            "location": "SAC 23",
+            "start_time": datetime(2017, 11, 14, 18),
+            "end_time": datetime(2017, 11, 14, 19)
         }]
     }
     assert helpers.get_all_reservations(
@@ -58,10 +58,10 @@ def test_add_and_get_reservations(client):
         "day":
         datetime(2017, 11, 15).date(),
         "reservations": [{
-            "id": 2,
-            "room": "SAC 23",
-            "start": datetime(2017, 11, 15, 12),
-            "end": datetime(2017, 11, 15, 13)
+            "reservation_id": 2,
+            "location": "SAC 23",
+            "start_time": datetime(2017, 11, 15, 12),
+            "end_time": datetime(2017, 11, 15, 13)
         }]
     }
     assert helpers.get_all_reservations(
@@ -79,9 +79,9 @@ def test_add_and_get_reservations(client):
     assert helpers.get_reservation(2) == {
         "location": "SAC 23",
         "title": "ASCIT Screening Room",
-        "name": "Robert Eng",
-        "start": datetime(2017, 11, 15, 12),
-        "end": datetime(2017, 11, 15, 13),
+        "full_name": "Robert Eng",
+        "start_time": datetime(2017, 11, 15, 12),
+        "end_time": datetime(2017, 11, 15, 13),
         "reason": "Dank memes",
         "username": "reng"
     }
@@ -125,32 +125,32 @@ def test_get_my_reservations(client):
         datetime(now.year, now.month, now.day, 15) + timedelta(days=1))
     assert helpers.get_my_reservations("reng") == {
         "past": [{
-            "id":
+            "reservation_id":
             5,
-            "room":
+            "location":
             "SAC 23",
-            "start":
+            "start_time":
             datetime(now.year, now.month, now.day, 12) + timedelta(days=-1),
-            "end":
+            "end_time":
             datetime(now.year, now.month, now.day, 13) + timedelta(days=-1)
         }, {
-            "id":
+            "reservation_id":
             4,
-            "room":
+            "location":
             "SAC 23",
-            "start":
+            "start_time":
             datetime(now.year, now.month, now.day, 12) + timedelta(days=-2),
-            "end":
+            "end_time":
             datetime(now.year, now.month, now.day, 13) + timedelta(days=-2)
         }],
         "upcoming": [{
-            "id":
+            "reservation_id":
             3,
-            "room":
+            "location":
             "SAC 23",
-            "start":
+            "start_time":
             datetime(now.year, now.month, now.day, 12) + timedelta(days=1),
-            "end":
+            "end_time":
             datetime(now.year, now.month, now.day, 13) + timedelta(days=1)
         }]
     }

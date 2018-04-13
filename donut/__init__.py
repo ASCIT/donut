@@ -22,7 +22,7 @@ from donut.modules import committee_sites
 from donut.modules import editor
 from donut.modules import uploads
 from donut.modules import rooms
-
+from donut.modules import directory_search
 app = flask.Flask(__name__)
 
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -37,7 +37,7 @@ app.register_blueprint(committee_sites.blueprint)
 app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
-
+app.register_blueprint(directory_search.blueprint)
 
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
