@@ -77,13 +77,15 @@ def test_get_all_fields(client):
 def test_get_new_posts(client):
     posts = helpers.get_new_posts()
     assert len(posts) == 1
-    assert posts == [{'complaint_id': 1,
-                     'course': 'Math 1a',
-                     'status': 'new_msg',
-                     'uuid': 'sample_uuid',
-                     'message': 'Sample Message 2',
-                     'poster': 'Davis',
-                     'time': datetime(2018, 1, 2)}]
+    assert posts == [{
+        'complaint_id': 1,
+        'course': 'Math 1a',
+        'status': 'new_msg',
+        'uuid': 'sample_uuid',
+        'message': 'Sample Message 2',
+        'poster': 'Davis',
+        'time': datetime(2018, 1, 2)
+    }]
 
 
 def test_register_complaint(client):
