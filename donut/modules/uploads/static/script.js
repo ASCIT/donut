@@ -7,5 +7,3 @@ function convert(input) {
 	  console.log(target.innerHTML);
     target.innerHTML = html;
 }
-
-window.onload = convert;

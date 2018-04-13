@@ -1,6 +1,10 @@
 import flask
 import json
+import os
 from werkzeug import secure_filename
+
+#DEBUGGING
+import glob
 
 from donut.modules.uploads import blueprint, helpers
 
@@ -12,10 +16,34 @@ def display(url):
     return flask.render_template('page.html', page=page, title=url)
 
 
-@blueprint.route('/uploads')
+@blueprint.route('/uploads', methods=['GET', 'POST'])
 def uploads():
+    if flask.request.method == 'POST':
+        if 'file' not in flask.request.files:
+            flask.flash('No file part')
+            return flask.render_template('uploads.html')
+        file = flask.request.files['file']
+
+        if file.filename == '':
+            flask.flash('No selected file')
+            return flask.redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(
+                os.path.join(flask.current_app.config['UPLOAD_FOLDER'],
+                             filename))
+            return flask.redirect(
+                flask.url_for('uploads.uploaded_file', filename=filename))
     return flask.render_template('uploads.html')
 
+
+@blueprint.route('/uploaded_file/<filename>', methods = ['GET'])
+def uploaded_file(filename):
+    print(filename)
+    print(flask.current_app.config['UPLOAD_FOLDER'])
+    print(glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*'))
+    return flask.send_from_directory(flask.current_app.config['UPLOAD_FOLDER'],
+    filename, as_attachment= True)
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -25,7 +53,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@blueprint.route('/_uploader', methods=['GET', 'POST'])
+@blueprint.route('/_uploader', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
 
