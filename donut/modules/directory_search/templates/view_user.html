@@ -1,0 +1,161 @@
+{% extends 'layout.html' %}
+{% block page %}
+	<div class='col-md-6 col-md-offset-3' id='dir-info' style='float: none; padding-bottom: 25px'>
+		{% if user is none %}
+			No such user!
+		{% else %}
+			<h2>
+				{{ user['preferred_name'] or user['first_name'] }}
+				{{ user['middle_name'] or '' }}
+				{{ user['last_name'] }}
+				{% if is_me %}
+					<a href='{{ url_for("core.edit_user") }}' style='float: right; padding-right: 20px'>Update</a>
+				{% endif %}
+			</h2>
+			{% if user['image'] %}
+			<div class='col-md-8'>
+			{% else %}
+			<div>
+			{% endif %}
+				<ul class='list-group list-group-root'>
+					{% if user['username'] and 'username' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Username</strong>:
+							{{ user['username'] }}
+						</li>
+					{% endif %}
+					{% if 'uid' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>UID</strong>:
+							{{ user['uid'] }}
+						</li>
+					{% endif %}
+					{% if user['birthday'] and 'birthday' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Birthday</strong>:
+							{{ user['birthday'].strftime('%b %-d, %Y') }}
+						</li>
+					{% endif %}
+					{% if 'gender_string' in user and 'gender_string' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Gender</strong>:
+							{{ user['gender_string'] }}
+						</li>
+					{% endif %}
+					{% if user['email'] and 'email' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Email</strong>:
+							<a href='mailto:{{ user["email"] }}'>{{ user['email'] }}</a>
+						</li>
+					{% endif %}
+					{% if 'phone_string' in user and 'phone_string' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Phone</strong>:
+							{{ user['phone_string'] }}
+						</li>
+					{% endif %}
+					{% if user['msc'] and 'msc' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Mail Stop Code (MSC)</strong>:
+							{{ user['msc'] }}
+						</li>
+					{% endif %}
+					{% if user['building_name'] and 'building_name' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Residence</strong>:
+							{{ user['building_name'] }}
+							{{ user['room'] }}
+						</li>
+					{% endif %}
+					{% if user['hometown_string'] and 'hometown_string' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Hometown</strong>:
+							{{ user['hometown_string'] }}
+						</li>
+					{% endif %}
+					{% if user['entry_year'] and 'entry_year' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Matriculation</strong>:
+							{{ user['entry_year'] }}
+						</li>
+					{% endif %}
+					{% if user['graduation_year'] and 'graduation_year' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Graduation</strong>:
+							{{ user['graduation_year'] }}
+						</li>
+					{% endif %}
+					{% if user['options'] and 'options' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for option in user['options'] %}
+								<li class='list-group-item'>
+									{{ option['option_name'] + ' (' + option['option_type'] + ')' }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{% if user['houses'] and 'houses' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>House{% if user['houses']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for house in user['houses'] %}
+								<li class='list-group-item'>
+									{{ house['group_name'] + ' - ' + house['pos_name'] }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{% if user['positions'] and 'positions' not in hidden_fields %}
+						<li class='list-group-item'>
+							<strong>Position{% if user['positions']|length > 1 %}s{% endif %}</strong>:
+						</li>
+						<ul class='list-group'>
+							{% for position in user['positions'] %}
+								<li class='list-group-item'>
+									{{ position['group_name'] + ' - ' + position['pos_name'] }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</ul>
+			</div>
+			{% if user['image'] and 'image' not in hidden_fields %}
+				<div class='col-md-4'>
+					<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
+				</div>
+			{% endif %}
+		{% endif %}
+	</div>
+{% endblock %}
+{% block styles %}
+	{{ super() }}
+	<style>
+		#dir-info:before, #dir-info:after {
+			content: " ";
+			display: table;
+		}
+		#dir-info:after {
+			clear: both;
+		}
+
+		/*Somewhat from https://stackoverflow.com/a/33571268*/
+		.list-group:not(:first-child) > .list-group-item, .list-group > .list-group-item:not(:first-child) {
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+		.list-group:not(:last-child) > .list-group-item, .list-group > .list-group-item:not(:last-child) {
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+		.list-group.list-group-root .list-group {
+			margin-bottom: -1px;
+		}
+		.list-group.list-group-root > .list-group > .list-group-item {
+			padding-left: 50px;
+		}
+	</style>
+{% endblock %}
