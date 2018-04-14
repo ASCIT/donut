@@ -64,6 +64,17 @@ def restrict_edit(survey):
         return list_surveys()
 
 
+@blueprint.route('/1/surveys/mine')
+def my_surveys():
+    if 'username' not in flask.session:
+        return flask.render_template('manage.html', logged_in=False)
+
+    user_id = helpers.get_user_id(flask.session['username'])
+    my_surveys = helpers.get_my_surveys(user_id)
+    return flask.render_template(
+        'manage.html', logged_in=True, my_surveys=my_surveys)
+
+
 @blueprint.route('/1/surveys/<access_key>/questions', methods=['GET'])
 def edit_questions(access_key):
     survey = helpers.get_survey_data(access_key)
@@ -122,4 +133,25 @@ def save_questions(access_key):
 
     questions = flask.request.get_json(force=True)
     helpers.set_questions(survey['survey_id'], questions)
+    return flask.jsonify({'success': True})
+
+
+@blueprint.route('/1/surveys/<access_key>', methods=['DELETE'])
+def delete_survey(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Invalid access key'
+        })
+    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    if user_id != survey['creator']:
+        return flask.jsonify({
+            'success':
+            False,
+            'message':
+            'You are not the creator of this survey'
+        })
+
+    helpers.delete_survey(survey['survey_id'])
     return flask.jsonify({'success': True})

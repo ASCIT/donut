@@ -208,3 +208,19 @@ def set_questions(survey_id, questions):
             question_id = cursor.lastrowid
             for choice in question.get('choices', []):
                 cursor.execute(insert_choice_query, [question_id, choice])
+
+
+def get_my_surveys(user_id):
+    query = """
+        SELECT title, description, access_key, end_time <= NOW() as closed, end_time
+        FROM surveys WHERE creator = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchall()
+
+
+def delete_survey(survey_id):
+    query = 'DELETE FROM surveys WHERE survey_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [survey_id])
