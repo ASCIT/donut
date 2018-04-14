@@ -186,3 +186,25 @@ def update_survey_params(survey_id, params):
         key + ' = %s' for key in params) + ' WHERE survey_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [*params.values(), survey_id])
+
+
+def set_questions(survey_id, questions):
+    delete_query = 'DELETE FROM survey_questions WHERE survey_id = %s'
+    insert_question_query = """
+        INSERT INTO survey_questions (survey_id, title, description, list_order, type_id)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    insert_choice_query = """
+        INSERT INTO survey_question_choices (question_id, choice)
+        VALUES (%s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(delete_query, [survey_id])
+        for order, question in enumerate(questions):
+            cursor.execute(insert_question_query, [
+                survey_id, question['title'], question['description'].strip()
+                or None, order, question['type']
+            ])
+            question_id = cursor.lastrowid
+            for choice in question.get('choices', []):
+                cursor.execute(insert_choice_query, [question_id, choice])

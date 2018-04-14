@@ -17,8 +17,8 @@ CREATE TABLE surveys (
     creator        INT           NOT NULL, -- user id of survey creator
 
     PRIMARY KEY(survey_id),
-    FOREIGN KEY(group_id) REFERENCES groups(group_id),
-    FOREIGN KEY(creator) REFERENCES members(user_id)
+    FOREIGN KEY(group_id) REFERENCES groups(group_id) ON DELETE SET NULL,
+    FOREIGN KEY(creator) REFERENCES members(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE survey_question_types (
@@ -38,7 +38,7 @@ CREATE TABLE survey_questions (
     type_id      INT           NOT NULL,
 
     PRIMARY KEY(question_id),
-    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id),
+    FOREIGN KEY(survey_id) REFERENCES surveys(survey_id) ON DELETE CASCADE,
     FOREIGN KEY(type_id) REFERENCES survey_question_types(type_id)
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE survey_question_choices (
     choice       VARCHAR(50)  NOT NULL,
 
     PRIMARY KEY(choice_id),
-    FOREIGN KEY(question_id) REFERENCES survey_questions(question_id)
+    FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE
 );
 
 INSERT INTO survey_question_types (type_name, options) VALUES

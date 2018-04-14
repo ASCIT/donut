@@ -105,10 +105,21 @@ def edit_params(access_key):
 
 
 @blueprint.route('/1/surveys/<access_key>', methods=['POST'])
-def save_survey(access_key):
+def save_params(access_key):
     survey = helpers.get_survey_data(access_key)
     restricted = restrict_edit(survey)
     if restricted: return restricted
 
     return helpers.process_params_request(
         survey['survey_id'], access_key=access_key)
+
+
+@blueprint.route('/1/surveys/<access_key>/questions', methods=['POST'])
+def save_questions(access_key):
+    survey = helpers.get_survey_data(access_key)
+    restricted = restrict_edit(survey)
+    if restricted: return restricted
+
+    questions = flask.request.get_json(force=True)
+    helpers.set_questions(survey['survey_id'], questions)
+    return flask.jsonify({'success': True})

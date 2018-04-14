@@ -5,7 +5,7 @@
 			<h3>
 				{% if editing %}Editing{% else %}Making new{% endif %} survey
 			</h3>
-			<form action='{{ url_for("voting.save_survey", access_key=access_key) if editing else url_for("voting.make_survey") }}' method='POST'>
+			<form action='{{ url_for("voting.save_params", access_key=access_key) if editing else url_for("voting.make_survey") }}' method='POST'>
 				<div class='form-group'>
 					<label for='title' class='required'>Title</label>
 					<input
