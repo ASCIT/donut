@@ -7,7 +7,9 @@ from flask import current_app, redirect, url_for
 
 
 @blueprint.route('/editor', methods=['GET', 'POST'])
-def editor(input_text='Hello World!!!', title="TITLE", div_id='empty'):
+def editor(input_text='Hello World!!!', title="TITLE"):
+    if input_text != 'Hello World!!!':
+        input_text = read_markdown(input_text)
     #markdown = flask.request.form['markdown']
     #title = flask.request.form['title']
     #if title == '':

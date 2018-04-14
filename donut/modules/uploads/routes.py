@@ -47,6 +47,12 @@ def uploaded_file(filename):
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
+@blueprint.route('/uploaded_list')
+def uploadedList():
+    links = glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*')
+    for i in range(links):
+        links[i] = (flask.url_for('uploads.uploaded_file', filename=links[i]), links[i])
+    flask.render_template('uploaded_list.html', links=links)
 
 def allowed_file(filename):
     return '.' in filename and \

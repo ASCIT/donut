@@ -23,7 +23,7 @@ def rename_title(oldfilename, newfilename):
     return
 
 
-def read_markdown(name, div_id):
+def read_markdown(name):
     '''
     Reads in the mark down text from a file.
     '''
@@ -34,7 +34,7 @@ def read_markdown(name, div_id):
 
     if name in underCommittee:
         curFile = read_file(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
-                            + '/static/' + name)
+                            + '/static/' + name + ".html")
         return curFile
     else:
         curFile = read_file(flask.current_app.config["UPLOAD_FOLDER"] +
