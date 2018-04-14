@@ -55,30 +55,64 @@
         .on('dragend', handleDragEnd)
     }
 
+    function addSelectOption() {
+	var option_text = $(this).parent().children('input').first().val()
+	if (option_text != "") {
+	 $(this).parent().children('select').first().append($('<option>' + option_text + '</option>'))
+	}
+    }
+
     function addElement() {
-      var li = $('<li>').addClass('element').attr('draggable', 'true')
+      var li = $('<li>').addClass('element').attr('question_type', typeSelect.val()).attr('draggable', 'true')
       switch (Number(typeSelect.val())) {
         case QUESTION_TYPES.Dropdown:
+          var add_dropdown_option = $('<button>').click(addSelectOption).text('Add Option')
+          li.append($('<input>'))
+	  li.append($('<p>').text('Question:'))
+	  li.append($('<input>').attr('id', 'question_name'))
+	  li.append(add_dropdown_option)
           li.append($('<select>'))
           break
         case QUESTION_TYPES.Checkboxes:
+	  li.append($('<p>').text('Question:'))
+	  li.append($('<input>').attr('id', 'question_name'))
           li.append($('<input>').attr('type', 'checkbox'))
           break
         case QUESTION_TYPES['Elected position']:
-          li.append($('<div>').text('Some elected position'))
+          var add_dropdown_option = $('<button>').click(addSelectOption).text('Add Option')
+          li.append($('<input>'))
+	  li.append($('<p>').text('Question:'))
+	  li.append($('<input>').attr('id', 'question_name'))
+	  li.append(add_dropdown_option)
+          li.append($('<select>'))
           break
         case QUESTION_TYPES['Short text']:
+	  li.append($('<p>').text('Question:'))
+	  li.append($('<input>').attr('id', 'question_name'))
           li.append($('<input>'))
           break
         case QUESTION_TYPES['Long text']:
+	  li.append($('<p>').text('Question:'))
+	  li.append($('<input>').attr('id', 'question_name'))
           li.append($('<textarea>'))
       }
-      li.append($('<div>').addClass('remove_element').click(removeElement))
+      li.append($('<button>').addClass('remove_element').text('Remove').click(function() { $(this).closest('li').remove() }))
       questionContainer.append(li)
       addDnDHandlers(li)
     }
 
-    function removeElement() {}
+    function generateJSON() {
+	var json_string = "["
+	var question_container = $('ul#question_container').children('li').each(
+		function() {
+			json_string += "{"
+			json_string += "type: " + this.question_type
+			json_string += "title: " + this.select('input#question_name').val()
+			json_string += ""
+			json_string += "}"
+		})
+	json_string += "]"
+    }
 
     $(document).ready(function() {
       questionContainer = $('#question_container')
@@ -89,6 +123,7 @@
       }
 
       $('button#add_question').click(addElement)
+      $('button#save_survey').click(generateJSON)
       addDnDHandlers(questionContainer.find('.element'))
     })
   </script>
@@ -97,17 +132,10 @@
 {% block page %}
   <div class="col-md-8 col-md-offset-2" style="float: none; padding-bottom: 25px">
     <ul id="question_container">
-      <li draggable="true" class="element">
-        This is a temp example for when I start adding these dynamically in JS.
-        <div class="remove_element"></div>
-      </li>
-      <li draggable="true" class="element">
-        This is a temp example for when I start adding these dynamically in JS.
-        <div class="remove_element"></div>
-      </li>
     </ul>
     <select id="question_type"></select>
     <button id="add_question">Add question</button>
+    <button id="save_survey">Save</button>
   </div>
 {% endblock %}
 
