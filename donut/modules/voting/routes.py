@@ -133,9 +133,7 @@ def make_survey():
         flask.url_for('voting.edit_questions', access_key=access_key))
 
 
-@blueprint.route('/1/surveys/<access_key>/questions', methods=['GET'])
-def edit_questions(access_key):
-    survey = helpers.get_survey_data(access_key)
+def restrict_edit(survey):
     if not survey:
         flask.flash('Invalid access key')
         return list_surveys()
@@ -148,8 +146,45 @@ def edit_questions(access_key):
         flask.flash('Cannot modify a survey after it has closed')
         return list_surveys()
 
+
+@blueprint.route('/1/surveys/<access_key>/questions', methods=['GET'])
+def edit_questions(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if restrict_edit(survey): return
+
     questions_json = helpers.get_questions_json(survey['survey_id'])
     return flask.render_template(
         'edit.html',
         question_types=helpers.get_question_types(),
-        questions_json=questions_json)
+        questions_json=questions_json,
+        access_key=access_key,
+        survey=survey)
+
+
+@blueprint.route('/1/surveys/<access_key>', methods=['GET'])
+def edit_params(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if restrict_edit(survey): return
+
+    survey_params = helpers.get_survey_params(survey['survey_id'])
+    start_time = survey_params['start_time']
+    end_time = survey_params['end_time']
+    return flask.render_template(
+        'survey_params.html',
+        editting=True,
+        access_key=access_key,
+        groups=helpers.get_groups(),
+        start_date=start_time.strftime(YYYY_MM_DD),
+        start_hour=start_time.strftime('%-I'),
+        start_minute=start_time.strftime('%M'),
+        start_period='P' if start_time.hour >= 12 else 'A',
+        end_date=end_time.strftime(YYYY_MM_DD),
+        end_hour=end_time.strftime('%-I'),
+        end_minute=end_time.strftime('%M'),
+        end_period='P' if end_time.hour >= 12 else 'A',
+        **survey_params)
+
+
+@blueprint.route('/1/surveys/<access_key>', methods=['POST'])
+def save_survey(access_key):
+    return 'Not implemented yet'

@@ -96,6 +96,13 @@
 
 {% block page %}
   <div class="col-md-8 col-md-offset-2" style="float: none; padding-bottom: 25px">
+    <h1>Editting survey questions for {{ survey['title'] }}</h1>
+    {% if survey['description'] %}
+      <h3>{{ survey['description'] }}</h3>
+    {% endif %}
+    <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
+      Edit survey settings
+    </a>
     <ul id="question_container">
       <li draggable="true" class="element">
         This is a temp example for when I start adding these dynamically in JS.

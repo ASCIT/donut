@@ -40,7 +40,10 @@ def get_public_surveys(user_id):
 
 
 def get_survey_data(access_key):
-    query = 'SELECT survey_id, start_time, end_time, creator FROM surveys WHERE access_key = %s'
+    query = """
+        SELECT survey_id, title, description, start_time, end_time, creator
+        FROM surveys WHERE access_key = %s
+    """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [access_key])
         survey = cursor.fetchone()
@@ -87,3 +90,15 @@ def make_survey(**params):
             params['public'], creator
         ])
     return access_key
+
+
+def get_survey_params(survey_id):
+    query = """
+        SELECT title, description, start_time, end_time,
+            group_id, auth, public
+        FROM surveys
+        WHERE survey_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [survey_id])
+        return cursor.fetchone()
