@@ -1,10 +1,15 @@
+from datetime import datetime
 import json
 import flask
 from donut.auth_utils import get_user_id
 from donut.misc_utils import generate_random_string
 from donut.modules.groups.helpers import get_group_list_data
+from donut.validation_utils import (validate_date, validate_exists,
+                                    validate_in, validate_int)
 
 ACCESS_KEY_LENGTH = 64
+AM_OR_PM = set(['A', 'P'])
+YYYY_MM_DD = '%Y-%m-%d'
 
 
 def get_groups():
@@ -46,8 +51,7 @@ def get_survey_data(access_key):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [access_key])
-        survey = cursor.fetchone()
-    return survey
+        return cursor.fetchone()
 
 
 def get_questions_json(survey_id):
@@ -75,30 +79,110 @@ def get_questions_json(survey_id):
     return json.dumps(questions)
 
 
-def make_survey(**params):
-    access_key = generate_random_string(ACCESS_KEY_LENGTH)
-    creator = get_user_id(params['username'])
-    query = """
-        INSERT INTO surveys (title, description, start_time, end_time,
-            access_key, group_id, auth, public, creator)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [
-            params['title'], params['description'], params['start'],
-            params['end'], access_key, params['group_id'], params['auth'],
-            params['public'], creator
-        ])
-    return access_key
+def process_params_request(survey_id=None, access_key=None):
+    form = flask.request.form
+
+    def creation_error(message):
+        flask.flash(message)
+        return flask.render_template(
+            'survey_params.html',
+            groups=get_groups(),
+            title=form.get('title'),
+            description=form.get('description'),
+            start_date=form.get('start_date'),
+            start_hour=form.get('start_hour'),
+            start_minute=form.get('start_minute'),
+            start_period=form.get('start_period'),
+            end_date=form.get('end_date'),
+            end_hour=form.get('end_hour'),
+            end_minute=form.get('end_minute'),
+            end_period=form.get('end_period'),
+            auth='auth' in form,
+            public='public' in form,
+            group_id=form.get('group'))
+
+    if 'username' not in flask.session:
+        return creation_error('Not logged in')
+
+    validations = [
+        validate_exists(form, 'title'),
+        validate_exists(form, 'description'),
+        validate_exists(form, 'start_date')
+        and validate_date(form['start_date']),
+        validate_exists(form, 'start_hour')
+        and validate_int(form['start_hour'], 1, 12),
+        validate_exists(form, 'start_minute')
+        and validate_int(form['start_minute'], 0, 59),
+        validate_exists(form, 'start_period')
+        and validate_in(form['start_period'], AM_OR_PM),
+        validate_exists(form, 'end_date') and validate_date(form['end_date']),
+        validate_exists(form, 'end_hour')
+        and validate_int(form['end_hour'], 1, 12),
+        validate_exists(form, 'end_minute')
+        and validate_int(form['end_minute'], 0, 59),
+        validate_exists(form, 'end_period')
+        and validate_in(form['end_period'], AM_OR_PM),
+        validate_exists(form, 'group')
+        and (not form['group'] or validate_int(form['group']))
+    ]
+    if not all(validations):
+        #Should only happen if a malicious request is sent,
+        #so error message is not important
+        return creation_error('Invalid form data')
+
+    start_day = datetime.strptime(form['start_date'], YYYY_MM_DD)
+    start_hour = int(form['start_hour']) % 12
+    if form['start_period'] == 'P': start_hour += 12
+    start_minute = int(form['start_minute'])
+    start = datetime(start_day.year, start_day.month, start_day.day,
+                     start_hour, start_minute)
+    end_day = datetime.strptime(form['end_date'], YYYY_MM_DD)
+    end_hour = int(form['end_hour']) % 12
+    if form['end_period'] == 'P': end_hour += 12
+    end_minute = int(form['end_minute'])
+    end = datetime(end_day.year, end_day.month, end_day.day, end_hour,
+                   end_minute)
+    if start >= end:
+        return creation_error('Start must be before end')
+
+    group = form['group']
+    group = int(group) if group else None
+
+    params = {
+        'title': form['title'].strip(),
+        'description': form['description'].strip() or None,
+        'start_time': start,
+        'end_time': end,
+        'auth': 'auth' in form,
+        'public': 'public' in form,
+        'group_id': group
+    }
+    if survey_id:
+        update_survey_params(survey_id, params)
+    else:
+        access_key = generate_random_string(ACCESS_KEY_LENGTH)
+        params['access_key'] = access_key
+        params['creator'] = get_user_id(flask.session['username'])
+        query = 'INSERT INTO surveys (' + ', '.join(
+            params) + ') VALUES (' + ', '.join(['%s'] * len(params)) + ')'
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, list(params.values()))
+    return flask.redirect(
+        flask.url_for('voting.edit_questions', access_key=access_key))
 
 
 def get_survey_params(survey_id):
     query = """
-        SELECT title, description, start_time, end_time,
-            group_id, auth, public
-        FROM surveys
-        WHERE survey_id = %s
+        SELECT title, description, start_time, end_time, group_id, auth, public
+        FROM surveys WHERE survey_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [survey_id])
         return cursor.fetchone()
+
+
+def update_survey_params(survey_id, params):
+    query = 'UPDATE surveys SET ' + ', '.join(
+        key + ' = %s' for key in params) + ' WHERE survey_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [*params.values(), survey_id])

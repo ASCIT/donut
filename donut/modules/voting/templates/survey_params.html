@@ -3,13 +3,9 @@
 	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
 		{% if 'username' in session %}
 			<h3>
-				{% if editting %}
-					Editting survey
-				{% else %}
-					Making new survey
-				{% endif %}
+				{% if editing %}Editing{% else %}Making new{% endif %} survey
 			</h3>
-			<form action='{{ url_for("voting.save_survey", access_key=access_key) if editting else url_for("voting.make_survey") }}' method='POST'>
+			<form action='{{ url_for("voting.save_survey", access_key=access_key) if editing else url_for("voting.make_survey") }}' method='POST'>
 				<div class='form-group'>
 					<label for='title' class='required'>Title</label>
 					<input
@@ -139,7 +135,7 @@
 					</select>
 				</div>
 				<button type='submit' class='btn btn-primary'>
-					{%if editting %}Save{% else %}Make{% endif %} survey
+					{%if editing %}Save{% else %}Make{% endif %} survey
 				</button>
 			</form>
 		{% else %}
