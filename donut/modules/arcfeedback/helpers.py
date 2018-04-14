@@ -177,7 +177,6 @@ def mark_read(complaint_id):
         return False
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        cursor.execute("COMMIT;")  #not sure why this doesn't autocommit
 
 
 def mark_unread(complaint_id):
