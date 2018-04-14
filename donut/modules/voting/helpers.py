@@ -21,6 +21,24 @@ def get_question_types():
         }
 
 
+def get_public_surveys(user_id):
+    query = """
+        SELECT DISTINCT title, description, end_time, access_key
+        FROM surveys
+            NATURAL LEFT JOIN groups
+            NATURAL LEFT JOIN (
+                SELECT group_id, user_id FROM group_members UNION
+                SELECT group_id, user_id FROM position_holders
+            ) tmp
+        WHERE start_time <= NOW() AND NOW() <= end_time
+        AND (group_id IS NULL OR user_id = %s)
+        ORDER BY end_time
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchall()
+
+
 def get_survey_data(access_key):
     query = 'SELECT survey_id, start_time, end_time, creator FROM surveys WHERE access_key = %s'
     with flask.g.pymysql_db.cursor() as cursor:

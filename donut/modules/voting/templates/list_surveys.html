@@ -10,7 +10,23 @@
                 <div class='panel-heading'>
                     <h3 class='panel-title'>Active surveys</h3>
                 </div>
-                <div class='panel-body'></div>
+                <div class='panel-body'>
+                    <div class='list-group'>
+                        {% for survey in active_surveys %}
+                            <a class='list-group-item' href='{{ url_for("voting.take_survey", access_key=survey["access_key"]) }}'>
+                                <h4 class='list-group-item-heading'>
+                                    {{ survey['title'] }}
+                                </h4>
+                                {% if survey['description'] %}
+                                    <p class='list-group-item-text'>{{ survey['description'] }}</p>
+                                {% endif %}
+                                <p class='list-group-item-text'>
+                                    Open until {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                                </p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
         <div class='col-md-6'>
@@ -32,6 +48,13 @@
         }
         #main:after {
             clear: both;
+        }
+        div.panel-body {
+            padding: 0;
+            margin: -1px;
+        }
+        div.list-group {
+            margin: 0;
         }
     </style>
 {% endblock %}

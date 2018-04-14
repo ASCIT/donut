@@ -11,7 +11,10 @@ YYYY_MM_DD = '%Y-%m-%d'
 
 @blueprint.route('/1/surveys')
 def list_surveys():
-    return flask.render_template('list_surveys.html')
+    user_id = helpers.get_user_id(flask.session.get('username'))
+    active_surveys = helpers.get_public_surveys(user_id)
+    return flask.render_template(
+        'list_surveys.html', active_surveys=active_surveys)
 
 
 @blueprint.route('/1/surveys/<access_key>/take')
