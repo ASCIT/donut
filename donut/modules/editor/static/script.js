@@ -115,7 +115,10 @@ function save(){
       $.ajax({
             url: $SCRIPT_ROOT+'/_save',
             type: 'POST',
-            data:{markdown:text, title:title}
+            data:{markdown:text, title:title},
+	    success: function(data) {
+            window.location.href = data['url']
+        }
       });
     }
     else {
