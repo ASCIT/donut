@@ -2,7 +2,14 @@
 {% block page %}
 	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
 		{% if 'username' in session %}
-			<form action='{{ url_for("voting.make_survey") }}' method='POST'>
+			<h3>
+				{% if editting %}
+					Editting survey
+				{% else %}
+					Making new survey
+				{% endif %}
+			</h3>
+			<form action='{{ url_for("voting.save_survey", access_key=access_key) if editting else url_for("voting.make_survey") }}' method='POST'>
 				<div class='form-group'>
 					<label for='title' class='required'>Title</label>
 					<input
@@ -125,13 +132,15 @@
 					<select class='form-control' name='group' id='group'>
 						<option value=''>All users</option>
 						{% for group in groups %}
-							<option value={{ group["group_id"] }} {% if group['group_id']|string == group_id %}selected{% endif %}>
+							<option value={{ group["group_id"] }} {% if group['group_id']|string == group_id|string %}selected{% endif %}>
 								{{ group['group_name'] }}
 							</option>
 						{% endfor %}
 					</select>
 				</div>
-				<button type='submit' class='btn btn-primary'>Make survey</button>
+				<button type='submit' class='btn btn-primary'>
+					{%if editting %}Save{% else %}Make{% endif %} survey
+				</button>
 			</form>
 		{% else %}
 			<h2>Please log in to create a survey</h2>
