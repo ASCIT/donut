@@ -57,7 +57,7 @@ def get_group_positions(group_id):
     s = "SELECT " + ','.join(group_position_fields)
     s = s + " FROM positions WHERE group_id=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (group_id))
+        cursor.execute(s, group_id)
         result = cursor.fetchall()
     return list(result)
 
