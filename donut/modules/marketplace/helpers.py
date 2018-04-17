@@ -524,7 +524,7 @@ def generate_hidden_form_elements(skip_fields):
         if parameter in flask.request.form:
             to_return.append([parameter, flask.request.form[parameter]])
 
-    if not 'item_images' in skip_fields:
+    if 'item_images' not in skip_fields:
         if 'item_images[]' in flask.request.form:
             for image in flask.request.form.getlist('item_images[]'):
                 to_return.append(['item_images[]', image])
@@ -607,12 +607,12 @@ def validate_data():
                 'Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places.'
             )
 
+    image_regex_1 = "^https?://i\.imgur\.com/[a-z0-9]+\.(jpg|png|gif)$"
+    image_regex_2 = "^https?://imgur\.com/[a-z0-9]+$"
     for image in flask.request.form.get('item_images', []):
         if image == "":
             continue
 
-        image_regex_1 = "^https?://i\.imgur\.com/[a-z0-9]+\.(jpg|png|gif)$"
-        image_regex_2 = "^https?://imgur\.com/[a-z0-9]+$"
         if re.match(image_regex_1, image, re.IGNORECASE) == None:
             if re.match(image_regex_2, image, re.IGNORECASE) != None:
                 # if it's in format 2, convert it to format 1 by taking
@@ -644,7 +644,7 @@ def create_new_listing(stored):
     item_details = stored['item_details']
     item_price = stored['item_price']
     item_images = []
-    #item_images = stored['item_images'] # TODO: images
+    item_images = stored['item_images']
     result = []
     if cat_title == 'Textbooks':
         textbook_id = int(stored['textbook_id'])
@@ -677,13 +677,12 @@ def create_new_listing(stored):
     else:
         return -1
 
-    # TODO: images
-    """
     for image in item_images:
-        s = '''INSERT INTO marketplace.images (item_id, img_link) VALUES (%s, %s);'''
+        if image == "":
+            continue
+        s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(s, [item_id, image])
-    """
     return item_id
 
 
@@ -703,7 +702,7 @@ def update_current_listing(item_id, stored):
     item_details = stored['item_details']
     item_price = stored['item_price']
     item_images = []
-    #item_images = stored['item_images'] # TODO: images
+    item_images = stored['item_images']
     result = []
     if cat_title == 'Textbooks':
         textbook_id = int(stored['textbook_id'])
@@ -728,13 +727,12 @@ def update_current_listing(item_id, stored):
                 item_price, item_id
             ])
 
-    # TODO: images
-    """
     for image in item_images:
-        s = '''INSERT INTO marketplace.images (item_id, img_link) VALUES (%s, %s);''')
+        if image == "":
+            continue
+        s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(s, [item_id, image])
-    """
     return item_id
 
 

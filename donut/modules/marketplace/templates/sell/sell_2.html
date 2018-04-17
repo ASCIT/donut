@@ -81,11 +81,6 @@
             <p>
                 You may submit up to 5 images using the buttons below. If the buttons don't work or you wish to upload them manually, you may also copy the links here. All images are uploaded to imgur.
             </p>
-            <noscript>
-                <p>
-                    It appears that you have javascript disabled, but you can still upload images manually <a href="http://imgur.com">here</a>.
-                </p>
-            </noscript>
 
             <table>
                 {% for i in range(stored_images|length) %}
@@ -104,8 +99,10 @@
             </table>
         </div>
 
-        <script>var IMGUR_CLIENT_ID = '{{ imgur_id }}';</script>
-        <script>var LOADING_PATH = "{{ url_for('static', filename='images/marketplace/loading.gif') }}";</script>
+        <script>
+            var IMGUR_CLIENT_ID = '{{ imgur_id }}';
+            var LOADING_PATH = "{{ url_for('static', filename='images/marketplace/loading.gif') }}";
+        </script>
         <script src={{ url_for('static', filename='js/marketplace/overlay.js') }}></script>
         <script src={{ url_for('static', filename='js/marketplace/sell_images.js') }}></script>
         <div class="text-center">

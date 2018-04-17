@@ -546,6 +546,7 @@ def sell():
                 stored[field] = flask.request.form[field]
 
         stored['user_id'] = get_user_id(flask.session['username'])
+        stored['item_images'] = stored_images
 
         # if we are creating a new item listing, insert it into the database.
         # otherwise, if we are editing an item that already exists, we need
