@@ -134,27 +134,35 @@
     }
 
     function generateJSON() {
-      if (!saveButton.hasClass('btn-primary')) return //submission already in progress
-
       var questions = []
       questionContainer.children().each(function() {
         var $question = $(this)
-        var choices = []
-        $question.find('.choices').children().each(function() {
-          choices.push($(this).attr('choice'))
-        })
-        questions.push({
+        var question = {
           type: Number($question.attr('question_type')),
           description: $question.find('textarea.description').val(),
-          title: $question.find('input.title').val(),
-          choices: choices
-        })
+          title: $question.find('input.title').val()
+        }
+        var choicesDiv = $question.find('.choices')
+        if (choicesDiv.length) {
+          var choices = []
+          choicesDiv.children().each(function() {
+            choices.push($(this).attr('choice'))
+          })
+          question.choices = choices
+        }
+        questions.push(question)
       })
+      return questions
+    }
+    function saveChanges() {
+      if (!saveButton.hasClass('btn-primary')) return //submission already in progress
+
+      var newQuestionData = generateJSON()
       saveButton.removeClass('btn-primary').addClass('btn-warning')
       $.ajax({
         url: '{{ url_for("voting.save_questions", access_key=access_key) }}',
         type: 'POST',
-        data: JSON.stringify(questions),
+        data: JSON.stringify(newQuestionData),
         dataType: 'json',
         success: function(response) {
           saveButton.removeClass('btn-warning')
@@ -162,6 +170,7 @@
           setTimeout(function() {
             saveButton.removeClass('btn-success btn-danger').addClass('btn-primary')
           }, 2e3)
+          questionData = newQuestionData
         },
         error: function(jqXHR, status, error) {
           console.error(jqXHR, status, error)
@@ -172,6 +181,24 @@
           }, 2e3)
         }
       })
+    }
+    function deepEquals(a, b) {
+      switch (a.constructor) {
+        case Array:
+          if (a.length !== b.length) return false
+          for (var i = 0; i < a.length; i++) {
+            if (!deepEquals(a[i], b[i])) return false
+          }
+          return true
+        case Object:
+          if (Object.keys(a).length !== Object.keys(b).length) return false
+          for (var key in a) {
+            if (!deepEquals(a[key], b[key])) return false
+          }
+          return true
+        default:
+          return a === b
+      }
     }
 
     $(document).ready(function() {
@@ -186,8 +213,13 @@
       }
 
       $('button#add_question').click(function() { addElement(Number(typeSelect.val())) })
-      saveButton = $('button#save_survey').click(generateJSON)
+      saveButton = $('button#save_survey').click(saveChanges)
     })
+    window.onbeforeunload = function(e) {
+      if (!deepEquals(generateJSON(), questionData)) {
+        return e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
+      }
+    }
   </script>
 {% endblock %}
 
