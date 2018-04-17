@@ -82,25 +82,30 @@
       title = title || ''
       description = description || ''
       choices = choices || []
-      var li = $('<li>').addClass('element').attr('question_type', questionType).attr('draggable', 'true')
-        .append(
-          $('<div>').addClass('input-group').append(
-            $('<input>').addClass('form-control title').attr('placeholder', 'Question title').val(title),
-            $('<span>').addClass('input-group-btn').append(
-              $('<button>').addClass('btn btn-danger').text('Remove').click(function() {
-                li.remove()
-              })
-            )
-          ),
-          $('<textarea>').addClass('form-control description').attr('placeholder', 'Question description').text(description)
-        )
+      var inputs = $('<div>').addClass('col-md-11').append(
+        $('<div>').addClass('input-group').append(
+          $('<input>').addClass('form-control title').attr('placeholder', 'Question title').val(title),
+          $('<span>').addClass('input-group-btn').append(
+            $('<button>').addClass('btn btn-danger').text('Remove').click(function() {
+              li.remove()
+            })
+          )
+        ),
+        $('<textarea>').addClass('form-control description').attr('placeholder', 'Question description').text(description)
+      )
+      var li = $('<li>').addClass('element').attr('question_type', questionType).attr('draggable', 'true').append(
+        $('<div>').addClass('col-md-1').append(
+          $('<span>').addClass('glyphicon glyphicon-menu-hamburger').css('font-size', '30px')
+        ),
+        inputs
+      )
       var choiceName = $('<input>').addClass('form-control choice').attr('placeholder', 'Option name')
       switch (questionType) {
         case QUESTION_TYPES.Dropdown:
         case QUESTION_TYPES['Elected position']:
           var choicesDiv = $('<select>').addClass('form-control choices')
           choices.forEach(function(choice) { choicesDiv.append(makeDropdownChoice(choice)) })
-          li.append(
+          inputs.append(
             $('<div>').addClass('input-group').append(
               choiceName,
               $('<span>').addClass('input-group-btn').append(
@@ -113,7 +118,7 @@
         case QUESTION_TYPES.Checkboxes:
           var choicesDiv = $('<div>').addClass('choices')
           choices.forEach(function(choice) { choicesDiv.append(makeCheckboxChoice(choice)) })
-          li.append(
+          inputs.append(
             $('<div>').addClass('input-group').append(
               choiceName,
               $('<span>').addClass('input-group-btn').append(
@@ -124,10 +129,10 @@
           )
           break
         case QUESTION_TYPES['Short text']:
-          li.append($('<input>').addClass('form-control'))
+          inputs.append($('<input>').addClass('form-control'))
           break
         case QUESTION_TYPES['Long text']:
-          li.append($('<textarea>').addClass('form-control'))
+          inputs.append($('<textarea>').addClass('form-control'))
       }
       questionContainer.append(li)
       addDnDHandlers(li)
@@ -270,9 +275,20 @@
       text-align: center;
       cursor: move;
     }
-
     .element.over {
       border-top: 2px dashed #000;
+    }
+    .element:before, .element:after {
+      content: " ";
+      display: table;
+    }
+    .element:after {
+      clear: both;
+    }
+
+    .element .col-md-1, .col-md-11 {
+      padding-left: 0;
+      padding-right: 0;
     }
 
     input[type=checkbox] {
