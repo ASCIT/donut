@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 
 import pymysql.cursors
 
@@ -19,10 +18,10 @@ def get_member_data(user_id, fields=None):
                 For lists of user_id's result will be a list of dicts.
     """
     all_returnable_fields = [
-        "user_id", "uid", "last_name", "first_name", "middle_name", "email",
-        "phone", "gender", "gender_custom", "birthday", "entry_year",
-        "graduation_year", "msc", "building", "room_num", "address", "city",
-        "state", "zip", "country"
+        "user_id", "uid", "last_name", "first_name", "middle_name",
+        "preferred_name", "email", "phone", "gender", "gender_custom",
+        "birthday", "entry_year", "graduation_year", "msc", "building",
+        "room_num", "address", "city", "state", "zip", "country"
     ]
     default_fields = [
         "user_id", "first_name", "last_name", "email", "uid", "entry_year",
@@ -41,12 +40,12 @@ def get_member_data(user_id, fields=None):
     if len(user_id) == 0:
         return {}
 
-    s = "SELECT " + ', '.join(fields) + " FROM `members` WHERE "
-    s += ' OR '.join(["`user_id`=%s" for _ in user_id])
+    query = "SELECT " + ', '.join(fields) + " FROM members WHERE "
+    query += ' OR '.join(["user_id=%s" for _ in user_id])
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, user_id)
+        cursor.execute(query, user_id)
         result = cursor.fetchall()
 
     if len(result) == 0:
@@ -86,19 +85,17 @@ def get_member_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ', '.join(fields) + " FROM `members`"
+    query = "SELECT " + ', '.join(fields) + " FROM members"
 
     if attrs:
-        s += " WHERE "
-        s += ' AND '.join([key + "= %s" for key, value in attrs.items()])
+        query += " WHERE "
+        query += ' AND '.join([key + "= %s" for key, value in attrs.items()])
     values = [value for key, value in attrs.items()]
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, values)
-        result = cursor.fetchall()
-
-    return result
+        cursor.execute(query, values)
+        return cursor.fetchall()
 
 
 def get_name_and_email(user_id):
@@ -111,30 +108,53 @@ def get_name_and_email(user_id):
     Returns:
         (full_name, email): The full_name and email corresponding, in a tuple.
     """
-    s = sqlalchemy.sql.select(["full_name", "email"]).select_from(
-        sqlalchemy.text("members NATURAL LEFT JOIN members_full_name"))
-    s = s.where(sqlalchemy.text("user_id = :u"))
+    query = """SELECT full_name, email
+    FROM members NATURAL LEFT JOIN members_full_name
+    WHERE user_id=%s"""
 
-    result = list(flask.g.db.execute(s, {'u': user_id}))
-    return (result[0][0], result[0][1])  # convert from a 2d list to a 1d list
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        result = cursor.fetchall()
+
+    return (result[0]["full_name"], result[0]["email"])
 
 
 def get_group_list_of_member(user_id):
     """
-    Queries the database and returns list of groups and admin status 
+    Queries the database and returns list of groups and admin status
     for a given id
     Arguments:
         user_id: The user_id for query.
     Returns:
         result: All the groups that an user_id is a part of
     """
-    fields = ["group_id", "group_name", "control"]
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text(
-            " group_members NATURAL JOIN groups NATURAL JOIN members"))
+    query = """SELECT group_id, group_name, control
+    FROM group_members NATURAL JOIN groups NATURAL JOIN members
+    WHERE user_id = %s"""
 
-    s = s.where(sqlalchemy.text("user_id = :u"))
-    result = flask.g.db.execute(s, u=user_id)
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return list(cursor.fetchall())
 
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    return result
+
+def set_image(user_id, extension, contents):
+    delete_query = 'DELETE FROM images WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(delete_query, [user_id])
+    add_query = 'INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(add_query, [user_id, extension, contents])
+
+
+def get_preferred_name(user_id):
+    return get_member_data(user_id, ['preferred_name'])['preferred_name'] or ''
+
+
+def get_gender(user_id):
+    return get_member_data(user_id, ['gender_custom'])['gender_custom'] or ''
+
+
+def set_member_field(user_id, field, value):
+    query = 'UPDATE members SET `' + field + '` = %s WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [value, user_id])

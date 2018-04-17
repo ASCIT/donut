@@ -1,5 +1,5 @@
 import flask
-import sqlalchemy
+import pymysql.cursors
 from donut.modules.core import helpers as core
 
 
@@ -28,22 +28,16 @@ def get_group_list_data(fields=None, attrs={}):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
-
-    # Build the WHERE clause
-    for key, value in list(attrs.items()):
-        s = s.where(sqlalchemy.text(key + "= :" + key))
+    query = "SELECT " + ', '.join(fields) + " FROM groups "
+    if attrs:
+        query += "WHERE "
+        query += " AND ".join([key + "= %s" for key in attrs.keys()])
+    values = list(attrs.values())
 
     # Execute the query
-    result = flask.g.db.execute(s, attrs).fetchall()
-
-    # Return the rows in the form of a list of dicts
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    return result
-
-
-group_position_fields = ["pos_id", "pos_name"]
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, values)
+        return list(cursor.fetchall())
 
 
 def get_group_positions(group_id):
@@ -53,13 +47,12 @@ def get_group_positions(group_id):
     Arguments:
         group_id: The integer id of the group
     """
+    query = "SELECT pos_id, pos_name FROM positions "
+    query += "WHERE group_id = %s"
 
-    s = "SELECT " + ','.join(group_position_fields)
-    s = s + " FROM positions WHERE group_id=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, group_id)
-        result = cursor.fetchall()
-    return list(result)
+        cursor.execute(query, [group_id])
+        return list(cursor.fetchall())
 
 
 def get_position_holders(pos_id):
@@ -76,13 +69,13 @@ def get_position_holders(pos_id):
                     columnname:columnvalue
     """
     fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text(" position_holders NATURAL JOIN members"))
-    s = s.where(sqlalchemy.text("pos_id = :p"))
-    result = flask.g.db.execute(s, p=pos_id)
+    query = "SELECT " + ', '.join(fields) + " "
+    query += "FROM position_holders NATURAL JOIN members "
+    query += "WHERE pos_id = %s"
 
-    result = [{f: t for f, t in zip(fields, res)} for res in result]
-    return result
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [pos_id])
+        return cursor.fetchall()
 
 
 def get_group_data(group_id, fields=None):
@@ -109,22 +102,14 @@ def get_group_data(group_id, fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    # Build the SELECT and FROM clauses
-    s = sqlalchemy.sql.select(fields).select_from(sqlalchemy.text("groups"))
+    query = "SELECT " + ', '.join(fields) + " FROM groups "
+    query += "WHERE group_id = %s"
 
-    # Build the WHERE clause
-    s = s.where(sqlalchemy.text("group_id = :g"))
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [group_id])
+        result = cursor.fetchone()
 
-    # Execute the query
-    result = flask.g.db.execute(s, g=group_id).first()
-
-    # Check to see if query returned anything
-    if result is None:
-        return {}
-
-    # Return the row in the form of a dict
-    result = {f: t for f, t in zip(fields, result)}
-    return result
+    return result or {}
 
 
 def get_position_data(fields=None):
@@ -143,17 +128,13 @@ def get_position_data(fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    s = "SELECT " + ','.join(fields)
-    s = s + " FROM members NATURAL JOIN positions NATURAL JOIN groups"\
-            " NATURAL JOIN position_holders"
+    query = "SELECT " + ', '.join(fields) + " "
+    query += "FROM members NATURAL JOIN positions NATURAL JOIN groups "
+    query += "NATURAL JOIN position_holders "
+
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
-        result = cursor.fetchall()
-
-    if result is None:
-        return {}
-
-    return result
+        cursor.execute(query)
+        return cursor.fetchall()
 
 
 def add_position(group_id, pos_name):
@@ -194,16 +175,12 @@ def delete_position(pos_id):
 
 
 def get_members_by_group(group_id):
-    # Build the SELECT and FROM clauses
-    fields = [sqlalchemy.text("user_id")]
-    s = sqlalchemy.sql.select(fields).select_from(
-        sqlalchemy.text("group_members"))
+    query = "SELECT user_id FROM group_members "
+    query += "WHERE group_id = %s"
 
-    # Build the WHERE clause
-    s = s.where(sqlalchemy.text("group_id = :g"))
-
-    # Execute the query
-    result = flask.g.db.execute(s, g=group_id).fetchall()
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [group_id])
+        result = cursor.fetchall()
 
     # Get data for each user id
     members = [row['user_id'] for row in result]

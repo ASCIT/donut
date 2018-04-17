@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% block page %}
+	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
+		<h2>Updating user info</h2>
+
+		Set profile picture:
+		<form
+			id='image'
+			enctype='multipart/form-data'
+			action='{{ url_for("core.set_image") }}'
+			method='POST'
+		>
+			<label class='btn btn-default'>
+				Choose file <input type='file' name='file' accept='image/*' style='display: none' />
+			</label>
+		</form>
+		<br />
+		Set preferred name:
+		<form action='{{ url_for("core.set_name") }}' method='POST'>
+			<div class='input-group'>
+				<input class='form-control' name='name' placeholder='Preferred name' value='{{ name }}' />
+				<span class='input-group-btn'>
+					<input type='submit' class='btn btn-primary' value='Save' />
+				</span>
+			</div>
+		</form>
+		<br />
+		Set gender:
+		<form action='{{ url_for("core.set_gender") }}' method='POST'>
+			<div class='input-group'>
+				<input class='form-control' name='gender' placeholder='Gender' value='{{ gender }}' />
+				<span class='input-group-btn'>
+					<input type='submit' class='btn btn-primary' value='Save' />
+				</span>
+			</div>
+		</form>
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			var imageInput = $('form#image input')
+			var imageForm = $('form#image')
+			imageInput.change(function() { imageForm.submit() })
+		})
+	</script>
+{% endblock %}
