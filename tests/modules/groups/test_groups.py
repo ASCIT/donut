@@ -5,7 +5,6 @@ from donut.testing.fixtures import client
 from donut import app
 from donut.modules.groups import helpers
 from donut.modules.groups import routes
-import sys
 
 group = {
     "group_id": 1,
@@ -49,6 +48,7 @@ def test_get_position_data(client):
     assert res[0]["group_id"] == 1
     assert res[0]["pos_id"] == 1
 
+
 def test_delete_position(client):
     assert helpers.get_group_positions(1) == [{
         "pos_id": 1,
@@ -62,6 +62,7 @@ def test_delete_position(client):
         "pos_id": 2,
         "pos_name": "Secretary"
     }]
+
 
 def test_get_group_data(client):
     assert helpers.get_group_data(2) == {}

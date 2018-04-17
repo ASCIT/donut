@@ -130,14 +130,14 @@ function changePosition(posName) {
 }
 
 /*
- *
+ * Called a group is selected for the "delete position" tab.
+ * Queries for all positions associated with the group
  */
 function groupDelChange() {
-    var groupIndex =$('#groupDel').val();
+    var groupIndex = $('#groupDel').val();
     $('#position').find('option').remove();
     var url = '/1/groups/' + groupIndex + '/positions/';
     $.ajax({
-        type: 'GET',
         url: url,
         success: function(data){
             for (var i = 0; i < data.length; i++) {
@@ -158,8 +158,7 @@ $(document).ready(function() {
             url: '/1/positions/',
             data: $("#posCreate").serialize(),
             success: function(data) {
-                p = JSON.parse(data);
-                if(p.success) {
+                if(data.success) {
                     $('#posCreate').trigger("reset");
                     alert("Position created!");
                 }
@@ -173,16 +172,23 @@ $(document).ready(function() {
             url: '/1/positions/delete/',
             data: $("#posDelete").serialize(),
             success: function(data) {
-                p = JSON.parse(data);
-                if(p.success) {
-                    $('#posDelete').trigger("reset");
-                    $('#position').find('option')
-                                .remove()
-                                .end()
-                                .append('<option>Select a Position</option>');
+                if(data.success) {
+                    setUpForms();
                     alert("Position Deleted");
                 }
             }
         });
     });
 }); 
+
+/*
+ * Function to be called to reset forms to default
+ */
+function setUpForms() {
+    $('#posDelete').trigger("reset");
+    $('#position').find('option')
+                  .remove()
+                  .end()
+                  .append('<option>Select a Position</option>');
+
+}

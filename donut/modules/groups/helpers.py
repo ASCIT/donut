@@ -53,20 +53,13 @@ def get_group_positions(group_id):
     Arguments:
         group_id: The integer id of the group
     """
-    
-    s = "SELECT "
-    for i in range(len(group_position_fields)):
-        if i == len(group_position_fields) - 1:
-            s = s + group_position_fields[i]
-        else:
-            s = s + group_position_fields[i] + ","
-    s = s + " FROM positions WHERE group_id=" + str(group_id)
+
+    s = "SELECT " + ','.join(group_position_fields)
+    s = s + " FROM positions WHERE group_id=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(s, (group_id))
         result = cursor.fetchall()
-    if len(result) == 0:
-        return []
-    return result
+    return list(result)
 
 
 def get_position_holders(pos_id):
@@ -150,20 +143,12 @@ def get_position_data(fields=None):
         if any(f not in all_returnable_fields for f in fields):
             return "Invalid field"
 
-    
-    s = "SELECT "
-    for i in range(len(fields)):
-        if i == len(fields) - 1:
-            s = s + fields[i]
-        else:
-            s = s + fields[i] + ","
+    s = "SELECT " + ','.join(fields)
     s = s + " FROM members NATURAL JOIN positions NATURAL JOIN groups"\
             " NATURAL JOIN position_holders"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
         result = cursor.fetchall()
-
-    print(result)
 
     if result is None:
         return {}
@@ -181,11 +166,10 @@ def add_position(group_id, pos_name):
         pos_name: name of the position to be created
     '''
     # Construct the statement
-    s = "INSERT INTO positions (group_id, pos_name) VALUES (%d, '%s')"
-    s = s % (group_id, pos_name)
+    s = "INSERT INTO positions (group_id, pos_name) VALUES (%s, %s)"
     # Execute query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(s, (group_id, pos_name))
 
 
 def delete_position(pos_id):
@@ -199,14 +183,12 @@ def delete_position(pos_id):
     # Construct statements
     s = "DELETE FROM position_holders WHERE pos_id=%d"
     s = s % pos_id
-    print(s)
     # Execute query
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
     # Same as above but now delete from positions table
     s = "DELETE FROM positions WHERE pos_id=%d"
     s = s % pos_id
-    print(s)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
 
