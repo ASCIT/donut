@@ -89,7 +89,7 @@ def manage_set_active_status(item, is_active):
             Permissions.ADMIN):
         return False
 
-    s = 'UPDATE `marketplace_items` SET `item_active`=%s WHERE `item_id`=%s'
+    s = 'UPDATE marketplace_items SET item_active=%s WHERE item_id=%s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (is_active, item))
         result = cursor.fetchone()
@@ -354,7 +354,8 @@ def generate_search_table(fields=None, attrs={}, query=''):
                 elif fields[field_index] == 'user_id':
                     temp_link_row.append(
                         flask.url_for('core.get_members', user_id=int(data)))
-                    # TODO: update when stalker is working
+                        # flask.url_for('directory_search.view_user', user_id=int(data)))
+                        # TODO: update when directory_search is merged
                     added_link = True
 
                     temp_res_row.append(get_name_from_user_id(int(data)))
@@ -523,10 +524,10 @@ def generate_hidden_form_elements(skip_fields):
         if parameter in flask.request.form:
             to_return.append([parameter, flask.request.form[parameter]])
 
-    if not 'item_image' in skip_fields:
-        if 'item_image' in flask.request.form:
-            for img in flask.request.form['item_image']:
-                to_return.append(['item_image[]', img])
+    if not 'item_images' in skip_fields:
+        if 'item_images[]' in flask.request.form:
+            for image in flask.request.form.getlist('item_images[]'):
+                to_return.append(['item_images[]', image])
 
     return to_return
 
@@ -544,7 +545,6 @@ def validate_data():
     except ValueError:
         # this should never happen through normal form use
         errors.append('Somehow the category got all messed up.')
-        return errors
 
     cat_title = get_table_list_data(
         'marketplace_categories',
@@ -553,7 +553,6 @@ def validate_data():
     if len(cat_title) == 0:
         # the category id doesn't correspond to any category
         errors.append('Somehow the category got all messed up.')
-        return errors
     else:
         # 2d array to a single element
         # [['Furniture']] -> 'Furniture'
@@ -608,7 +607,21 @@ def validate_data():
                 'Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places.'
             )
 
-    # TODO: image link verification
+    for image in flask.request.form.get('item_images', []):
+        if image == "":
+            continue
+
+        image_regex_1 = "^https?://i\.imgur\.com/[a-z0-9]+\.(jpg|png|gif)$"
+        image_regex_2 = "^https?://imgur\.com/[a-z0-9]+$"
+        if re.match(image_regex_1, image, re.IGNORECASE) == None:
+            if re.match(image_regex_2, image, re.IGNORECASE) != None:
+                # if it's in format 2, convert it to format 1 by taking
+                # the key and adding .png.  Imgur automatically
+                # converts any image uploaded to all three types (jpg, png, gif).
+                key = image.split('/')[-1]
+                image = "https://i.imgur.com/" + key + ".png"
+            else:
+                errors.append('Some image links appear to be invalid - try re-uploading?')
 
     return errors
 

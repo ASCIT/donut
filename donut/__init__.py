@@ -58,6 +58,7 @@ def init(environment_name):
     app.config["DB_USER"] = environment.db_user
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
+    app.config["IMGUR_API"] = environment.imgur_api
 
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH

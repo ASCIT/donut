@@ -6,6 +6,7 @@ from donut.modules.core.helpers import get_name_and_email
 from donut.auth_utils import get_user_id, check_permission
 from donut.resources import Permissions
 
+MAX_NUM_IMAGES = 5
 
 @blueprint.route('/marketplace')
 def marketplace():
@@ -279,6 +280,7 @@ def sell():
         'item_active', 'textbook_edition', 'textbook_isbn', 'textbook_title',
         'textbook_author'
     ]
+    stored_images = []
     for field in stored_fields:
         stored[field] = ''
 
@@ -315,6 +317,17 @@ def sell():
                         'You do not have permission to edit this item.')
                     return flask.redirect(
                         flask.request.referrer)  # go back to the previous page
+
+            # images
+            if 'item_images[]' in flask.request.form:
+                stored_images = flask.request.form.getlist('item_images[]')
+            else:
+                data = helpers.get_table_list_data('marketplace_images',
+                        ['img_link'], {'item_id': item_id})
+                stored_images = data
+                # pad out to MAX_NUM_IMAGES
+                stored_images += [""]*(MAX_NUM_IMAGES - len(stored_images))
+
 
     # prev_page is used for the back button
     prev_page = page
@@ -461,12 +474,14 @@ def sell():
             # we need to pass textbook_id, but almost nothing else
             hidden = helpers.generate_hidden_form_elements([
                 'textbook_edition', 'textbook_isbn', 'item_title',
-                'item_condition', 'item_price', 'item_details'
+                'item_condition', 'item_price', 'item_details',
+                'item_images'
             ])
         else:
             hidden = helpers.generate_hidden_form_elements([
                 'textbook_id', 'textbook_edition', 'textbook_isbn',
-                'item_title', 'item_condition', 'item_price', 'item_details'
+                'item_title', 'item_condition', 'item_price', 'item_details',
+                'item_images'
             ])
         hidden.append(['prev_page', page.value])
 
@@ -476,6 +491,8 @@ def sell():
             state=state,
             cat_title=cat_title,
             stored=stored,
+            stored_images=stored_images,
+            imgur_id=flask.current_app.config['IMGUR_API']['id'],
             errors=errors,
             hidden=hidden)
 

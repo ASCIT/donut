@@ -2,7 +2,7 @@
 {% block page %}
 {% include "topbar.html" %}
 
-<div class="col-md-4 col-md-offset-4" style="margin-bottom: 25px">
+<div class="col-md-4 col-md-offset-4" style="margin-bottom: 25px" id="mainbody">
     <!-- SECTION 2 OF SELLING: INFO INPUT -->
     <div class="text-center">
         {% if state == "new" %}
@@ -77,10 +77,42 @@
             <textarea class="form-control" name="item_details" id="details" maxlength="2000">{{ stored['item_details'] }}</textarea>
         </div>
 
+        <div class="form-group">
+            <p>
+                You may submit up to 5 images using the buttons below. If the buttons don't work or you wish to upload them manually, you may also copy the links here. All images are uploaded to imgur.
+            </p>
+            <noscript>
+                <p>
+                    It appears that you have javascript disabled, but you can still upload images manually <a href="http://imgur.com">here</a>.
+                </p>
+            </noscript>
+
+            <table>
+                {% for i in range(stored_images|length) %}
+                <tr>
+                    <td>
+                        Image {{ i+1 }}:
+                    </td>
+                    <td>
+                        <input id="image{{ i+1 }}" type="text" name="item_images[]" value={{ stored_images[i] }}></input>
+                    </td>
+                    <td>
+                        <button type="button" onclick="showUploadForm({{ i+1 }})">Upload an image</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <script>var IMGUR_CLIENT_ID = '{{ imgur_id }}';</script>
+        <script>var LOADING_PATH = "{{ url_for('static', filename='images/marketplace/loading.gif') }}";</script>
+        <script src={{ url_for('static', filename='js/marketplace/overlay.js') }}></script>
+        <script src={{ url_for('static', filename='js/marketplace/sell_images.js') }}></script>
         <div class="text-center">
             <button class="btn btn-warning" name="page" value="CATEGORY">Back</button>
             <button class="btn btn-primary" name="page" value="CONFIRMATION">Continue</button>
         </div>
+        <br>
 
         <!-- hidden fields allow us to pass info between form pages -->
         {% for h in hidden %}
