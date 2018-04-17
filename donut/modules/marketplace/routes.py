@@ -8,6 +8,7 @@ from donut.resources import Permissions
 
 MAX_NUM_IMAGES = 5
 
+
 @blueprint.route('/marketplace')
 def marketplace():
     """Display marketplace page."""
@@ -322,12 +323,11 @@ def sell():
             if 'item_images[]' in flask.request.form:
                 stored_images = flask.request.form.getlist('item_images[]')
             else:
-                data = helpers.get_table_list_data('marketplace_images',
-                        ['img_link'], {'item_id': item_id})
+                data = helpers.get_table_list_data(
+                    'marketplace_images', ['img_link'], {'item_id': item_id})
                 stored_images = data
                 # pad out to MAX_NUM_IMAGES
-                stored_images += [""]*(MAX_NUM_IMAGES - len(stored_images))
-
+                stored_images += [""] * (MAX_NUM_IMAGES - len(stored_images))
 
     # prev_page is used for the back button
     prev_page = page
@@ -474,8 +474,7 @@ def sell():
             # we need to pass textbook_id, but almost nothing else
             hidden = helpers.generate_hidden_form_elements([
                 'textbook_edition', 'textbook_isbn', 'item_title',
-                'item_condition', 'item_price', 'item_details',
-                'item_images'
+                'item_condition', 'item_price', 'item_details', 'item_images'
             ])
         else:
             hidden = helpers.generate_hidden_form_elements([

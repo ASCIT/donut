@@ -12,5 +12,7 @@ TEST = environment.Environment(
     debug=True,
     testing=True,
     secret_key="1234567890",
-    imgur_api={"id": "b579f690cacf867",
-               "secret": "****************************************"})
+    imgur_api={
+        "id": "b579f690cacf867",
+        "secret": "****************************************"
+    })

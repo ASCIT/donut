@@ -354,8 +354,8 @@ def generate_search_table(fields=None, attrs={}, query=''):
                 elif fields[field_index] == 'user_id':
                     temp_link_row.append(
                         flask.url_for('core.get_members', user_id=int(data)))
-                        # flask.url_for('directory_search.view_user', user_id=int(data)))
-                        # TODO: update when directory_search is merged
+                    # flask.url_for('directory_search.view_user', user_id=int(data)))
+                    # TODO: update when directory_search is merged
                     added_link = True
 
                     temp_res_row.append(get_name_from_user_id(int(data)))
@@ -621,7 +621,9 @@ def validate_data():
                 key = image.split('/')[-1]
                 image = "https://i.imgur.com/" + key + ".png"
             else:
-                errors.append('Some image links appear to be invalid - try re-uploading?')
+                errors.append(
+                    'Some image links appear to be invalid - try re-uploading?'
+                )
 
     return errors
 
