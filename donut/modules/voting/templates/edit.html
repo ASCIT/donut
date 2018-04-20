@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
-
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/voting-forms.css') }}" />
+{% endblock %}
 {% block scripts %}
   {{ super() }}
   <script>
