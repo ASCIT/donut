@@ -24,11 +24,12 @@
 		$(document).ready(function() {
 			var questionContainer = $('#question_container')
 			questionData.forEach(function(question, index) {
-				var elementInner = $('<div>').append(
-					$('<h4>').addClass('left').text(
+				var elementInner = $('<div>').addClass('left').append(
+					$('<h3>').text(
 						String(index + 1) + '. ' + question.title
 					)
 				)
+				if (question.description) elementInner.append($('<h4>').text(question.description))
 				var li = $('<li>').addClass('element').append(elementInner)
 				switch (question.type) {
 					case QUESTION_TYPES.Dropdown:
@@ -42,7 +43,7 @@
 						//TODO
 						break
 					case QUESTION_TYPES.Checkboxes:
-						var choicesDiv = $('<div>').addClass('choices left')
+						var choicesDiv = $('<div>').addClass('choices')
 						question.choices.forEach(function(choice) {
 							choicesDiv.append($('<div>').append(
 								$('<label>').text(choice).append(
