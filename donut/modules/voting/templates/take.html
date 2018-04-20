@@ -1,11 +1,86 @@
 {% extends 'layout.html' %}
 {% block page %}
-    Some survey stuff
+<div class="container theme-showcase">
+	<div class="jumbotron">
+		<ul id="question_container">
+		</ul>
+	</div>
+</div>
 {% endblock %}
 {% block scripts %}
     {{ super() }}
     <script>
         var QUESTION_TYPES = {{ question_types|safe }}
         var questionData = {{ questions_json|safe }}
+	
+        $(document).ready(function() {
+		var questionContainer = $('#question_container')
+
+		questionData.forEach(function(question) {
+			var questionType = question.type_id
+			var title = question.title
+			var h4 = $('<h4>').text(title)
+			var li = $('<li>').addClass('element').attr('question_type', questionType)
+
+			switch (Number(questionType)) {
+				case QUESTION_TYPES.Dropdown:
+					var select = $('<select>').addClass('form-control choices')
+
+					question.choices.forEach(function(choice) {
+						select.append($('<option>' + choice + '</option>'))
+					})
+
+					li.append(
+						$('<div>').append(
+							h4,
+							select
+						)
+					)
+					break
+				case QUESTION_TYPES['Elected position']:
+					li.append(
+						$('<div>').append(
+							h4
+						)
+					)
+					break
+				case QUESTION_TYPES.Checkboxes:
+					var container = $('<div>').addClass('form-control choices')
+					
+					question.choices.forEach(function(choice) {
+						container.append($('<label>').text(choice).append(	
+							$('<input>').attr('type', 'checkbox')
+							)
+						)
+
+					})
+
+					li.append(
+						$('<div>').append(
+							h4,
+							container
+						)
+					)
+					break
+				case QUESTION_TYPES['Short text']:
+					li.append(
+						$('<div>').append(
+							h4,
+							$('<input>').attr('type', 'text').addClass('form-control')
+						)
+					)
+					break
+				case QUESTION_TYPES['Long text']:
+					li.append(
+						$('<div>').append(
+							h4,
+							$('<textarea>').addClass('form-control')
+						)
+					)
+					break
+			}
+			questionContainer.append(li)
+		})
+	})
     </script>
 {% endblock %}
