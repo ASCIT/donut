@@ -55,95 +55,119 @@
         .on('dragend', handleDragEnd)
     }
 
-    function addOption(makeOptionElement) {
+    function addChoice(makeChoiceElement) {
       return function() {
         var parent = $(this).closest('.element')
-        var optionInput = parent.find('input.option')
-        var optionText = optionInput.val()
-        if (optionText) {
-          parent.find('.choices').append(makeOptionElement(optionText).attr('choice', optionText))
-          optionInput.val('')
+        var choiceInput = parent.find('input.choice')
+        var choiceText = choiceInput.val()
+        if (choiceText) {
+          parent.find('.choices').append(makeChoiceElement(choiceText))
+          choiceInput.val('')
         }
+        else alert('Please enter the name of the option')
+        choiceInput.focus()
       }
     }
 
-    function addElement() {
-      var questionType = typeSelect.val()
-      var li = $('<li>').addClass('element').attr('question_type', questionType).attr('draggable', 'true')
-        .append($('<div>').addClass('input-group').append(
-          $('<input>').addClass('form-control title').attr('placeholder', 'Question title'),
+    function makeDropdownChoice(choice) {
+      return $('<option>').attr('choice', choice).text(choice)
+    }
+    function makeCheckboxChoice(choice) {
+      return $('<div>').attr('choice', choice).append(
+        $('<label>').text(choice).append($('<input>').attr('type', 'checkbox'))
+      )
+    }
+
+    function addElement(questionType, title, description, choices) {
+      title = title || ''
+      description = description || ''
+      choices = choices || []
+      var inputs = $('<div>').addClass('col-md-11').append(
+        $('<div>').addClass('input-group').append(
+          $('<input>').addClass('form-control title').attr('placeholder', 'Question title').val(title),
           $('<span>').addClass('input-group-btn').append(
             $('<button>').addClass('btn btn-danger').text('Remove').click(function() {
               li.remove()
             })
           )
-        ))
-      switch (Number(questionType)) {
+        ),
+        $('<textarea>').addClass('form-control description').attr('placeholder', 'Question description').text(description)
+      )
+      var li = $('<li>').addClass('element').attr('question_type', questionType).attr('draggable', 'true').append(
+        $('<div>').addClass('col-md-1').append(
+          $('<span>').addClass('glyphicon glyphicon-menu-hamburger').css('font-size', '30px')
+        ),
+        inputs
+      )
+      var choiceName = $('<input>').addClass('form-control choice').attr('placeholder', 'Option name')
+      switch (questionType) {
         case QUESTION_TYPES.Dropdown:
         case QUESTION_TYPES['Elected position']:
-          li.append(
+          var choicesDiv = $('<select>').addClass('form-control choices')
+          choices.forEach(function(choice) { choicesDiv.append(makeDropdownChoice(choice)) })
+          inputs.append(
             $('<div>').addClass('input-group').append(
-              $('<input>').addClass('form-control option').attr('placeholder', 'Option'),
+              choiceName,
               $('<span>').addClass('input-group-btn').append(
-                $('<button>')
-                  .addClass('btn btn-success')
-                  .click(addOption(function(option) { return $('<option>').text(option) }))
-                  .text('Add option')
+                $('<button>').addClass('btn btn-success').click(addChoice(makeDropdownChoice)).text('Add option')
               )
             ),
-            $('<select>').addClass('form-control choices')
+            choicesDiv
           )
           break
         case QUESTION_TYPES.Checkboxes:
-          li.append(
+          var choicesDiv = $('<div>').addClass('choices')
+          choices.forEach(function(choice) { choicesDiv.append(makeCheckboxChoice(choice)) })
+          inputs.append(
             $('<div>').addClass('input-group').append(
-              $('<input>').addClass('form-control option').attr('placeholder', 'Option'),
+              choiceName,
               $('<span>').addClass('input-group-btn').append(
-                $('<button>')
-                  .addClass('btn btn-success')
-                  .click(addOption(function(option) {
-                    return $('<div>').append(
-                      $('<label>').text(option).append($('<input>').attr('type', 'checkbox'))
-                    )
-                  }))
-                  .text('Add option')
+                $('<button>').addClass('btn btn-success').click(addChoice(makeCheckboxChoice)).text('Add option')
               )
             ),
-            $('<div>').addClass('choices')
+            choicesDiv
           )
           break
         case QUESTION_TYPES['Short text']:
-          li.append($('<input>').addClass('form-control'))
+          inputs.append($('<input>').addClass('form-control'))
           break
         case QUESTION_TYPES['Long text']:
-          li.append($('<textarea>').addClass('form-control'))
+          inputs.append($('<textarea>').addClass('form-control'))
       }
       questionContainer.append(li)
       addDnDHandlers(li)
     }
 
     function generateJSON() {
+      var questions = []
+      questionContainer.children().each(function() {
+        var $question = $(this)
+        var question = {
+          type: Number($question.attr('question_type')),
+          description: $question.find('textarea.description').val(),
+          title: $question.find('input.title').val()
+        }
+        var choicesDiv = $question.find('.choices')
+        if (choicesDiv.length) {
+          var choices = []
+          choicesDiv.children().each(function() {
+            choices.push($(this).attr('choice'))
+          })
+          question.choices = choices
+        }
+        questions.push(question)
+      })
+      return questions
+    }
+    function saveChanges() {
       if (!saveButton.hasClass('btn-primary')) return //submission already in progress
 
-      var questions = []
-      questionContainer.children().each(function(_, question) {
-        var $question = $(question)
-        var choices = []
-        $question.find('.choices').children().each(function(_, choice) {
-          choices.push($(choice).attr('choice'))
-        })
-        questions.push({
-          type: Number($question.attr('question_type')),
-          description: '',
-          title: $question.find('input.title').val(),
-          choices: choices
-        })
-      })
+      var newQuestionData = generateJSON()
       saveButton.removeClass('btn-primary').addClass('btn-warning')
       $.ajax({
         url: '{{ url_for("voting.save_questions", access_key=access_key) }}',
         type: 'POST',
-        data: JSON.stringify(questions),
+        data: JSON.stringify(newQuestionData),
         dataType: 'json',
         success: function(response) {
           saveButton.removeClass('btn-warning')
@@ -151,6 +175,7 @@
           setTimeout(function() {
             saveButton.removeClass('btn-success btn-danger').addClass('btn-primary')
           }, 2e3)
+          questionData = newQuestionData
         },
         error: function(jqXHR, status, error) {
           console.error(jqXHR, status, error)
@@ -162,19 +187,44 @@
         }
       })
     }
+    function deepEquals(a, b) {
+      switch (a.constructor) {
+        case Array:
+          if (a.length !== b.length) return false
+          for (var i = 0; i < a.length; i++) {
+            if (!deepEquals(a[i], b[i])) return false
+          }
+          return true
+        case Object:
+          if (Object.keys(a).length !== Object.keys(b).length) return false
+          for (var key in a) {
+            if (!deepEquals(a[key], b[key])) return false
+          }
+          return true
+        default:
+          return a === b
+      }
+    }
 
     $(document).ready(function() {
       questionContainer = $('#question_container')
+      questionData.forEach(function(question) {
+        addElement(question.type, question.title, question.description, question.choices)
+      })
 
       typeSelect = $('select#question_type')
       for (var questionType in QUESTION_TYPES) {
         typeSelect.append($('<option>').val(QUESTION_TYPES[questionType]).text(questionType))
       }
 
-      $('button#add_question').click(addElement)
-      saveButton = $('button#save_survey').click(generateJSON)
-      addDnDHandlers(questionContainer.find('.element'))
+      $('button#add_question').click(function() { addElement(Number(typeSelect.val())) })
+      saveButton = $('button#save_survey').click(saveChanges)
     })
+    window.onbeforeunload = function(e) {
+      if (!deepEquals(generateJSON(), questionData)) {
+        return e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
+      }
+    }
   </script>
 {% endblock %}
 
@@ -187,8 +237,7 @@
     <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
       Edit survey settings
     </a>
-    <ul id="question_container">
-    </ul>
+    <ul id="question_container"></ul>
     <div class="form-group">
       <div class="input-group">
         <select class="form-control" id="question_type"></select>
@@ -202,4 +251,3 @@
     </div>
   </div>
 {% endblock %}
-
