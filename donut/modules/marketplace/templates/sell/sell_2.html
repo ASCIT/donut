@@ -83,18 +83,19 @@
             </p>
 
             <table>
-                {% for i in range(stored_images|length) %}
-                <tr>
-                    <td>
-                        Image {{ i+1 }}:
-                    </td>
-                    <td>
-                        <input id="image{{ i+1 }}" type="text" name="item_images[]" value={{ stored_images[i] }}></input>
-                    </td>
-                    <td>
-                        <button type="button" onclick="showUploadForm({{ i+1 }})">Upload an image</button>
-                    </td>
-                </tr>
+                {% for image in stored_images %}
+                    {% set i = loop.index0 %}
+                    <tr>
+                        <td>
+                            Image {{ i+1 }}:
+                        </td>
+                        <td>
+                            <input id="image{{ i+1 }}" type="text" name="item_images[]" value={{ image }}></input>
+                        </td>
+                        <td>
+                            <button type="button" onclick="showUploadForm({{ i+1 }})">Upload an image</button>
+                        </td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

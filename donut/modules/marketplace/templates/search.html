@@ -19,13 +19,16 @@
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for i in range(datalist|length) %}
+                {% for row in datalist %}
+                    {% set i = loop.index0 %}
                     <tr>
-                        {% for j in range(datalist[i]|length) %}
+                        {% for cell in row %}
+                            {% set j = loop.index0 %}
+                            {% set link = links[i][j] %}
                             <td>
-                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
-                                {{ datalist[i][j] }}
-                                {% if links[i][j] != 0 %} </a> {% endif %}
+                                {% if link != 0 %} <a href={{ link }}> {% endif %}
+                                {{ cell }}
+                                {% if link != 0 %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>

@@ -22,13 +22,16 @@
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for i in range(activelist|length) %}
+                {% for row in activelist %}
+                    {% set i = loop.index0 %}
                     <tr>
-                        {% for j in range(activelist[i]|length) %}
+                        {% for cell in row %}
+                            {% set j = loop.index0 %}
+                            {% set link = activelinks[i][j] %}
                             <td>
-                                {% if activelinks[i][j] != 0 %} <a href={{ activelinks[i][j] }}> {% endif %}
-                                {{ activelist[i][j] }}
-                                {% if activelinks[i][j] != 0 %} </a> {% endif %}
+                                {% if link != 0 %} <a href={{ link }}> {% endif %}
+                                {{ cell }}
+                                {% if link != 0 %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
@@ -58,13 +61,16 @@
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for i in range(inactivelist|length) %}
+                {% for row in inactivelist %}
+                    {% set i = loop.index0 %}
                     <tr>
-                        {% for j in range(inactivelist[i]|length) %}
+                        {% for cell in row %}
+                            {% set j = loop.index0 %}
+                            {% set link = inactivelinks[i][j] %}
                             <td>
-                                {% if inactivelinks[i][j] != 0 %} <a href={{ inactivelinks[i][j] }}> {% endif %}
-                                {{ inactivelist[i][j] }}
-                                {% if inactivelinks[i][j] != 0 %} </a> {% endif %}
+                                {% if link != 0 %} <a href={{ link }}> {% endif %}
+                                {{ cell }}
+                                {% if link != 0 %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>

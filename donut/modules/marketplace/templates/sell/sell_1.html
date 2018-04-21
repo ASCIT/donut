@@ -18,12 +18,14 @@
         <div class="form-group">
             <label for="cat_id">Please select a category for your item</label>
             <select class="form-control" name="cat_id" id="cat_id" autofocus>
-                {% for i in range(cats|length) %}
-                    {% for j in range(cats[i]|length) %}
+                {% for cat_row in cats %}
+                    {% set i = loop.index0 %}
+                    {% for cat in cat_row %}
+                        {% set j = loop.index0 %}
                         <option value="{{ i*cats[0]|length+j+1 }}"
-                        {% if i*cats[0]|length+j+1 == category_id %} selected {% endif %} >
+                        {% if i*cat_row|length+j+1 == category_id %} selected {% endif %} >
                             <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
-                            {{ cats[i][j] }}
+                            {{ cat }}
                         </option>
                     {% endfor %}
                 {% endfor %}

@@ -319,15 +319,16 @@ def sell():
                     return flask.redirect(
                         flask.request.referrer)  # go back to the previous page
 
-            # images
-            if 'item_images[]' in flask.request.form:
-                stored_images = flask.request.form.getlist('item_images[]')
-            else:
-                data = helpers.get_table_list_data(
-                    'marketplace_images', ['img_link'], {'item_id': item_id})
-                stored_images = data
-                # pad out to MAX_NUM_IMAGES
-                stored_images += [""] * (MAX_NUM_IMAGES - len(stored_images))
+    # images
+    if 'item_images[]' in flask.request.form:
+        stored_images = flask.request.form.getlist('item_images[]')
+    else:
+        data = helpers.get_table_list_data('marketplace_images', ['img_link'],
+                                           {'item_id': item_id})
+        # unwrap elements of 2d array
+        stored_images = list(map(lambda x: x[0], data))
+        # pad out to MAX_NUM_IMAGES
+        stored_images += [""] * (MAX_NUM_IMAGES - len(stored_images))
 
     # prev_page is used for the back button
     prev_page = page

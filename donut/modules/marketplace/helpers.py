@@ -677,10 +677,10 @@ def create_new_listing(stored):
     else:
         return -1
 
+    s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
     for image in item_images:
         if image == "":
             continue
-        s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(s, [item_id, image])
     return item_id
@@ -727,10 +727,10 @@ def update_current_listing(item_id, stored):
                 item_price, item_id
             ])
 
+    s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
     for image in item_images:
         if image == "":
             continue
-        s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(s, [item_id, image])
     return item_id
