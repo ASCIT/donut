@@ -40,51 +40,76 @@
 	</style>
 {% endblock %}
 {% block scripts %}
-	{{ super() }}
-	<script>
-		var QUESTION_TYPES = {{ question_types|safe }}
-		var questionData = {{ questions_json|safe }}
+{{ super() }}
+<script>
+	var QUESTION_TYPES = {{ question_types|safe }}
+	var questionData = {{ questions_json|safe }}
 
-		$(document).ready(function() {
-			var questionContainer = $('#question_container')
-			questionData.forEach(function(question, index) {
-				var elementInner = $('<div>').addClass('left').append(
-					$('<h3>').text(
-						String(index + 1) + '. ' + question.title
-					)
+	$(document).ready(function() {
+		var questionContainer = $('#question_container')
+		questionData.forEach(function(question, index) {
+			var elementInner = $('<div>').addClass('left').append(
+				$('<h3>').text(
+					String(index + 1) + '. ' + question.title
+
 				)
-				if (question.description) elementInner.append($('<h4>').text(question.description))
-				var li = $('<li>').addClass('element').append(elementInner)
-				switch (question.type) {
-					case QUESTION_TYPES.Dropdown:
-						var select = $('<select>').addClass('form-control choices')
-						question.choices.forEach(function(choice) {
-							select.append($('<option>').text(choice))
-						})
-						elementInner.append(select)
-						break
-					case QUESTION_TYPES['Elected position']:
-						//TODO
-						break
-					case QUESTION_TYPES.Checkboxes:
-						var choicesDiv = $('<div>').addClass('choices')
-						question.choices.forEach(function(choice) {
-							choicesDiv.append($('<div>').append(
-								$('<label>').text(choice).append(
-									$('<input>').attr('type', 'checkbox')
+			)
+			if (question.description) elementInner.append($('<h4>').text(question.description))
+			var li = $('<li>').addClass('element').append(elementInner)
+			switch (question.type) {
+				case QUESTION_TYPES.Dropdown:
+					var select = $('<select>').addClass('form-control choices')
+					question.choices.forEach(function(choice) {
+						select.append($('<option>').text(choice))
+					})
+					elementInner.append(select)
+					break
+				case QUESTION_TYPES['Elected position']:
+					var choicesDiv  = $('<div>').addClass('slidecontainer')
+					var choicelen = question.choices.length
+
+					question.choices.forEach(function(choice) {
+						var candDiv = $('<div>')
+						candDiv.append($('<p>').text(choice))					
+						var slider = $('<input>').attr('type', 'range')
+									 .attr('min', '1')
+								      	 .attr('max', choicelen)
+							       		 .attr('value', '1')
+									 .addClass('slider')
+									 .change(updateSliderVal)
+						candDiv.append(slider)
+
+						candDiv.append($('<p>').text("Value: 1"))
+
+						choicesDiv.append(candDiv)
+					})
+
+					elementInner.append(choicesDiv)
+					break
+				case QUESTION_TYPES.Checkboxes:
+					var choicesDiv = $('<div>').addClass('choices')
+					question.choices.forEach(function(choice) {
+						choicesDiv.append($('<div>').append(
+							$('<label>').text(choice).append(
+								$('<input>').attr('type', 'checkbox')
 								)
-							))
-						})
-						elementInner.append(choicesDiv)
-						break
-					case QUESTION_TYPES['Short text']:
-						elementInner.append($('<input>').addClass('form-control'))
-						break
-					case QUESTION_TYPES['Long text']:
-						elementInner.append($('<textarea>').addClass('form-control'))
-				}
-				questionContainer.append(li)
-			})
+						))
+					})
+					elementInner.append(choicesDiv)
+					break
+				case QUESTION_TYPES['Short text']:
+					elementInner.append($('<input>').addClass('form-control'))
+					break
+				case QUESTION_TYPES['Long text']:
+					elementInner.append($('<textarea>').addClass('form-control'))
+			}
+			questionContainer.append(li)
 		})
-	</script>
+	})
+
+	function updateSliderVal() {
+		var p = $(this).parent().children('p').last()
+		p.text("Value: " + $(this).val())
+	}
+</script>
 {% endblock %}
