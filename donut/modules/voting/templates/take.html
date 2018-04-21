@@ -65,25 +65,23 @@
 					elementInner.append(select)
 					break
 				case QUESTION_TYPES['Elected position']:
-					var choicesDiv  = $('<div>').addClass('slidecontainer')
+					var choicesDiv = $('<div>').addClass('slidecontainer')
 					var choicelen = question.choices.length
 
 					question.choices.forEach(function(choice) {
 						var candDiv = $('<div>')
-						candDiv.append($('<p>').text(choice))					
 						var slider = $('<input>').attr('type', 'range')
-									 .attr('min', '1')
-								      	 .attr('max', choicelen)
-							       		 .attr('value', '1')
-									 .addClass('slider')
-									 .change(updateSliderVal)
-						candDiv.append(slider)
-
-						candDiv.append($('<p>').text("Value: 1"))
-
+							.attr('min', 1).attr('max', choicelen)
+							.val(1)
+							.addClass('slider')
+							.mousedown(updateSliderVal).mousemove(updateSliderVal)
+						candDiv.append(
+							$('<p>').text(choice),
+							slider,
+							$('<p>').text('Value: 1')
+						)
 						choicesDiv.append(candDiv)
 					})
-
 					elementInner.append(choicesDiv)
 					break
 				case QUESTION_TYPES.Checkboxes:
@@ -92,7 +90,7 @@
 						choicesDiv.append($('<div>').append(
 							$('<label>').text(choice).append(
 								$('<input>').attr('type', 'checkbox')
-								)
+							)
 						))
 					})
 					elementInner.append(choicesDiv)
@@ -108,8 +106,11 @@
 	})
 
 	function updateSliderVal() {
-		var p = $(this).parent().children('p').last()
-		p.text("Value: " + $(this).val())
+		var $this = $(this)
+		setTimeout(function() {
+			var p = $this.parent().children('p:last-child')
+			p.text('Value: ' + $this.val())
+		}, 0)
 	}
 </script>
 {% endblock %}
