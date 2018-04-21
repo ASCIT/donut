@@ -24,10 +24,13 @@ def take_survey(access_key):
         return list_surveys()
 
     questions_json = helpers.get_questions_json(survey['survey_id'])
+    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    is_owner = survey['creator'] == user_id
     return flask.render_template(
         'take.html',
         access_key=access_key,
         **survey,
+        is_owner=is_owner,
         question_types=helpers.get_question_types(),
         questions_json=questions_json)
 
