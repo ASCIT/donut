@@ -518,8 +518,10 @@ def sell():
         if cat_title == 'Textbooks':
             hidden = helpers.generate_hidden_form_elements(['item_title'])
         else:
-            hidden = helpers.generate_hidden_form_elements(
-                ['textbook_id', 'textbook_edition', 'textbook_isbn'])
+            hidden = helpers.generate_hidden_form_elements([
+                'textbook_id', 'textbook_edition', 'textbook_isbn',
+                'item_images'
+            ])
         hidden.append(['prev_page', page.value])
         return helpers.render_with_top_marketplace_bar(
             'sell/sell_3.html',
@@ -527,6 +529,7 @@ def sell():
             state=state,
             cat_title=cat_title,
             stored=stored,
+            stored_images=stored_images,
             hidden=hidden)
 
     elif page == Page.SUBMIT:
