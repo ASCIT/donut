@@ -46,7 +46,7 @@ def get_public_surveys(user_id):
 
 def get_survey_data(access_key):
     query = """
-        SELECT survey_id, title, description, start_time, end_time, creator
+        SELECT survey_id, title, description, start_time, end_time, creator, auth
         FROM surveys WHERE access_key = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
