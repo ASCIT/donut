@@ -28,3 +28,12 @@ def save():
         return flask.jsonify({'url' : url_for('uploads.display', url=title)})
     else:
         return flask.jsonify({'url' : url_for( 'uploads.display', url = title)})
+
+@blueprint.route('/created_list')
+def created_list():
+    root = flask.current_app.config["UPLOAD_FOLDER"]
+    new_root = root + "/static"
+    links = glob.glob(new_root+'/*')
+    for i in range(len(links)):
+        links[i] = (flask.url_for('uploads.display', url=links[i][22:]), links[i][22:])
+    return flask.render_template('uploaded_list.html', links=links)
