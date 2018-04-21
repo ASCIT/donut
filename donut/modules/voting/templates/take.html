@@ -2,85 +2,95 @@
 {% block page %}
 <div class="container theme-showcase">
 	<div class="jumbotron">
-		<ul id="question_container">
-		</ul>
+		<form url="{{ url_for('voting.submit', access_key=access_key) }}" method="POST">
+			{% if auth %}
+				<h3>Please enter your UID and birthday to verify your identity</h3>
+				<div class="form-group">
+					<label for="uid">UID</label>
+					<input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
+				</div>
+				<div class="form-group">
+					<label for="birthday">Birthday</label>
+					<input type="date" class="form-control" id="birthday" name="birthday"/>
+				</div>
+			{% endif %}
+			<ul id="question_container"></ul>
+		</form>
 	</div>
 </div>
 {% endblock %}
+{% block styles %}
+	{{ super() }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/voting-forms.css') }}" />
+	<style>
+		.left {
+			text-align: left;
+		}
+	</style>
+{% endblock %}
 {% block scripts %}
-    {{ super() }}
-    <script>
-        var QUESTION_TYPES = {{ question_types|safe }}
-        var questionData = {{ questions_json|safe }}
-	
-        $(document).ready(function() {
+{{ super() }}
+<script>
+	var QUESTION_TYPES = {{ question_types|safe }}
+	var questionData = {{ questions_json|safe }}
+
+	$(document).ready(function() {
 		var questionContainer = $('#question_container')
+		questionData.forEach(function(question, index) {
+			var elementInner = $('<div>').addClass('left').append(
+				$('<h3>').text(
+					String(index + 1) + '. ' + question.title
 
-		questionData.forEach(function(question) {
-			var questionType = question.type
-			var title = question.title
-			var desc = question.description
-			var h4 = $('<h4>').text(title)
-			var li = $('<li>').attr('question_type', questionType)
-			var pd = $('<p>').text(desc)
-
-			li.append(h4, pd)
-
-			switch (Number(questionType)) {
+				)
+			)
+			if (question.description) elementInner.append($('<h4>').text(question.description))
+			var li = $('<li>').addClass('element').append(elementInner)
+			switch (question.type) {
 				case QUESTION_TYPES.Dropdown:
 					var select = $('<select>').addClass('form-control choices')
-
 					question.choices.forEach(function(choice) {
-						select.append($('<option>' + choice + '</option>'))
+						select.append($('<option>').text(choice))
 					})
-
-					li.append($('<div>').append(select))
+					elementInner.append(select)
 					break
 				case QUESTION_TYPES['Elected position']:
-					var container = $('<div>').addClass('slidecontainer')
+					var choicesDiv  = $('<div>').addClass('slidecontainer')
 					var choicelen = question.choices.length
 
 					question.choices.forEach(function(choice) {
-						var subcontainer = $('<div>')
-						subcontainer.append($('<p>').text(choice))					
+						var candDiv = $('<div>')
+						candDiv.append($('<p>').text(choice))					
 						var slider = $('<input>').attr('type', 'range')
 									 .attr('min', '1')
 								      	 .attr('max', choicelen)
-									 .attr('value', '1')
+							       		 .attr('value', '1')
 									 .addClass('slider')
 									 .change(updateSliderVal)
-						subcontainer.append(slider)
+						candDiv.append(slider)
 
-						subcontainer.append($('<p>').text("Value: 1"))
+						candDiv.append($('<p>').text("Value: 1"))
 
-						container.append(subcontainer)
+						choicesDiv.append(candDiv)
 					})
 
-					li.append($('<div>').append(container))
+					elementInner.append(choicesDiv)
 					break
 				case QUESTION_TYPES.Checkboxes:
-					var container = $('<div>').addClass('form-control choices')
-					
+					var choicesDiv = $('<div>').addClass('choices')
 					question.choices.forEach(function(choice) {
-						container.append($('<label>').text(choice).append(	
-							$('<input>').attr('type', 'checkbox')
-							)
-						)
-
+						choicesDiv.append($('<div>').append(
+							$('<label>').text(choice).append(
+								$('<input>').attr('type', 'checkbox')
+								)
+						))
 					})
-
-					li.append($('<div>').append(container))
+					elementInner.append(choicesDiv)
 					break
 				case QUESTION_TYPES['Short text']:
-					li.append(
-						$('<div>').append($('<input>').attr('type', 'text').addClass('form-control'))
-					)
+					elementInner.append($('<input>').addClass('form-control'))
 					break
 				case QUESTION_TYPES['Long text']:
-					li.append(
-						$('<div>').append($('<textarea>').addClass('form-control'))
-					)
-					break
+					elementInner.append($('<textarea>').addClass('form-control'))
 			}
 			questionContainer.append(li)
 		})
@@ -90,5 +100,5 @@
 		var p = $(this).parent().children('p').last()
 		p.text("Value: " + $(this).val())
 	}
-    </script>
+</script>
 {% endblock %}

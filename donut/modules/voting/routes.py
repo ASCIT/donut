@@ -26,6 +26,8 @@ def take_survey(access_key):
     questions_json = helpers.get_questions_json(survey['survey_id'])
     return flask.render_template(
         'take.html',
+        access_key=access_key,
+        auth=survey['auth'],
         question_types=helpers.get_question_types(),
         questions_json=questions_json)
 
@@ -155,3 +157,7 @@ def delete_survey(access_key):
 
     helpers.delete_survey(survey['survey_id'])
     return flask.jsonify({'success': True})
+
+@blueprint.route('/1/surveys/<access_key>/submit', methods=['POST'])
+def submit():
+    return 'Unimplemented'
