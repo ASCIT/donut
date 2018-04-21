@@ -17,10 +17,14 @@
 		var questionContainer = $('#question_container')
 
 		questionData.forEach(function(question) {
-			var questionType = question.type_id
+			var questionType = question.type
 			var title = question.title
+			var desc = question.description
 			var h4 = $('<h4>').text(title)
-			var li = $('<li>').addClass('element').attr('question_type', questionType)
+			var li = $('<li>').attr('question_type', questionType)
+			var pd = $('<p>').text(desc)
+
+			li.append(h4, pd)
 
 			switch (Number(questionType)) {
 				case QUESTION_TYPES.Dropdown:
@@ -30,19 +34,29 @@
 						select.append($('<option>' + choice + '</option>'))
 					})
 
-					li.append(
-						$('<div>').append(
-							h4,
-							select
-						)
-					)
+					li.append($('<div>').append(select))
 					break
 				case QUESTION_TYPES['Elected position']:
-					li.append(
-						$('<div>').append(
-							h4
-						)
-					)
+					var container = $('<div>').addClass('slidecontainer')
+					var choicelen = question.choices.length
+
+					question.choices.forEach(function(choice) {
+						var subcontainer = $('<div>')
+						subcontainer.append($('<p>').text(choice))					
+						var slider = $('<input>').attr('type', 'range')
+									 .attr('min', '1')
+								      	 .attr('max', choicelen)
+									 .attr('value', '1')
+									 .addClass('slider')
+									 .change(updateSliderVal)
+						subcontainer.append(slider)
+
+						subcontainer.append($('<p>').text("Value: 1"))
+
+						container.append(subcontainer)
+					})
+
+					li.append($('<div>').append(container))
 					break
 				case QUESTION_TYPES.Checkboxes:
 					var container = $('<div>').addClass('form-control choices')
@@ -55,32 +69,26 @@
 
 					})
 
-					li.append(
-						$('<div>').append(
-							h4,
-							container
-						)
-					)
+					li.append($('<div>').append(container))
 					break
 				case QUESTION_TYPES['Short text']:
 					li.append(
-						$('<div>').append(
-							h4,
-							$('<input>').attr('type', 'text').addClass('form-control')
-						)
+						$('<div>').append($('<input>').attr('type', 'text').addClass('form-control'))
 					)
 					break
 				case QUESTION_TYPES['Long text']:
 					li.append(
-						$('<div>').append(
-							h4,
-							$('<textarea>').addClass('form-control')
-						)
+						$('<div>').append($('<textarea>').addClass('form-control'))
 					)
 					break
 			}
 			questionContainer.append(li)
 		})
 	})
+
+	function updateSliderVal() {
+		var p = $(this).parent().children('p').last()
+		p.text("Value: " + $(this).val())
+	}
     </script>
 {% endblock %}
