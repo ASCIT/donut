@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS survey_responses;
 DROP TABLE IF EXISTS survey_question_choices;
 DROP TABLE IF EXISTS survey_questions;
 DROP TABLE IF EXISTS survey_question_types;
@@ -49,6 +50,19 @@ CREATE TABLE survey_question_choices (
 
     PRIMARY KEY(choice_id),
     FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE
+);
+
+CREATE TABLE survey_responses (
+    question_id  INT  NOT NULL,
+    user_id      INT,
+    response     TEXT, -- JSON
+                       -- For dropdown:         choice_id (number)
+                       -- For checkbox:         [choice_id (number)]
+                       -- For short/long text:  text (string)
+                       -- For elected position: [choice_id (number) | writein (string) | NO (null)]
+    PRIMARY KEY(question_id, user_id),
+    FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES members(user_id) ON DELETE CASCADE
 );
 
 INSERT INTO survey_question_types (type_name, options) VALUES
