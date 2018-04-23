@@ -32,11 +32,11 @@ def get_public_surveys(user_id):
         FROM surveys
             NATURAL LEFT JOIN groups
             NATURAL LEFT JOIN (
-                SELECT group_id, user_id FROM group_members UNION
+                -- SELECT group_id, user_id FROM group_members UNION
                 SELECT group_id, user_id FROM position_holders
             ) tmp
         WHERE start_time <= NOW() AND NOW() <= end_time
-        AND (group_id IS NULL OR user_id = %s)
+        -- AND (group_id IS NULL OR user_id = %s)
         ORDER BY end_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
