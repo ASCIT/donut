@@ -108,3 +108,13 @@ def arcfeedback_mark_unread(id):
         return
     else:
         return 'Success'
+
+# add an email to this complaint
+@blueprint.route('/1/arcfeedback/<uuid:id>/addEmail/<email>')
+def arcfeedback_add_email(id, email):
+    #TODO
+
+# remove an email from this complaint
+@blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail/<email>')
+def arfeedback_remove_email(id, email):
+    #TODO

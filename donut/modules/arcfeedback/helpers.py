@@ -59,6 +59,14 @@ def add_email(complaint_id, email):
         cursor.execute(query, (complaint_id, email))
 
 
+def remove_email(complaint_id, email):
+    '''
+    Removes 'email' from the list of emails subscribed to this complaint
+    returns False if complaint_id is invalid
+    '''
+    #TODO
+
+
 def add_msg(complaint_id, message, poster):
     '''
     Adds a message to a complaint in the database
