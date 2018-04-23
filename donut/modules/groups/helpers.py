@@ -137,6 +137,43 @@ def get_position_data(fields=None):
         return cursor.fetchall()
 
 
+def add_position(group_id, pos_name):
+    ''' 
+    Inserts new position into the database associated
+    with the given group and with the given name
+
+    Arguments: 
+        group_id: the id of the group you want to insert the position into
+        pos_name: name of the position to be created
+    '''
+    # Construct the statement
+    s = "INSERT INTO positions (group_id, pos_name) VALUES (%s, %s)"
+    # Execute query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, (group_id, pos_name))
+
+
+def delete_position(pos_id):
+    '''
+    Deletes the position specified with the pos_id and all assocaited
+    position holders entries
+
+    Arguments:
+        pos_id: id of the position to be deleted
+    '''
+    # Construct statements
+    s = "DELETE FROM position_holders WHERE pos_id=%d"
+    s = s % pos_id
+    # Execute query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+    # Same as above but now delete from positions table
+    s = "DELETE FROM positions WHERE pos_id=%d"
+    s = s % pos_id
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+
+
 def get_members_by_group(group_id):
     query = "SELECT user_id FROM group_members "
     query += "WHERE group_id = %s"
