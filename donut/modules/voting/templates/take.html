@@ -47,7 +47,7 @@
 
 	var questionContainer
 
-	function addChoice(e) {
+	function addChoice() {
 		var $this = $(this)
 		var inputGroup = $this.closest('.input-group')
 		var choiceSpan = inputGroup.find('.candidate')
@@ -65,9 +65,15 @@
 			$('<li>').addClass('list-group-item').append(
 				$('<span>').text(choice),
 				$('<div>').addClass('btn-group space-right').append(
-					$('<button>').addClass('btn btn-default').click(removeChoice(writein)).text('-'),
-					$('<button>').addClass('btn btn-default').click(moveUp).text('^'),
-					$('<button>').addClass('btn btn-default').click(moveDown).text('v')
+					$('<button>').addClass('btn btn-default').click(removeChoice(writein)).append(
+						$('<span>').addClass('glyphicon glyphicon-minus')
+					),
+					$('<button>').addClass('btn btn-default').click(moveUp).append(
+						$('<span>').addClass('glyphicon glyphicon-triangle-top')
+					),
+					$('<button>').addClass('btn btn-default').click(moveDown).append(
+						$('<span>').addClass('glyphicon glyphicon-triangle-bottom')
+					)
 				)
 			)
 		)
@@ -102,7 +108,9 @@
 			$('<div>').addClass('input-group').append(
 				input,
 				$('<span>').addClass('input-group-btn').append(
-					$('<button>').addClass('btn btn-default').click(addChoice).text('+')
+					$('<button>').addClass('btn btn-default').click(addChoice).append(
+						$('<span>').addClass('glyphicon glyphicon-plus')
+					)
 				)
 			)
 		)
