@@ -1,7 +1,6 @@
 -- TODO: Add CASCADEs
 -- TODO: Better comments
 
-DROP TABLE IF EXISTS group_members;
 DROP TABLE IF EXISTS group_positions;
 DROP VIEW IF EXISTS group_house_membership;
 DROP VIEW IF EXISTS group_houses;
@@ -139,6 +138,13 @@ CREATE TABLE positions (
     group_id INT         NOT NULL,
     pos_id   INT         NOT NULL AUTO_INCREMENT,
     pos_name VARCHAR(32) NOT NULL,
+    send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
+                                       -- can send emails to group
+    control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
+                                       -- has admin control over group
+    receive     BOOLEAN DEFAULT TRUE,  -- Toggles if this position receives
+                                       -- emails from this group
+
     PRIMARY KEY (pos_id),
     FOREIGN KEY (group_id) REFERENCES groups(group_id)
 );
@@ -171,21 +177,6 @@ CREATE VIEW group_house_membership AS (
     FROM group_houses NATURAL JOIN positions NATURAL JOIN position_holders
     WHERE UPPER(pos_name) = UPPER('Full Member')
         OR UPPER(pos_name) = UPPER('Social Member')
-);
-
--- Group Members Table
-CREATE TABLE group_members (
-    user_id  INT NOT NULL,
-    group_id INT NOT NULL,
-    send     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this member can
-                                    -- send emails to group
-    control  BOOLEAN DEFAULT FALSE, -- Toggles whether or not this member has
-                                    -- admin control over group
-    receive  BOOLEAN DEFAULT TRUE,  -- Toggles if the member receives emails
-                                    -- From this group
-    PRIMARY KEY (user_id, group_id),
-    FOREIGN KEY (user_id) REFERENCES members(user_id),
-    FOREIGN KEY (group_id) REFERENCES groups(group_id)
 );
 
 -- Group Positions Table

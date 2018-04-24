@@ -59,14 +59,11 @@ INSERT INTO users(user_id, username) VALUES
     (1, "dqu"),
     (2, "reng"),
     (3, "csander");
+    (4, "ssyu");
 
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
     (2, 'Ruddock House', 'house');
-
-INSERT INTO group_members(user_id, group_id) VALUES
-    (1, 1),
-    (2, 1);
 
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),

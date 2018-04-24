@@ -129,7 +129,7 @@ def get_group_list_of_member(user_id):
         result: All the groups that an user_id is a part of
     """
     query = """SELECT group_id, group_name, control
-    FROM group_members NATURAL JOIN groups NATURAL JOIN members
+    FROM positions NATURAL JOIN groups NATURAL JOIN position_holders
     WHERE user_id = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:

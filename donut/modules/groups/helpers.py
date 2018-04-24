@@ -138,7 +138,7 @@ def get_position_data(fields=None):
 
 
 def get_members_by_group(group_id):
-    query = "SELECT user_id FROM group_members "
+    query = "SELECT user_id FROM positions NATURAL JOIN position_holders "
     query += "WHERE group_id = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
