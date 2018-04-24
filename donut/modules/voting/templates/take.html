@@ -13,20 +13,18 @@
 		{% if description %}
 			<h2>{{ description }}</h2>
 		{% endif %}
-		<form url="{{ url_for('voting.submit', access_key=access_key) }}" method="POST">
-			{% if auth %}
-				<h4>Please enter your UID and birthday to verify your identity</h4>
-				<div class="form-group">
-					<label for="uid">UID</label>
-					<input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
-				</div>
-				<div class="form-group">
-					<label for="birthday">Birthday</label>
-					<input type="date" class="form-control" id="birthday" name="birthday"/>
-				</div>
-			{% endif %}
-			<ul id="question_container"></ul>
-		</form>
+		{% if auth %}
+			<h4>Please enter your UID and birthday to verify your identity</h4>
+			<div class="form-group">
+				<label for="uid">UID</label>
+				<input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
+			</div>
+			<div class="form-group">
+				<label for="birthday">Birthday</label>
+				<input type="date" class="form-control" id="birthday" name="birthday"/>
+			</div>
+		{% endif %}
+		<ul id="question_container"></ul>
 	</div>
 </div>
 {% endblock %}
@@ -42,8 +40,75 @@
 {% block scripts %}
 {{ super() }}
 <script>
+	var NO = 'NO'
 	var QUESTION_TYPES = {{ question_types|safe }}
 	var questionData = {{ questions_json|safe }}
+
+	function addChoice(e) {
+		var $this = $(this)
+		var inputGroup = $this.closest('.input-group')
+		var choiceSpan = inputGroup.find('.candidate')
+		var chosenList = $this.closest('.element').find('.chosen')
+		if (choiceSpan.length) {
+			var choice = choiceSpan.text(), writein = false
+			inputGroup.remove()
+		}
+		else {
+			var writeinInput = inputGroup.find('input')
+			var choice = writeinInput.val(), writein = true
+			writeinInput.val('')
+		}
+		chosenList.append(
+			$('<li>').addClass('list-group-item').append(
+				$('<span>').text(choice),
+				$('<div>').addClass('btn-group space-right').append(
+					$('<button>').addClass('btn btn-default').click(removeChoice(writein)).text('-'),
+					$('<button>').addClass('btn btn-default').click(moveUp).text('^'),
+					$('<button>').addClass('btn btn-default').click(moveDown).text('v')
+				)
+			)
+		)
+	}
+	function removeChoice(writein) {
+		return function() {
+			var $this = $(this)
+			var listGroupItem = $this.closest('.list-group-item')
+			if (!writein) {
+				var choice = listGroupItem.find('span').text()
+				$this.closest('.element').find('.choices').prepend(candidateInput(choice)) //add back to choices list
+			}
+			listGroupItem.remove()
+		}
+	}
+	function moveUp() {
+		var $this = $(this)
+		var listGroupItem = $this.closest('.list-group-item')
+		var previousItem = listGroupItem.prev()
+		if (!previousItem.length) return
+		listGroupItem.insertBefore(previousItem)
+	}
+	function moveDown() {
+		var $this = $(this)
+		var listGroupItem = $this.closest('.list-group-item')
+		var nextItem = listGroupItem.next()
+		if (!nextItem.length) return
+		listGroupItem.insertAfter(nextItem)
+	}
+	function electedPositionChoice(input) {
+		return $('<div>').addClass('form-group').append(
+			$('<div>').addClass('input-group').append(
+				input,
+				$('<span>').addClass('input-group-btn').append(
+					$('<button>').addClass('btn btn-default').click(addChoice).text('+')
+				)
+			)
+		)
+	}
+	function candidateInput(choice) {
+		return electedPositionChoice(
+			$('<span>').addClass('input-group-addon candidate').text(choice)
+		)
+	}
 
 	$(document).ready(function() {
 		var questionContainer = $('#question_container')
@@ -51,7 +116,6 @@
 			var elementInner = $('<div>').addClass('left').append(
 				$('<h3>').text(
 					String(index + 1) + '. ' + question.title
-
 				)
 			)
 			if (question.description) elementInner.append($('<h4>').text(question.description))
@@ -65,24 +129,25 @@
 					elementInner.append(select)
 					break
 				case QUESTION_TYPES['Elected position']:
-					var choicesDiv = $('<div>').addClass('slidecontainer')
-					var choicelen = question.choices.length
-
+					var choices = $('<div>').addClass('col-md-6 choices')
 					question.choices.forEach(function(choice) {
-						var candDiv = $('<div>')
-						var slider = $('<input>').attr('type', 'range')
-							.attr('min', 1).attr('max', choicelen)
-							.val(1)
-							.addClass('slider')
-							.mousedown(updateSliderVal).mousemove(updateSliderVal)
-						candDiv.append(
-							$('<p>').text(choice),
-							slider,
-							$('<p>').text('Value: 1')
-						)
-						choicesDiv.append(candDiv)
+						choices.append(candidateInput(choice))
 					})
-					elementInner.append(choicesDiv)
+					choices.append(
+						candidateInput(NO),
+						electedPositionChoice(
+							$('<input>').addClass('form-control').attr('placeholder', 'Write-in')
+						)
+					)
+					elementInner.append(
+						$('<div>').addClass('row').append(
+							choices,
+							$('<div>').addClass('col-md-6').append(
+								$('<h5>').text('Chosen:'),
+								$('<ul>').addClass('list-group chosen')
+							)
+						)
+					)
 					break
 				case QUESTION_TYPES.Checkboxes:
 					var choicesDiv = $('<div>').addClass('choices')

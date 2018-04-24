@@ -39,3 +39,16 @@ input[type=checkbox] {
 	top: 2px;
 	left: 3px;
 }
+
+.input-group input {
+	margin-top: 0 !important;
+}
+
+.candidate {
+	width: 100%;
+}
+
+.space-right {
+	position: relative;
+	left: 15px;
+}
