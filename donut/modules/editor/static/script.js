@@ -110,12 +110,21 @@ function save(){
     // anything other than numbers, characters,
     // period, front slash, and spaces.
     var valid = /^[0-9a-zA-Z.\/ ]*$/.test(title);
+
+    var reader = new XMLHttpRequest();
+    reader.open('get', 'pages.txt', true);
+    console.log(reader.responseText);
+
     if (valid && title.length < TITLE_CUTOFF)
     {
       $.ajax({
             url: $SCRIPT_ROOT+'/_save',
             type: 'POST',
-            data:{markdown:text, title:title}
+            data:{markdown:text, title:title},
+	    success: function(data) {
+            window.location.href = data['url']
+        }
+
       });
     }
     else {
@@ -123,4 +132,3 @@ function save(){
     }
   }
 }
-

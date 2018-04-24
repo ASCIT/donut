@@ -77,4 +77,7 @@ def write_markdown(markdown, title):
     f.write(markdown)
     f.close()
 
+    f = open(os.path.join(flask.current_app.config["EXISTING_LIST"],'pages.txt'), "w+")
+    f.write(title)
+    f.close()
     return 0
