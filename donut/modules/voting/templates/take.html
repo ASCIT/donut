@@ -147,7 +147,11 @@
 		$.ajax({
 			url: '{{ url_for("voting.submit", access_key=access_key) }}',
 			type: 'POST',
-			data: JSON.stringify(responses),
+			data: JSON.stringify({
+				uid: $('input#uid').val(),
+				birthday: $('input#birthday').val(),
+				responses: responses
+			}),
 			success: function(response) {
 				if (response.success) {
 					alert('Submission received')

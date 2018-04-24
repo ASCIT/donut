@@ -3,6 +3,7 @@ import json
 import flask
 
 from . import blueprint, helpers
+from donut.modules.core.helpers import get_member_data
 
 NO = 'NO'
 
@@ -170,13 +171,20 @@ def submit(access_key):
 
     survey = helpers.get_survey_data(access_key)
     restrict_message = helpers.restrict_take_access(survey)
-    if restrict_message:
-        return error(restrict_message)
-    responses = flask.request.get_json(force=True)
+    if restrict_message: return error(restrict_message)
+    post_data = flask.request.get_json(force=True)
+    if survey['auth']:
+        user_id = helpers.get_user_id(flask.session['username'])
+        auth_info = get_member_data(user_id, ['uid', 'birthday'])
+        authorized = post_data['uid'] == auth_info['uid'] and post_data['birthday'] == auth_info['birthday'].strftime(
+            helpers.YYYY_MM_DD)
+        if not authorized: return error('Incorrect UID or birthday')
+    responses = post_data['responses']
     expected_question_ids = helpers.get_question_ids(survey['survey_id'])
     if [response['question']
             for response in responses] != expected_question_ids:
         return error('Survey questions have changed')
+
     question_types = helpers.get_question_types()
     response_jsons = []
     for response in responses:

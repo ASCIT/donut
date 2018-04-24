@@ -263,7 +263,7 @@ def restrict_take_access(survey):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(responses_query,
                        [survey['survey_id'], flask.session['username']])
-        if cursor.fetchone() is not None: return 'Already completed'
+        if cursor.fetchone(): return 'Already completed'
 
 
 def set_responses(question_ids, responses):
