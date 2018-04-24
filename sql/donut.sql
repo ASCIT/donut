@@ -1,7 +1,7 @@
 -- TODO: Add CASCADEs
 -- TODO: Better comments
 
-DROP TABLE IF EXISTS group_positions;
+DROP TABLE IF EXISTS position_relations;
 DROP VIEW IF EXISTS group_house_membership;
 DROP VIEW IF EXISTS group_houses;
 DROP TABLE IF EXISTS position_holders;
@@ -179,17 +179,11 @@ CREATE VIEW group_house_membership AS (
         OR UPPER(pos_name) = UPPER('Social Member')
 );
 
--- Group Positions Table
-CREATE TABLE group_positions (
-    pos_id      INT NOT NULL,
-    group_id    INT NOT NULL,
-    send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
-                                       -- can send emails to group
-    control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
-                                       -- has admin control over group
-    receive     BOOLEAN DEFAULT TRUE,  -- Toggles if this position receives
-                                       -- emails from this group
-    PRIMARY KEY (pos_id, group_id),
-    FOREIGN KEY (pos_id) REFERENCES positions(pos_id),
-    FOREIGN KEY (group_id) REFERENCES groups(group_id)
-);
+CREATE TABLE position_relations (
+    relation_id   INT  NOT NULL AUTO_INCREMENT,
+    pos_id_from   INT  NOT NULL,
+    pos_id_to     INT  NOT NULL,
+    PRIMARY KEY (relation_id),
+    FOREIGN KEY (pos_id_from) REFERENCES positions(pos_id),
+    FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id)
+)
