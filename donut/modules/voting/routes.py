@@ -1,7 +1,10 @@
 from datetime import date, datetime, timedelta
+import json
 import flask
 
 from . import blueprint, helpers
+
+NO = 'NO'
 
 
 @blueprint.route('/1/surveys')
@@ -15,12 +18,9 @@ def list_surveys():
 @blueprint.route('/1/surveys/<access_key>/take')
 def take_survey(access_key):
     survey = helpers.get_survey_data(access_key)
-    if not survey:
-        flask.flash('Invalid access key')
-        return list_surveys()
-    now = datetime.now()
-    if not (survey['start_time'] <= now <= survey['end_time']):
-        flask.flash('Survey is not currently accepting responses')
+    restrict_message = helpers.restrict_take_access(survey)
+    if restrict_message:
+        flask.flash(restrict_message)
         return list_surveys()
 
     questions_json = helpers.get_questions_json(survey['survey_id'])
@@ -31,6 +31,7 @@ def take_survey(access_key):
         access_key=access_key,
         **survey,
         is_owner=is_owner,
+        NO=NO,
         question_types=helpers.get_question_types(),
         questions_json=questions_json)
 
@@ -163,5 +164,55 @@ def delete_survey(access_key):
 
 
 @blueprint.route('/1/surveys/<access_key>/submit', methods=['POST'])
-def submit():
-    return 'Unimplemented'
+def submit(access_key):
+    def error(message):
+        return flask.jsonify({'success': False, 'message': message})
+
+    survey = helpers.get_survey_data(access_key)
+    restrict_message = helpers.restrict_take_access(survey)
+    if restrict_message:
+        return error(restrict_message)
+    responses = flask.request.get_json(force=True)
+    expected_question_ids = helpers.get_question_ids(survey['survey_id'])
+    if [response['question']
+            for response in responses] != expected_question_ids:
+        return error('Survey questions have changed')
+    question_types = helpers.get_question_types()
+    response_jsons = []
+    for response in responses:
+        question_id = response['question']
+        value = response['response']
+        type_id = helpers.get_question_type(question_id)
+        if type_id == question_types['Dropdown']:
+            choice = helpers.get_choice(question_id, value)
+            if choice is None: return error('Invalid choice for dropdown')
+            response_json = choice['choice_id']
+        elif type_id == question_types['Elected position']:
+            if type(value) != list:
+                return error('Invalid response to elected position')
+            response_json = []
+            for order_value in value:
+                if type(order_value) != str:
+                    return error('Invalid response to elected position')
+                if order_value == NO: response_json.append(None)
+                else:
+                    choice = helpers.get_choice(question_id, order_value)
+                    response_json.append(order_value if choice is None else
+                                         choice['choice_id'])
+        elif type_id == question_types['Checkboxes']:
+            if type(value) != list:
+                return error('Invalid response to checkboxes')
+            response_json = []
+            for chosen in value:
+                if type(chosen) != str:
+                    return error('Invalid response to checkboxes')
+                choice = helpers.get_choice(question_id, chosen)
+                if choice is None:
+                    return error('Invalid choice for checkboxes')
+                response_json.append(choice['choice_id'])
+        else:  # input field
+            if type(value) != str: return error('Invalid text response')
+            response_json = value
+        response_jsons.append(json.dumps(response_json))
+    helpers.set_responses(expected_question_ids, response_jsons)
+    return flask.jsonify({'success': True})

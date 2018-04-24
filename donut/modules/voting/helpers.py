@@ -75,8 +75,28 @@ def get_questions_json(survey_id):
                 ]
         else:
             del question['choices']
-        del question['question_id']
     return json.dumps(questions)
+
+
+def get_question_ids(survey_id):
+    query = 'SELECT question_id FROM survey_questions WHERE survey_id = %s ORDER BY list_order'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [survey_id])
+        return [question['question_id'] for question in cursor.fetchall()]
+
+
+def get_question_type(question_id):
+    query = 'SELECT type_id FROM survey_questions WHERE question_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [question_id])
+        return cursor.fetchone()['type_id']
+
+
+def get_choice(question_id, value):
+    query = 'SELECT choice_id FROM survey_question_choices WHERE question_id = %s AND choice = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [question_id, value])
+        return cursor.fetchone()
 
 
 def process_params_request(survey_id=None, access_key=None):
@@ -224,3 +244,34 @@ def delete_survey(survey_id):
     query = 'DELETE FROM surveys WHERE survey_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [survey_id])
+
+
+def restrict_take_access(survey):
+    if not survey:
+        return 'Invalid access key'
+    now = datetime.now()
+    if not (survey['start_time'] <= now <= survey['end_time']):
+        return 'Survey is not currently accepting responses'
+    if 'username' not in flask.session:
+        return 'Must be logged in to take survey'
+    # TODO: Check that user is in correct group
+    responses_query = """
+        SELECT question_id
+        FROM survey_questions NATURAL JOIN survey_responses NATURAL JOIN users
+        WHERE survey_id = %s AND username = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(responses_query,
+                       [survey['survey_id'], flask.session['username']])
+        if cursor.fetchone() is not None: return 'Already completed'
+
+
+def set_responses(question_ids, responses):
+    user_id = get_user_id(flask.session['username'])
+    query = """
+        INSERT INTO survey_responses(question_id, user_id, response)
+        VALUES (%s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        for question_id, response in zip(question_ids, responses):
+            cursor.execute(query, [question_id, user_id, response])

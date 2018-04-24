@@ -16,15 +16,16 @@
 		{% if auth %}
 			<h4>Please enter your UID and birthday to verify your identity</h4>
 			<div class="form-group">
-				<label for="uid">UID</label>
+				<label class="required" for="uid">UID</label>
 				<input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
 			</div>
 			<div class="form-group">
-				<label for="birthday">Birthday</label>
+				<label class="required" for="birthday">Birthday</label>
 				<input type="date" class="form-control" id="birthday" name="birthday"/>
 			</div>
 		{% endif %}
 		<ul id="question_container"></ul>
+		<button class="btn btn-primary" id="submit">Submit answers</button>
 	</div>
 </div>
 {% endblock %}
@@ -40,9 +41,11 @@
 {% block scripts %}
 {{ super() }}
 <script>
-	var NO = 'NO'
+	var NO = '{{ NO }}'
 	var QUESTION_TYPES = {{ question_types|safe }}
 	var questionData = {{ questions_json|safe }}
+
+	var questionContainer
 
 	function addChoice(e) {
 		var $this = $(this)
@@ -109,9 +112,58 @@
 			$('<span>').addClass('input-group-addon candidate').text(choice)
 		)
 	}
+	function submitSurvey() {
+		var responses = new Array(questionData.length)
+		var elements = questionContainer.children()
+		for (var i = 0; i < questionData.length; i++) {
+			var question = questionData[i]
+			var element = elements.eq(i)
+			switch (question.type) {
+				case QUESTION_TYPES.Dropdown:
+					var response = element.find('select').val()
+					break
+				case QUESTION_TYPES['Elected position']:
+					var response = []
+					var chosen = element.find('.chosen .list-group-item span')
+					chosen.each(function() { response.push($(this).text()) })
+					break
+				case QUESTION_TYPES.Checkboxes:
+					var response = []
+					var choices = element.find('.choices').children()
+					choices.each(function() {
+						var $this = $(this)
+						if ($this.find(':checked').length) response.push($this.find('label').text())
+					})
+					break
+				case QUESTION_TYPES['Short text']:
+				case QUESTION_TYPES['Long text']:
+					var response = element.find('.text-input').val()
+			}
+			responses[i] = {
+				question: question.question_id,
+				response: response
+			}
+		}
+		$.ajax({
+			url: '{{ url_for("voting.submit", access_key=access_key) }}',
+			type: 'POST',
+			data: JSON.stringify(responses),
+			success: function(response) {
+				if (response.success) {
+					alert('Submission received')
+					location.assign('{{ url_for("voting.list_surveys") }}')
+				}
+				else alert('Submission failed: ' + response.message)
+			},
+			error: function(jqXHR, status, error) {
+				console.error(jqXHR, status, error)
+				alert('Submission failed?')
+			}
+		})
+	}
 
 	$(document).ready(function() {
-		var questionContainer = $('#question_container')
+		questionContainer = $('#question_container')
 		questionData.forEach(function(question, index) {
 			var elementInner = $('<div>').addClass('left').append(
 				$('<h3>').text(
@@ -161,21 +213,14 @@
 					elementInner.append(choicesDiv)
 					break
 				case QUESTION_TYPES['Short text']:
-					elementInner.append($('<input>').addClass('form-control'))
+					elementInner.append($('<input>').addClass('form-control text-input'))
 					break
 				case QUESTION_TYPES['Long text']:
-					elementInner.append($('<textarea>').addClass('form-control'))
+					elementInner.append($('<textarea>').addClass('form-control text-input'))
 			}
 			questionContainer.append(li)
 		})
+		$('button#submit').click(submitSurvey)
 	})
-
-	function updateSliderVal() {
-		var $this = $(this)
-		setTimeout(function() {
-			var p = $this.parent().children('p:last-child')
-			p.text('Value: ' + $this.val())
-		}, 0)
-	}
 </script>
 {% endblock %}
