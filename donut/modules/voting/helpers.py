@@ -275,3 +275,15 @@ def set_responses(question_ids, responses):
     with flask.g.pymysql_db.cursor() as cursor:
         for question_id, response in zip(question_ids, responses):
             cursor.execute(query, [question_id, user_id, response])
+
+
+def some_responses_for_survey(survey_id):
+    query = """
+        SELECT user_id
+        FROM survey_responses NATURAL JOIN survey_questions
+        WHERE survey_id = %s
+        LIMIT 1
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [survey_id])
+        return cursor.fetchone() is not None

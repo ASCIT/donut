@@ -88,7 +88,12 @@ def edit_questions(access_key):
     restricted = restrict_edit(survey)
     if restricted: return restricted
 
-    questions_json = helpers.get_questions_json(survey['survey_id'])
+    survey_id = survey['survey_id']
+    if helpers.some_responses_for_survey(survey_id):
+        flask.flash(
+            'WARNING: Previous responses will be deleted if you edit the questions'
+        )
+    questions_json = helpers.get_questions_json(survey_id)
     return flask.render_template(
         'edit.html',
         question_types=helpers.get_question_types(),
