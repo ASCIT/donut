@@ -64,14 +64,19 @@ def remove_email(complaint_id, email):
     Removes 'email' from the list of emails subscribed to this complaint
     returns False if complaint_id is invalid
     '''
-    #TODO
+    if not get_course(complaint_id): return False
+    query = """
+    DELETE FROM arc_complaint_emails WHERE complaint_id = %s AND email = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (complaint_id, email))
 
 
 def add_msg(complaint_id, message, poster):
     '''
     Adds a message to a complaint in the database
     and updates status of complaint to 'new_msg'
-    if poster is None or an empty string, it will be replaced with 
+    if poster is None or an empty string, it will be replaced with
     "(anonymous)"
     If complaint_id is invalid, returns False
     '''
@@ -131,7 +136,7 @@ def get_messages(complaint_id):
     in ascending order of timestamp
     """
     query = """
-    SELECT time, poster, message, message_id FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time 
+    SELECT time, poster, message, message_id FROM arc_complaint_messages WHERE complaint_id = %s ORDER BY time
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -143,7 +148,7 @@ def get_messages(complaint_id):
 
 def get_summary(complaint_id):
     """
-    Returns a dict with the following fields: course, status 
+    Returns a dict with the following fields: course, status
 
     """
     fields = ['course', 'status']
@@ -204,7 +209,7 @@ def mark_unread(complaint_id):
 
 def get_emails(complaint_id):
     """
-    Returns a list of subscribed emails for this complaint (which may be empty) 
+    Returns a list of subscribed emails for this complaint (which may be empty)
     or an empty list if complaint_id is invalid
     """
     query = 'SELECT email FROM arc_complaint_emails WHERE complaint_id = %s'
@@ -233,17 +238,17 @@ def get_all_fields(complaint_id):
 def get_new_posts():
     '''
     Returns all posts with status 'new_msg' and their associated list
-    of messages. Will be an array of dicts with keys complaint_id, course, 
+    of messages. Will be an array of dicts with keys complaint_id, course,
     status, uuid, message, poster, time
     Note that message and poster refer to the latest comment on this complaint
     '''
     query = """SELECT post.complaint_id AS complaint_id, post.course AS course, post.status AS status,
-    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time FROM arc_complaint_info post 
-    INNER JOIN arc_complaint_messages comment 
+    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time FROM arc_complaint_info post
+    INNER JOIN arc_complaint_messages comment
     ON comment.complaint_id = post.complaint_id
     INNER JOIN (
     SELECT complaint_id, max(time) AS time FROM arc_complaint_messages GROUP BY complaint_id
-    ) maxtime 
+    ) maxtime
     ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
     WHERE post.status = 'new_msg'
     """

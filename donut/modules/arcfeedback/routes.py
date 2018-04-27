@@ -117,4 +117,4 @@ def arcfeedback_add_email(id, email):
 # remove an email from this complaint
 @blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail/<email>')
 def arfeedback_remove_email(id, email):
-    #TODO
+    remove_email(id, email)
