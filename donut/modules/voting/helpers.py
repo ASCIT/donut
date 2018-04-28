@@ -54,7 +54,7 @@ def get_survey_data(access_key):
         return cursor.fetchone()
 
 
-def get_questions_json(survey_id):
+def get_questions_json(survey_id, include_id):
     questions_query = """
         SELECT question_id, title, description, type_id AS type, choices
         FROM survey_questions NATURAL JOIN survey_question_types
@@ -75,6 +75,7 @@ def get_questions_json(survey_id):
                 ]
         else:
             del question['choices']
+        if not include_id: del question['question_id']
     return json.dumps(questions)
 
 

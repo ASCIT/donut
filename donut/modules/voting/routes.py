@@ -24,7 +24,7 @@ def take_survey(access_key):
         flask.flash(restrict_message)
         return list_surveys()
 
-    questions_json = helpers.get_questions_json(survey['survey_id'])
+    questions_json = helpers.get_questions_json(survey['survey_id'], True)
     user_id = helpers.get_user_id(flask.session.get('username', ''))
     is_owner = survey['creator'] == user_id
     return flask.render_template(
@@ -93,7 +93,7 @@ def edit_questions(access_key):
         flask.flash(
             'WARNING: Previous responses will be deleted if you edit the questions'
         )
-    questions_json = helpers.get_questions_json(survey_id)
+    questions_json = helpers.get_questions_json(survey_id, False)
     return flask.render_template(
         'edit.html',
         question_types=helpers.get_question_types(),
