@@ -84,8 +84,6 @@ def get_pos_holders(pos_id):
         validations = [
                 validate_exists(form, "group_id")
                 and validate_int(form["group_id"]),
-                validate_exists(form, "pos_id")
-                and validate_int(form["pos_id"]),
                 validate_exists(form, "user_id")
                 and validate_int(form["user_id"]),
                 validate_exists(form, "start_date")
@@ -97,7 +95,7 @@ def get_pos_holders(pos_id):
             return jsonify({'success': False})
         else:
             helpers.create_position_holder(int(form["group_id"]), 
-            int(form["pos_id"]), int(form["user_id"]), form["start_date"], 
+            int(pos_id), int(form["user_id"]), form["start_date"], 
             form["end_date"])
             return jsonify({'success': True})
 
