@@ -40,7 +40,28 @@
 				<div class='panel-heading'>
 					<h3 class='panel-title'>Survey results</h3>
 				</div>
-				<div class='panel-body'></div>
+				<div class='panel-body'>
+					<div class='list-group'>
+						{% for survey in closed_surveys %}
+							<a class='list-group-item' href='{{ url_for("voting.show_results", access_key=survey["access_key"]) }}'>
+								<h4 class='list-group-item-heading'>
+									{{ survey['title'] }}
+								</h4>
+								{% if survey['description'] %}
+									<p class='list-group-item-text'>{{ survey['description'] }}</p>
+								{% endif %}
+								<p class='list-group-item-text'>
+									Closed {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+								</p>
+								{% if not survey['results_shown'] %}
+									<p class='list-group-item-text'>
+										<i>Only visible to you</i>
+									</p>
+								{% endif %}
+							</a>
+						{% endfor %}
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

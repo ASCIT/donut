@@ -44,9 +44,23 @@ def get_public_surveys(user_id):
         return cursor.fetchall()
 
 
+def get_closed_surveys(user_id):
+    query = """
+        SELECT title, description, end_time, access_key, results_shown
+        FROM surveys
+        WHERE end_time <= NOW()
+        AND (creator = %s OR (public AND results_shown))
+        ORDER BY end_time DESC
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchall()
+
+
 def get_survey_data(access_key):
     query = """
-        SELECT survey_id, title, description, start_time, end_time, creator, auth
+        SELECT survey_id, title, description,
+        start_time, end_time, creator, auth, results_shown
         FROM surveys WHERE access_key = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -288,3 +302,13 @@ def some_responses_for_survey(survey_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [survey_id])
         return cursor.fetchone() is not None
+
+
+def get_results(survey_id):
+    return {}
+
+
+def release_results(survey_id):
+    query = 'UPDATE surveys SET results_shown = TRUE WHERE survey_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [survey_id])

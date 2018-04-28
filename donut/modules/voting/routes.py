@@ -12,8 +12,11 @@ NO = 'NO'
 def list_surveys():
     user_id = helpers.get_user_id(flask.session.get('username'))
     active_surveys = helpers.get_public_surveys(user_id)
+    closed_surveys = helpers.get_closed_surveys(user_id)
     return flask.render_template(
-        'list_surveys.html', active_surveys=active_surveys)
+        'list_surveys.html',
+        active_surveys=active_surveys,
+        closed_surveys=closed_surveys)
 
 
 @blueprint.route('/1/surveys/<access_key>/take')
@@ -65,8 +68,7 @@ def restrict_edit(survey):
     if user_id != survey['creator']:
         flask.flash('You are not the creator of this survey')
         return list_surveys()
-    now = datetime.now()
-    if now > survey['end_time']:
+    if datetime.now() > survey['end_time']:
         flask.flash('Cannot modify a survey after it has closed')
         return list_surveys()
 
@@ -229,3 +231,39 @@ def submit(access_key):
         response_jsons.append(json.dumps(response_json))
     helpers.set_responses(expected_question_ids, response_jsons)
     return flask.jsonify({'success': True})
+
+@blueprint.route('/1/surveys/<access_key>/results')
+def show_results(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
+        return list_surveys()
+    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    creator_allowed = user_id == survey['creator'] and datetime.now() > survey['end_time']
+    if not (creator_allowed or survey['results_shown']):
+        flask.flash('You are not permitted to see the results at this time')
+        return list_surveys()
+
+    results = helpers.get_results(survey['survey_id'])
+    return flask.render_template(
+        'results.html',
+        access_key=access_key,
+        **survey,
+        results=results)
+
+@blueprint.route('/1/surveys/<access_key>/release')
+def release_results(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
+        return list_surveys()
+    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    if user_id != survey['creator']:
+        flask.flash('You are not the creator of this survey')
+        return list_surveys()
+    if datetime.now() < survey['end_time']:
+        flask.flash('Survey has not yet finished')
+        return list_surveys()
+
+    helpers.release_results(survey['survey_id'])
+    return flask.redirect(flask.url_for('voting.show_results', access_key=access_key))

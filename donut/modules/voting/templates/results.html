@@ -2,8 +2,18 @@
 {% block page %}
 
 <div class="container theme-showcase" role="main">
-	
 	<div class="jumbotron">
+		{% if not results_shown %}
+			<a href="{{ url_for('voting.release_results', access_key=access_key) }}">
+				<h4>Allow others to see results</h4>
+			</a>
+		{% endif %}
+		<h1>
+			<strong>{{ title }}</strong>
+		</h1>
+		{% if description %}
+			<h2>{{ description }}</h2>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
