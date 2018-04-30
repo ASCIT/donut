@@ -146,13 +146,12 @@ CREATE TABLE positions (
 -- Position to Member Table
 CREATE TABLE position_holders (
     hold_id    INT  NOT NULL AUTO_INCREMENT,
-    group_id   INT  NOT NULL,
     pos_id     INT  NOT NULL,
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (group_id, pos_id) REFERENCES positions(group_id, pos_id),
+    FOREIGN KEY (pos_id) REFERENCES positions(pos_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 

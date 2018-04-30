@@ -82,8 +82,6 @@ def get_pos_holders(pos_id):
     if flask.request.method == "POST":
         form = flask.request.form
         validations = [
-                validate_exists(form, "group_id")
-                and validate_int(form["group_id"]),
                 validate_exists(form, "user_id")
                 and validate_int(form["user_id"]),
                 validate_exists(form, "start_date")
@@ -94,9 +92,8 @@ def get_pos_holders(pos_id):
         if not all(validations):
             return jsonify({'success': False})
         else:
-            helpers.create_position_holder(int(form["group_id"]), 
-            int(pos_id), int(form["user_id"]), form["start_date"], 
-            form["end_date"])
+            helpers.create_position_holder(int(pos_id), int(form["user_id"]), 
+            form["start_date"], form["end_date"])
             return jsonify({'success': True})
 
 

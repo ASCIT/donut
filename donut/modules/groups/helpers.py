@@ -185,10 +185,10 @@ def create_position_holder(group_id, pos_id, user_id, start_date, end_date):
         start_date: Starting date of the holding period, format is 'yyyy-mm-dd'
         end_date: end date of the hold period
     '''
-    s = """INSERT INTO position_holders (group_id, pos_id, user_id, start_date, 
-    end_date) VALUES (%s, %s, %s, %s, %s)"""
+    s = """INSERT INTO position_holders (pos_id, user_id, start_date, 
+    end_date) VALUES (%s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (group_id, pos_id, user_id, start_date, 
+        cursor.execute(s, (pos_id, user_id, start_date, 
         end_date))
 
 def get_members_by_group(group_id):
