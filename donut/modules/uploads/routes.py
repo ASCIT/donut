@@ -29,8 +29,9 @@ def uploads():
             return flask.redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(flask.current_app.config['UPLOAD_FOLDER'],
-                             filename))
+            uploads = os.path.join(flask.current_app.root_path,
+                           flask.current_app.config['UPLOAD_FOLDER']) 
+            file.save(os.path.join(uploads, filename))
             return flask.redirect(
                 flask.url_for('uploads.uploaded_file', filename=filename))
         else:
@@ -40,11 +41,15 @@ def uploads():
 
 @blueprint.route('/uploaded_file/<filename>', methods = ['GET'])
 def uploaded_file(filename):
+    
     print(filename)
-    print(flask.current_app.config['UPLOAD_FOLDER'])
     print(glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*'))
-    return flask.send_from_directory(flask.current_app.config['UPLOAD_FOLDER'],
+    uploads = os.path.join(flask.current_app.root_path,
+                           flask.current_app.config['UPLOAD_FOLDER']) 
+    print(uploads)
+    return flask.send_from_directory(uploads,
                                      filename, as_attachment=True)
+    
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
