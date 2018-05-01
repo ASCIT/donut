@@ -184,3 +184,54 @@ label.required:after {
     text-align: left;
   }
 }
+
+[draggable] {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	/* Required to make elements draggable in old WebKit */
+	-khtml-user-drag: element;
+	-webkit-user-drag: element;
+	cursor: move;
+}
+
+#question_container {
+	list-style-type: none;
+}
+
+.element {
+	padding-bottom: 5px;
+	padding-top: 5px;
+	text-align: center;
+}
+.element.over {
+	border-top: 2px dashed #000;
+}
+.element:before, .element:after {
+	content: " ";
+	display: table;
+}
+.element:after {
+	clear: both;
+}
+
+.element .col-md-1, .col-md-11 {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+input[type=checkbox] {
+	position: relative;
+	top: 2px;
+	left: 3px;
+}
+
+.input-group input {
+	margin-top: 0 !important;
+}
+
+.candidate {
+	width: 100%;
+}
+
