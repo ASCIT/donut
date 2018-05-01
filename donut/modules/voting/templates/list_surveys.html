@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='col-md-8 col-md-offset-2' id='main' style='float: none; padding-bottom: 25px'>
+	<div class='jumbotron col-md-8 col-md-offset-2' id='main' style='float: none; padding-bottom: 25px'>
 		<div class='btn-group' style='padding-left: 15px'>
 			<button class='btn btn-default'>
 				<a href='{{ url_for("voting.make_survey_form") }}'>New Survey</a>
@@ -65,23 +65,4 @@
 			</div>
 		</div>
 	</div>
-{% endblock %}
-{% block styles %}
-	{{ super() }}
-	<style>
-		#main:before, #main:after {
-			content: " ";
-			display: table;
-		}
-		#main:after {
-			clear: both;
-		}
-		div.panel-body {
-			padding: 0;
-			margin: -1px;
-		}
-		div.list-group {
-			margin: 0;
-		}
-	</style>
 {% endblock %}
