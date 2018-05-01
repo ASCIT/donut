@@ -44,37 +44,44 @@
             </ul>
             <div class="tab-content">
                 <div id="createPos" class="tab-pane fade in active">
-                    <form>
+                    <form id="posCreate">
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="groupCreate">
                                 Group Name:</label>
-                            <select class="form-control" id="groupCreate"> 
+                            <select class="form-control" id="groupCreate" 
+                                                            name="group_id"> 
                                 <option> Select a Group </option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="posName">
                                 Position Name: </label>
-                            <input class="form-control" id="posName">
+                            <input class="form-control" id="posName" 
+                                                            name="pos_name">
                         </div>
-                        <button type="submit" class="btn btn-default">Submit</button>
+                        <button id="submitPosBtn" class="btn btn-default">
+                            Submit
+                        </button>
                     </form>
                 </div>
                 <div id="deletePos" class="tab-pane fade in">
-                    <form>
+                    <form id="posDelete">
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="groupDel">
                                 Group Name:</label>
-                            <select class="form-control" id="groupDel">
+                            <select class="form-control" id="groupDel" 
+                                    onchange="groupDelChange()" name="group_id">
                                 <option> Select a Group </option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="position">
                                 Position: </label>
-                            <input class="form-control" id="position">
+                            <select class="form-control" id="position" name="pos_id">
+                                <option> Pick a position </option>
+                            </select>
                         </div>
-                        <button type="submit" class="btn btn-default">Submit</button>
+                        <button id="delPosBtn" class="btn btn-default">Submit</button>
                     </form>     
                 </div>
             </div> 
