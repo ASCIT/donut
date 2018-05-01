@@ -152,7 +152,6 @@ CREATE TABLE positions (
 -- Position to Member Table
 CREATE TABLE position_holders (
     hold_id    INT  NOT NULL AUTO_INCREMENT,
-    group_id   INT  NOT NULL,
     pos_id     INT  NOT NULL,
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
@@ -179,11 +178,11 @@ CREATE VIEW group_house_membership AS (
         OR UPPER(pos_name) = UPPER('Social Member')
 );
 
+-- Position to position table
 CREATE TABLE position_relations (
-    relation_id   INT  NOT NULL AUTO_INCREMENT,
     pos_id_from   INT  NOT NULL,
     pos_id_to     INT  NOT NULL,
-    PRIMARY KEY (relation_id),
+    PRIMARY KEY (pos_id_from, pos_id_to),
     FOREIGN KEY (pos_id_from) REFERENCES positions(pos_id),
     FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id)
 )

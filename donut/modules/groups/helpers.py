@@ -138,7 +138,22 @@ def get_position_data(fields=None):
 
 
 def get_members_by_group(group_id):
-    query = "SELECT user_id FROM positions NATURAL JOIN position_holders "
+    '''
+    Queries the database and returns a list of all users associated with
+    a particular group either because a) They hold a position in the group
+    or b) They hold a position linked to another position in the group
+
+    Arguments:
+        group_id: id of group in question
+    
+    Returns:
+        List where each element is a JSON reprenting the data of each
+        person
+    '''
+    query = "SELECT DISTINCT user_id FROM positions p LEFT JOIN "
+    query += "position_relations pr ON p.pos_id=pr.pos_id_to "
+    query += "INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR "
+    query += "pr.pos_id_from=ph.pos_id "
     query += "WHERE group_id = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
