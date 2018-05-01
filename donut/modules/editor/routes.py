@@ -31,9 +31,8 @@ def save():
 
 @blueprint.route('/created_list')
 def created_list():
-    root = flask.current_app.config["UPLOAD_FOLDER"]
-    new_root = root + "/static"
-    links = glob.glob(new_root+'/*')
+    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"])
+    links = glob.glob(root+'/*')
     for i in range(len(links)):
         links[i] = (flask.url_for('uploads.display', url=links[i][22:]), links[i][22:])
     return flask.render_template('uploaded_list.html', links=links)

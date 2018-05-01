@@ -20,3 +20,6 @@ textarea{
     margin: 5px;
 }
 
+.dropdown:hover>.dropdown-menu {
+    display: block;
+}

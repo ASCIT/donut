@@ -20,13 +20,14 @@ function insert_heading(size){
   {
     string += "#";
   }
-  if (window.getSelection().toString() != "")
+  var ta = document.getElementById('source')
+  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
   {
-    var text = document.getElementById('source').value;
-    document.getElementById('source').value =
-    text.slice(0, window.getSelection().selectionStart) +
-    "*" + window.getSelection().toString() + "*"
-    text.slice(window.getSelection().selectionEnd);
+    var text = ta.value;
+    text =
+    text.substr(0, ta.selectionStart) +
+    string + window.getSelection().toString() + string
+    text.substr(ta.selectionEnd);
   }
   else {
     insert(string + "Heading_title" + string+ "\n");
@@ -34,27 +35,30 @@ function insert_heading(size){
 }
 
 function insert_italic(){
-  if (window.getSelection().toString() != "")
+  var ta = document.getElementById("source");
+  if (ta.value.substr(ta.selectionStart, ta.selectionEnd) != "")
   {
     insert("*", false);
   }
   else {
-    insert("*italicText*");
+    insert("*italicText*", true);
   }
 }
 
 function insert_bold(){
-  if (window.getSelection().toString() != "")
+  var ta = document.getElementById("source");
+  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
   {
     insert("**", false);
   }
   else {
-    insert("**boldText**");
+    insert("**boldText**", true);
   }
 }
 
 function insert_strike_through(){
-  if (window.getSelection().toString() != "")
+  var ta = document.getElementById("source");
+  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
   {
     insert("~~", false);
   }
@@ -72,20 +76,22 @@ function insert_link(){
 function insert_image(){
   insert("![Alt text](url/to/image");
 }
+
+// bool true  = string + selection
+// bool false = string + selection + string
 function insert(string, bool){
-  var text = document.getElementById('source').value;
+  var ta = document.getElementById('source');
   if(!bool)
   {
-    var txt2 = text.slice(0, document.getElementById('source').selectionStart)
-  + string + text.slice(document.getElementById('source').selectionStart,
-  document.getElementById('source').selectionEnd) + string
-  + text.slice(document.getElementById('source').selectionEnd);
+    var txt2 = ta.value.substr(0, ta.selectionStart)
+  + string + ta.value.substr(ta.selectionStart, ta.selectionEnd) + string
+  + ta.value.substr(ta.selectionEnd);
   }
   else {
-    var txt2 = text.slice(0, document.getElementById('source').selectionStart)
-  + string + text.slice(document.getElementById('source').selectionStart);
+    var txt2 = ta.value.substr(0, ta.selectionStart)
+  + string + ta.value.substr(ta.selectionStart);
   }
-  document.getElementById('source').value = txt2;
+  ta.value = txt2;
 }
 
 // Saves the page created
