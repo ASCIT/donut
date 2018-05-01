@@ -353,9 +353,8 @@ def generate_search_table(fields=None, attrs={}, query=''):
 
                 elif fields[field_index] == 'user_id':
                     temp_link_row.append(
-                        flask.url_for('core.get_members', user_id=int(data)))
-                    # flask.url_for('directory_search.view_user', user_id=int(data)))
-                    # TODO: update when directory_search is merged
+                        flask.url_for(
+                            'directory_search.view_user', user_id=int(data)))
                     added_link = True
 
                     temp_res_row.append(get_name_from_user_id(int(data)))
@@ -726,6 +725,11 @@ def update_current_listing(item_id, stored):
                 user_id, cat_id, item_title, item_condition, item_details,
                 item_price, item_id
             ])
+
+    # clean the database of all items that used to be affiliated with <item_id>
+    s = '''DELETE FROM marketplace_images WHERE item_id = %s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
 
     s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
     for image in item_images:

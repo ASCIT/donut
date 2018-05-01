@@ -152,6 +152,14 @@ def view_item():
         if stored[field] == None:
             stored[field] = ''
 
+    # grab the stored image links
+    data = helpers.get_table_list_data('marketplace_images', ['img_link'],
+                                       {'item_id': item_id})
+    # unwrap elements of 2d array
+    stored_images = list(map(lambda x: x[0], data))
+    # pad out to MAX_NUM_IMAGES
+    stored_images += [""] * (MAX_NUM_IMAGES - len(stored_images))
+
     has_edit_privs = False
     if 'username' in flask.session:
         current_user_id = get_user_id(flask.session['username'])
@@ -162,6 +170,7 @@ def view_item():
     return helpers.render_with_top_marketplace_bar(
         'view_item.html',
         stored=stored,
+        stored_images=stored_images,
         cat_title=cat_title,
         has_edit_privs=has_edit_privs)
 
@@ -321,6 +330,7 @@ def sell():
 
     # images
     if 'item_images[]' in flask.request.form:
+        print(flask.request.form.getlist('item_images[]'))
         stored_images = flask.request.form.getlist('item_images[]')
     else:
         data = helpers.get_table_list_data('marketplace_images', ['img_link'],
@@ -519,8 +529,9 @@ def sell():
             hidden = helpers.generate_hidden_form_elements(['item_title'])
         else:
             hidden = helpers.generate_hidden_form_elements([
-                'textbook_id', 'textbook_edition', 'textbook_isbn',
-                'item_images'
+                'textbook_id',
+                'textbook_edition',
+                'textbook_isbn',
             ])
         hidden.append(['prev_page', page.value])
         return helpers.render_with_top_marketplace_bar(

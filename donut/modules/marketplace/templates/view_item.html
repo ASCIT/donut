@@ -67,6 +67,19 @@
             <td>Details:</td>
             <td> {{stored["item_details"]}} </td>
         </tr>
+
+        <tr>
+            <td>Images:</td>
+            <td>
+                <table>
+                    {% for image in stored_images %}
+                        <tr><td>
+                            <img src="{{image}}"></img>
+                        </td></tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
     </table>
     <br>
     <br>
