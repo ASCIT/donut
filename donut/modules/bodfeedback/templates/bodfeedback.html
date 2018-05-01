@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+        <p>This is the BoD anonymous course feedback form.</p>
+	
+	<p>Ever wanted to suggest something to the Board of Director's, but didn't want to say it directly / didn't know when BoD meetings were? Ever wanted to comment about how an event was run, or are curious about how to get involved?
+
+Well then, simply fill out the form below. The ASCIT BoD would love to hear all of your suggestions</p>
+
+	<p>Fill in your name and email address if you are willing to have the BoD contact
+  you with follow up questions; this will obviously make your comment
+  non-anonymous, but we do promise to keep comments strictly
+  confidential. </p>
+
+	<p>To: Board of Directors</p>
+	<div class="col-md-8 col-md-offset-2">
+	  <div class="row">
+	    <form method="POST" action="{{  url_for('bodfeedback.bodfeedback_submit')  }}">
+	      <table id="feedback" class="table">
+		<tr>
+		  <div class="form-group">
+		  <td class="feedback">Name: </td>
+		  <td class="feedback"><input type="text" name="name" class="form-control" /></td>
+		  </div>
+		</tr>
+		<tr>
+		  <div class="form-group">
+		  <td class="feedback">Reply Email: </td>
+		  <td class="feedback"><input type="email" name="email" class="form-control" /></td>
+		  </div>
+		</tr>
+		<tr>
+		  <div class="form-group">
+		  <td class="feedback">Subject*: </td>
+		  <td class="feedback"><input type="text" name="subject" class="form-control" required /></td>
+		  </div>
+		</tr>
+		<tr>
+		  <div class="form-group">
+		  <td class="feedback">Feedback*: </td>
+		  <td class="feedback"><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
+		  </div>
+		</tr>
+	      </table>
+	      <div class="row">
+		<div class="text-center">
+		     <input class="btn" type="submit" value="Submit" />
+		</div>
+	      </div>
+	    </form>
+	  </div>
+	</div>
+    </div>
+
+</div>
+
+{% endblock %}
