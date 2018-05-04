@@ -676,7 +676,7 @@ def create_new_listing(stored):
     else:
         return -1
 
-    s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
+    s = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'
     for image in item_images:
         if image == "":
             continue
@@ -727,11 +727,11 @@ def update_current_listing(item_id, stored):
             ])
 
     # clean the database of all items that used to be affiliated with <item_id>
-    s = '''DELETE FROM marketplace_images WHERE item_id = %s'''
+    s = 'DELETE FROM marketplace_images WHERE item_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [item_id])
 
-    s = '''INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'''
+    s = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'
     for image in item_images:
         if image == "":
             continue
@@ -1013,7 +1013,7 @@ def delete_item(item_id):
     Returns:
         True if the delete succeeds, and False if not (the item doesn't exist)
     """
-    s = '''SELECT item_id FROM marketplace_items WHERE item_id = %s'''
+    s = 'SELECT item_id FROM marketplace_items WHERE item_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [item_id])
         result = cursor.fetchone()
@@ -1021,7 +1021,7 @@ def delete_item(item_id):
         # the item doesn't exist
         return False
 
-    s = '''DELETE FROM marketplace_items WHERE item_id=%s'''
+    s = 'DELETE FROM marketplace_items WHERE item_id=%s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [item_id])
     return True
@@ -1037,7 +1037,7 @@ def get_user_id_of_item(item_id):
     Returns:
         The user_id
     """
-    s = '''SELECT user_id FROM marketplace_items WHERE item_id = %s'''
+    s = 'SELECT user_id FROM marketplace_items WHERE item_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [item_id])
         result = cursor.fetchone()
@@ -1057,7 +1057,7 @@ def get_name_from_user_id(user_id):
         result: A string of the user's full name.
                 (first + ' ' + last)
     """
-    s = '''SELECT full_name FROM members_full_name WHERE user_id=%s'''
+    s = 'SELECT full_name FROM members_full_name WHERE user_id=%s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [user_id])
         result = cursor.fetchone()
@@ -1075,7 +1075,7 @@ def get_textbook_info_from_textbook_id(textbook_id):
     Returns:
         result: A list of the textbook title and author.
     """
-    s = '''SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=%s'''
+    s = 'SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=%s'
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [textbook_id])
@@ -1095,7 +1095,7 @@ def get_category_name_from_id(cat_id):
     Returns:
         result: A string with the name of the category.
     """
-    s = '''SELECT cat_title FROM marketplace_categories WHERE cat_id=%s'''
+    s = 'SELECT cat_title FROM marketplace_categories WHERE cat_id=%s'
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [cat_id])

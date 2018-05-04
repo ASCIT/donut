@@ -152,6 +152,10 @@ def view_item():
         if stored[field] == None:
             stored[field] = ''
 
+    # notify if the item is inactive
+    if not stored['item_active']:
+        flask.flash('The listing for this item is no longer active!')
+
     # grab the stored image links
     data = helpers.get_table_list_data('marketplace_images', ['img_link'],
                                        {'item_id': item_id})
@@ -330,7 +334,6 @@ def sell():
 
     # images
     if 'item_images[]' in flask.request.form:
-        print(flask.request.form.getlist('item_images[]'))
         stored_images = flask.request.form.getlist('item_images[]')
     else:
         data = helpers.get_table_list_data('marketplace_images', ['img_link'],
