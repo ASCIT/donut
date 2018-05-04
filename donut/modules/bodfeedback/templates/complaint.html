@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="jumbotron">
+    <div class="panel panel-default">
+	<div class="panel-heading">
+	    <h3>Feedback Summary</h3>
+	</div>
+	<div class="panel-body" id="summary-panel">
+	    <p>Subject: {{complaint['subject']}} </p>
+	    <p>Status: {{complaint['status']}} </p>
+	    {% if complaint['emails']|length == 0 %}
+	    <p>No emails subscribed to this complaint </p>
+	    {% else %}
+	    <p>Subscribed emails: </p>
+	    {% for email in complaint['emails'] %}
+	    <p>{{email}}</p>
+	    {% endfor %}
+	    {% endif %}
+	</div>
+    </div>
+    <button class="btn btn-primary" id="markRead">Mark as read</button>
+    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
+    <div class="row">
+	<div class="col-md-8 col-md-offset-2">
+	    <div >
+		<table class="table table-bordered" id="messageList">
+		    <thead class="thead-default">
+			<tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
+		    </thead>
+		    {% for message in complaint['messages'] %}
+		    <tr> 
+			<th>{{message['time'].strftime('%b %d %Y %-I:%M%p')}}</th> 
+			<th>{{ message['poster'] }}</th> 
+			<td>{{ message['message'] }}</td>
+		    </tr>
+		    {% endfor %}
+		</table>
+	    </div>
+	    <div class="panel panel-default">
+		<div class="panel-heading">
+		    <p>Add a comment<p>
+		</div>
+		<div class="panel-body">
+		    <form method="POST" id="addMessage" action="/">
+			<div class="form-group">
+			    <p>Name: </p>
+			    <input class="form-control" type="text" name="poster" />
+			</div>
+			<div class="form-group">
+			    <p>Message: </p>
+			    <textarea class="form-control" name="message" rows="10" required></textarea>
+			</div>
+			<input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+		    </form>
+		</div>
+	    </div>
+	</div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+ function addMessage(response) {
+     var msg = response['message'];
+     var poster = response['poster'];
+     var msg_html = "<tr> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
+     $('#messageList').append(msg_html);
+ }
+ 
+ function addMessageError(response) {
+     $(messageList).append(response);
+ }
+ $(document).ready(function() {
+     {% if complaint['status'] == 'new_msg' %}
+     $('#markUnread').hide();
+     {% else %}
+     $('#markRead').hide();
+     {% endif %}
+     $('#addMessage').on('submit', function(e) {
+	 e.preventDefault();
+	 $.ajax({
+	     url: "{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}",
+	     data: $('#addMessage').serialize(),
+	     type: 'POST',
+	     success: addMessage,
+	     error: addMessageError
+	 }); 
+	 $('#addMessage')[0].reset()
+     });
+     $('#markRead').on('click', function() {
+	 $.ajax({
+	     url: "{{ url_for('bodfeedback.bodfeedback_mark_read', id=complaint['uuid']) }}",
+	     type: "GET",
+	     success: function(){
+		 $('#markRead').hide();
+		 $('#markUnread').show();
+	     },
+	     error: function(response){
+		 $('#summary-panel').append(response)
+	     }
+	 });
+     });
+     $('#markUnread').on('click', function() {
+	 $.ajax({
+	     url: "{{ url_for('arcfeedback.arcfeedback_mark_unread', id=complaint['uuid']) }}",
+	     type: 'GET',
+	     success: function(){
+		 $('#markUnread').hide();
+		 $('#markRead').show();
+	     },
+	     error: function(response){
+		 $('#summary-panel').append(response)
+	     }
+	 });
+     });
+ });
+ 
+</script>
+
+{% endblock %}
