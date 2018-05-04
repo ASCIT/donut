@@ -51,6 +51,21 @@ def test_get_position_data(client):
     assert res[0]["pos_id"] == 1
 
 
+def test_delete_position(client):
+    assert helpers.get_group_positions(1) == [{
+        "pos_id": 1,
+        "pos_name": "Head"
+    }, {
+        "pos_id": 2,
+        "pos_name": "Secretary"
+    }]
+    helpers.delete_position(1)
+    assert helpers.get_group_positions(1) == [{
+        "pos_id": 2,
+        "pos_name": "Secretary"
+    }]
+
+
 def test_get_group_data(client):
     assert helpers.get_group_data(3) == {}
     assert helpers.get_group_data(1, ["not_a_real_field"]) == "Invalid field"
