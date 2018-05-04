@@ -37,7 +37,8 @@ def read_markdown(name):
                             + '/static/' + name + ".html")
         return curFile
     else:
-        curFile = read_file(flask.current_app.config["UPLOAD_FOLDER"] +
+        curFile = read_file(os.path.join(flask.current_app.root_path,
+                                   flask.current_app.config['UPLOAD_FOLDER']) +
                             '/static/' + name + '.md')
         return curFile
 
@@ -66,7 +67,8 @@ def write_markdown(markdown, title):
         f = open(path, "r*")
         '''
     # Non-special cases.
-    root = flask.current_app.config["UPLOAD_FOLDER"]
+    root = os.path.join(flask.current_app.root_path,
+                               flask.current_app.config['UPLOAD_FOLDER'])
     new_root = root + "/static"
 
     title = title.replace(' ', '_')
