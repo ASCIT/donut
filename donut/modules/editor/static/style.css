@@ -20,12 +20,7 @@ textarea{
     margin: 5px;
 }
 
-/*
-.dropdown:hover>.dropdown-menu {
-    display: block;
-}
 
-.dropdown-menu:hover {
+.dropdown:hover .dropdown-menu {
     display: block;
 }
-*/
