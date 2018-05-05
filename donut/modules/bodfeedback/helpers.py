@@ -64,7 +64,7 @@ def remove_email(complaint_id, email):
     Removes 'email' from the list of emails subscribed to this complaint
     returns False if complaint_id is invalid
     '''
-    if not get_course(complaint_id): return False
+    if not get_subject(complaint_id): return False
     query = """
     DELETE FROM bod_complaint_emails WHERE complaint_id = %s AND email = %s
     """
@@ -161,7 +161,7 @@ def get_summary(complaint_id):
 
 def get_subject(complaint_id):
     '''
-    Returns the course or None if complaint_id is invalid
+    Returns the suject or None if complaint_id is invalid
     '''
     res = get_summary(complaint_id)
     if res:
@@ -223,7 +223,7 @@ def get_emails(complaint_id):
 
 def get_all_fields(complaint_id):
     '''
-    Returns a dict with emails, messages, course, status
+    Returns a dict with emails, messages, subject, status
     Returns None if complaint_id is invalid
     '''
     data = {}
@@ -241,7 +241,7 @@ def get_new_posts():
     status, uuid, message, poster, time
     Note that message and poster refer to the latest comment on this complaint
     '''
-    query = """SELECT post.complaint_id AS complaint_id, post.course AS subject, post.status AS status,
+    query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject, post.status AS status,
     post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time FROM bod_complaint_info post
     INNER JOIN bod_complaint_messages comment
     ON comment.complaint_id = post.complaint_id

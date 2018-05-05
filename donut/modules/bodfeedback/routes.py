@@ -11,7 +11,7 @@ def bodfeedback():
 
 # submit feedback form
 @blueprint.route('/bodfeedback/submit', methods=['POST'])
-def arcfeedback_submit():
+def bodfeedback_submit():
     fields = ['name', 'email', 'subject', 'msg']
     required = ['subject', 'msg']
     data = {}
@@ -113,6 +113,7 @@ def bodfeedback_mark_unread(id):
 @blueprint.route('/1/bodfeedback/<uuid:id>/addEmail/<email>')
 def bodfeedback_add_email(id, email):
     #TODO
+    pass
 
 # remove an email from this complaint
 @blueprint.route('/1/bodfeedback/<uuid:id>/removeEmail/<email>')

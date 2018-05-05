@@ -80,3 +80,17 @@ INSERT INTO position_holders(group_id, pos_id, user_id) VALUES
 
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
+
+/* For bodfeedback module */
+INSERT INTO bod_complaint_info(complaint_id, subject, status, uuid) VALUES
+    (1, 'Sub1', 'new_msg', 'sample_uuid'),
+    (2, 'Sub2', 'read', 'sample_uuid2');
+
+INSERT INTO bod_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
+    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
+    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
+
+INSERT INTO bod_complaint_emails(complaint_id, email, email_id) VALUES
+    (1, 'test@example.com', 1),
+    (1, 'test2@example.com', 2);
