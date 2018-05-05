@@ -30,6 +30,7 @@ def test_get_group_list_data(client):
     assert helpers.get_group_list_data(None, {"group_id": 1})[0] == group
     assert helpers.get_group_list_data(None, {"group_id": 4}) == []
 
+
 def test_get_members_by_group(client):
     assert helpers.get_members_by_group(1)[0]["user_id"] == 1
     assert helpers.get_members_by_group(1)[1]["user_id"] == 2
