@@ -5,11 +5,13 @@ import os
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
 
-
-@blueprint.route('/editor')
+@blueprint.route('/editor', methods=['GET', 'POST'])
 def editor(input_text='Hello World!!!', title="TITLE"):
-    if input_text != 'Hello World!!!':
-        input_text = read_markdown(input_text)
+    input = flask.request.args.get('input_text')
+    print(input)
+    if input != None:
+        input_text = helpers.read_markdown(input)
+        title = flask.request.args.get('title')
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
 

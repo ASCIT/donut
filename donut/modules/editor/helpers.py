@@ -34,7 +34,7 @@ def read_markdown(name):
 
     if name in underCommittee:
         curFile = read_file(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
-                            + '/static/' + name + ".html")
+                            + '/' + name + ".html")
         return curFile
     else:
         curFile = read_file(flask.current_app.config["UPLOAD_FOLDER"] +

@@ -7,13 +7,15 @@ from werkzeug import secure_filename
 import glob
 
 from donut.modules.uploads import blueprint, helpers
-
+from donut.resources import Permissions
+from donut.auth_utils import check_permission
 
 @blueprint.route('/lib/<path:url>')
 def display(url):
     page = helpers.readPage(url.lower())
-
-    return flask.render_template('page.html', page=page, title=url)
+    if check_permission(Permissions.ADMIN):
+        return flask.render_template('page.html', page=page, title=url, permission=True)
+    return flask.render_template('page.html', page=page, title=url, permission=False)
 
 
 @blueprint.route('/uploads', methods=['GET', 'POST'])
