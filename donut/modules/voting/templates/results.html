@@ -23,44 +23,56 @@
 					{% if question['description'] %}
 						<h4>{{ question['description'] }}</h4>
 					{% endif %}
+					{% if 'choices' in question %}
+						<h4>
+							<strong>Choices</strong>
+						</h4>
+						<ul class="list-group">
+							{% for choice_id in question['choices'] %}
+								<li class="list-group-item">{{ question['choices'][choice_id] }}</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
 					<h4>
 						<strong>Results</strong>
-						{% if question['type'] == question_types['Dropdown'] or question['type'] == question_types['Checkboxes'] %}
-							<ul class="list-group">
-								{% for choice, count in question['results'] %}
-									<li class="list-group-item">
-										{{ question['choices'][choice] }}:
-										<em>{{ count }} response{{ 's' if count > 1 else '' }}</em>
-									</li>
-								{% endfor %}
-							</ul>
-							{% if question['type'] == question_types['Checkboxes'] %}
-								Individual responses:
-								<ul class="list-group">
-									{% for response in question['responses'] %}
-										<li class="list-group-item">
-											{% for choice in response %}
-												<div>{{ question['choices'][choice] }}</div>
-											{% endfor %}
-										</li>
-									{% endfor %}
-								</ul>
-							{% endif %}
-						{% elif question['type'] == question_types['Short text'] or question['type'] == question_types['Long text'] %}
-							<ul class="list-group">
-								{% for response, count in question['results'] %}
-									<li class="list-group-item">
-										{{ response or 'Blank' }}
-										{% if count > 1 %}
-											<em>({{ count }} responses)</em>
-										{% endif %}
-									</li>
-								{% endfor %}
-							</ul>
-						{% else %}
-							<div>Unknown question type</div>
-						{% endif %}
 					</h4>
+					{% if question['type'] == question_types['Dropdown'] or question['type'] == question_types['Checkboxes'] %}
+						<ul class="list-group">
+							{% for choice_id, count in question['results'] %}
+								<li class="list-group-item">
+									{{ question['choices'][choice_id] }}:
+									<em>{{ count }} response{{ 's' if count > 1 else '' }}</em>
+								</li>
+							{% endfor %}
+						</ul>
+						{% if question['type'] == question_types['Checkboxes'] %}
+							<h4>
+								<strong>Individual responses:</strong>
+							</h4>
+							<ul class="list-group">
+								{% for response in question['responses'] %}
+									<li class="list-group-item">
+										{% for choice_id in response %}
+											<div>{{ question['choices'][choice_id] }}</div>
+										{% endfor %}
+									</li>
+								{% endfor %}
+							</ul>
+						{% endif %}
+					{% elif question['type'] == question_types['Short text'] or question['type'] == question_types['Long text'] %}
+						<ul class="list-group">
+							{% for response, count in question['results'] %}
+								<li class="list-group-item">
+									{{ response or 'Blank' }}
+									{% if count > 1 %}
+										<em>({{ count }} responses)</em>
+									{% endif %}
+								</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+						<div>Unknown question type</div>
+					{% endif %}
 				</li>
 			{% endfor %}
 		</ul>
