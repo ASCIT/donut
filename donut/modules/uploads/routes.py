@@ -12,8 +12,8 @@ from donut.auth_utils import check_permission
 
 @blueprint.route('/lib/<path:url>')
 def display(url):
-    page = helpers.readPage(url.replace(' ', '_')
-    if check_permission(Permissions.ADMIN):
+    page = helpers.readPage(url.replace(' ', '_'))
+    if(check_permission(Permissions.ADMIN)):
         return flask.render_template('page.html', page=page, title=url, permission=True)
     return flask.render_template('page.html', page=page, title=url, permission=False)
 

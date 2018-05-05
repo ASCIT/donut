@@ -9,7 +9,7 @@ from donut.auth_utils import check_permission
 @blueprint.route('/BoC')
 def boc():
     """Display Boc page."""
-    if check_permission(Permissions.ADMIN):
+    if(check_permission(Permissions.ADMIN)):
         return flask.render_template('BoC.html', BoC=helpers.get_BoC_member(), permission=True)
     return flask.render_template('BoC.html', BoC=helpers.get_BoC_member())
 
@@ -25,7 +25,7 @@ def defendants():
 @blueprint.route('/BoC/witnesses')
 def witnesses():
     """Display Boc witnesses page."""
-    if check_permission(Permissions.ADMIN):
+    if (check_permission(Permissions.ADMIN)):
         return flask.render_template('BoC.witnesses.html', permission=True)
     return flask.render_template('BoC.witnesses.html')
 
@@ -33,7 +33,7 @@ def witnesses():
 @blueprint.route('/BoC/FAQ')
 def FAQ():
     """Display Boc FAQ page."""
-     if check_permission(Permissions.ADMIN):
+    if(check_permission(Permissions.ADMIN)):
         return flask.render_template('BoC.reporters.html', permission=True)
     return flask.render_template('BoC.FAQ.html')
 
@@ -41,7 +41,7 @@ def FAQ():
 @blueprint.route('/BoC/reporters')
 def reporters():
     """Display Boc reporters page."""
-    if check_permission(Permissions.ADMIN):
+    if(check_permission(Permissions.ADMIN)):
         return flask.render_template('BoC.reporters.html', permission=True)
     return flask.render_template('BoC.reporters.html')
 
@@ -49,7 +49,7 @@ def reporters():
 @blueprint.route('/BoC/bylaws')
 def bylaws():
     """Display Boc bylaws page."""
-    if check_permission(Permissions.ADMIN):
+    if(check_permission(Permissions.ADMIN)):
         return flask.render_template('BoC.bylaws.html', permission=True)
     return flask.render_template('BoC.bylaws.html')
 
