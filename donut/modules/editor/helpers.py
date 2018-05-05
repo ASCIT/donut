@@ -72,7 +72,7 @@ def write_markdown(markdown, title):
     new_root = root + "/static"
 
     title = title.replace(' ', '_')
-    path = os.path.join(new_root, title.lower() + ".md")
+    path = os.path.join(new_root, title + ".md")
 
     # Writing to the new html file
     f = open(path, "w+")
