@@ -157,7 +157,7 @@ CREATE TABLE position_holders (
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (group_id, pos_id) REFERENCES positions(group_id, pos_id),
+    FOREIGN KEY (pos_id) REFERENCES positions(pos_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
