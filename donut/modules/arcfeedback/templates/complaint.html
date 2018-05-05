@@ -1,57 +1,79 @@
 {% extends "layout.html" %}
 {% block page %}
 <div class="jumbotron">
-    <div class="panel panel-default">
-	<div class="panel-heading">
-	    <h3>Feedback Summary</h3>
-	</div>
-	<div class="panel-body" id="summary-panel">
-	    <p>Course: {{complaint['course']}} </p>
-	    <p>Status: {{complaint['status']}} </p>
-	    {% if complaint['emails']|length == 0 %}
-	    <p>No emails subscribed to this complaint </p>
-	    {% else %}
-	    <p>Subscribed emails: </p>
-	    {% for email in complaint['emails'] %}
-	    <p>{{email}}</p>
-	    {% endfor %}
-	    {% endif %}
-	</div>
-    </div>
-    <button class="btn btn-primary" id="markRead">Mark as read</button>
-    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
     <div class="row">
-	<div class="col-md-8 col-md-offset-2">
-	    <div >
-		<table class="table table-bordered" id="messageList">
-		    <thead class="thead-default">
-			<tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
-		    </thead>
-		    {% for message in complaint['messages'] %}
-		    <tr> 
-			<th>{{message['time'].strftime('%b %d %Y %-I:%M%p')}}</th> 
-			<th>{{ message['poster'] }}</th> 
-			<td>{{ message['message'] }}</td>
-		    </tr>
-		    {% endfor %}
-		</table>
-	    </div>
+	<div class="col-md-8">
 	    <div class="panel panel-default">
 		<div class="panel-heading">
-		    <p>Add a comment<p>
+		    <h3>Feedback Summary</h3>
+		</div>
+		<div class="panel-body" id="summary-panel">
+		    <p>Course: {{complaint['course']}} </p>
+		    <p>Status: {{complaint['status']}} </p>
+		    {% if complaint['emails']|length == 0 %}
+		    <p>No emails subscribed to this complaint </p>
+		    {% else %}
+		    <p>Subscribed emails: </p>
+		    {% for email in complaint['emails'] %}
+		    <p>{{email}}</p>
+		    {% endfor %}
+		    {% endif %}
+		</div>
+		<button class="btn btn-primary" id="markRead">Mark as read</button>
+		<button class="btn btn-primary" id="markUnread">Mark as unread</button>
+	    </div>
+	</div>
+	<div class="col-md-4">
+	    <div class="panel panel-default">
+		<div class="panel-heading">
+		    <h4>Add an email</h4>
 		</div>
 		<div class="panel-body">
-		    <form method="POST" id="addMessage" action="/">
+		    <form method="POST" id="add-email" action="???">
 			<div class="form-group">
-			    <p>Name: </p>
-			    <input class="form-control" type="text" name="poster" />
+			    <p>Email: </p>
+			    <input class="form-control" type="text" name="email" />
 			</div>
-			<div class="form-group">
-			    <p>Message: </p>
-			    <textarea class="form-control" name="message" rows="10" required></textarea>
-			</div>
-			<input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+			<input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
 		    </form>
+		</div>
+		<div class="row">
+		</div>
+	    </div>
+	</div>
+	<div class="row">
+	    <div class="col-md-8 col-md-offset-2">
+		<div>
+		    <table class="table table-bordered" id="messageList">
+			<thead class="thead-default">
+			    <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
+			</thead>
+			{% for message in complaint['messages'] %}
+			<tr> 
+			    <th>{{message['time'].strftime('%b %d %Y %-I:%M%p')}}</th> 
+			    <th>{{ message['poster'] }}</th> 
+			    <td>{{ message['message'] }}</td>
+			</tr>
+			{% endfor %}
+		    </table>
+		</div>
+		<div class="panel panel-default">
+		    <div class="panel-heading">
+			<p>Add a comment<p>
+		    </div>
+		    <div class="panel-body">
+			<form method="POST" id="addMessage" action="/">
+			    <div class="form-group">
+				<p>Name: </p>
+				<input class="form-control" type="text" name="poster" />
+			    </div>
+			    <div class="form-group">
+				<p>Message: </p>
+				<textarea class="form-control" name="message" rows="10" required></textarea>
+			    </div>
+			    <input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+			</form>
+		    </div>
 		</div>
 	    </div>
 	</div>

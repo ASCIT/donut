@@ -110,6 +110,7 @@ def arcfeedback_mark_unread(id):
         return 'Success'
 
 # add an email to this complaint
+# TODO: make this work from the front end / maybe rename it
 @blueprint.route('/1/arcfeedback/<uuid:id>/addEmail/<email>')
 def arcfeedback_add_email(id, email):
     complaint_id = helpers.get_id(id)
@@ -118,6 +119,7 @@ def arcfeedback_add_email(id, email):
     return "Success!"
 
 # remove an email from this complaint
+# TODO: make this work from the front end / maybe rename it
 @blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail/<email>')
 def arfeedback_remove_email(id, email):
     remove_email(id, email)
