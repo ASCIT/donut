@@ -78,6 +78,13 @@ table {
   color: #FFF;
 }
 
+/* I don't think the btn-primary class
+ * is needed. I'll get rid of it when
+ * I go through the grand CSS purging
+ * of everything Caleb made for his
+ * pages.
+ */
+
 .btn-primary {
   border-color: orange;
 }
@@ -148,7 +155,6 @@ table {
 }
 
 .navbar:before {
-  /*border-top: 5px orange solid;*/
   content: "";
   position: relative;
   width: 100%;
@@ -241,26 +247,6 @@ label.required:after {
     margin-top: 5%;
     border: 1px orange solid;
     border-radius: 5px;
-  }
-
-  .jumbotron {
-    position: absolute;
-    width: 60%;
-    top: 0;
-    right: 0;
-  }
-
-  .navbar {
-    width: 30%;
-    height: 100%;
-  }
-
-  .navbar-collapse {
-    height: 100%;
-  }
-
-  .navbar-fixed-top .navbar-collapse {
-    max-height: 100%;
   }
 
   .navbar-brand {
