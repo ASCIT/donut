@@ -54,7 +54,7 @@
 		}
 		chosenList.append(
 			$('<li>').addClass('list-group-item').append(
-				$('<span>').text(choice),
+				$('<span>').addClass('choice-text').text(choice),
 				$('<div>').addClass('btn-group space-right').append(
 					$('<button>').addClass('btn btn-default').click(removeChoice(writein)).append(
 						$('<span>').addClass('glyphicon glyphicon-minus')
@@ -123,7 +123,7 @@
 					break
 				case QUESTION_TYPES['Elected position']:
 					var response = []
-					var chosen = element.find('.chosen .list-group-item span')
+					var chosen = element.find('.chosen .list-group-item span.choice-text')
 					chosen.each(function() { response.push($(this).text()) })
 					break
 				case QUESTION_TYPES.Checkboxes:
