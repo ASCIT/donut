@@ -67,9 +67,8 @@ def write_markdown(markdown, title):
         f = open(path, "r*")
         '''
     # Non-special cases.
-    root = os.path.join(flask.current_app.root_path,
-                               flask.current_app.config['UPLOAD_FOLDER'])
-    new_root = root + "/static"
+    root = os.path.join(flask.current_app.root_path, flask.current_app.config["UPLOAD_FOLDER"])
+    new_root = root + "/pages"
 
     title = title.replace(' ', '_')
     path = os.path.join(new_root, title + ".md")
@@ -79,7 +78,8 @@ def write_markdown(markdown, title):
     f.write(markdown)
     f.close()
 
-    f = open(os.path.join(flask.current_app.config["EXISTING_LIST"],'pages.txt'), "w+")
+    f = open(os.path.join(flask.current_app.root_path,
+                          flask.current_app.config["EXISTING_LIST"],'pages.txt'), "w+")
     f.write(title)
     f.close()
     return 0

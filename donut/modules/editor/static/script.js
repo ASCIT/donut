@@ -21,13 +21,13 @@ function insert_heading(size){
     string += "#";
   }
   var ta = document.getElementById('source')
-  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
+  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
   {
     var text = ta.value;
     text =
-    text.substr(0, ta.selectionStart) +
+    text.substring(0, ta.selectionStart) +
     string + window.getSelection().toString() + string
-    text.substr(ta.selectionEnd);
+    text.substring(ta.selectionEnd);
   }
   else {
     insert(string + "Heading_title" + string+ "\n");
@@ -36,7 +36,7 @@ function insert_heading(size){
 
 function insert_italic(){
   var ta = document.getElementById("source");
-  if (ta.value.substr(ta.selectionStart, ta.selectionEnd) != "")
+  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) != "")
   {
     insert("*", false);
   }
@@ -47,7 +47,7 @@ function insert_italic(){
 
 function insert_bold(){
   var ta = document.getElementById("source");
-  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
+  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
   {
     insert("**", false);
   }
@@ -58,7 +58,7 @@ function insert_bold(){
 
 function insert_strike_through(){
   var ta = document.getElementById("source");
-  if ((ta.value.substr(ta.selectionStart, ta.selectionEnd)) != "")
+  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
   {
     insert("~~", false);
   }
@@ -69,12 +69,12 @@ function insert_strike_through(){
 }
 
 function insert_link(){
-  insert("[linkTitle](example.com)");
+  insert("[linkTitle](example.com)", true);
 }
 
 
 function insert_image(){
-  insert("![Alt text](url/to/image");
+  insert("![Alt text](url/to/image", true);
 }
 
 // bool true  = string + selection
@@ -83,13 +83,13 @@ function insert(string, bool){
   var ta = document.getElementById('source');
   if(!bool)
   {
-    var txt2 = ta.value.substr(0, ta.selectionStart)
-  + string + ta.value.substr(ta.selectionStart, ta.selectionEnd) + string
-  + ta.value.substr(ta.selectionEnd);
+    var txt2 = ta.value.substring(0, ta.selectionStart)
+  + string + ta.value.substring(ta.selectionStart, ta.selectionEnd) + string
+  + ta.value.substring(ta.selectionEnd);
   }
   else {
-    var txt2 = ta.value.substr(0, ta.selectionStart)
-  + string + ta.value.substr(ta.selectionStart);
+    var txt2 = ta.value.substring(0, ta.selectionStart)
+  + string + ta.value.substring(ta.selectionStart);
   }
   ta.value = txt2;
 }
@@ -113,9 +113,9 @@ function save(){
   }
   else {
     // Checking for valid titles; should not have
-    // anything other than numbers, characters,
-    // period, front slash, and spaces.
-    var valid = /^[0-9a-zA-Z.\/ ]*$/.test(title);
+    // anything other than numbers, characters, underscore,
+    // period, front slash, hyphen, and spaces.
+    var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
     var reader = new XMLHttpRequest();
     reader.open('get', 'pages.txt', true);
