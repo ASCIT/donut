@@ -24,9 +24,9 @@ Are you sure you want to {{ action }} the following item?
             {% for item_field in item %}
                 {% set i = loop.index0 %}
                 <td>
-                    {% if links[i] != 0 %} <a href={{ links[i] }}> {% endif %}
+                    {% if links[i] != '' %} <a href={{ links[i] }}> {% endif %}
                     {{ item_field }}
-                    {% if links[i] != 0 %} </a> {% endif %}
+                    {% if links[i] != '' %} </a> {% endif %}
                 </td>
             {% endfor %}
         </tr>

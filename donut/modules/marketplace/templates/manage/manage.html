@@ -29,9 +29,9 @@
                             {% set j = loop.index0 %}
                             {% set link = activelinks[i][j] %}
                             <td>
-                                {% if link != 0 %} <a href={{ link }}> {% endif %}
+                                {% if link != '' %} <a href={{ link }}> {% endif %}
                                 {{ cell }}
-                                {% if link != 0 %} </a> {% endif %}
+                                {% if link != '' %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
@@ -68,9 +68,9 @@
                             {% set j = loop.index0 %}
                             {% set link = inactivelinks[i][j] %}
                             <td>
-                                {% if link != 0 %} <a href={{ link }}> {% endif %}
+                                {% if link != '' %} <a href={{ link }}> {% endif %}
                                 {{ cell }}
-                                {% if link != 0 %} </a> {% endif %}
+                                {% if link != '' %} </a> {% endif %}
                             </td>
                         {% endfor %}
                     </tr>

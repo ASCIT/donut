@@ -35,14 +35,8 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
         The result of render_template(): Whatever magic Flask does to render the
                                          final page.
     """
-    # Get category titles
-
-    fields = ['cat_title']
-    categories = list(get_table_list_data('marketplace_categories', fields))
-    # get_table_list_data always returns a list of lists, but we know that
-    # each list is only one element long, and we only want a list of strings.
-    for i in range(len(categories)):
-        categories[i] = categories[i][0]
+    # Get category titles.
+    categories = table_fetch_all('marketplace_categories', ['cat_title'])
 
     # Get number of rows and columns to display categories nicely. This is a
     # little tricky - we want to aim for a table with either 4 categories or 5
@@ -59,7 +53,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     else:
         num_cols = 5
 
-    # if there's nothing in categories, 404; something's borked
+    # If there's nothing in categories, 404; something's borked.
     if num_cols == 0:
         return flask.render_template('404.html'), 404
 
@@ -71,15 +65,15 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     for cat_index in range(len(categories)):
         cats2d[cat_index // num_cols].append(categories[cat_index])
 
-    # This is simpler than a bootstrap col-sm-something, since we want a variable number of columns.
-    width = 'width: ' + str(100.0 / (num_cols)) + '%'
-
     # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
     # function, on to Flask in order to render the top bar and the rest of the content.
     return flask.render_template(
-        template_url, cats=cats2d, width=width, **kwargs)
+        template_url, cats=cats2d, width=str(100.0 / num_cols), **kwargs)
 
 
+###############
+# MANAGE PAGE #
+###############
 def manage_set_active_status(item, is_active):
     """
     Checks permissions and then sets the is_active status of item <item> to <is_active>.
@@ -123,34 +117,30 @@ def manage_display_confirmation(action, item_id):
 
     field_index_map = {k: v for v, k in enumerate(fields)}
 
-    item_details = get_table_list_data(
+    item_details = table_fetch_one(
         'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
         fields=fields,
         attrs={'item_id': item_id})
 
     if item_details == None:
-        # item doesn't exist, something went wrong
+        # The item doesn't exist, something went wrong.
         return flask.render_template('404.html'), 404
 
-    item_details = item_details[0]  # unwrap
-
-    if item_details[field_index_map['item_title']] == '':
-        item_details[field_index_map['item_title']] = item_details[
-            field_index_map['textbook_title']]
-
-    # pretty timestamps
+    # Pretty timestamps!
     item_details[field_index_map['item_timestamp']] = item_details[
         field_index_map['item_timestamp']].strftime('%m/%d/%y')
-    # convert category ids to category names
+
+    # Convert category ids to category names.
     item_details[field_index_map['cat_id']] = get_category_name_from_id(
         item_details[field_index_map['cat_id']])
 
+    # Overall title is either item_title or textbook_title.
     if item_details[field_index_map['item_title']] == '':
         item_details[field_index_map['item_title']] = item_details[
             field_index_map['textbook_title']]
     del item_details[field_index_map['textbook_title']]
 
-    links = [0] * len(item_details)
+    links = [''] * len(item_details)
     links[field_index_map['item_title']] = flask.url_for(
         '.view_item', item_id=item_id)
 
@@ -175,7 +165,8 @@ def display_managed_items():
     ]
     field_index_map = {k: v for v, k in enumerate(fields)}
 
-    owned_items = get_table_list_data(
+    # get all owned items
+    owned_items = table_fetch_all(
         'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
         fields=fields,
         attrs={'user_id': get_user_id(flask.session['username'])})
@@ -252,9 +243,30 @@ def row_text_from_managed_item(item, field_index_map):
 
 def generate_links_for_managed_item(item, field_index_map, item_active,
                                     item_id):
-    links = [0] * (len(item) + 3)
+    """
+    For use in routes.manage().  Creates links to edit, (un)archive, and delete pages.
+
+    Arguments:
+        item: The list of item details.
+
+        field_index_map: A map from a field to the index where its info is stored in
+                         item.
+
+        item_active: Whether or not the item is active -- affects whether the link
+                     is archive or unarchive.
+
+        item_id: ID of the item.
+
+    Returns:
+        links: A list the same size as item[], with links to edit, (un)archive,
+               and delete pages stored at field_index_map['edit'], ['archive'], and
+               ['delete'] respectively, and '' everywhere else.
+    """
+    links = [''] * len(item)
+
     links[field_index_map['item_title']] = flask.url_for(
         '.view_item', item_id=item_id)
+
     links[field_index_map['edit']] = flask.url_for(
         '.sell', item_id=item_id, state='edit')
 
@@ -267,9 +279,13 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
 
     links[field_index_map['delete']] = flask.url_for(
         '.manage_confirm', item=item_id, state='delete')
+
     return links
 
 
+###############
+# SEARCH PAGE #
+###############
 def generate_search_table(fields=None, attrs={}, query=''):
     """
     Provides a centralized way to generate the 2d array of cells that is displayed
@@ -278,9 +294,9 @@ def generate_search_table(fields=None, attrs={}, query=''):
     the headers.
 
     Arguments:
-    fields: A list of the fields that are requested to be in the table.  For
-        example: ['cat_id', 'item_title', 'textbook_title', 'item_price',
-            ...]
+        fields: A list of the fields that are requested to be in the table.  For
+                example: ['cat_id', 'item_title', 'textbook_title', 'item_price',
+                ...]
 
         attrs: A map of fields to values that make up conditions on the fields.
                For example, {'cat_id':1} will only return results for which the
@@ -394,47 +410,6 @@ def generate_search_table(fields=None, attrs={}, query=''):
     return (sanitized_res, headers, links)
 
 
-def get_table_list_data(tables, fields=None, attrs={}):
-    """
-    Queries the database (specifically, table <table>) and returns list of member data
-    constrained by the specified attributes.
-
-    Arguments:
-        tables: The table(s) to query.  Ex: 'marketplace_items', or
-                'marketplace_items NATURAL LEFT JOIN
-                marketplace_textbooks'.
-        fields: The fields to return. If None specified, then default_fields
-                are used.
-        attrs:  The attributes of the members to filter for.
-    Returns:
-        result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of lists.
-    """
-    if fields == None:
-        s_select_columns = 'SELECT * '
-    else:
-        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
-
-    s_from = 'FROM ' + tables
-
-    s_where = ''
-    if len(attrs) != 0:
-        s_where = ' WHERE '
-        for key, value in list(attrs.items()):
-            s_where += str(key) + ' = %s'
-
-    s = s_select_columns + s_from + s_where
-
-    # Execute the query
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, list(attrs.values()))
-        result = cursor.fetchall()
-
-    # Return the list of lists
-    result = list(map(lambda a: list(a.values()), result))
-    return result
-
-
 def merge_titles(datalist, fields):
     """
     Takes datalist and merges the two columns, item_title and textbook_title.
@@ -500,6 +475,145 @@ def process_category_headers(fields):
     return headers
 
 
+#################
+# TABLE QUERIES #
+#################
+def get_table_list_data(tables, fields=None, attrs={}):
+    """
+    Queries the database (specifically, table <table>) and returns list of member data
+    constrained by the specified attributes.
+
+    Arguments:
+        tables: The table(s) to query.  Ex: 'marketplace_items', or
+                'marketplace_items NATURAL LEFT JOIN
+                marketplace_textbooks'.
+        fields: The fields to return. If None specified, then default_fields
+                are used.
+        attrs:  The attributes of the members to filter for.
+    Returns:
+        result: The fields and corresponding values of members with desired
+                attributes. In the form of a list of lists.
+    """
+    if fields == None:
+        s_select_columns = 'SELECT * '
+    else:
+        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
+
+    s_from = 'FROM ' + tables
+
+    s_where = ''
+    if len(attrs) != 0:
+        s_where = ' WHERE '
+        for key, value in list(attrs.items()):
+            s_where += str(key) + ' = %s'
+
+    s = s_select_columns + s_from + s_where
+
+    # Execute the query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, list(attrs.values()))
+        result = cursor.fetchall()
+
+    # Return the list of lists
+    result = list(map(lambda a: list(a.values()), result))
+    return result
+
+
+def table_fetch_one(tables, fields=None, attrs={}):
+    """
+    Queries the database (specifically, table <table>) and returns list of member data
+    constrained by the specified attributes.
+
+    Arguments:
+        tables: The table(s) to query.  Ex: 'marketplace_items', or
+                'marketplace_items NATURAL LEFT JOIN
+                marketplace_textbooks'.
+        fields: The fields to return. If None specified, then default_fields
+                are used.
+        attrs:  The attributes of the members to filter for.
+    Returns:
+        result: The fields and corresponding values of members with desired
+                attributes. In the form of a list.
+    """
+    if fields == None:
+        s_select_columns = 'SELECT * '
+    else:
+        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
+
+    s_from = 'FROM ' + tables
+
+    s_where = ''
+    if len(attrs) != 0:
+        s_where = ' WHERE '
+        for key, value in list(attrs.items()):
+            s_where += str(key) + ' = %s'
+
+    s = s_select_columns + s_from + s_where
+
+    # Execute the query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, list(attrs.values()))
+        result = cursor.fetchone()
+
+    # Return the values as a list
+    result = list(result.values())
+
+    # If only one field requested, unwrap [_] to _
+    if len(fields) == 1:
+        result = result[0]
+
+    return result
+
+
+def table_fetch_all(tables, fields=None, attrs={}):
+    """
+    Queries the database (specifically, table <table>) and returns list of member data
+    constrained by the specified attributes.
+
+    Arguments:
+        tables: The table(s) to query.  Ex: 'marketplace_items', or
+                'marketplace_items NATURAL LEFT JOIN
+                marketplace_textbooks'.
+        fields: The fields to return. If None specified, then default_fields
+                are used.
+        attrs:  The attributes of the members to filter for.
+    Returns:
+        result: The fields and corresponding values of members with desired
+                attributes. In the form of a list of lists.
+    """
+    if fields == None:
+        s_select_columns = 'SELECT * '
+    else:
+        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
+
+    s_from = 'FROM ' + tables
+
+    s_where = ''
+    if len(attrs) != 0:
+        s_where = ' WHERE '
+        for key, value in list(attrs.items()):
+            s_where += str(key) + ' = %s'
+
+    s = s_select_columns + s_from + s_where
+
+    # Execute the query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, list(attrs.values()))
+        result = cursor.fetchall()
+
+    # Return the list of lists
+    result = list(map(lambda a: list(a.values()), result))
+
+    # If only one field requested, unwrap [[_], [_], [_]] to [_, _, _]
+    if len(fields) == 1:
+        result = list(map(lambda a: a[0], result))
+
+    return result
+
+
+#############
+# SELL PAGE #
+#############
 def generate_hidden_form_elements(skip_fields):
     """
     Creates a list of names of parameters and values, gathered from flask.request.form, to be passed into sell_*.html.
@@ -740,6 +854,66 @@ def update_current_listing(item_id, stored):
     return item_id
 
 
+def add_textbook(title, author):
+    """
+    Adds a textbook to the database, with title <title> and author
+    <author>.
+
+    Arguments:
+        title: The title.
+        author: The author.
+
+    Returns:
+        True if the insert succeeds, and False if not (the textbook
+        already exists)
+    """
+    # check if the textbook exists
+    s = '''SELECT textbook_title FROM
+            marketplace_textbooks WHERE textbook_title = %s AND
+            textbook_author = %s'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [title, author])
+        result = cursor.fetchone()
+    if result != None:
+        # the textbook already exists
+        return False
+
+    s = '''INSERT INTO marketplace_textbooks
+            (textbook_title, textbook_author) VALUES (%s,
+            %s)'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [title, author])
+
+    return True
+
+
+def delete_item(item_id):
+    """
+    Deletes an item.
+
+    Arguments:
+        item_id: The id of the item to delete.
+
+    Returns:
+        True if the delete succeeds, and False if not (the item doesn't exist)
+    """
+    s = 'SELECT item_id FROM marketplace_items WHERE item_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
+        result = cursor.fetchone()
+    if result == None:
+        # the item doesn't exist
+        return False
+
+    s = 'DELETE FROM marketplace_items WHERE item_id=%s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, [item_id])
+    return True
+
+
+###############
+# SEARCH PAGE #
+###############
 def search_datalist(fields, datalist, query):
     """
     Searches in datalist (which has columns denoted in fields) to
@@ -970,63 +1144,9 @@ def process_edition(edition):
         return edition
 
 
-def add_textbook(title, author):
-    """
-    Adds a textbook to the database, with title <title> and author
-    <author>.
-
-    Arguments:
-        title: The title.
-        author: The author.
-
-    Returns:
-        True if the insert succeeds, and False if not (the textbook
-        already exists)
-    """
-    # check if the textbook exists
-    s = '''SELECT textbook_title FROM
-            marketplace_textbooks WHERE textbook_title = %s AND
-            textbook_author = %s'''
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [title, author])
-        result = cursor.fetchone()
-    if result != None:
-        # the textbook already exists
-        return False
-
-    s = '''INSERT INTO marketplace_textbooks
-            (textbook_title, textbook_author) VALUES (%s,
-            %s)'''
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [title, author])
-
-    return True
-
-
-def delete_item(item_id):
-    """
-    Deletes an item.
-
-    Arguments:
-        item_id: The id of the item to delete.
-
-    Returns:
-        True if the delete succeeds, and False if not (the item doesn't exist)
-    """
-    s = 'SELECT item_id FROM marketplace_items WHERE item_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
-        result = cursor.fetchone()
-    if result == None:
-        # the item doesn't exist
-        return False
-
-    s = 'DELETE FROM marketplace_items WHERE item_id=%s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
-    return True
-
-
+#####################
+# HELPFUL FUNCTIONS #
+#####################
 def get_user_id_of_item(item_id):
     """
     Gets the user_id of the user who owns the item <item_id>.
