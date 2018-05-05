@@ -2,6 +2,7 @@ import flask
 import json
 import os
 
+import glob
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
 
@@ -31,8 +32,9 @@ def save():
 
 @blueprint.route('/created_list')
 def created_list():
-    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"])
+    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"], 'pages')
     links = glob.glob(root+'/*')
     for i in range(len(links)):
-        links[i] = (flask.url_for('uploads.display', url=links[i][22:]), links[i][22:])
+        links[i] = links[i].replace(root + '/', '').replace('.md','')
+        links[i] = (flask.url_for('uploads.display', url=links[i]), links[i])
     return flask.render_template('uploaded_list.html', links=links)

@@ -113,9 +113,9 @@ function save(){
   }
   else {
     // Checking for valid titles; should not have
-    // anything other than numbers, characters,
-    // period, front slash, and spaces.
-    var valid = /^[0-9a-zA-Z.\/ ]*$/.test(title);
+    // anything other than numbers, characters, underscore,
+    // period, front slash, hyphen, and spaces.
+    var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
     var reader = new XMLHttpRequest();
     reader.open('get', 'pages.txt', true);

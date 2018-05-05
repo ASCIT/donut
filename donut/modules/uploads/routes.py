@@ -11,7 +11,7 @@ from donut.modules.uploads import blueprint, helpers
 
 @blueprint.route('/lib/<path:url>')
 def display(url):
-    page = helpers.readPage(url.lower())
+    page = helpers.readPage(url.lower().replace(' ', '_'))
 
     return flask.render_template('page.html', page=page, title=url)
 

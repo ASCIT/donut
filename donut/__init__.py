@@ -66,7 +66,7 @@ def init(environment_name):
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
-    app.config["EXISTING_LIST"] = 'donut/modules/editor/static'
+    app.config["EXISTING_LIST"] = 'modules/editor/static'
     app.config["COMMITTEE_UPLOAD_FOLDER"] = 'donut/modules/committee_sites'
 
     # Maximum file upload size, in bytes.
