@@ -232,6 +232,7 @@ def submit(access_key):
     helpers.set_responses(expected_question_ids, response_jsons)
     return flask.jsonify({'success': True})
 
+
 @blueprint.route('/1/surveys/<access_key>/results')
 def show_results(access_key):
     survey = helpers.get_survey_data(access_key)
@@ -239,17 +240,21 @@ def show_results(access_key):
         flask.flash('Invalid access key')
         return list_surveys()
     user_id = helpers.get_user_id(flask.session.get('username', ''))
-    creator_allowed = user_id == survey['creator'] and datetime.now() > survey['end_time']
+    now = datetime.now()
+    creator_allowed = user_id == survey['creator'] and survey['end_time'] < now
     if not (creator_allowed or survey['results_shown']):
         flask.flash('You are not permitted to see the results at this time')
         return list_surveys()
 
+    question_types = helpers.get_question_types()
     results = helpers.get_results(survey['survey_id'])
     return flask.render_template(
         'results.html',
         access_key=access_key,
         **survey,
+        question_types=question_types,
         results=results)
+
 
 @blueprint.route('/1/surveys/<access_key>/release')
 def release_results(access_key):
@@ -266,4 +271,5 @@ def release_results(access_key):
         return list_surveys()
 
     helpers.release_results(survey['survey_id'])
-    return flask.redirect(flask.url_for('voting.show_results', access_key=access_key))
+    return flask.redirect(
+        flask.url_for('voting.show_results', access_key=access_key))

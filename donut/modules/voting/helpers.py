@@ -1,4 +1,6 @@
+from collections import Counter
 from datetime import datetime
+from itertools import chain, groupby
 import json
 import flask
 from donut.auth_utils import get_user_id
@@ -16,31 +18,32 @@ def get_groups():
     return get_group_list_data(['group_id', 'group_name'])
 
 
+question_types = None
+
+
 def get_question_types():
-    query = 'SELECT type_id, type_name FROM survey_question_types'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
-        return {
-            question_type['type_name']: question_type['type_id']
-            for question_type in cursor.fetchall()
-        }
+    global question_types
+    if not question_types:
+        query = 'SELECT type_id, type_name FROM survey_question_types'
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query)
+            question_types = {
+                question_type['type_name']: question_type['type_id']
+                for question_type in cursor.fetchall()
+            }
+    return question_types
 
 
 def get_public_surveys(user_id):
+    #TODO: fix group restriction
     query = """
         SELECT DISTINCT title, description, end_time, access_key
         FROM surveys
-            NATURAL LEFT JOIN groups
-            NATURAL LEFT JOIN (
-                -- SELECT group_id, user_id FROM group_members UNION
-                SELECT group_id, user_id FROM position_holders
-            ) tmp
         WHERE start_time <= NOW() AND NOW() <= end_time
-        -- AND (group_id IS NULL OR user_id = %s)
         ORDER BY end_time
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
+        cursor.execute(query)
         return cursor.fetchall()
 
 
@@ -75,21 +78,20 @@ def get_questions_json(survey_id, include_id):
         WHERE survey_id = %s
         ORDER BY list_order
     """
+    choices_query = 'SELECT choice FROM survey_question_choices WHERE question_id = %s ORDER BY choice_id'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(questions_query, [survey_id])
         questions = cursor.fetchall()
-    for question in questions:
-        question['description'] = question['description'] or ''
-        if question['choices']:
-            choices_query = 'SELECT choice FROM survey_question_choices WHERE question_id = %s ORDER BY choice_id'
-            with flask.g.pymysql_db.cursor() as cursor:
+        for question in questions:
+            question['description'] = question['description'] or ''
+            if question['choices']:
                 cursor.execute(choices_query, [question['question_id']])
                 question['choices'] = [
                     choice['choice'] for choice in cursor.fetchall()
                 ]
-        else:
-            del question['choices']
-        if not include_id: del question['question_id']
+            else:
+                del question['choices']
+            if not include_id: del question['question_id']
     return json.dumps(questions)
 
 
@@ -305,7 +307,62 @@ def some_responses_for_survey(survey_id):
 
 
 def get_results(survey_id):
-    return {}
+    questions_query = """
+        SELECT question_id, title, description, type_id AS type, list_order, choices
+        FROM survey_questions NATURAL JOIN survey_question_types
+        WHERE survey_id = %s
+        ORDER BY list_order
+    """
+    choices_query = """
+        SELECT choice_id, choice
+        FROM survey_question_choices
+        WHERE question_id = %s
+        ORDER BY choice_id
+    """
+    responses_query = """
+        SELECT response
+        FROM survey_questions NATURAL JOIN survey_responses
+        WHERE question_id = %s
+    """
+    question_types = get_question_types()
+    count_types = set([
+        question_types['Dropdown'], question_types['Short text'],
+        question_types['Long text']
+    ])
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(questions_query, [survey_id])
+        questions = cursor.fetchall()
+        for question in questions:
+            if question['choices']:
+                cursor.execute(choices_query, [question['question_id']])
+                question['choices'] = {
+                    choice['choice_id']: choice['choice']
+                    for choice in cursor.fetchall()
+                }
+            else:
+                del question['choices']
+
+            def resolve_name(vote):
+                if vote is None: return None
+                if type(vote) is int: return question['choices'][vote]
+                if type(vote) is str: return vote
+                raise Exception('Unrecognized elected position vote')
+
+            cursor.execute(responses_query, question['question_id'])
+            responses = [
+                json.loads(res['response']) for res in cursor.fetchall()
+            ]
+            question_type = question['type']
+            if question_type in count_types:
+                question['results'] = Counter(responses).most_common()
+            elif question_type == question_types['Checkboxes']:
+                question['results'] = Counter(chain(*responses)).most_common()
+                question['responses'] = responses
+            elif question_type == question_types['Elected position']:
+                #TODO: calculate ranked pairs
+                responses = [map(resolve_name, res) for res in responses]
+                question['results'] = {}
+    return questions
 
 
 def release_results(survey_id):

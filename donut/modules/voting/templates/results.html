@@ -14,6 +14,56 @@
 		{% if description %}
 			<h2>{{ description }}</h2>
 		{% endif %}
+		<ul id="question_container">
+			{% for question in results %}
+				<li class="list-group-item">
+					<h3>
+						{{ question['list_order'] + 1 }}. {{ question['title'] }}
+					</h3>
+					{% if question['description'] %}
+						<h4>{{ question['description'] }}</h4>
+					{% endif %}
+					<h4>
+						<strong>Results</strong>
+						{% if question['type'] == question_types['Dropdown'] or question['type'] == question_types['Checkboxes'] %}
+							<ul class="list-group">
+								{% for choice, count in question['results'] %}
+									<li class="list-group-item">
+										{{ question['choices'][choice] }}:
+										<em>{{ count }} response{{ 's' if count > 1 else '' }}</em>
+									</li>
+								{% endfor %}
+							</ul>
+							{% if question['type'] == question_types['Checkboxes'] %}
+								Individual responses:
+								<ul class="list-group">
+									{% for response in question['responses'] %}
+										<li class="list-group-item">
+											{% for choice in response %}
+												<div>{{ question['choices'][choice] }}</div>
+											{% endfor %}
+										</li>
+									{% endfor %}
+								</ul>
+							{% endif %}
+						{% elif question['type'] == question_types['Short text'] or question['type'] == question_types['Long text'] %}
+							<ul class="list-group">
+								{% for response, count in question['results'] %}
+									<li class="list-group-item">
+										{{ response or 'Blank' }}
+										{% if count > 1 %}
+											<em>({{ count }} responses)</em>
+										{% endif %}
+									</li>
+								{% endfor %}
+							</ul>
+						{% else %}
+							<div>Unknown question type</div>
+						{% endif %}
+					</h4>
+				</li>
+			{% endfor %}
+		</ul>
 	</div>
 </div>
 {% endblock %}
