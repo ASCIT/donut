@@ -5,8 +5,6 @@ import flask
 from . import blueprint, helpers
 from donut.modules.core.helpers import get_member_data
 
-NO = 'NO'
-
 
 @blueprint.route('/1/surveys')
 def list_surveys():
@@ -35,7 +33,7 @@ def take_survey(access_key):
         access_key=access_key,
         **survey,
         is_owner=is_owner,
-        NO=NO,
+        NO=helpers.NO,
         question_types=helpers.get_question_types(),
         questions_json=questions_json)
 
@@ -209,7 +207,7 @@ def submit(access_key):
             for order_value in value:
                 if type(order_value) != str:
                     return error('Invalid response to elected position')
-                if order_value == NO: response_json.append(None)
+                if order_value == helpers.NO: response_json.append(None)
                 else:
                     choice = helpers.get_choice(question_id, order_value)
                     response_json.append(order_value if choice is None else

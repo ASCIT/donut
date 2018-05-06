@@ -8,10 +8,12 @@ from donut.misc_utils import generate_random_string
 from donut.modules.groups.helpers import get_group_list_data
 from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
+from .ranked_pairs import winners
 
 ACCESS_KEY_LENGTH = 64
 AM_OR_PM = set(['A', 'P'])
 YYYY_MM_DD = '%Y-%m-%d'
+NO = 'NO'
 
 
 def get_groups():
@@ -343,7 +345,7 @@ def get_results(survey_id):
                 del question['choices']
 
             def resolve_name(vote):
-                if vote is None: return None
+                if vote is None: return NO
                 if type(vote) is int: return question['choices'][vote]
                 if type(vote) is str: return vote
                 raise Exception('Unrecognized elected position vote')
@@ -359,9 +361,10 @@ def get_results(survey_id):
                 question['results'] = Counter(chain(*responses)).most_common()
                 question['responses'] = responses
             elif question_type == question_types['Elected position']:
-                #TODO: calculate ranked pairs
-                responses = [map(resolve_name, res) for res in responses]
-                question['results'] = {}
+                responses = [[resolve_name(vote) for vote in res]
+                             for res in responses]
+                question['results'] = winners(responses)
+                question['responses'] = responses
     return questions
 
 

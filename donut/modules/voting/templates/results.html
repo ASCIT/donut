@@ -70,6 +70,27 @@
 								</li>
 							{% endfor %}
 						</ul>
+					{% elif question['type'] == question_types['Elected position'] %}
+						<ul class="list-group">
+							{% for winner in question['results'] %}
+								<li class="list-group-item">
+									{{ loop.index }}.
+									{{ winner }}
+								</li>
+							{% endfor %}
+						</ul>
+						<h4>
+							<strong>Individual responses:</strong>
+						</h4>
+						<ul class="list-group">
+							{% for response in question['responses'] %}
+								<li class="list-group-item">
+									{% for vote in response %}
+										<div>{{ vote }}</div>
+									{% endfor %}
+								</li>
+							{% endfor %}
+						</ul>
 					{% else %}
 						<div>Unknown question type</div>
 					{% endif %}
