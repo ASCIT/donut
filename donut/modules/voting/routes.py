@@ -226,7 +226,7 @@ def submit(access_key):
         else:  # input field
             if type(value) != str: return error('Invalid text response')
             response_json = value
-        response_jsons.append(json.dumps(response_json))
+        response_jsons.append(json.dumps(response_json, separators=(',',':')))
     helpers.set_responses(expected_question_ids, response_jsons)
     return flask.jsonify({'success': True})
 
