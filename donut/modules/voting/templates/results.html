@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block page %}
-
 <div class="container theme-showcase" role="main">
 	<div class="jumbotron">
 		{% if not results_shown %}
@@ -49,6 +48,8 @@
 							<h4>
 								<strong>Individual responses:</strong>
 							</h4>
+							<label for="show-responses{{ loop.index }}">Show responses?</label>
+							<input type="checkbox" class="show-responses" id="show-responses{{ loop.index }}"/>
 							<ul class="list-group">
 								{% for response in question['responses'] %}
 									<li class="list-group-item">
@@ -82,6 +83,8 @@
 						<h4>
 							<strong>Individual responses:</strong>
 						</h4>
+						<label for="show-responses{{ loop.index }}">Show responses?</label>
+						<input type="checkbox" class="show-responses" id="show-responses{{ loop.index }}"/>
 						<ul class="list-group">
 							{% for response in question['responses'] %}
 								<li class="list-group-item">
@@ -99,4 +102,12 @@
 		</ul>
 	</div>
 </div>
+{% endblock %}
+{% block styles %}
+	{{ super() }}
+	<style>
+		.show-responses:not(:checked) ~ ul {
+			display: none;
+		}
+	</style>
 {% endblock %}
