@@ -34,7 +34,7 @@ def save():
 
 @blueprint.route('/created_list')
 def created_list():
-    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"], 'pages')
+    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_WEBPAGES")
     links = glob.glob(root+'/*')
     for i in range(len(links)):
         links[i] = links[i].replace(root + '/', '').replace('.md','')
