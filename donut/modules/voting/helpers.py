@@ -42,6 +42,7 @@ def get_public_surveys(user_id):
         SELECT DISTINCT title, description, end_time, access_key
         FROM surveys
         WHERE start_time <= NOW() AND NOW() <= end_time
+        AND public
         ORDER BY end_time
     """
     with flask.g.pymysql_db.cursor() as cursor:

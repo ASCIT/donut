@@ -225,6 +225,11 @@
 
       $('button#add_question').click(function() { addElement(Number(typeSelect.val())) })
       saveButton = $('button#save_survey').click(saveChanges)
+
+      $('input#take-link').val(
+        location.origin +
+        '{{ url_for("voting.take_survey", access_key=access_key) }}'
+      )
     })
     window.onbeforeunload = function(e) {
       if (!deepEquals(generateJSON(), questionData)) {
@@ -241,6 +246,8 @@
       {% if survey['description'] %}
         <h3>{{ survey['description'] }}</h3>
       {% endif %}
+      <label for="take-link">Link to take survey:</label>
+      <input class="form-control" id="take-link" disabled/>
       <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
         Edit survey settings
       </a>
