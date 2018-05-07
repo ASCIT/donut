@@ -4,6 +4,10 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 class="text-center">BoC Reps</h1>
+      {% if permission %}
+      <a href="{{ url_for('editor.editor', input_text=BoC_reporters, title=BoC_reporters) }}">edit this page</a>
+      {% else %}
+      {% endif %}
       <div id = 'title'>
         <h2>Reporting Concerns to the BoC</h2>
       </div>
@@ -11,7 +15,7 @@
         <p>
           This is a guide with advice on how to respond to a BoC concern against
           you and what to expect throughout the case process. You may also find
-          information in our 
+          information in our
 	  <a href="{{ url_for('committee_sites.FAQ')}}">
 	Frequently Asked Questions useful.</a>
         </p>
@@ -99,4 +103,3 @@
   </div>
 </div>
 {% endblock %}
-

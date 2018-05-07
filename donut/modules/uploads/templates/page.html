@@ -11,7 +11,7 @@
       <script>convert(`{{page}}`);</script>
     </div>
     {% if permission %}
-    <a href="{{ url_for('editor.editor', input_text=title, title=title) }}">>edit this page</a>
+    <a href="{{ url_for('editor.editor', input_text=title, title=title) }}">edit this page</a>
     {% else %}
     {% endif %}
     </div>

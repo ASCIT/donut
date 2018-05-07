@@ -4,6 +4,10 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 class="text-center">ASCIT Bylaws</h1>
+      {% if permission %}
+      <a href="{{ url_for('editor.editor', input_text=ASCIT_Bylaws, title=ASCIT_Bylaws) }}">edit this page</a>
+      {% else %}
+      {% endif %}
       <div id = 'content'>
         <a name="ARTICLE_I--PURPOSE"></a><h3> <span class="mw-headline">ARTICLE I--PURPOSE</span></h3>
         <p>SECTION 1. The Associated Students of the California Institute of Technology (ASCIT) shall exist for the benefit of undergraduates as given in the Articles of Incorporation.  ASCIT shall provide representation for students to the Institute, seek to improve academic and nonacademic aspects of student life, provide universal student resources, support publications, and uphold the Honor System.
@@ -248,4 +252,3 @@
   </div>
 </div>
 {% endblock %}
-

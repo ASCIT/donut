@@ -9,70 +9,53 @@ from donut.auth_utils import check_permission
 @blueprint.route('/BoC')
 def boc():
     """Display Boc page."""
-    if(check_permission(Permissions.ADMIN)):
-        return flask.render_template('BoC.html', BoC=helpers.get_BoC_member(), permission=True)
-    return flask.render_template('BoC.html', BoC=helpers.get_BoC_member())
+    return flask.render_template('BoC.html', BoC=helpers.get_BoC_member(), permission=check_permission(Permissions.ADMIN)
+
 
 
 @blueprint.route('/BoC/defendants')
 def defendants():
     """Display Boc defendant page."""
-    if check_permission(Permissions.ADMIN):
-        return flask.render_template('BoC.defendants.html', permission=True)
-    return flask.render_template('BoC.defendants.html')
+    return flask.render_template('BoC_Defendants.html', permission=check_permission(Permissions.ADMIN)
 
 
-@blueprint.route('/BoC/witnesses')
+@blueprint.route('/BoC/witness')
 def witnesses():
-    """Display Boc witnesses page."""
-    if (check_permission(Permissions.ADMIN)):
-        return flask.render_template('BoC.witnesses.html', permission=True)
-    return flask.render_template('BoC.witnesses.html')
+    """Display Boc witness page."""
+    return flask.render_template('BoC_Witness.html', permission=check_permission(Permissions.ADMIN)
 
 
 @blueprint.route('/BoC/FAQ')
 def FAQ():
     """Display Boc FAQ page."""
-    if(check_permission(Permissions.ADMIN)):
-        return flask.render_template('BoC.reporters.html', permission=True)
-    return flask.render_template('BoC.FAQ.html')
+    return flask.render_template('BoC_FAQ.html', permission=check_permission(Permissions.ADMIN)
 
 
 @blueprint.route('/BoC/reporters')
 def reporters():
     """Display Boc reporters page."""
-    if(check_permission(Permissions.ADMIN)):
-        return flask.render_template('BoC.reporters.html', permission=True)
-    return flask.render_template('BoC.reporters.html')
+    return flask.render_template('BoC_Reporters.html', permission=check_permission(Permissions.ADMIN)
 
 
 @blueprint.route('/BoC/bylaws')
 def bylaws():
     """Display Boc bylaws page."""
-    if(check_permission(Permissions.ADMIN)):
-        return flask.render_template('BoC.bylaws.html', permission=True)
-    return flask.render_template('BoC.bylaws.html')
+    return flask.render_template('BoC_Bylaws.html', permission=check_permission(Permissions.ADMIN)
 
 
 @blueprint.route('/ascit/bylaws')
 def ascit_bylaws():
     """Display ASCIT bylaws page"""
-    if check_permission(Permissions.ADMIN):
-        return flask.render_template('ascit_bylaws.html', permission=True)
-    return flask.render_template('ascit_bylaws.html')
+    return flask.render_template('ASCIT_Bylaws.html', permission=check_permission(Permissions.ADMIN)
+
 
 
 @blueprint.route('/honor_system_handbook')
 def honor_system_handbook():
     """Display the honor system faculty handbook"""
-    if check_permission(Permissions.ADMIN):
-        return flask.render_template('honor_system_handbook.html', permission=True)
-    return flask.render_template('honor_system_handbook.html')
-
+    return flask.render_template('The_Honor_System.html', permission=check_permission(Permissions.ADMIN)
 
 @blueprint.route('/CRC')
 def CRC():
     """Display CRC page."""
-    if check_permission(Permissions.ADMIN):
-        return flask.render_template('CRC.html', CRC=helpers.get_CRC_member(), permission=True)
-    return flask.render_template('CRC.html', CRC=helpers.get_CRC_member())
+    return flask.render_template('CRC.html', CRC=helpers.get_CRC_member(), permission=check_permission(Permissions.ADMIN)

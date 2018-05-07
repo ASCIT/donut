@@ -6,8 +6,12 @@
       <div class="jumbotron">
         <div>
           <h1 class="text-center">BoC Reps</h1>
+          {% if permission %}
+          <a href="{{ url_for('editor.editor', input_text=BoC, title=BoC) }}">edit this page</a>
+          {% else %}
+          {% endif %}
           <h2>Board of Control</h2>
-          <a href="{{ url_for('editor.editor', input_text='BoC', title=10) }}">>edit this page</a>
+          <a href="{{ url_for('editor.editor', input_text='BoC', title=BoC) }}">>edit this page: TEST!!!!</a>
           <p><i>
           "No member of the Caltech community shall take unfair advantage of any
           other member of the Caltech community!"

@@ -4,7 +4,10 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 class="text-center">BoC FAQ</h1>
-      <a href="{{url_for('editor.editor', input_text='hi')}}"> click meee</a>
+      {% if permission %}
+      <a href="{{ url_for('editor.editor', input_text=BoC_FAQ, title=BoC_FAQ) }}">edit this page</a>
+      {% else %}
+      {% endif %}
       <div id = 'disclaimer'>
         <p>
           All cases are unique and all decisions are made on a case-by-case
@@ -903,4 +906,3 @@
   </div>
 </div>
 {% endblock %}
-

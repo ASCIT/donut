@@ -4,6 +4,10 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 class="text-center">CONDUCT REVIEW COMMITTEE(CRC)</h1>
+      {% if permission %}
+      <a href="{{ url_for('editor.editor', input_text=CRC, title=CRC) }}">>edit this page</a>
+      {% else %}
+      {% endif %}
       <div id = 'CRC'>
         <div id = 'representative' style="font-size:21px;font-weight:200;
         margin-bottom:15px;>

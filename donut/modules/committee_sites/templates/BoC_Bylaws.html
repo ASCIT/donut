@@ -5,6 +5,10 @@
     <div class="jumbotron">
       <div id = 'content'>
         <h1 class="text-center">BoC Bylaws</h1>
+        {% if permission %}
+        <a href="{{ url_for('editor.editor', input_text=BoC_Bylaws, title=BoC_Bylaws) }}">edit this page</a>
+        {% else %}
+        {% endif %}
         <h2>BOARD OF CONTROL</h2>
         <p>
           SECTION 1. Purpose and Duties. The Board of Control (BoC) shall review
@@ -338,4 +342,3 @@
   </div>
 </div>
 {% endblock %}
-
