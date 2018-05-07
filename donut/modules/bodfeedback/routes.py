@@ -112,10 +112,12 @@ def bodfeedback_mark_unread(id):
 # add an email to this complaint
 @blueprint.route('/1/bodfeedback/<uuid:id>/addEmail/<email>')
 def bodfeedback_add_email(id, email):
-    #TODO
-    pass
+    complaint_id = helpers.get_id(id)
+    sucess = helpers.add_email(complaint_id, email)
+    if not success: return "Failed to add email"
+    return "Success!"
 
 # remove an email from this complaint
 @blueprint.route('/1/bodfeedback/<uuid:id>/removeEmail/<email>')
 def bodfeedback_remove_email(id, email):
-    remove_email(id, email)
+    helpers.remove_email(id, email)

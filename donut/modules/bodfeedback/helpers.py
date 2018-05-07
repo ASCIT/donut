@@ -41,7 +41,9 @@ def register_complaint(data):
     add_msg(complaint_id, data['msg'], data['name'])
     # add email to db if applicable
     if data['email'] != "":
-        add_email(complaint_id, data['email'])
+        emails = [x.strip() for x in data['email'].split(',')]
+        for e in emails:
+            add_email(complaint_id, e)
     return complaint_id
 
 
@@ -57,6 +59,7 @@ def add_email(complaint_id, email):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
+    return True
 
 
 def remove_email(complaint_id, email):
@@ -70,6 +73,7 @@ def remove_email(complaint_id, email):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
+    return True
 
 
 def add_msg(complaint_id, message, poster):
