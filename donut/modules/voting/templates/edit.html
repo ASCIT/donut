@@ -1,8 +1,4 @@
 {% extends "layout.html" %}
-{% block styles %}
-  {{ super() }}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/voting-forms.css') }}" />
-{% endblock %}
 {% block scripts %}
   {{ super() }}
   <script>
@@ -239,25 +235,27 @@
 {% endblock %}
 
 {% block page %}
-  <div class="col-md-8 col-md-offset-2" style="float: none; padding-bottom: 25px">
-    <h1>Editing survey questions for {{ survey['title'] }}</h1>
-    {% if survey['description'] %}
-      <h3>{{ survey['description'] }}</h3>
-    {% endif %}
-    <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
-      Edit survey settings
-    </a>
-    <ul id="question_container"></ul>
-    <div class="form-group">
-      <div class="input-group">
-        <select class="form-control" id="question_type"></select>
-        <span class="input-group-btn">
-          <button class="btn btn-default" id="add_question">Add question</button>
-        </span>
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <h1>Editing survey questions for {{ survey['title'] }}</h1>
+      {% if survey['description'] %}
+        <h3>{{ survey['description'] }}</h3>
+      {% endif %}
+      <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
+        Edit survey settings
+      </a>
+      <ul id="question_container"></ul>
+      <div class="form-group">
+        <div class="input-group">
+          <select class="form-control" id="question_type"></select>
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="add_question">Add question</button>
+          </span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <button class="btn btn-primary" id="save_survey">Save</button>
+      <div class="form-group">
+        <button class="btn btn-primary" id="save_survey">Save</button>
+      </div>
     </div>
   </div>
 {% endblock %}
