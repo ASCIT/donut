@@ -138,11 +138,11 @@ def get_position_data(fields=None):
 
 
 def add_position(group_id, pos_name):
-    ''' 
+    '''
     Inserts new position into the database associated
     with the given group and with the given name
 
-    Arguments: 
+    Arguments:
         group_id: the id of the group you want to insert the position into
         pos_name: name of the position to be created
     '''
@@ -182,7 +182,7 @@ def get_members_by_group(group_id):
 
     Arguments:
         group_id: id of group in question
-    
+
     Returns:
         List where each element is a JSON reprenting the data of each
         person
@@ -201,3 +201,25 @@ def get_members_by_group(group_id):
     members = [row['user_id'] for row in result]
     result = core.get_member_data(members)
     return result
+
+
+def is_user_in_group(user_id, group_id):
+    """
+    Returns whether the given user holds any position in the given group
+    """
+    query = """
+        SELECT user_id
+        FROM position_holders NATURAL JOIN (
+            (SELECT pos_id, group_id FROM positions) UNION
+            (
+                SELECT group_id, pos_id_to AS pos_id
+                FROM positions JOIN position_relations
+                    ON pos_id = pos_id_from
+            )
+        ) tmp NATURAL JOIN groups
+        WHERE user_id = %s AND group_id = %s
+        LIMIT 1
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id, group_id])
+        return cursor.fetchone() is not None

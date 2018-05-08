@@ -5,7 +5,7 @@ import json
 import flask
 from donut.auth_utils import get_user_id
 from donut.misc_utils import generate_random_string
-from donut.modules.groups.helpers import get_group_list_data
+from donut.modules.groups.helpers import get_group_list_data, is_user_in_group
 from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
 from .ranked_pairs import winners
@@ -37,9 +37,8 @@ def get_question_types():
 
 
 def get_public_surveys(user_id):
-    #TODO: fix group restriction
     query = """
-        SELECT DISTINCT title, description, end_time, access_key
+        SELECT DISTINCT title, description, end_time, access_key, group_id
         FROM surveys
         WHERE start_time <= NOW() AND NOW() <= end_time
         AND public
@@ -47,7 +46,10 @@ def get_public_surveys(user_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        return cursor.fetchall()
+        return filter(
+            lambda survey: survey['group_id'] is None or is_user_in_group(user_id, survey['group_id']),
+            cursor.fetchall()
+        )
 
 
 def get_closed_surveys(user_id):
