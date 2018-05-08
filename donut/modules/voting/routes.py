@@ -205,13 +205,19 @@ def submit(access_key):
                 return error('Invalid response to elected position')
             response_json = []
             for order_value in value:
-                if type(order_value) != str:
-                    return error('Invalid response to elected position')
-                if order_value == helpers.NO: response_json.append(None)
+                if type(order_value) == str:
+                    if order_value == helpers.NO: response_json.append(None)
+                    else:
+                        choice = helpers.get_choice(question_id, order_value)
+                        if choice is None:
+                            return error('Invalid choice for elected position')
+                        response_json.append(choice['choice_id'])
+                elif type(order_value) == int:
+                    if get_member_data(order_value, ['user_id']) == {}:
+                        return error('Invalid write-in for elected position')
+                    response_json.append(-order_value)
                 else:
-                    choice = helpers.get_choice(question_id, order_value)
-                    response_json.append(order_value if choice is None else
-                                         choice['choice_id'])
+                    return error('Invalid response to elected position')
         elif type_id == question_types['Checkboxes']:
             if type(value) != list:
                 return error('Invalid response to checkboxes')

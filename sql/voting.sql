@@ -59,7 +59,7 @@ CREATE TABLE survey_responses (
                        -- For dropdown:         choice_id (number)
                        -- For checkbox:         [choice_id (number)]
                        -- For short/long text:  text (string)
-                       -- For elected position: [choice_id (number) | writein (string) | NO (null)]
+                       -- For elected position: [choice_id (number) | user_id (negative number) | NO (null)]
     PRIMARY KEY(question_id, user_id),
     FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE,
     FOREIGN KEY(user_id) REFERENCES members(user_id) ON DELETE CASCADE

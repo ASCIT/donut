@@ -332,6 +332,7 @@ def get_results(survey_id):
         FROM survey_questions NATURAL JOIN survey_responses
         WHERE question_id = %s
     """
+    name_query = 'SELECT full_name FROM members_full_name WHERE user_id = %s'
     question_types = get_question_types()
     count_types = set([
         question_types['Dropdown'], question_types['Short text'],
@@ -352,15 +353,18 @@ def get_results(survey_id):
 
             def resolve_name(vote):
                 if vote is None: return NO
-                if type(vote) is int: return question['choices'][vote]
-                if type(vote) is str: return vote
+                if type(vote) is int:
+                    if vote < 0:  # user_id
+                        cursor.execute(name_query, [-vote])
+                        return cursor.fetchone()['full_name']
+                    else:
+                        return question['choices'][vote]
                 raise Exception('Unrecognized elected position vote')
 
             cursor.execute(responses_query, question['question_id'])
             responses = [
                 json.loads(res['response']) for res in cursor.fetchall()
             ]
-            question['responses'] = responses
             question_type = question['type']
             if question_type in count_types:
                 question['results'] = Counter(responses).most_common()
@@ -370,6 +374,7 @@ def get_results(survey_id):
                 responses = [[resolve_name(vote) for vote in res]
                              for res in responses]
                 question['results'] = winners(responses)
+            question['responses'] = responses
     return questions
 
 

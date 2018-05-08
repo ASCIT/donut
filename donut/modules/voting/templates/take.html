@@ -31,6 +31,7 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+<script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
 <script>
 	var NO = '{{ NO }}'
 	var QUESTION_TYPES = {{ question_types|safe }}
@@ -40,23 +41,28 @@
 
 	function addChoice() {
 		var $this = $(this)
-		var inputGroup = $this.closest('.input-group')
-		var choiceSpan = inputGroup.find('.candidate')
-		var chosenList = $this.closest('.element').find('.chosen')
-		if (choiceSpan.length) {
-			var choice = choiceSpan.text(), writein = false
+		var element = $this.closest('.element')
+		var chosenList = element.find('.chosen')
+		var userId = $this.attr('user-id')
+		if (userId) { //a writein
+			var choice = $this.find('p').text()
+			element.find('input.writein')
+				.val('')
+				.keyup() //clear search results
+		}
+		else { //not a writein
+			var inputGroup = $this.closest('.input-group')
+			var choiceSpan = inputGroup.find('.candidate')
+			var choice = choiceSpan.text()
 			inputGroup.remove()
 		}
-		else {
-			var writeinInput = inputGroup.find('input')
-			var choice = writeinInput.val(), writein = true
-			writeinInput.val('')
-		}
+		var displayedChoice = $('<span>').addClass('choice-text').text(choice)
+		if (userId) displayedChoice.attr('user-id', userId)
 		chosenList.append(
 			$('<li>').addClass('list-group-item').append(
-				$('<span>').addClass('choice-text').text(choice),
+				displayedChoice,
 				$('<div>').addClass('btn-group space-right').append(
-					$('<button>').addClass('btn btn-default').click(removeChoice(writein)).append(
+					$('<button>').addClass('btn btn-default').click(removeChoice(userId)).append(
 						$('<span>').addClass('glyphicon glyphicon-minus')
 					),
 					$('<button>').addClass('btn btn-default').click(moveUp).append(
@@ -124,7 +130,11 @@
 				case QUESTION_TYPES['Elected position']:
 					var response = []
 					var chosen = element.find('.chosen .list-group-item span.choice-text')
-					chosen.each(function() { response.push($(this).text()) })
+					chosen.each(function() {
+						var $this = $(this)
+						var userId = $this.attr('user-id')
+						response.push(userId ? Number(userId) : $this.text())
+					})
 					break
 				case QUESTION_TYPES.Checkboxes:
 					var response = []
@@ -188,12 +198,19 @@
 					question.choices.forEach(function(choice) {
 						choices.append(candidateInput(choice))
 					})
+					var nameInput = $('<input>').addClass('form-control writein').attr('placeholder', 'Write-in')
+					var searchResults = $('<ul>').addClass('list-group')
 					choices.append(
 						candidateInput(NO),
-						electedPositionChoice(
-							$('<input>').addClass('form-control').attr('placeholder', 'Write-in')
-						)
+						nameInput,
+						searchResults
 					)
+					attachDirectorySearch(nameInput, searchResults, function(user) {
+						return $('<button>').addClass('list-group-item')
+							.attr('user-id', user.user_id)
+							.click(addChoice)
+							.append($('<p>').text(user.full_name))
+					})
 					elementInner.append(
 						$('<div>').addClass('row').append(
 							choices,
@@ -232,6 +249,10 @@
 	<style>
 		.left {
 			text-align: left;
+		}
+		button[user-id] > p { /* override jumbotron p styles */
+			font-size: 15px;
+			margin-bottom: 0;
 		}
 	</style>
 {% endblock %}
