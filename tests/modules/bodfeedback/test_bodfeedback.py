@@ -93,11 +93,11 @@ def test_register_complaint(client):
         'subject': 'Sub1',
         'msg': 'Sample Message 3',
         'name': 'Joe Schmo',
-        'email': 'joe@example.com'
+        'email': 'joe@example.com, joey@example.com'
     }
     complaint_id = helpers.register_complaint(data)
     res = helpers.get_all_fields(complaint_id)
-    assert res['emails'] == ['joe@example.com']
+    assert res['emails'] == ['joe@example.com', 'joey@example.com']
     assert res['messages'][0]['message'] == 'Sample Message 3'
     assert res['messages'][0]['poster'] == 'Joe Schmo'
     assert res['subject'] == 'Sub1'
