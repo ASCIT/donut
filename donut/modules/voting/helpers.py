@@ -36,6 +36,10 @@ def get_question_types():
     return question_types
 
 
+def allowed_to_take(user_id):
+    return lambda survey: survey['group_id'] is None or is_user_in_group(user_id, survey['group_id'])
+
+
 def get_public_surveys(user_id):
     query = """
         SELECT DISTINCT title, description, end_time, access_key, group_id
@@ -46,10 +50,7 @@ def get_public_surveys(user_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        return filter(
-            lambda survey: survey['group_id'] is None or is_user_in_group(user_id, survey['group_id']),
-            cursor.fetchall()
-        )
+        return filter(allowed_to_take(user_id), cursor.fetchall())
 
 
 def get_closed_surveys(user_id):
@@ -67,7 +68,7 @@ def get_closed_surveys(user_id):
 
 def get_survey_data(access_key):
     query = """
-        SELECT survey_id, title, description,
+        SELECT survey_id, title, description, group_id,
         start_time, end_time, creator, auth, results_shown
         FROM surveys WHERE access_key = %s
     """
@@ -274,9 +275,11 @@ def restrict_take_access(survey):
     now = datetime.now()
     if not (survey['start_time'] <= now <= survey['end_time']):
         return 'Survey is not currently accepting responses'
-    if 'username' not in flask.session:
+    username = flask.session.get('username')
+    if not username:
         return 'Must be logged in to take survey'
-    # TODO: Check that user is in correct group
+    if not allowed_to_take(get_user_id(username))(survey):
+        return 'You do not belong to the group this survey is for'
     responses_query = """
         SELECT question_id
         FROM survey_questions NATURAL JOIN survey_responses NATURAL JOIN users
