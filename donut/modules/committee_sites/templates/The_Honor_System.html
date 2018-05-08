@@ -5,6 +5,10 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 class="text-center">The Honor System</h1>
+      {% if permission %}
+      <a href="{{ url_for('editor.editor', input_text=The_Honor_System, title=The_Honor_System) }}">>edit this page</a>
+      {% else %}
+      {% endif %}
       <div id = 'content'>
 
 
@@ -970,4 +974,3 @@ gratefully received and suggestions for change will be seriously considered.<p>
 </div>
 </div>
 {% endblock %}
-

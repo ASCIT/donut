@@ -6,6 +6,10 @@
       <h1 class="text-center">BoC Witness</h1>
       <div id = 'title'>
         <h2>Being a BoC Witness</h2>
+        {% if permission %}
+        <a href="{{ url_for('editor.editor', input_text=BoC_Witness, title=BoC_Witness) }}">>edit this page</a>
+        {% else %}
+        {% endif %}
       </div>
       <div id = 'content'>
         <p>
@@ -47,7 +51,7 @@
           regarding the case to anyone other than the defendant you
           accompany, the chair and secretary for the case, the Deans,
           and any member of the counseling center. See
-          <a href="{{ url_for('committee_sites.FAQ', 
+          <a href="{{ url_for('committee_sites.FAQ',
           _anchor="What confidentiality must I keep?")}}">"What confidentiality
           must I keep?" </a> for more details.
         </p>
@@ -61,7 +65,7 @@
           does not depend on your word alone (physical evidence is the
           number one factor), we do feel that your input will be important
           to ensure that this case is decided as accurately and fairly as
-          possible. Please see the 
+          possible. Please see the
 	  <a href="{{ url_for('committee_sites.FAQ', _anchor="Witness Questions") }}
 	 ">Witness FAQ</a> for more information.
         </p>
@@ -79,7 +83,7 @@
           regarding the case to anyone other than the chair and secretary
           for the case, the Deans, and any member of the counseling center.
           See
-          <a href="{{ url_for('committee_sites.FAQ', 
+          <a href="{{ url_for('committee_sites.FAQ',
           _anchor="What confidentiality must I keep?")}}">"What confidentiality must I keep?"</a>
           for more details.
         </p>
@@ -88,4 +92,3 @@
   </div>
 </div>
 {% endblock %}
-

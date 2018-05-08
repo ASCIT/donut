@@ -7,7 +7,7 @@
     <div class="jumbotron" style="text-align: center">
       <h1 id = "title" class="text-center">Editing</h1>
 
-      <textarea id="text_title" rows="2">{{title}}</textarea>
+      <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
 
       <br/>
       <div class="btn-group">
@@ -24,7 +24,7 @@
         </div>
         <div class="btn-group" role="group">
           <div class="dropdown">
-            <button class="btn btn-primary btn-sm" type="button">Headings
+            <button class="btn btn-outline-primary btn-sm" type="button">Headings
             <span class="caret"></span></button>
             <ul class="dropdown-menu">
               <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_heading(1)" style="font-size:20px">Heading</a></li>
@@ -41,6 +41,7 @@
         <button class="btn btn-outline-primary btn-sm" type="button" onClick="insert_image()">Images</button>
       </div>
       <br/>
+
       <textarea id="source" rows="10" cols="20" width="80%">{{input_text}}
       </textarea>
       <hr/>

@@ -16,6 +16,7 @@ function change_title(){
 
 function insert_heading(size){
   var string = "";
+  console.log("headings???");
   for(var i = 0; i< size; i++)
   {
     string += "#";
@@ -23,14 +24,10 @@ function insert_heading(size){
   var ta = document.getElementById('source')
   if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
   {
-    var text = ta.value;
-    text =
-    text.substring(0, ta.selectionStart) +
-    string + window.getSelection().toString() + string
-    text.substring(ta.selectionEnd);
+    insert(string, false);
   }
   else {
-    insert(string + "Heading_title" + string+ "\n");
+    insert(string + "Heading_title" + string+ "\n", true);
   }
 }
 

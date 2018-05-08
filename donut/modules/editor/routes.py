@@ -6,11 +6,13 @@ import glob
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
 
-
-@blueprint.route('/editor')
+@blueprint.route('/editor', methods=['GET', 'POST'])
 def editor(input_text='Hello World!!!', title="TITLE"):
-    if input_text != 'Hello World!!!':
-        input_text = read_markdown(input_text)
+    input = flask.request.args.get('input_text')
+    print(input)
+    if input != None:
+        input_text = helpers.read_markdown(input)
+        title = flask.request.args.get('title')
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
 
@@ -32,7 +34,7 @@ def save():
 
 @blueprint.route('/created_list')
 def created_list():
-    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_FOLDER"], 'pages')
+    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_WEBPAGES")
     links = glob.glob(root+'/*')
     for i in range(len(links)):
         links[i] = links[i].replace(root + '/', '').replace('.md','')
