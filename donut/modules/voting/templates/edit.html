@@ -68,13 +68,16 @@
       }
     }
 
-    function makeDropdownChoice(choice) {
-      return $('<option>').attr('choice', choice).text(choice)
-    }
-    function makeCheckboxChoice(choice) {
-      return $('<div>').attr('choice', choice).append(
-        $('<label>').text(choice).append($('<input>').attr('type', 'checkbox'))
-      )
+    function makeChoice(inputType) {
+      return function(choice) {
+        var choiceDiv = $('<div>').attr('choice', choice).append(
+          $('<label>').text(choice).append($('<input>').attr('type', inputType)),
+          $('<button>').addClass('btn btn-danger remove-choice')
+            .click(function() { choiceDiv.remove() })
+            .append($('<span>').addClass('glyphicon glyphicon-remove'))
+        )
+        return choiceDiv
+      }
     }
 
     function addElement(questionType, title, description, choices) {
@@ -108,27 +111,18 @@
         })
       switch (questionType) {
         case QUESTION_TYPES.Dropdown:
-        case QUESTION_TYPES['Elected position']:
-          var choicesDiv = $('<select>').addClass('form-control choices')
-          choices.forEach(function(choice) { choicesDiv.append(makeDropdownChoice(choice)) })
-          inputs.append(
-            $('<div>').addClass('input-group').append(
-              choiceName,
-              $('<span>').addClass('input-group-btn').append(
-                $('<button>').addClass('btn btn-success').click(addChoice(makeDropdownChoice)).text('Add option')
-              )
-            ),
-            choicesDiv
-          )
-          break
         case QUESTION_TYPES.Checkboxes:
+        case QUESTION_TYPES['Elected position']:
+          var makeChoiceFunction = questionType === QUESTION_TYPES.Checkboxes
+            ? makeChoice('checkbox')
+            : makeChoice('radio')
           var choicesDiv = $('<div>').addClass('choices')
-          choices.forEach(function(choice) { choicesDiv.append(makeCheckboxChoice(choice)) })
+          choices.forEach(function(choice) { choicesDiv.append(makeChoiceFunction(choice)) })
           inputs.append(
             $('<div>').addClass('input-group').append(
               choiceName,
               $('<span>').addClass('input-group-btn').append(
-                $('<button>').addClass('btn btn-success').click(addChoice(makeCheckboxChoice)).text('Add option')
+                $('<button>').addClass('btn btn-success').click(addChoice(makeChoiceFunction)).text('Add option')
               )
             ),
             choicesDiv
@@ -238,7 +232,18 @@
     }
   </script>
 {% endblock %}
-
+{% block styles %}
+  {{ super() }}
+  <style>
+    .choices > * {
+      padding-top: 5px;
+    }
+    button.remove-choice {
+      position: relative;
+      left: 5px;
+    }
+  </style>
+{% endblock %}
 {% block page %}
   <div class="row">
     <div class="col-md-8 col-md-offset-2">
