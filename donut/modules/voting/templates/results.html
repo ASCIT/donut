@@ -13,6 +13,14 @@
 		{% if description %}
 			<h2>{{ description }}</h2>
 		{% endif %}
+		<h4>
+			Responses:
+			{% if results %}
+				{{ results[0]['responses']|length }}
+			{% else %}
+				0
+			{% endif %}
+		</h4>
 		<ul id="question_container">
 			{% for question in results %}
 				<li class="list-group-item">
