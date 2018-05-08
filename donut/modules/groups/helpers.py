@@ -173,6 +173,7 @@ def delete_position(pos_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
 
+
 # TODO: Implement this helper function
 def create_position_holder(group_id, pos_id, user_id, start_date, end_date):
     '''
@@ -188,8 +189,8 @@ def create_position_holder(group_id, pos_id, user_id, start_date, end_date):
     s = """INSERT INTO position_holders (pos_id, user_id, start_date, 
     end_date) VALUES (%s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (pos_id, user_id, start_date, 
-        end_date))
+        cursor.execute(s, (pos_id, user_id, start_date, end_date))
+
 
 def get_members_by_group(group_id):
     query = "SELECT user_id FROM group_members "
