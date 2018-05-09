@@ -255,7 +255,9 @@ def set_questions(survey_id, questions):
 
 def get_my_surveys(user_id):
     query = """
-        SELECT title, description, access_key, end_time <= NOW() as closed, end_time
+        SELECT title, description, access_key,
+        start_time, start_time >= NOW() AS unopened,
+        end_time <= NOW() as closed, end_time
         FROM surveys WHERE creator = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:

@@ -18,6 +18,11 @@
 								<p class='list-group-item-text'>{{ survey['description'] }}</p>
 							{% endif %}
 							<p class='list-group-item-text'>
+								{% if survey['unopened'] %}
+									Opens on
+									{{ survey['start_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+									<br />
+								{% endif %}
 								{% if survey['closed'] %}Closed on{% else %}Open until{% endif %}
 								{{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
 							</p>
