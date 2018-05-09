@@ -274,6 +274,6 @@ def release_results(access_key):
         flask.flash('Survey has not yet finished')
         return list_surveys()
 
-    helpers.release_results(survey['survey_id'])
+    helpers.update_survey_params(survey['survey_id'], {'results_shown': True})
     return flask.redirect(
         flask.url_for('voting.show_results', access_key=access_key))

@@ -20,7 +20,7 @@ def get_groups():
     return get_group_list_data(['group_id', 'group_name'])
 
 
-question_types = None
+question_types = None  # caches the return value of get_question_types()
 
 
 def get_question_types():
@@ -379,9 +379,3 @@ def get_results(survey_id):
                 question['results'] = winners(non_abstaining)
                 question['filled_responses'] = non_abstaining
     return questions
-
-
-def release_results(survey_id):
-    query = 'UPDATE surveys SET results_shown = TRUE WHERE survey_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [survey_id])
