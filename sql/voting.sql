@@ -65,7 +65,7 @@ CREATE TABLE survey_responses (
     FOREIGN KEY(user_id) REFERENCES members(user_id) ON DELETE CASCADE
 );
 
-INSERT INTO survey_question_types (type_name, options) VALUES
+INSERT INTO survey_question_types (type_name, choices) VALUES
     ('Dropdown', TRUE),
     ('Checkboxes', TRUE),
     ('Elected position', TRUE),
