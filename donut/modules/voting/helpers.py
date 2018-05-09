@@ -98,7 +98,7 @@ def get_questions_json(survey_id, include_id):
             else:
                 del question['choices']
             if not include_id: del question['question_id']
-    return json.dumps(questions)
+    return json.dumps(questions, separators=(',', ':'))
 
 
 def get_question_ids(survey_id):
