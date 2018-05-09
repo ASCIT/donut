@@ -365,16 +365,17 @@ def get_results(survey_id):
             responses = [
                 json.loads(res['response']) for res in cursor.fetchall()
             ]
+            question['responses'] = responses
             question_type = question['type']
             if question_type in count_types:
                 question['results'] = Counter(responses).most_common()
             elif question_type == question_types['Checkboxes']:
                 question['results'] = Counter(chain(*responses)).most_common()
             elif question_type == question_types['Elected position']:
-                responses = [[resolve_name(vote) for vote in res]
-                             for res in responses]
-                question['results'] = winners(responses)
-            question['responses'] = responses
+                non_abstaining = [[resolve_name(vote) for vote in res]
+                                  for res in responses if res]
+                question['results'] = winners(non_abstaining)
+                question['filled_responses'] = non_abstaining
     return questions
 
 
