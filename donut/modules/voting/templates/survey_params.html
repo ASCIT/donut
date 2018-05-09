@@ -70,7 +70,7 @@
 						</div>
 					</div>
 					<div class='form-group'>
-						<label for='start_date' class='required'>End date</label>
+						<label for='end_date' class='required'>End date</label>
 						<input
 							type='date'
 							class='form-control'
@@ -144,4 +144,23 @@
 			{% endif %}
 		</div>
 	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		var END_TIME_BEFORE_NOW_WARNING = 'Are you sure you want to set the end time to before now? You will not be able to change it later.'
+		$(document).ready(function() {
+			$('button[type=submit]').click(function(e) {
+				var endYMD = $('input#end_date').val().split('-').map(Number)
+				var endDate = new Date(endYMD[0], endYMD[1] - 1, endYMD[2]) //JS month is 0-indexed
+				var endHour = Number($('input#end_hour').val()) % 12
+				if ($('input[name=end_period][value=P]').parent().hasClass('active')) endHour += 12 //PM
+				endDate.setHours(endHour)
+				endDate.setMinutes(Number($('input#end_minute').val()))
+				if (endDate < new Date) {
+					if (!confirm(END_TIME_BEFORE_NOW_WARNING)) e.preventDefault()
+				}
+			})
+		})
+	</script>
 {% endblock %}
