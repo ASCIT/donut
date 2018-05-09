@@ -286,10 +286,10 @@ def restrict_take_access(survey):
         SELECT question_id
         FROM survey_questions NATURAL JOIN survey_responses NATURAL JOIN users
         WHERE survey_id = %s AND username = %s
+        LIMIT 1
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(responses_query,
-                       [survey['survey_id'], flask.session['username']])
+        cursor.execute(responses_query, [survey['survey_id'], username])
         if cursor.fetchone(): return 'Already completed'
 
 
