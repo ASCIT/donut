@@ -520,3 +520,587 @@ def test_restrict_access(client):
 
 
 # Routes
+
+
+def test_home(client):
+    rv = client.get(flask.url_for('voting.list_surveys'))
+    assert rv.status_code == 200
+    assert b'Ruddock only' not in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(flask.url_for('voting.list_surveys'))
+    assert rv.status_code == 200
+    assert b'Ruddock only' in rv.data
+
+
+def test_take(client):
+    access_key = list(
+        helpers.get_public_surveys(helpers.get_user_id('csander')))[1][
+            'access_key']
+    rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Must be logged in to take survey' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    helpers.set_questions(2, [{
+        'title': 'Question 1',
+        'description': '',
+        'type': helpers.get_question_types()['Long text']
+    }])
+    rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Edit' in rv.data
+    assert b'Question 1' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'reng'
+    rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Edit' not in rv.data
+    assert b'Question 1' in rv.data
+
+
+def test_make_form(client):
+    rv = client.get(flask.url_for('voting.make_survey_form'))
+    assert rv.status_code == 200
+    assert b'Please log in to create a survey' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(flask.url_for('voting.make_survey_form'))
+    assert rv.status_code == 200
+    assert b'Making new survey' in rv.data
+
+
+def test_manage(client):
+    rv = client.get(flask.url_for('voting.my_surveys'))
+    assert rv.status_code == 200
+    assert b'Please log in to manage your surveys' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(flask.url_for('voting.my_surveys'))
+    assert rv.status_code == 200
+    assert b'ABC' in rv.data and b'Ruddock only' in rv.data
+
+
+def test_edit_questions(client):
+    # Test all restrictions
+    rv = client.get(
+        flask.url_for(
+            'voting.edit_questions', access_key='invalid-access-key'))
+    assert rv.status_code == 200
+    assert b'Invalid access key' in rv.data
+    assert b'Editing survey questions' not in rv.data
+    access_key = list(
+        helpers.get_public_surveys(helpers.get_user_id('csander')))[0][
+            'access_key']
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not the creator of this survey' in rv.data
+    assert b'Editing survey questions' not in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'dqu'
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not the creator of this survey' in rv.data
+    assert b'Editing survey questions' not in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    client.post(
+        flask.url_for('voting.make_survey'),
+        data=dict(
+            title='Already closed',
+            description='',
+            start_date='2018-05-01',
+            start_hour='12',
+            start_minute='00',
+            start_period='P',
+            end_date='2018-05-03',
+            end_hour='12',
+            end_minute='00',
+            end_period='P',
+            group=''),
+        follow_redirects=False)
+    closed_access_key = helpers.get_closed_surveys(
+        helpers.get_user_id('csander'))[0]['access_key']
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=closed_access_key))
+    assert rv.status_code == 200
+    assert b'Cannot modify a survey after it has closed' in rv.data
+    assert b'Editing survey questions' not in rv.data
+    # Test success cases
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Editing survey questions' in rv.data
+    assert b'WARNING: Previous responses will be deleted if you edit the questions' in rv.data
+    access_key2 = list(
+        helpers.get_public_surveys(helpers.get_user_id('csander')))[1][
+            'access_key']
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=access_key2))
+    assert rv.status_code == 200
+    assert b'Editing survey questions' in rv.data
+    assert b'WARNING: Previous responses will be deleted if you edit the questions' not in rv.data
+    # Test saving questions
+    rv = client.post(
+        flask.url_for('voting.save_questions', access_key=closed_access_key),
+        data='[]')
+    assert rv.status_code == 200
+    assert b'Cannot modify a survey after it has closed' in rv.data
+    rv = client.post(
+        flask.url_for('voting.save_questions', access_key=access_key2),
+        data=
+        '[{"title":"Added question","description":"","type":1,"choices":["choice A","choice B"]}]'
+    )
+    assert rv.status_code == 200
+    assert rv.data == b'{"success":true}\n'
+    rv = client.get(
+        flask.url_for('voting.edit_questions', access_key=access_key2))
+    assert rv.status_code == 200
+    assert b'Editing survey questions' in rv.data
+    assert b'Added question' in rv.data and b'choice A' in rv.data and b'choice B' in rv.data
+
+
+def test_edit_params(client):
+    # Test that (some) restrictions are applied
+    rv = client.get(
+        flask.url_for('voting.edit_params', access_key='invalid-access-key'))
+    assert rv.status_code == 200
+    assert b'Invalid access key' in rv.data
+    assert b'Editing survey' not in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    # Test successful case
+    access_key = list(
+        helpers.get_public_surveys(helpers.get_user_id('csander')))[0][
+            'access_key']
+    rv = client.get(flask.url_for('voting.edit_params', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Editing survey' in rv.data
+    assert b"value='ABC'" in rv.data
+    assert b'New description' not in rv.data
+    yesterday = date.today() + timedelta(days=-1)
+    tomorrow = date.today() + timedelta(days=1)
+    rv = client.post(
+        flask.url_for('voting.save_params', access_key=access_key),
+        data=dict(
+            title='ABC',
+            description='New description',
+            start_date=yesterday.strftime(helpers.YYYY_MM_DD),
+            start_hour='12',
+            start_minute='00',
+            start_period='P',
+            end_date=tomorrow.strftime(helpers.YYYY_MM_DD),
+            end_hour='12',
+            end_minute='00',
+            end_period='P',
+            group=''),
+        follow_redirects=False)
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for(
+        'voting.edit_questions', access_key=access_key)
+    rv = client.get(flask.url_for('voting.edit_params', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'New description' in rv.data  # assert that description has changed
+
+
+def test_delete(client):
+    # Test error cases
+    rv = client.delete(
+        flask.url_for('voting.delete_survey', access_key='invalid-access-key'))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid access key"' in rv.data
+    access_key = helpers.get_closed_surveys(
+        helpers.get_user_id('csander'))[0]['access_key']
+    rv = client.delete(
+        flask.url_for('voting.delete_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"You are not the creator of this survey"' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    # Test successful case
+    rv = client.delete(
+        flask.url_for('voting.delete_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert rv.data == b'{"success":true}\n'
+    # Test that it was deleted
+    rv = client.delete(
+        flask.url_for('voting.delete_survey', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid access key"' in rv.data
+
+
+def test_submit(client):
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    yesterday = date.today() + timedelta(days=-1)
+    tomorrow = date.today() + timedelta(days=1)
+    rv = client.post(
+        flask.url_for('voting.make_survey'),
+        data=dict(
+            title='Response test',
+            description='',
+            start_date=yesterday.strftime(helpers.YYYY_MM_DD),
+            start_hour='12',
+            start_minute='00',
+            start_period='P',
+            end_date=tomorrow.strftime(helpers.YYYY_MM_DD),
+            end_hour='12',
+            end_minute='00',
+            end_period='P',
+            auth='on',
+            public='on',
+            group=''),
+        follow_redirects=False)
+    access_key = [
+        survey
+        for survey in helpers.get_public_surveys(
+            helpers.get_user_id('csander'))
+        if survey['title'] == 'Response test'
+    ][0]['access_key']
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for(
+        'voting.edit_questions', access_key=access_key)
+    with client.session_transaction() as sess:
+        del sess['username']
+    survey_id = helpers.get_survey_data(access_key)['survey_id']
+    question_types = helpers.get_question_types()
+    helpers.set_questions(survey_id, [{ # question id 8
+        'title': 'Question A',
+        'description': '',
+        'type': question_types['Dropdown'],
+        'choices': ['1', '2', '3']
+    }, {  # question id 9
+        'title': 'Question B',
+        'description': 'bbb',
+        'type': question_types['Short text']
+    }, { # question id 10
+        'title': 'Question C',
+        'description': 'ccc',
+        'type': question_types['Checkboxes'],
+        'choices': ['a', 'b', 'c']
+    }, { # question id 11
+        'title': 'Question D',
+        'description': '',
+        'type': question_types['Long text']
+    }, { # question id 12
+        'title': 'Question E',
+        'description': '',
+        'type': question_types['Elected position'],
+        'choices': ['do', 're', 'me']
+    }])
+    # Test (some) restriction
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key), data='')
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Must be logged in to take survey"' in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    # Test authorization
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data='{"uid":"","birthday":"1999-05-08"}')
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Incorrect UID or birthday"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data='{"uid":"2078141","birthday":""}')
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Incorrect UID or birthday"' in rv.data
+    # Test questions match
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data=
+        '{"uid":"2078141","birthday":"1999-05-08","responses":[{"question":1}]}'
+    )
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Survey questions have changed"' in rv.data
+    # Test response value errors
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"4"},
+                    {"question":9},
+                    {"question":10},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid choice for dropdown"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":10},
+                    {"question":10},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid text response"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":10},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to checkboxes"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":[3]},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to checkboxes"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["d"]},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid choice for checkboxes"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":100},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid text response"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":"NO"}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":[true]}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":["fa"]}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid choice for elected position"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":[100]}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid write-in for elected position"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":"2"},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":["a","c"]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":[3,"re",2,"NO"]}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert rv.data == b'{"success":true}\n'
+
+
+def test_results(client):
+    rv = client.get(
+        flask.url_for('voting.show_results', access_key='invalid-access-key'))
+    assert rv.status_code == 200
+    assert b'Invalid access key' in rv.data
+    access_key = [
+        survey
+        for survey in helpers.get_public_surveys(
+            helpers.get_user_id('csander'))
+        if survey['title'] == 'Response test'
+    ][0]['access_key']
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    # Test viewing before close
+    rv = client.get(
+        flask.url_for('voting.show_results', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not permitted to see the results at this time' in rv.data
+    # Test releasing before close
+    rv = client.get(
+        flask.url_for('voting.release_results', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'Survey has not yet finished' in rv.data
+    # Test after close
+    yesterday = date.today() + timedelta(days=-1)
+    rv = client.post(
+        flask.url_for('voting.save_params', access_key=access_key),
+        data=dict(
+            title='Response test',
+            description='',
+            start_date=yesterday.strftime(helpers.YYYY_MM_DD),
+            start_hour='12',
+            start_minute='00',
+            start_period='P',
+            end_date=yesterday.strftime(helpers.YYYY_MM_DD),
+            end_hour='1',
+            end_minute='00',
+            end_period='P',
+            auth='on',
+            public='on',
+            group=''),
+        follow_redirects=False)
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for(
+        'voting.edit_questions', access_key=access_key)
+    rv = client.get(
+        flask.url_for('voting.show_results', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not permitted to see the results at this time' not in rv.data
+    assert b'Responses:' in rv.data
+    assert b'Question A' in rv.data
+    assert b'Question B' in rv.data
+    assert b'Question C' in rv.data
+    assert b'Question D' in rv.data
+    assert b'Question E' in rv.data
+    assert b'Allow others to see results' in rv.data
+    # Test if not creator after close
+    with client.session_transaction() as sess:
+        del sess['username']
+    rv = client.get(
+        flask.url_for('voting.show_results', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not permitted to see the results at this time' in rv.data
+    # Test releasing error conditions
+    rv = client.get(
+        flask.url_for(
+            'voting.release_results', access_key='invalid-access-key'),
+        follow_redirects=False)
+    assert rv.status_code == 200
+    assert b'Invalid access key' in rv.data
+    rv = client.get(
+        flask.url_for('voting.release_results', access_key=access_key),
+        follow_redirects=False)
+    assert rv.status_code == 200
+    assert b'You are not the creator of this survey' in rv.data
+    # Test successful release
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(
+        flask.url_for('voting.release_results', access_key=access_key),
+        follow_redirects=False)
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for(
+        'voting.show_results', access_key=access_key)
+    # Test if not creator, but results released
+    with client.session_transaction() as sess:
+        del sess['username']
+    rv = client.get(
+        flask.url_for('voting.show_results', access_key=access_key))
+    assert rv.status_code == 200
+    assert b'You are not permitted to see the results at this time' not in rv.data
+    assert b'Responses:' in rv.data
+    assert b'Question A' in rv.data
+    assert b'Question B' in rv.data
+    assert b'Question C' in rv.data
+    assert b'Question D' in rv.data
+    assert b'Question E' in rv.data
+    assert b'Allow others to see results' not in rv.data

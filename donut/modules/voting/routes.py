@@ -62,7 +62,7 @@ def restrict_edit(survey):
     if not survey:
         flask.flash('Invalid access key')
         return list_surveys()
-    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    user_id = helpers.get_user_id(flask.session.get('username'))
     if user_id != survey['creator']:
         flask.flash('You are not the creator of this survey')
         return list_surveys()
@@ -156,7 +156,7 @@ def delete_survey(access_key):
             'success': False,
             'message': 'Invalid access key'
         })
-    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    user_id = helpers.get_user_id(flask.session.get('username'))
     if user_id != survey['creator']:
         return flask.jsonify({
             'success':
@@ -243,7 +243,7 @@ def show_results(access_key):
     if not survey:
         flask.flash('Invalid access key')
         return list_surveys()
-    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    user_id = helpers.get_user_id(flask.session.get('username'))
     now = datetime.now()
     creator_allowed = user_id == survey['creator'] and survey['end_time'] < now
     if not (creator_allowed or survey['results_shown']):
@@ -266,7 +266,7 @@ def release_results(access_key):
     if not survey:
         flask.flash('Invalid access key')
         return list_surveys()
-    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    user_id = helpers.get_user_id(flask.session.get('username'))
     if user_id != survey['creator']:
         flask.flash('You are not the creator of this survey')
         return list_surveys()
