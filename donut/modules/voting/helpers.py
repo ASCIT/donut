@@ -374,8 +374,10 @@ def get_results(survey_id):
             elif question_type == question_types['Checkboxes']:
                 question['results'] = Counter(chain(*responses)).most_common()
             elif question_type == question_types['Elected position']:
-                non_abstaining = [[resolve_name(vote) for vote in res]
-                                  for res in responses if res]
-                question['results'] = winners(non_abstaining)
-                question['filled_responses'] = non_abstaining
+                non_abstaining = [list(res) for res in responses if res]
+                question['results'] = list(
+                    map(resolve_name, winners(non_abstaining)))
+                question['filled_responses'] = [
+                    list(map(resolve_name, res)) for res in non_abstaining
+                ]
     return questions
