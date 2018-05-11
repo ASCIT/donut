@@ -34,12 +34,12 @@ def read_markdown(name):
 
     # Check if the pages were already created prior (only the BoC pages)
     if name in underCommittee:
-        curFile = read_file(os.path.join(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"], name + ".html")
+        curFile = read_file(os.path.join(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"], name + ".html"))
         return curFile
     else:
         path = os.path.join(flask.current_app.root_path,
                                    flask.current_app.config['UPLOAD_WEBPAGES'])
-        curFile = read_file(os.path.join(path, name + '.md')
+        curFile = read_file(os.path.join(path, name + '.md'))
         return curFile
 
 

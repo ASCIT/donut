@@ -74,6 +74,21 @@ function insert_image(){
   insert("![Alt text](url/to/image", true);
 }
 
+function insert_ulist(){
+  insert("* ", true);
+}
+
+function insert_olist(){
+  var number = 1;
+  var ta = document.getElementById("source");
+  while(ta.includes(number+"."))
+  {
+    number = number + 1;
+  }
+  insert(number+". ", true);
+}
+
+
 // bool true  = string + selection
 // bool false = string + selection + string
 function insert(string, bool){

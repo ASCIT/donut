@@ -5,7 +5,12 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">Uploads</h1>
-
+      <div id="info">
+        <p>
+          See a list of all uploaded files
+          <a href="{{ url_for('uploads.uploaded_list') }}">here</a>. 
+        </p>
+      </div>
       <form method=post enctype=multipart/form-data>
         <p><input type=file name=file>
            <input type=submit value=Upload>

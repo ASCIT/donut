@@ -47,7 +47,7 @@ def uploads():
 @blueprint.route('/uploaded_file/<filename>', methods = ['GET'])
 def uploaded_file(filename):
     '''
-    Serves the actual uploaded file. 
+    Serves the actual uploaded file.
     '''
     print(filename)
     print(glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*'))
@@ -55,19 +55,23 @@ def uploaded_file(filename):
                            flask.current_app.config['UPLOAD_FOLDER'])
     print(uploads)
     return flask.send_from_directory(uploads,
-                                     filename, as_attachment=True)
+                                     filename, as_attachment=False)
 
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 @blueprint.route('/uploaded_list')
-def uploadedList():
+def uploaded_list():
     '''
     Shows the list of uploaded files
     '''
-    links = glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*')
+    path = os.path.join(flask.current_app.root_path,
+                           flask.current_app.config['UPLOAD_FOLDER'])
+    links = glob.glob(path + '/*')
     for i in range(len(links)):
-        links[i] = (flask.url_for('uploads.uploaded_file', filename=links[i][22:]), links[i][22:])
+        links[i] = links[i].replace(path + '/', '')
+        links[i] = (flask.url_for(
+            'uploads.uploaded_file', filename=links[i]), links[i])
     return flask.render_template('uploaded_list.html', links=links)
 
 def allowed_file(filename):
