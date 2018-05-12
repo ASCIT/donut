@@ -22,10 +22,11 @@ SKIP_WORDS = [
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
     """
-    Provides an easy way for routing functions to pass the variables required for
-    rendering the marketplace's top bar to render_template.  Basically chains
-    some other arguments on to the render call, namely the list of marketplace
-    categories, the list urls to categories, and the width of each url column.
+    Provides an easy way for routing functions to pass the variables required
+    for rendering the marketplace's top bar to render_template.  Basically
+    chains some other arguments on to the render call, namely the list of
+    marketplace categories, the list urls to categories, and the width of each
+    url column.
 
     Arguments:
         template_url: The url which is being rendered.
@@ -65,8 +66,9 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     for cat_index in range(len(categories)):
         cats2d[cat_index // num_cols].append(categories[cat_index])
 
-    # Pass the 2d category array, urls array, and width string, along with the arguments passed in to this
-    # function, on to Flask in order to render the top bar and the rest of the content.
+    # Pass the 2d category array, urls array, and width string, along with the
+    # arguments passed in to this function, on to Flask in order to render the
+    # top bar and the rest of the content.
     return flask.render_template(
         template_url, cats=cats2d, width=str(100.0 / num_cols), **kwargs)
 
@@ -76,7 +78,8 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
 ###############
 def manage_set_active_status(item, is_active):
     """
-    Checks permissions and then sets the is_active status of item <item> to <is_active>.
+    Checks permissions and then sets the is_active status of item <item> to
+    <is_active>.
     """
     current_user_id = get_user_id(flask.session['username'])
     if current_user_id != get_user_id_of_item(item) and not check_permission(
@@ -165,7 +168,7 @@ def display_managed_items():
     ]
     field_index_map = {k: v for v, k in enumerate(fields)}
 
-    # get all owned items
+    # Get all owned items.
     owned_items = table_fetch_all(
         'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
         fields=fields,
@@ -202,13 +205,13 @@ def display_managed_items():
 def row_text_from_managed_item(item, field_index_map):
     """
     For use in routes.manage().  Removes item_active and item_id from item[],
-    replacing them with edit, (un)archive, and delete text instead.  Also modifies
-    field_index_map to reflect this change.
+    replacing them with edit, (un)archive, and delete text instead.  Also
+    modifies field_index_map to reflect this change.
     """
-    # convert datestrings into actual dates
+    # Convert datestrings into actual dates.
     item[field_index_map['item_timestamp']] = item[field_index_map[
         'item_timestamp']].strftime('%m/%d/%y')
-    # convert category ids to category names
+    # Convert category ids to category names.
     item[field_index_map['cat_id']] = get_category_name_from_id(
         item[field_index_map['cat_id']])
 
@@ -217,15 +220,16 @@ def row_text_from_managed_item(item, field_index_map):
             'textbook_title']]
 
     item_active = item[field_index_map['item_active']]
-    # remove item_active, item_id, and textbook_title
+    # Remove item_active, item_id, and textbook_title.
     del item[field_index_map['item_id']]
     del item[field_index_map['item_active']]
     del item[field_index_map['textbook_title']]
-    # this order is important because if we delete item_active first,
+    # This order is important because if we delete item_active first,
     # field_index_map['item_id'] will be wrong, so delete in reverse
-    # order
+    # order.
 
-    # in the real text of the manage page, we need edit, (un)archive, and delete links
+    # In the real text of the manage page, we need edit, (un)archive, and delete
+    # links.
     item.append('Edit')
     field_index_map['edit'] = len(item) - 1
 
@@ -244,23 +248,24 @@ def row_text_from_managed_item(item, field_index_map):
 def generate_links_for_managed_item(item, field_index_map, item_active,
                                     item_id):
     """
-    For use in routes.manage().  Creates links to edit, (un)archive, and delete pages.
+    For use in routes.manage().  Creates links to edit, (un)archive, and delete
+    pages.
 
     Arguments:
         item: The list of item details.
 
-        field_index_map: A map from a field to the index where its info is stored in
-                         item.
+        field_index_map: A map from a field to the index where its info is
+                         stored in item.
 
-        item_active: Whether or not the item is active -- affects whether the link
-                     is archive or unarchive.
+        item_active: Whether or not the item is active -- affects whether the
+                     link is archive or unarchive.
 
         item_id: ID of the item.
 
     Returns:
         links: A list the same size as item[], with links to edit, (un)archive,
-               and delete pages stored at field_index_map['edit'], ['archive'], and
-               ['delete'] respectively, and '' everywhere else.
+               and delete pages stored at field_index_map['edit'], ['archive'],
+               and ['delete'] respectively, and '' everywhere else.
     """
     links = [''] * len(item)
 
@@ -288,15 +293,15 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
 ###############
 def generate_search_table(fields=None, attrs={}, query=''):
     """
-    Provides a centralized way to generate the 2d array of cells that is displayed
-    in a table, along with all the stuff that needs to be packaged with it.  Calls
-    a few functions further down to get the data, merge some columns, and rename
-    the headers.
+    Provides a centralized way to generate the 2d array of cells that is
+    displayed in a table, along with all the stuff that needs to be packaged
+    with it.  Calls a few functions further down to get the data, merge some
+    columns, and rename the headers.
 
     Arguments:
         fields: A list of the fields that are requested to be in the table.  For
-                example: ['cat_id', 'item_title', 'textbook_title', 'item_price',
-                ...]
+                example: ['cat_id', 'item_title', 'textbook_title',
+                'item_price', ...]
 
         attrs: A map of fields to values that make up conditions on the fields.
                For example, {'cat_id':1} will only return results for which the
@@ -311,35 +316,43 @@ def generate_search_table(fields=None, attrs={}, query=''):
         headers: The English-ified headers for each column.
 
         links: A 2d array that, in each cell, gives the url of the link that
-               clicking on the corresponding cell in result should yield.  If none,
-               the cell will contain the number 0 instead.
+               clicking on the corresponding cell in result should yield.  If
+               none, the cell will contain the number 0 instead.
     """
 
     # We need the item_id to generate the urls that clicking on the item title
     # should go to.
-    # Also, we add it to the front so that we can get the id before we need to use
-    # it (i.e., when we're adding it to links)
-    fields = ['item_id'] + fields
+    # Also, we add it to the front so that we can get the id before we need to
+    # use it (i.e., when we're adding it to links)
+    if fields != None:
+        fields = ['item_id'] + fields
+    else:
+        fields = ['item_id']
 
-    if query != '':
-        # and add cat_id, textbook_author and textbook_isbn to the end so
-        # that we can use those fields in search_datalist
+    if query:
+        # Also add cat_id, textbook_author and textbook_isbn to the end so
+        # that we can use those fields to query by.
         fields = fields + ['textbook_author', 'textbook_isbn', 'cat_id']
 
     result = get_table_list_data(
         'marketplace_items NATURAL LEFT JOIN marketplace_textbooks', fields,
         attrs)
 
-    if query != '':
-        # filter by query
+    if query:
+        # Filter by query.
         result = search_datalist(fields, result, query)
-        # take textbook_author, textbook_isbn, and cat_id (the last 3
-        # columns) back out
+        # Take textbook_author, textbook_isbn, and cat_id (the last 3
+        # columns) back out.
         fields = fields[:-3]
         for i in range(len(result)):
             result[i] = result[i][:-3]
 
-    (result, fields) = merge_titles(result, fields)
+    # Maps fields to their index in each result.  Done after search_datalist
+    # in order to avoid key conflicts.
+    field_index_map = {k: v for v, k in enumerate(fields)}
+
+    (result, fields, field_index_map) = merge_titles(result, fields,
+                                                     field_index_map)
 
     sanitized_res = []
     links = []
@@ -347,92 +360,77 @@ def generate_search_table(fields=None, attrs={}, query=''):
     # Format the data, parsing the timestamps, converting the ids to actual
     # information, and adding links
     for item_listing in result:
-        temp_res_row = []
-        temp_link_row = []
-        item_listing = list(item_listing)
-        field_index = 0
-        item_id = -1
-        for data in item_listing:
-            added_link = False
-            if data == None:
-                temp_res_row.append('')
-            else:
-                if fields[field_index] == 'item_id':
-                    # store the item_id (which will be the first item in each row
-                    # [because we added it to the front of the fields list])
-                    # so that we can use it to generate the links for each item
-                    item_id = int(data)
-                    temp_res_row.append(data)
+        #temp_res_row = item_listing
+        link_row = [''] * len(item_listing)
 
-                elif fields[field_index] == 'item_timestamp':
-                    temp_res_row.append(data.strftime('%m/%d/%y'))
+        if 'item_id' in field_index_map:
+            item_id = int(item_listing[field_index_map['item_id']])
 
-                elif fields[field_index] == 'user_id':
-                    temp_link_row.append(
-                        flask.url_for(
-                            'directory_search.view_user', user_id=int(data)))
-                    added_link = True
+        if 'item_timestamp' in field_index_map:
+            item_listing[field_index_map['item_timestamp']] = item_listing[
+                field_index_map['item_timestamp']].strftime('%m/%d/%y')
 
-                    temp_res_row.append(get_name_from_user_id(int(data)))
+        if 'user_id' in field_index_map:
+            link_row[field_index_map['user_id']] = flask.url_for(
+                'directory_search.view_user',
+                user_id=int(item_listing[field_index_map['user_id']]))
 
-                elif fields[field_index] == 'textbook_edition':
-                    temp_res_row.append(process_edition(data))
+            item_listing[field_index_map['user_id']] = get_name_from_user_id(
+                int(item_listing[field_index_map['user_id']]))
 
-                elif fields[field_index] == 'cat_id':
-                    temp_res_row.append(get_category_name_from_id(int(data)))
+        if 'textbook_edition' in field_index_map:
+            item_listing[
+                field_index_map['textbook_edition']] = process_edition(
+                    item_listing[field_index_map['textbook_edition']])
 
-                elif fields[field_index] == 'item_title' or fields[field_index] == 'textbook_title':
-                    temp_link_row.append(
-                        flask.url_for('.view_item', item_id=item_id))
-                    added_link = True
-                    temp_res_row.append(data)
+        if 'cat_id' in field_index_map:
+            item_listing[field_index_map[
+                'cat_id']] = get_category_name_from_id(
+                    int(item_listing[field_index_map['cat_id']]))
 
-                else:
-                    temp_res_row.append(data)
+        if 'item_title' in field_index_map:
+            link_row[field_index_map['item_title']] = flask.url_for(
+                '.view_item', item_id=item_id)
 
-            if not added_link:
-                temp_link_row.append(0)
-            field_index += 1
+        if 'textbook_title' in field_index_map:
+            link_row[field_index_map['textbook_title']] = flask.url_for(
+                '.view_item', item_id=item_id)
 
-        # strip off the item_id column we added at the beginning of the function
-        temp_res_row = temp_res_row[1:]
-        temp_link_row = temp_link_row[1:]
+        # Strip off the item_id column we added earlier in the function.
+        item_listing = item_listing[1:]
+        link_row = link_row[1:]
 
-        # add our temporary rows to the real 2d arrays that we'll return
-        sanitized_res.append(temp_res_row)
-        links.append(temp_link_row)
+        # Add our rows to the real 2d arrays that we'll return.
+        sanitized_res.append(item_listing)
+        links.append(link_row)
 
-    fields = fields[
-        1:]  # strip off the item_id column we added at the beginning
+    # Strip off the item_id column we added at the beginning.
+    fields = fields[1:]
 
     headers = process_category_headers(fields)
 
     return (sanitized_res, headers, links)
 
 
-def merge_titles(datalist, fields):
+def merge_titles(datalist, fields, field_index_map):
     """
     Takes datalist and merges the two columns, item_title and textbook_title.
 
     Arguments:
-        datalist: a 2d list of data, with columns determined by fields
-        fields: the column titles from the SQL tables
+        datalist: a 2d list of data, with columns determined by fields.
+        fields: the column titles from the SQL tables.
+        field_index_map: a map from fields to their index in datalist.
 
     Returns:
-        datalist: the original table, but with the two columns merged
-        fields: the column titles similarly merged together into item_title
+        datalist: the original table, but with the two columns merged.
+        fields: the column titles similarly merged together into item_title.
     """
-    item_index = None
-    textbook_index = None
-    for i in range(len(fields)):
-        if fields[i] == 'item_title':
-            item_index = i
-        if fields[i] == 'textbook_title':
-            textbook_index = i
+    item_index = field_index_map.get('item_title', None)
+    textbook_index = field_index_map.get('textbook_title', None)
 
     if item_index is None or textbook_index is None:
-        # can't merge, since the two columns aren't there
-        return (datalist, fields)
+        # Can't merge, since the two columns aren't there.
+        return (datalist, fields, field_index_map)
 
     for row_index in range(len(datalist)):
         row = datalist[row_index]
@@ -441,7 +439,11 @@ def merge_titles(datalist, fields):
         del row[textbook_index]
         datalist[row_index] = row
     del fields[textbook_index]
-    return (datalist, fields)
+
+    # Update field_index_map.
+    field_index_map = {k: v for v, k in enumerate(fields)}
+
+    return (datalist, fields, field_index_map)
 
 
 def process_category_headers(fields):
@@ -449,10 +451,11 @@ def process_category_headers(fields):
     Converts fields from sql headers to English.
 
     Arguments:
-        fields: the list of fields that will be changed into the headers that are returned
+        fields: the list of fields that will be changed into the headers that
+                are returned.
 
     Returns:
-        headers: the list of headers that will become the headers of the tables
+        headers: the list of headers that will become the headers of the tables.
     """
     headers = []
     for i in fields:
@@ -475,13 +478,241 @@ def process_category_headers(fields):
     return headers
 
 
+def search_datalist(fields, datalist, query):
+    """
+    Searches in datalist (which has columns denoted in fields) to
+    create a new datalist, sorted first by relevance and then by date
+    created.
+    """
+    # Map column names to indices.
+    field_index_map = {k: v for v, k in enumerate(fields)}
+
+    # Add a special column at the end: score.
+    field_index_map['score'] = len(fields)
+
+    query_tokens = tokenize_query(query)
+    perfect_matches = []
+    imperfect_matches = []
+
+    query_isbns = []
+    # ISBNs instantly make listings a perfect match
+    for token in query_tokens:
+        if validate_isbn(token):
+            query_isbns.append(token)
+
+    for listing in datalist:
+        item_tokens = []
+        is_isbn_match = False
+        if get_category_name_from_id(
+                listing[field_index_map['cat_id']]) == 'Textbooks':
+            # if it's a textbook, include the author's name and the
+            # book title in the item tokens
+            item_tokens = tokenize_query(
+                listing[field_index_map['textbook_title']])
+            item_tokens += tokenize_query(
+                listing[field_index_map['textbook_author']])
+
+            # does the isbn match any of the query's isbns?
+            for isbn in query_isbns:
+                if listing[field_index_map['textbook_isbn']] == isbn:
+                    is_isbn_match = True
+        else:
+            # only include the item title
+            item_tokens = tokenize_query(
+                listing[field_index_map['item_title']])
+
+        score = get_matches(query_tokens, item_tokens)
+
+        # if it's an isbn match, give it a perfect score as well
+        # so that it doesn't get placed after all of the other perfect
+        # matches
+        if is_isbn_match:
+            score = len(query_tokens)
+
+        if score == 0:
+            continue
+
+        listing.append(score)
+
+        if score == len(query_tokens):
+            perfect_matches.append(listing)
+        else:
+            imperfect_matches.append(listing)
+
+    search_results = []
+    # if we have any perfect matches, don't include the imperfect ones
+    if len(perfect_matches) > 0:
+        search_results = perfect_matches
+    else:
+        search_results = imperfect_matches
+
+    # define a custom comparison function to use in python's sort
+    # -1 if item1 goes above item2, i.e. either item1's score is higher
+    # or item1 was posted earlier.
+    def compare(item1, item2):
+        if item1[field_index_map['score']] < item2[field_index_map['score']]:
+            return 1
+        elif item1[field_index_map['score']] > item2[field_index_map['score']]:
+            return -1
+        # they have the same number of matches, so we sort by timestamp
+        if item1[field_index_map['item_timestamp']] < item2[field_index_map['item_timestamp']]:
+            return 1
+        elif item1[field_index_map['item_timestamp']] == item2[field_index_map[
+                'item_timestamp']]:
+            return 0
+        else:
+            return -1
+
+    search_results = sorted(
+        search_results,
+        key=
+        lambda item: (item[field_index_map['score']], item[field_index_map['item_timestamp']])
+    )
+
+    # chop off the last column, which holds the score
+    for i in range(len(search_results)):
+        search_results[i] = search_results[i][:-1]
+
+    return search_results
+
+
+def get_matches(l1, l2):
+    """
+    Returns the number of matches between list 1 and list 2.
+    """
+    if len(l1) < len(l2):
+        return len([x for x in l1 if x in l2])
+    else:
+        return len([x for x in l2 if x in l1])
+
+
+def tokenize_query(query):
+    """
+    Turns a string with a query into a list of tokens that represent the query.
+    """
+    tokens = []
+
+    query = query.split()
+    # Validate ISBNs before we remove hyphens.
+    for token_index in range(len(query)):
+        token = query[token_index]
+        if (validate_isbn(token)):
+            tokens.append(token)
+            del query[token_index]
+
+    query = ' '.join(query)
+    # Remove punctuation.
+    punctuation = [',', '.', '-', '_', '!', ';', ':', '/', '\\']
+    for p in punctuation:
+        query = query.replace(p, ' ')
+    query = query.split()
+
+    # If any of the words in query are in our SKIP_WORDS, don't add them
+    # to tokens.
+    for token in query:
+        token = token.lower()
+        if not token in SKIP_WORDS:
+            tokens.append(token)
+
+    return tokens
+
+
+def validate_isbn(isbn):
+    """
+    Determines whether an ISBN is valid or not.  Works with ISBN-10 and ISBN-13,
+    validating the length of the string and the check digit as well.
+
+    Arguments:
+        isbn: The ISBN, in the form of a string.
+    Returns:
+        valid: Whether or not the isbn is valid (a boolean).
+    """
+    if type(isbn) != str:
+        return False
+
+    # Hyphens are annoying but there should never be one at start or end,
+    # nor should there be two in a row.
+    if isbn[0] == '-' or isbn[-1] == '-' or '--' in isbn:
+        return False
+
+    # Now that we've done that we can remove them.
+    isbn = isbn.replace('-', '')
+
+    # Regexes shamelessly copypasted.
+    # The ISBN-10 can have an x at the end (but the ISBN-13 can't).
+    if re.match('^[0-9]{9}[0-9x]$', isbn, re.IGNORECASE) != None:
+        # Check the check digit.
+        total = 0
+        for i in range(10):
+            char = isbn[i].lower()
+            digit = 10  # x has value 10.
+            if char != 'x':
+                digit = int(char)
+            weight = 10 - i
+            total += digit * weight
+        if total % 11 == 0:
+            return True
+        else:
+            return False
+
+    elif re.match('^[0-9]{13}$', isbn, re.IGNORECASE) != None:
+        # Check the check digit.
+        total = 0
+        for i in range(13):
+            weight = 1
+            if i % 2 != 0:
+                weight = 3
+            digit = int(isbn[i])
+            total += digit * weight
+        if total % 10 == 0:
+            return True
+        else:
+            return False
+
+    return False
+
+
+def process_edition(edition):
+    """
+    Turns a string with an edition in it into a processed string.
+    Turns '1.0' into '1st', '2017.0' into '2017', and 'International'
+    into 'International'.  So it doesn't do a whole lot, but what it
+    does do, it does well.
+
+    Arguments:
+        edition: The edition string.
+    Returns:
+        edition: The processed edition string.
+    """
+
+    try:
+        edition = int(edition)
+        if edition < 100:
+            # It's probably an edition, not a year.
+
+            # If the tens digit is 1, it's always 'th'.
+            if (edition / 10) % 10 == 1:
+                return str(edition) + 'th'
+            if edition % 10 == 1:
+                return str(edition) + 'st'
+            if edition % 10 == 2:
+                return str(edition) + 'nd'
+            if edition % 10 == 3:
+                return str(edition) + 'rd'
+            return str(edition) + 'th'
+        else:
+            return str(edition)
+    except ValueError:
+        return edition
+
+
 #################
 # TABLE QUERIES #
 #################
 def get_table_list_data(tables, fields=None, attrs={}):
     """
-    Queries the database (specifically, table <table>) and returns list of member data
-    constrained by the specified attributes.
+    Queries the database (specifically, table <table>) and returns list of
+    member data constrained by the specified attributes.
 
     Arguments:
         tables: The table(s) to query.  Ex: 'marketplace_items', or
@@ -502,19 +733,18 @@ def get_table_list_data(tables, fields=None, attrs={}):
     s_from = 'FROM ' + tables
 
     s_where = ''
-    if len(attrs) != 0:
+    if attrs:
         s_where = ' WHERE '
-        for key, value in list(attrs.items()):
-            s_where += str(key) + ' = %s'
+        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
 
     s = s_select_columns + s_from + s_where
 
-    # Execute the query
+    # Execute the query.
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, list(attrs.values()))
         result = cursor.fetchall()
 
-    # Return the list of lists
+    # Return the list of lists.
     result = list(map(lambda a: list(a.values()), result))
     return result
 
@@ -543,10 +773,9 @@ def table_fetch_one(tables, fields=None, attrs={}):
     s_from = 'FROM ' + tables
 
     s_where = ''
-    if len(attrs) != 0:
+    if attrs:
         s_where = ' WHERE '
-        for key, value in list(attrs.items()):
-            s_where += str(key) + ' = %s'
+        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
 
     s = s_select_columns + s_from + s_where
 
@@ -589,10 +818,9 @@ def table_fetch_all(tables, fields=None, attrs={}):
     s_from = 'FROM ' + tables
 
     s_where = ''
-    if len(attrs) != 0:
+    if attrs:
         s_where = ' WHERE '
-        for key, value in list(attrs.items()):
-            s_where += str(key) + ' = %s'
+        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
 
     s = s_select_columns + s_from + s_where
 
@@ -874,7 +1102,7 @@ def add_textbook(title, author):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [title, author])
         result = cursor.fetchone()
-    if result != None:
+    if result:
         # the textbook already exists
         return False
 
@@ -909,239 +1137,6 @@ def delete_item(item_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, [item_id])
     return True
-
-
-###############
-# SEARCH PAGE #
-###############
-def search_datalist(fields, datalist, query):
-    """
-    Searches in datalist (which has columns denoted in fields) to
-    create a new datalist, sorted first by relevance and then by date
-    created.
-    """
-    # map column names to indices
-    # we need to map item_title and category_title to the same index
-    # because datalist has already been merged
-    field_index_map = {}
-    for i in range(len(fields)):
-        field_index_map[fields[i]] = i
-    # add a special column at the end: score
-    field_index_map['score'] = len(fields)
-
-    query_tokens = tokenize_query(query)
-    perfect_matches = []
-    imperfect_matches = []
-
-    query_isbns = []
-    # ISBNs instantly make listings a perfect match
-    for token in query_tokens:
-        if validate_isbn(token):
-            query_isbns.append(token)
-
-    for listing in datalist:
-        item_tokens = []
-        if get_category_name_from_id(
-                listing[field_index_map['cat_id']]) == 'Textbooks':
-            # if it's a textbook, include the author's name and the
-            # book title in the item tokens
-            item_tokens = tokenize_query(
-                listing[field_index_map['textbook_title']])
-            item_tokens += tokenize_query(
-                listing[field_index_map['textbook_author']])
-        else:
-            # only include the item title
-            item_tokens = tokenize_query(
-                listing[field_index_map['item_title']])
-
-        # does the isbn match any of the query's isbns?
-        is_isbn_match = False
-        for isbn in query_isbns:
-            if listing[field_index_map['textbook_isbn']] == isbn:
-                is_isbn_match = True
-
-        score = get_matches(query_tokens, item_tokens)
-
-        # if it's an isbn match, give it a perfect score as well
-        # so that it doesn't get placed after all of the other perfect
-        # matches
-        if is_isbn_match:
-            score = len(query_tokens)
-
-        listing.append(score)
-        if score == 0:
-            continue
-
-        if score == len(query_tokens):
-            perfect_matches.append(listing)
-        else:
-            imperfect_matches.append(listing)
-
-    search_results = []
-    # if we have any perfect matches, don't include the imperfect ones
-    if len(perfect_matches) > 0:
-        search_results = perfect_matches
-    else:
-        search_results = imperfect_matches
-
-    # define a custom comparison function to use in python's sort
-    # -1 if item1 goes above item2, i.e. either item1's score is higher
-    # or item1 was posted earlier.
-    def compare(item1, item2):
-        if item1[field_index_map['score']] < item2[field_index_map['score']]:
-            return 1
-        elif item1[field_index_map['score']] > item2[field_index_map['score']]:
-            return -1
-        # they have the same number of matches, so we sort by timestamp
-        if item1[field_index_map['item_timestamp']] < item2[field_index_map['item_timestamp']]:
-            return 1
-        elif item1[field_index_map['item_timestamp']] == item2[field_index_map[
-                'item_timestamp']]:
-            return 0
-        else:
-            return -1
-
-    search_results = sorted(
-        search_results,
-        key=
-        lambda item: (item[field_index_map['score']], item[field_index_map['item_timestamp']])
-    )
-
-    # chop off the last column, which holds the score
-    for i in range(len(search_results)):
-        search_results[i] = search_results[i][:-1]
-
-    return search_results
-
-
-def get_matches(l1, l2):
-    """
-    Returns the number of matches between list 1 and list 2.
-    """
-    if len(l1) < len(l2):
-        return len([x for x in l1 if x in l2])
-    else:
-        return len([x for x in l2 if x in l1])
-
-
-def tokenize_query(query):
-    """
-    Turns a string with a query into a list of tokens that represent the query.
-    """
-    tokens = []
-
-    query = query.split()
-    # Validate ISBNs before we remove hyphens
-    for token_index in range(len(query)):
-        token = query[token_index]
-        if (validate_isbn(token)):
-            tokens.append(token)
-            del query[token_index]
-
-    query = ' '.join(query)
-    # Remove punctuation
-    punctuation = [',', '.', '-', '_', '!', ';', ':', '/', '\\']
-    for p in punctuation:
-        query = query.replace(p, ' ')
-    query = query.split()
-
-    # if any of the words in query are in our SKIP_WORDS, don't add them
-    # to tokens
-    for token in query:
-        token = token.lower()
-        if not token in SKIP_WORDS:
-            tokens.append(token)
-
-    return tokens
-
-
-def validate_isbn(isbn):
-    """
-    Determines whether an ISBN is valid or not.  Works with ISBN-10 and ISBN-13,
-    validating the length of the string and the check digit as well.
-
-    Arguments:
-        isbn: The ISBN, in the form of a string.
-    Returns:
-        valid: Whether or not the isbn is valid (a boolean).
-    """
-    if type(isbn) != str:
-        return False
-
-    # hyphens are annoying but there should never be one at start or end,
-    # nor should there be two in a row.
-    if isbn[0] == '-' or isbn[-1] == '-' or '--' in isbn:
-        return False
-
-    # now that we've done that we can remove them
-    isbn = isbn.replace('-', '')
-
-    # regexes shamelessly copypasted
-    # the ISBN-10 can have an x at the end (but the ISBN-13 can't)
-    if re.match('^[0-9]{9}[0-9x]$', isbn, re.IGNORECASE) != None:
-        # check the check digit
-        total = 0
-        for i in range(10):
-            char = isbn[i].lower()
-            digit = 10  # x has value 10
-            if char != 'x':
-                digit = int(char)
-            weight = 10 - i
-            total += digit * weight
-        if total % 11 == 0:
-            return True
-        else:
-            return False
-
-    elif re.match('^[0-9]{13}$', isbn, re.IGNORECASE) != None:
-        # check the check digit
-        total = 0
-        for i in range(13):
-            weight = 1
-            if i % 2 != 0:
-                weight = 3
-            digit = int(isbn[i])
-            total += digit * weight
-        if total % 10 == 0:
-            return True
-        else:
-            return False
-
-    return False
-
-
-def process_edition(edition):
-    """
-    Turns a string with an edition in it into a processed string.
-    Turns '1.0' into '1st', '2017.0' into '2017', and 'International'
-    into 'International'.  So it doesn't do a whole lot, but what it
-    does do, it does well.
-
-    Arguments:
-        edition: The edition string.
-    Returns:
-        edition: The processed edition string.
-    """
-
-    try:
-        edition = int(edition)
-        if edition < 1000:
-            # it's probably an edition, not a year
-
-            # if the tens digit is 1, it's always 'th'
-            if (edition / 10) % 10 == 1:
-                return str(edition) + 'th'
-            if edition % 10 == 1:
-                return str(edition) + 'st'
-            if edition % 10 == 2:
-                return str(edition) + 'nd'
-            if edition % 10 == 3:
-                return str(edition) + 'rd'
-            return str(edition) + 'th'
-        else:
-            return str(edition)
-    except ValueError:
-        return edition
 
 
 #####################
