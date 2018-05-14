@@ -26,7 +26,8 @@ def redirecting(title='uploads.aaa'):
 def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-
+    print(markdown)
+    print(title)
     if (helpers.write_markdown(markdown, title) == 0):
         return flask.jsonify({'url' : url_for('uploads.display', url=title)})
     else:

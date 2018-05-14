@@ -45,9 +45,12 @@ def read_markdown(name):
 
 def read_file(path):
     curFile = ''
-    with open(path) as f:
-        curFile += f.read()
-    return curFile
+    if os.path.isfile("path"):
+        with open(path) as f:
+            curFile += f.read()
+        return curFile
+    else:
+        return ""
 
 
 def write_markdown(markdown, title):

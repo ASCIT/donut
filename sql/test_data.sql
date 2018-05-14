@@ -67,13 +67,19 @@ INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
     (2, 'Ruddock House', 'house'),
     (3, 'IHC', 'committee');
+    (4, 'BoC', '');
+    (5, 'CRC', '');
 
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary'),
     (2, 3, 'Full Member'),
     (2, 4, 'President'),
-    (3, 5, 'Member');
+    (3, 5, 'Member'),
+    (4, 6, 'Chair'),
+    (4, 7, 'Avery'),
+    (5, 8, 'Chair'),
+    (5, 9, 'Lloyd');
 
 INSERT INTO position_holders(pos_id, user_id) VALUES
     (1, 1),
@@ -81,7 +87,12 @@ INSERT INTO position_holders(pos_id, user_id) VALUES
     (3, 3),
     (4, 4),
     (4, 2),
-    (5, 4);
+    (5, 4),
+    (6, 1);
+    (7, 2);
+    (8, 2);
+    (9, 3);
+
 
 INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
     (4, 5);
