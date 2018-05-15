@@ -40,7 +40,7 @@ def handle_create_account(user_id, username, password, password2, birthday):
 
     # Insert new values into the database. Because the password is updated in a
     # separate step, we must use a transaction to execute this query.
-    transaction = flask.g.db.begin()
+    flask.g.pymysql_db.begin()
     try:
         # Insert the new row into users.
         query = sqlalchemy.text("""
@@ -56,12 +56,13 @@ def handle_create_account(user_id, username, password, password2, birthday):
       UPDATE members
       SET birthday = :birthday,
         create_account_key = NULL
-      WHERE user_id = :user_id
-      """)
-        flask.g.db.execute(query, birthday=birthday, user_id=user_id)
-        transaction.commit()
+      WHERE user_id = %s
+      """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, [birthday, user_id])
+        flask.g.pymysql_db.commit()
     except Exception:
-        transaction.rollback()
+        flask.g.pymysql_db.rollback()
         flask.flash(
             "An unexpected error occurred. Please contact devteam@donut.caltech.edu."
         )
