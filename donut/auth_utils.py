@@ -6,7 +6,7 @@ authentication and authorization, including logins and permissions.
 import hashlib
 import binascii
 import string
-import sqlalchemy
+import pymysql.cursors
 import flask
 
 from donut import constants
@@ -207,13 +207,13 @@ def set_password(username, password):
     # Sanity check
     if full_hash is None:
         raise ValueError
-    query = sqlalchemy.text("""
+    query = """
     UPDATE users
-    SET password_hash=:ph
-    WHERE username=:u
-    """)
-    flask.g.db.execute(query, ph=full_hash, u=username)
-    return
+    SET password_hash=%s
+    WHERE username=%s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (full_hash, username))
 
 
 def generate_salt():
@@ -234,12 +234,14 @@ def generate_reset_key():
 
 def check_reset_key(reset_key):
     """Returns the username if the reset key is valid, otherwise None."""
-    query = sqlalchemy.text("""
+    query = """
     SELECT username
     FROM users
-    WHERE password_reset_key = :rk AND NOW() < password_reset_expiration
-    """)
-    result = flask.g.db.execute(query, rk=reset_key).first()
+    WHERE password_reset_key = %s AND NOW() < password_reset_expiration
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, reset_key)
+        result = cursor.fetchone() 
     if result is not None:
         return result['username']
     else:
@@ -259,12 +261,13 @@ def get_user_id(username):
 
 def update_last_login(username):
     """Updates the last login time for the user."""
-    query = sqlalchemy.text("""
+    query = """
     UPDATE users
     SET last_login=NOW()
-    WHERE username=:u
-    """)
-    flask.g.db.execute(query, u=username)
+    WHERE username=%s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, username)
 
 
 def generate_create_account_key():
@@ -282,13 +285,15 @@ def check_create_account_key(key):
   Returns the user_id if the reset key is valid (matches a user_id and that
   user does not already have an account). Otherwise returns None.
   """
-    query = sqlalchemy.text("""
+    query = """
     SELECT user_id
     FROM members
-    WHERE create_account_key = :k
+    WHERE create_account_key = %s
       AND user_id NOT IN (SELECT user_id FROM users)
-    """)
-    result = flask.g.db.execute(query, k=key).first()
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, key)
+        result = cursor.fetchone()
     if result is not None:
         return result['user_id']
     else:
@@ -319,21 +324,23 @@ def get_permissions(username):
   A list is returned because Python sets cannot be stored in cookie data.
   """
     return []
-    query = sqlalchemy.text("""
+    query = """
     (SELECT permission_id
       FROM users
         NATURAL JOIN offices
         NATURAL JOIN office_assignments
         NATURAL JOIN office_assignments_current
         NATURAL JOIN office_permissions
-      WHERE username=:u)
+      WHERE username=%s)
     UNION
     (SELECT permission_id
       FROM users
         NATURAL JOIN user_permissions
-      WHERE username=:u)
-    """)
-    result = flask.g.db.execute(query, u=username)
+      WHERE username=%s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, username)
+        result = cursor.fetchall()
     return list(row['permission_id'] for row in result)
 
 
