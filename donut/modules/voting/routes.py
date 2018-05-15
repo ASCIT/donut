@@ -55,7 +55,7 @@ def make_survey_form():
 
 @blueprint.route('/1/survey', methods=['POST'])
 def make_survey():
-    return helpers.process_params_request()
+    return helpers.process_params_request(False)
 
 
 @blueprint.route('/1/surveys/mine')
@@ -126,8 +126,8 @@ def save_params(access_key):
         flask.flash(restrict_message)
         return list_surveys()
 
-    return helpers.process_params_request(
-        survey['survey_id'], access_key=access_key)
+    survey_id = survey['survey_id']
+    return helpers.process_params_request(True, survey_id, access_key)
 
 
 @blueprint.route('/1/surveys/<access_key>/questions', methods=['POST'])

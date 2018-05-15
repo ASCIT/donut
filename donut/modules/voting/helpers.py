@@ -122,13 +122,15 @@ def get_choice(question_id, value):
         return cursor.fetchone()
 
 
-def process_params_request(survey_id=None, access_key=None):
+def process_params_request(editing, survey_id=None, access_key=None):
     form = flask.request.form
 
     def creation_error(message):
         flask.flash(message)
         return flask.render_template(
             'survey_params.html',
+            editing=editing,
+            access_key=access_key,
             groups=get_groups(),
             title=form.get('title'),
             description=form.get('description'),
