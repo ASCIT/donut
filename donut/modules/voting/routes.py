@@ -26,7 +26,7 @@ def take_survey(access_key):
         return list_surveys()
 
     questions_json = helpers.get_questions_json(survey['survey_id'], True)
-    user_id = helpers.get_user_id(flask.session.get('username', ''))
+    user_id = helpers.get_user_id(flask.session['username'])
     is_owner = survey['creator'] == user_id
     return flask.render_template(
         'take.html',
@@ -58,19 +58,6 @@ def make_survey():
     return helpers.process_params_request()
 
 
-def restrict_edit(survey):
-    if not survey:
-        flask.flash('Invalid access key')
-        return list_surveys()
-    user_id = helpers.get_user_id(flask.session.get('username'))
-    if user_id != survey['creator']:
-        flask.flash('You are not the creator of this survey')
-        return list_surveys()
-    if datetime.now() > survey['end_time']:
-        flask.flash('Cannot modify a survey after it has closed')
-        return list_surveys()
-
-
 @blueprint.route('/1/surveys/mine')
 def my_surveys():
     if 'username' not in flask.session:
@@ -85,8 +72,10 @@ def my_surveys():
 @blueprint.route('/1/surveys/<access_key>/questions', methods=['GET'])
 def edit_questions(access_key):
     survey = helpers.get_survey_data(access_key)
-    restricted = restrict_edit(survey)
-    if restricted: return restricted
+    restrict_message = helpers.restrict_edit_access(survey, False)
+    if restrict_message:
+        flask.flash(restrict_message)
+        return list_surveys()
 
     survey_id = survey['survey_id']
     if helpers.some_responses_for_survey(survey_id):
@@ -105,8 +94,10 @@ def edit_questions(access_key):
 @blueprint.route('/1/surveys/<access_key>', methods=['GET'])
 def edit_params(access_key):
     survey = helpers.get_survey_data(access_key)
-    restricted = restrict_edit(survey)
-    if restricted: return restricted
+    restrict_message = helpers.restrict_edit_access(survey, False)
+    if restrict_message:
+        flask.flash(restrict_message)
+        return list_surveys()
 
     survey_params = helpers.get_survey_params(survey['survey_id'])
     start_time = survey_params['start_time']
@@ -130,8 +121,10 @@ def edit_params(access_key):
 @blueprint.route('/1/surveys/<access_key>', methods=['POST'])
 def save_params(access_key):
     survey = helpers.get_survey_data(access_key)
-    restricted = restrict_edit(survey)
-    if restricted: return restricted
+    restrict_message = helpers.restrict_edit_access(survey, False)
+    if restrict_message:
+        flask.flash(restrict_message)
+        return list_surveys()
 
     return helpers.process_params_request(
         survey['survey_id'], access_key=access_key)
@@ -140,8 +133,10 @@ def save_params(access_key):
 @blueprint.route('/1/surveys/<access_key>/questions', methods=['POST'])
 def save_questions(access_key):
     survey = helpers.get_survey_data(access_key)
-    restricted = restrict_edit(survey)
-    if restricted: return restricted
+    restrict_message = helpers.restrict_edit_access(survey, False)
+    if restrict_message:
+        flask.flash(restrict_message)
+        return list_surveys()
 
     questions = flask.request.get_json(force=True)
     helpers.set_questions(survey['survey_id'], questions)
@@ -151,19 +146,9 @@ def save_questions(access_key):
 @blueprint.route('/1/surveys/<access_key>', methods=['DELETE'])
 def delete_survey(access_key):
     survey = helpers.get_survey_data(access_key)
-    if not survey:
-        return flask.jsonify({
-            'success': False,
-            'message': 'Invalid access key'
-        })
-    user_id = helpers.get_user_id(flask.session.get('username'))
-    if user_id != survey['creator']:
-        return flask.jsonify({
-            'success':
-            False,
-            'message':
-            'You are not the creator of this survey'
-        })
+    restrict_message = helpers.restrict_edit_access(survey, True)
+    if restrict_message:
+        return flask.jsonify({'success': False, 'message': restrict_message})
 
     helpers.delete_survey(survey['survey_id'])
     return flask.jsonify({'success': True})

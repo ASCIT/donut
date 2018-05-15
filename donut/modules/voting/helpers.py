@@ -293,6 +293,16 @@ def restrict_take_access(survey):
         if cursor.fetchone(): return 'Already completed'
 
 
+def restrict_edit_access(survey, allow_after_close):
+    if not survey:
+        return 'Invalid access key'
+    user_id = get_user_id(flask.session.get('username'))
+    if user_id != survey['creator']:
+        return 'You are not the creator of this survey'
+    if not allow_after_close and survey['end_time'] < datetime.now():
+        return 'Cannot modify a survey after it has closed'
+
+
 def set_responses(question_ids, responses):
     user_id = get_user_id(flask.session['username'])
     query = """

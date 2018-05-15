@@ -703,6 +703,14 @@ def test_edit_params(client):
     rv = client.get(flask.url_for('voting.edit_params', access_key=access_key))
     assert rv.status_code == 200
     assert b'New description' in rv.data  # assert that description has changed
+    # Error cases for saving params
+    with client.session_transaction() as sess:
+        del sess['username']
+    rv = client.post(
+        flask.url_for('voting.save_params', access_key=access_key),
+        follow_redirects=False)
+    assert rv.status_code == 200
+    assert b'You are not the creator of this survey' in rv.data
 
 
 def test_delete(client):
