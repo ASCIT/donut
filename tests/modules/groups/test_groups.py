@@ -5,6 +5,7 @@ from donut.testing.fixtures import client
 from donut import app
 from donut.modules.groups import helpers
 from donut.modules.groups import routes
+import datetime
 
 group = {
     "group_id": 1,
@@ -83,6 +84,28 @@ def test_get_group_data(client):
     assert helpers.get_group_data(1, ["group_name"]) == {
         "group_name": "Donut Devteam"
     }
+
+
+def test_create_pos_holders(client):
+    helpers.create_position_holder(3, 3, "2018-02-22", "2019-02-22")
+    assert helpers.get_position_holders(3) == [{
+        "user_id": 3,
+        "first_name": "Caleb",
+        "last_name": "Sander",
+        "start_date": None,
+        "end_date": None
+    }, {
+        "user_id":
+        3,
+        "first_name":
+        "Caleb",
+        "last_name":
+        "Sander",
+        "start_date":
+        datetime.date(2018, 2, 22),
+        "end_date":
+        datetime.date(2019, 2, 22)
+    }]
 
 
 # Test Routes

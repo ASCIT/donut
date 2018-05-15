@@ -73,23 +73,24 @@ def get_group_members(group_id):
 # The POST method should use a flask.request.form and call the
 # helper function to create a position holding
 # GET method should just query for position holders
-@blueprint.route("/1/positions/<int:pos_id>/", methods=["POST", "GET"])
+@blueprint.route("/1/positions/<int:pos_id>/", methods=["GET"])
 def get_pos_holders(pos_id):
     """GET /1/positions/<int:pos_id>/"""
-    if flask.request.method == "GET":
-        return jsonify(helpers.get_position_holders(pos_id))
-    if flask.request.method == "POST":
-        form = flask.request.form
-        validations = [
-            validate_exists(form, "user_id") and validate_int(form["user_id"]),
-            validate_exists(form, "start_date")
-            and validate_date(form["start_date"]),
-            validate_exists(form, "end_date")
-            and validate_date(form["end_date"])
-        ]
-        if not all(validations):
-            return jsonify({'success': False})
-        helpers.create_position_holder(
-            int(pos_id),
-            int(form["user_id"]), form["start_date"], form["end_date"])
-        return jsonify({'success': True})
+    return jsonify(helpers.get_position_holders(pos_id))
+
+
+@blueprint.route("/1/positions/<int:pos_id>/", methods=["POST"])
+def create_pos_holder(pos_id):
+    form = flask.request.form
+    validations = [
+        validate_exists(form, "user_id") and validate_int(form["user_id"]),
+        validate_exists(form, "start_date")
+        and validate_date(form["start_date"]),
+        validate_exists(form, "end_date") and validate_date(form["end_date"])
+    ]
+    if not all(validations):
+        return jsonify({'success': False})
+    helpers.create_position_holder(
+        int(pos_id), int(form["user_id"]), form["start_date"],
+        form["end_date"])
+    return jsonify({'success': True})

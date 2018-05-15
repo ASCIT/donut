@@ -175,12 +175,11 @@ def delete_position(pos_id):
 
 
 # TODO: Implement this helper function
-def create_position_holder(group_id, pos_id, user_id, start_date, end_date):
+def create_position_holder(pos_id, user_id, start_date, end_date):
     '''
     Inserts row into position_holders table
 
     Arguments:
-        group_id: group id of the position
         pos_id: id of the position
         user_id: user id of the person that the position is to be assigned
         start_date: Starting date of the holding period, format is 'yyyy-mm-dd'
