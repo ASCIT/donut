@@ -137,8 +137,60 @@ def get_position_data(fields=None):
         return cursor.fetchall()
 
 
+def add_position(group_id, pos_name):
+    ''' 
+    Inserts new position into the database associated
+    with the given group and with the given name
+
+    Arguments: 
+        group_id: the id of the group you want to insert the position into
+        pos_name: name of the position to be created
+    '''
+    # Construct the statement
+    s = "INSERT INTO positions (group_id, pos_name) VALUES (%s, %s)"
+    # Execute query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, (group_id, pos_name))
+
+
+def delete_position(pos_id):
+    '''
+    Deletes the position specified with the pos_id and all assocaited
+    position holders entries
+
+    Arguments:
+        pos_id: id of the position to be deleted
+    '''
+    # Construct statements
+    s = "DELETE FROM position_holders WHERE pos_id=%d"
+    s = s % pos_id
+    # Execute query
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+    # Same as above but now delete from positions table
+    s = "DELETE FROM positions WHERE pos_id=%d"
+    s = s % pos_id
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
+
+
 def get_members_by_group(group_id):
-    query = "SELECT user_id FROM group_members "
+    '''
+    Queries the database and returns a list of all users associated with
+    a particular group either because a) They hold a position in the group
+    or b) They hold a position linked to another position in the group
+
+    Arguments:
+        group_id: id of group in question
+    
+    Returns:
+        List where each element is a JSON reprenting the data of each
+        person
+    '''
+    query = "SELECT DISTINCT user_id FROM positions p LEFT JOIN "
+    query += "position_relations pr ON p.pos_id=pr.pos_id_to "
+    query += "INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR "
+    query += "pr.pos_id_from=ph.pos_id "
     query += "WHERE group_id = %s"
 
     with flask.g.pymysql_db.cursor() as cursor:
