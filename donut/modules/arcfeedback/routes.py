@@ -122,4 +122,7 @@ def arcfeedback_add_email(id, email):
 # TODO: make this work from the front end / maybe rename it
 @blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail/<email>')
 def arfeedback_remove_email(id, email):
-    remove_email(id, email)
+    complaint_id = helpers.get_id(id)
+    success = helpers.remove_email(complaint_id, email)
+    if not success: return "Failed to remove email"
+    return "Success!"
