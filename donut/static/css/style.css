@@ -29,6 +29,8 @@ a:hover {
   -o-transition: all 0.5s;
   transition: all 0.5s;
 
+  transition: opacity 0.5s;
+
   opacity: 1;
   color: #CD6600;
 }
@@ -76,6 +78,7 @@ table {
 
   background-color: orange;
   color: #FFF;
+  margin-bottom: 5%;
 }
 
 /* I don't think the btn-primary class
@@ -179,6 +182,26 @@ table {
   text-align: right;
 }
 
+.triple-split-right {
+  width: 30%;
+  float: right;
+  display: inline-block;
+  margin: 0;
+}
+
+.triple-split-left {
+  float: left;
+  width: 30%;
+  display: inline-block;
+  margin: 0;
+}
+
+.triple-split-center {
+  width: 30%;
+  display: inline-block;
+  margin: 0;
+}
+
 #content {
   width: 100%;
 }
@@ -270,6 +293,18 @@ label.required:after {
   .container {
     width: 100%;
     height: 100%;
+  }
+
+  .triple-split-right {
+    width: 100%;
+  }
+
+  .triple-split-left {
+    width: 100%;
+  }
+
+  .triple-split-center {
+    width: 100%;
   }
 
   #navbar button {
