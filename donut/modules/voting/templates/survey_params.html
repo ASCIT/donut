@@ -1,166 +1,166 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='row'>
-		<div class='col-md-6 col-md-offset-3' style='padding-bottom:25px'>
-			{% if 'username' in session %}
-				<h3>
-					{% if editing %}Editing{% else %}Making new{% endif %} survey
-				</h3>
-				<form action='{{ url_for("voting.save_params", access_key=access_key) if editing else url_for("voting.make_survey") }}' method='POST'>
-					<div class='form-group'>
-						<label for='title' class='required'>Title</label>
-						<input
-							class='form-control'
-							name='title'
-							id='title'
-							required
-							autofocus
-							{% if title %}value='{{ title }}'{% endif %}
-						/>
-					</div>
-					<div class='form-group'>
-						<label for='description'>Description</label>
-						<textarea class='form-control' name='description' id='description'>{% if description %}{{ description }}{% endif %}</textarea>
-					</div>
-					<div class='form-group'>
-						<label for='start_date' class='required'>Start date</label>
-						<input
-							type='date'
-							class='form-control'
-							name='start_date'
-							id='start_date'
-							required
-							value='{{ start_date }}'
-						/>
-						<label for='start_hour' class='required'>Start time</label>
-						<div class='input-group'>
-							<input
-								type='number'
-								class='form-control'
-								name='start_hour'
-								id='start_hour'
-								required
-								min=1
-								max=12
-								placeholder='4'
-								value={{ start_hour }}
-							/>
-							<span class='input-group-addon'>:</span>
-							<input
-								type='number'
-								class='form-control'
-								name='start_minute'
-								id='start_minute'
-								required
-								min=0
-								max=59
-								placeholder='00'
-								value='{{ start_minute }}'
-							/>
-							<span class='input-group-btn' data-toggle='buttons'>
-								<label class='btn btn-default{% if start_period == "A" %} active{% endif %}'>
-									<input type='radio' name='start_period' value='A' {% if start_period == "A" %}checked{% endif %} />
-									AM
-								</label>
-								<label class='btn btn-default{% if start_period != "A" %} active{% endif %}'>
-									<input type='radio' name='start_period' value='P' {% if start_period != "A" %}checked{% endif %} />
-									PM
-								</label>
-							</span>
-						</div>
-					</div>
-					<div class='form-group'>
-						<label for='end_date' class='required'>End date</label>
-						<input
-							type='date'
-							class='form-control'
-							name='end_date'
-							id='end_date'
-							required
-							value='{{ end_date }}'
-						/>
-						<label for='end_hour' class='required'>End time</label>
-						<div class='input-group'>
-							<input
-								type='number'
-								class='form-control'
-								name='end_hour'
-								id='end_hour'
-								required
-								min=1
-								max=12
-								placeholder='4'
-								value={{ end_hour }}
-							/>
-							<span class='input-group-addon'>:</span>
-							<input
-								type='number'
-								class='form-control'
-								name='end_minute'
-								id='end_minute'
-								required
-								min=0
-								max=59
-								placeholder='00'
-								value='{{ end_minute }}'
-							/>
-							<span class='input-group-btn' data-toggle='buttons'>
-								<label class='btn btn-default{% if end_period == "A" %} active{% endif %}'>
-									<input type='radio' name='end_period' value='A' {% if end_period == "A" %}checked{% endif %} />
-									AM
-								</label>
-								<label class='btn btn-default{% if end_period != "A" %} active{% endif %}'>
-									<input type='radio' name='end_period' value='P' {% if end_period != "A" %}checked{% endif %} />
-									PM
-								</label>
-							</span>
-						</div>
-					</div>
-					<div class='form-group'>
-						<label for='auth'>Verify user with UID and birthday?</label>
-						<input type='checkbox' name='auth' id='auth' {% if auth %}checked{% endif %} style='position: relative; top: 3px' />
-					</div>
-					<div class='form-group'>
-						<label for='public'>List survey publicly?</label>
-						<input type='checkbox' name='public' id='public' {% if public %}checked{% endif %} style='position: relative; top: 3px' />
-					</div>
-					<div class='form-group'>
-						<label for='group'>Restrict to group</label>
-						<select class='form-control' name='group' id='group'>
-							<option value=''>All users</option>
-							{% for group in groups %}
-								<option value={{ group["group_id"] }} {% if group['group_id']|string == group_id|string %}selected{% endif %}>
-									{{ group['group_name'] }}
-								</option>
-							{% endfor %}
-						</select>
-					</div>
-					<button type='submit' class='btn btn-primary'>
-						{%if editing %}Save{% else %}Make{% endif %} survey
-					</button>
-				</form>
-			{% else %}
-				<h2>Please log in to create a survey</h2>
-			{% endif %}
-		</div>
-	</div>
+  <div class='row'>
+    <div class='col-md-6 col-md-offset-3' style='padding-bottom:25px'>
+      {% if 'username' in session %}
+        <h3>
+          {% if editing %}Editing{% else %}Making new{% endif %} survey
+        </h3>
+        <form action='{{ url_for("voting.save_params", access_key=access_key) if editing else url_for("voting.make_survey") }}' method='POST'>
+          <div class='form-group'>
+            <label for='title' class='required'>Title</label>
+            <input
+              class='form-control'
+              name='title'
+              id='title'
+              required
+              autofocus
+              {% if title %}value='{{ title }}'{% endif %}
+            />
+          </div>
+          <div class='form-group'>
+            <label for='description'>Description</label>
+            <textarea class='form-control' name='description' id='description'>{% if description %}{{ description }}{% endif %}</textarea>
+          </div>
+          <div class='form-group'>
+            <label for='start_date' class='required'>Start date</label>
+            <input
+              type='date'
+              class='form-control'
+              name='start_date'
+              id='start_date'
+              required
+              value='{{ start_date }}'
+            />
+            <label for='start_hour' class='required'>Start time</label>
+            <div class='input-group'>
+              <input
+                type='number'
+                class='form-control'
+                name='start_hour'
+                id='start_hour'
+                required
+                min=1
+                max=12
+                placeholder='4'
+                value={{ start_hour }}
+              />
+              <span class='input-group-addon'>:</span>
+              <input
+                type='number'
+                class='form-control'
+                name='start_minute'
+                id='start_minute'
+                required
+                min=0
+                max=59
+                placeholder='00'
+                value='{{ start_minute }}'
+              />
+              <span class='input-group-btn' data-toggle='buttons'>
+                <label class='btn btn-default{% if start_period == "A" %} active{% endif %}'>
+                  <input type='radio' name='start_period' value='A' {% if start_period == "A" %}checked{% endif %} />
+                  AM
+                </label>
+                <label class='btn btn-default{% if start_period != "A" %} active{% endif %}'>
+                  <input type='radio' name='start_period' value='P' {% if start_period != "A" %}checked{% endif %} />
+                  PM
+                </label>
+              </span>
+            </div>
+          </div>
+          <div class='form-group'>
+            <label for='end_date' class='required'>End date</label>
+            <input
+              type='date'
+              class='form-control'
+              name='end_date'
+              id='end_date'
+              required
+              value='{{ end_date }}'
+            />
+            <label for='end_hour' class='required'>End time</label>
+            <div class='input-group'>
+              <input
+                type='number'
+                class='form-control'
+                name='end_hour'
+                id='end_hour'
+                required
+                min=1
+                max=12
+                placeholder='4'
+                value={{ end_hour }}
+              />
+              <span class='input-group-addon'>:</span>
+              <input
+                type='number'
+                class='form-control'
+                name='end_minute'
+                id='end_minute'
+                required
+                min=0
+                max=59
+                placeholder='00'
+                value='{{ end_minute }}'
+              />
+              <span class='input-group-btn' data-toggle='buttons'>
+                <label class='btn btn-default{% if end_period == "A" %} active{% endif %}'>
+                  <input type='radio' name='end_period' value='A' {% if end_period == "A" %}checked{% endif %} />
+                  AM
+                </label>
+                <label class='btn btn-default{% if end_period != "A" %} active{% endif %}'>
+                  <input type='radio' name='end_period' value='P' {% if end_period != "A" %}checked{% endif %} />
+                  PM
+                </label>
+              </span>
+            </div>
+          </div>
+          <div class='form-group'>
+            <label for='auth'>Verify user with UID and birthday?</label>
+            <input type='checkbox' name='auth' id='auth' {% if auth %}checked{% endif %} style='position: relative; top: 3px' />
+          </div>
+          <div class='form-group'>
+            <label for='public'>List survey publicly?</label>
+            <input type='checkbox' name='public' id='public' {% if public %}checked{% endif %} style='position: relative; top: 3px' />
+          </div>
+          <div class='form-group'>
+            <label for='group'>Restrict to group</label>
+            <select class='form-control' name='group' id='group'>
+              <option value=''>All users</option>
+              {% for group in groups %}
+                <option value={{ group["group_id"] }} {% if group['group_id']|string == group_id|string %}selected{% endif %}>
+                  {{ group['group_name'] }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type='submit' class='btn btn-primary'>
+            {%if editing %}Save{% else %}Make{% endif %} survey
+          </button>
+        </form>
+      {% else %}
+        <h2>Please log in to create a survey</h2>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
 {% block scripts %}
-	{{ super() }}
-	<script>
-		var END_TIME_BEFORE_NOW_WARNING = 'Are you sure you want to set the end time to before now? You will not be able to change it later.'
-		$(document).ready(function() {
-			$('button[type=submit]').click(function(e) {
-				var endYMD = $('input#end_date').val().split('-').map(Number)
-				var endDate = new Date(endYMD[0], endYMD[1] - 1, endYMD[2]) //JS month is 0-indexed
-				var endHour = Number($('input#end_hour').val()) % 12
-				if ($('input[name=end_period][value=P]').parent().hasClass('active')) endHour += 12 //PM
-				endDate.setHours(endHour)
-				endDate.setMinutes(Number($('input#end_minute').val()))
-				if (endDate < new Date) {
-					if (!confirm(END_TIME_BEFORE_NOW_WARNING)) e.preventDefault()
-				}
-			})
-		})
-	</script>
+  {{ super() }}
+  <script>
+    var END_TIME_BEFORE_NOW_WARNING = 'Are you sure you want to set the end time to before now? You will not be able to change it later.'
+    $(document).ready(function() {
+      $('button[type=submit]').click(function(e) {
+        var endYMD = $('input#end_date').val().split('-').map(Number)
+        var endDate = new Date(endYMD[0], endYMD[1] - 1, endYMD[2]) //JS month is 0-indexed
+        var endHour = Number($('input#end_hour').val()) % 12
+        if ($('input[name=end_period][value=P]').parent().hasClass('active')) endHour += 12 //PM
+        endDate.setHours(endHour)
+        endDate.setMinutes(Number($('input#end_minute').val()))
+        if (endDate < new Date) {
+          if (!confirm(END_TIME_BEFORE_NOW_WARNING)) e.preventDefault()
+        }
+      })
+    })
+  </script>
 {% endblock %}

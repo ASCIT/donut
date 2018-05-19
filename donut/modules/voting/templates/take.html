@@ -1,258 +1,258 @@
 {% extends 'layout.html' %}
 {% block page %}
 <div class="container theme-showcase">
-	<div class="jumbotron">
-		{% if is_owner %}
-			<a href="{{ url_for('voting.edit_questions', access_key=access_key) }}">
-				<h4>Edit</h4>
-			</a>
-		{% endif %}
-		<h1>
-			<strong>{{ title }}</strong>
-		</h1>
-		{% if description %}
-			<h2>{{ description }}</h2>
-		{% endif %}
-		{% if auth %}
-			<h4>Please enter your UID and birthday to verify your identity</h4>
-			<div class="form-group">
-				<label class="required" for="uid">UID</label>
-				<input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
-			</div>
-			<div class="form-group">
-				<label class="required" for="birthday">Birthday</label>
-				<input type="date" class="form-control" id="birthday" name="birthday"/>
-			</div>
-		{% endif %}
-		<ul id="question_container"></ul>
-		<button class="btn btn-primary" id="submit">Submit answers</button>
-	</div>
+  <div class="jumbotron">
+    {% if is_owner %}
+      <a href="{{ url_for('voting.edit_questions', access_key=access_key) }}">
+        <h4>Edit</h4>
+      </a>
+    {% endif %}
+    <h1>
+      <strong>{{ title }}</strong>
+    </h1>
+    {% if description %}
+      <h2>{{ description }}</h2>
+    {% endif %}
+    {% if auth %}
+      <h4>Please enter your UID and birthday to verify your identity</h4>
+      <div class="form-group">
+        <label class="required" for="uid">UID</label>
+        <input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
+      </div>
+      <div class="form-group">
+        <label class="required" for="birthday">Birthday</label>
+        <input type="date" class="form-control" id="birthday" name="birthday"/>
+      </div>
+    {% endif %}
+    <ul id="question_container"></ul>
+    <button class="btn btn-primary" id="submit">Submit answers</button>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}
 {{ super() }}
 <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
 <script>
-	var NO = '{{ NO }}'
-	var QUESTION_TYPES = {{ question_types|safe }}
-	var questionData = {{ questions_json|safe }}
+  var NO = '{{ NO }}'
+  var QUESTION_TYPES = {{ question_types|safe }}
+  var questionData = {{ questions_json|safe }}
 
-	var questionContainer
+  var questionContainer
 
-	function addChoice() {
-		var $this = $(this)
-		var element = $this.closest('.element')
-		var chosenList = element.find('.chosen')
-		var userId = $this.attr('user-id')
-		if (userId) { //a writein
-			var choice = $this.find('p').text()
-			element.find('input.writein')
-				.val('')
-				.keyup() //clear search results
-		}
-		else { //not a writein
-			var inputGroup = $this.closest('.input-group')
-			var choiceSpan = inputGroup.find('.candidate')
-			var choice = choiceSpan.text()
-			inputGroup.remove()
-		}
-		var displayedChoice = $('<span>').addClass('choice-text').text(choice)
-		if (userId) displayedChoice.attr('user-id', userId)
-		chosenList.append(
-			$('<li>').addClass('list-group-item').append(
-				displayedChoice,
-				$('<div>').addClass('btn-group space-right').append(
-					$('<button>').addClass('btn btn-default').click(removeChoice(userId)).append(
-						$('<span>').addClass('glyphicon glyphicon-minus')
-					),
-					$('<button>').addClass('btn btn-default').click(moveUp).append(
-						$('<span>').addClass('glyphicon glyphicon-triangle-top')
-					),
-					$('<button>').addClass('btn btn-default').click(moveDown).append(
-						$('<span>').addClass('glyphicon glyphicon-triangle-bottom')
-					)
-				)
-			)
-		)
-	}
-	function removeChoice(writein) {
-		return function() {
-			var $this = $(this)
-			var listGroupItem = $this.closest('.list-group-item')
-			if (!writein) {
-				var choice = listGroupItem.find('span').text()
-				$this.closest('.element').find('.choices').prepend(candidateInput(choice)) //add back to choices list
-			}
-			listGroupItem.remove()
-		}
-	}
-	function moveUp() {
-		var $this = $(this)
-		var listGroupItem = $this.closest('.list-group-item')
-		var previousItem = listGroupItem.prev()
-		if (!previousItem.length) return
-		listGroupItem.insertBefore(previousItem)
-	}
-	function moveDown() {
-		var $this = $(this)
-		var listGroupItem = $this.closest('.list-group-item')
-		var nextItem = listGroupItem.next()
-		if (!nextItem.length) return
-		listGroupItem.insertAfter(nextItem)
-	}
-	function electedPositionChoice(input) {
-		return $('<div>').addClass('form-group').append(
-			$('<div>').addClass('input-group').append(
-				input,
-				$('<span>').addClass('input-group-btn').append(
-					$('<button>').addClass('btn btn-default').click(addChoice).append(
-						$('<span>').addClass('glyphicon glyphicon-plus')
-					)
-				)
-			)
-		)
-	}
-	function candidateInput(choice) {
-		return electedPositionChoice(
-			$('<span>').addClass('input-group-addon candidate').text(choice)
-		)
-	}
-	function submitSurvey() {
-		var responses = new Array(questionData.length)
-		var elements = questionContainer.children()
-		for (var i = 0; i < questionData.length; i++) {
-			var question = questionData[i]
-			var element = elements.eq(i)
-			switch (question.type) {
-				case QUESTION_TYPES.Dropdown:
-					var response = element.find('select').val()
-					break
-				case QUESTION_TYPES['Elected position']:
-					var response = []
-					var chosen = element.find('.chosen .list-group-item span.choice-text')
-					chosen.each(function() {
-						var $this = $(this)
-						var userId = $this.attr('user-id')
-						response.push(userId ? Number(userId) : $this.text())
-					})
-					break
-				case QUESTION_TYPES.Checkboxes:
-					var response = []
-					var choices = element.find('.choices').children()
-					choices.each(function() {
-						var $this = $(this)
-						if ($this.find(':checked').length) response.push($this.find('label').text())
-					})
-					break
-				case QUESTION_TYPES['Short text']:
-				case QUESTION_TYPES['Long text']:
-					var response = element.find('.text-input').val()
-			}
-			responses[i] = {
-				question: question.question_id,
-				response: response
-			}
-		}
-		$.ajax({
-			url: '{{ url_for("voting.submit", access_key=access_key) }}',
-			type: 'POST',
-			data: JSON.stringify({
-				uid: $('input#uid').val(),
-				birthday: $('input#birthday').val(),
-				responses: responses
-			}),
-			success: function(response) {
-				if (response.success) {
-					alert('Submission received')
-					location.assign('{{ url_for("voting.list_surveys") }}')
-				}
-				else alert('Submission failed: ' + response.message)
-			},
-			error: function(jqXHR, status, error) {
-				console.error(jqXHR, status, error)
-				alert('Submission failed?')
-			}
-		})
-	}
+  function addChoice() {
+    var $this = $(this)
+    var element = $this.closest('.element')
+    var chosenList = element.find('.chosen')
+    var userId = $this.attr('user-id')
+    if (userId) { //a writein
+      var choice = $this.find('p').text()
+      element.find('input.writein')
+        .val('')
+        .keyup() //clear search results
+    }
+    else { //not a writein
+      var inputGroup = $this.closest('.input-group')
+      var choiceSpan = inputGroup.find('.candidate')
+      var choice = choiceSpan.text()
+      inputGroup.remove()
+    }
+    var displayedChoice = $('<span>').addClass('choice-text').text(choice)
+    if (userId) displayedChoice.attr('user-id', userId)
+    chosenList.append(
+      $('<li>').addClass('list-group-item').append(
+        displayedChoice,
+        $('<div>').addClass('btn-group space-right').append(
+          $('<button>').addClass('btn btn-default').click(removeChoice(userId)).append(
+            $('<span>').addClass('glyphicon glyphicon-minus')
+          ),
+          $('<button>').addClass('btn btn-default').click(moveUp).append(
+            $('<span>').addClass('glyphicon glyphicon-triangle-top')
+          ),
+          $('<button>').addClass('btn btn-default').click(moveDown).append(
+            $('<span>').addClass('glyphicon glyphicon-triangle-bottom')
+          )
+        )
+      )
+    )
+  }
+  function removeChoice(writein) {
+    return function() {
+      var $this = $(this)
+      var listGroupItem = $this.closest('.list-group-item')
+      if (!writein) {
+        var choice = listGroupItem.find('span').text()
+        $this.closest('.element').find('.choices').prepend(candidateInput(choice)) //add back to choices list
+      }
+      listGroupItem.remove()
+    }
+  }
+  function moveUp() {
+    var $this = $(this)
+    var listGroupItem = $this.closest('.list-group-item')
+    var previousItem = listGroupItem.prev()
+    if (!previousItem.length) return
+    listGroupItem.insertBefore(previousItem)
+  }
+  function moveDown() {
+    var $this = $(this)
+    var listGroupItem = $this.closest('.list-group-item')
+    var nextItem = listGroupItem.next()
+    if (!nextItem.length) return
+    listGroupItem.insertAfter(nextItem)
+  }
+  function electedPositionChoice(input) {
+    return $('<div>').addClass('form-group').append(
+      $('<div>').addClass('input-group').append(
+        input,
+        $('<span>').addClass('input-group-btn').append(
+          $('<button>').addClass('btn btn-default').click(addChoice).append(
+            $('<span>').addClass('glyphicon glyphicon-plus')
+          )
+        )
+      )
+    )
+  }
+  function candidateInput(choice) {
+    return electedPositionChoice(
+      $('<span>').addClass('input-group-addon candidate').text(choice)
+    )
+  }
+  function submitSurvey() {
+    var responses = new Array(questionData.length)
+    var elements = questionContainer.children()
+    for (var i = 0; i < questionData.length; i++) {
+      var question = questionData[i]
+      var element = elements.eq(i)
+      switch (question.type) {
+        case QUESTION_TYPES.Dropdown:
+          var response = element.find('select').val()
+          break
+        case QUESTION_TYPES['Elected position']:
+          var response = []
+          var chosen = element.find('.chosen .list-group-item span.choice-text')
+          chosen.each(function() {
+            var $this = $(this)
+            var userId = $this.attr('user-id')
+            response.push(userId ? Number(userId) : $this.text())
+          })
+          break
+        case QUESTION_TYPES.Checkboxes:
+          var response = []
+          var choices = element.find('.choices').children()
+          choices.each(function() {
+            var $this = $(this)
+            if ($this.find(':checked').length) response.push($this.find('label').text())
+          })
+          break
+        case QUESTION_TYPES['Short text']:
+        case QUESTION_TYPES['Long text']:
+          var response = element.find('.text-input').val()
+      }
+      responses[i] = {
+        question: question.question_id,
+        response: response
+      }
+    }
+    $.ajax({
+      url: '{{ url_for("voting.submit", access_key=access_key) }}',
+      type: 'POST',
+      data: JSON.stringify({
+        uid: $('input#uid').val(),
+        birthday: $('input#birthday').val(),
+        responses: responses
+      }),
+      success: function(response) {
+        if (response.success) {
+          alert('Submission received')
+          location.assign('{{ url_for("voting.list_surveys") }}')
+        }
+        else alert('Submission failed: ' + response.message)
+      },
+      error: function(jqXHR, status, error) {
+        console.error(jqXHR, status, error)
+        alert('Submission failed?')
+      }
+    })
+  }
 
-	$(document).ready(function() {
-		questionContainer = $('#question_container')
-		questionData.forEach(function(question, index) {
-			var elementInner = $('<div>').addClass('left').append(
-				$('<h3>').text(
-					String(index + 1) + '. ' + question.title
-				)
-			)
-			if (question.description) elementInner.append($('<h4>').text(question.description))
-			var li = $('<li>').addClass('element').append(elementInner)
-			switch (question.type) {
-				case QUESTION_TYPES.Dropdown:
-					var select = $('<select>').addClass('form-control choices')
-					question.choices.forEach(function(choice) {
-						select.append($('<option>').text(choice))
-					})
-					elementInner.append(select)
-					break
-				case QUESTION_TYPES['Elected position']:
-					var choices = $('<div>').addClass('col-md-6 choices')
-					question.choices.forEach(function(choice) {
-						choices.append(candidateInput(choice))
-					})
-					var nameInput = $('<input>').addClass('form-control writein').attr('placeholder', 'Write-in')
-					var searchResults = $('<ul>').addClass('list-group')
-					choices.append(
-						candidateInput(NO),
-						nameInput,
-						searchResults
-					)
-					attachDirectorySearch(nameInput, searchResults, function(user) {
-						return $('<button>').addClass('list-group-item')
-							.attr('user-id', user.user_id)
-							.click(addChoice)
-							.append($('<p>').text(user.full_name))
-					})
-					elementInner.append(
-						$('<div>').addClass('row').append(
-							choices,
-							$('<div>').addClass('col-md-6').append(
-								$('<h5>').text('Chosen:'),
-								$('<ul>').addClass('list-group chosen')
-							)
-						)
-					)
-					break
-				case QUESTION_TYPES.Checkboxes:
-					var choicesDiv = $('<div>').addClass('choices')
-					question.choices.forEach(function(choice) {
-						choicesDiv.append($('<div>').append(
-							$('<label>').text(choice).append(
-								$('<input>').attr('type', 'checkbox')
-							)
-						))
-					})
-					elementInner.append(choicesDiv)
-					break
-				case QUESTION_TYPES['Short text']:
-					elementInner.append($('<input>').addClass('form-control text-input'))
-					break
-				case QUESTION_TYPES['Long text']:
-					elementInner.append($('<textarea>').addClass('form-control text-input'))
-			}
-			questionContainer.append(li)
-		})
-		$('button#submit').click(submitSurvey)
-	})
+  $(document).ready(function() {
+    questionContainer = $('#question_container')
+    questionData.forEach(function(question, index) {
+      var elementInner = $('<div>').addClass('left').append(
+        $('<h3>').text(
+          String(index + 1) + '. ' + question.title
+        )
+      )
+      if (question.description) elementInner.append($('<h4>').text(question.description))
+      var li = $('<li>').addClass('element').append(elementInner)
+      switch (question.type) {
+        case QUESTION_TYPES.Dropdown:
+          var select = $('<select>').addClass('form-control choices')
+          question.choices.forEach(function(choice) {
+            select.append($('<option>').text(choice))
+          })
+          elementInner.append(select)
+          break
+        case QUESTION_TYPES['Elected position']:
+          var choices = $('<div>').addClass('col-md-6 choices')
+          question.choices.forEach(function(choice) {
+            choices.append(candidateInput(choice))
+          })
+          var nameInput = $('<input>').addClass('form-control writein').attr('placeholder', 'Write-in')
+          var searchResults = $('<ul>').addClass('list-group')
+          choices.append(
+            candidateInput(NO),
+            nameInput,
+            searchResults
+          )
+          attachDirectorySearch(nameInput, searchResults, function(user) {
+            return $('<button>').addClass('list-group-item')
+              .attr('user-id', user.user_id)
+              .click(addChoice)
+              .append($('<p>').text(user.full_name))
+          })
+          elementInner.append(
+            $('<div>').addClass('row').append(
+              choices,
+              $('<div>').addClass('col-md-6').append(
+                $('<h5>').text('Chosen:'),
+                $('<ul>').addClass('list-group chosen')
+              )
+            )
+          )
+          break
+        case QUESTION_TYPES.Checkboxes:
+          var choicesDiv = $('<div>').addClass('choices')
+          question.choices.forEach(function(choice) {
+            choicesDiv.append($('<div>').append(
+              $('<label>').text(choice).append(
+                $('<input>').attr('type', 'checkbox')
+              )
+            ))
+          })
+          elementInner.append(choicesDiv)
+          break
+        case QUESTION_TYPES['Short text']:
+          elementInner.append($('<input>').addClass('form-control text-input'))
+          break
+        case QUESTION_TYPES['Long text']:
+          elementInner.append($('<textarea>').addClass('form-control text-input'))
+      }
+      questionContainer.append(li)
+    })
+    $('button#submit').click(submitSurvey)
+  })
 </script>
 {% endblock %}
 {% block styles %}
-	{{ super() }}
-	<style>
-		.left {
-			text-align: left;
-		}
-		button[user-id] > p { /* override jumbotron p styles */
-			font-size: 15px;
-			margin-bottom: 0;
-		}
-	</style>
+  {{ super() }}
+  <style>
+    .left {
+      text-align: left;
+    }
+    button[user-id] > p { /* override jumbotron p styles */
+      font-size: 15px;
+      margin-bottom: 0;
+    }
+  </style>
 {% endblock %}

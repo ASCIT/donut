@@ -1,79 +1,79 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='row'>
-		<div class='jumbotron col-md-8 col-md-offset-2' id='main'>
-			<div class='btn-group'>
-				<a href='{{ url_for("voting.make_survey_form") }}' class='btn btn-default'>
-					New Survey
-				</a>
-				<a href='{{ url_for("voting.my_surveys") }}' class='btn btn-default'>
-					My Surveys
-				</a>
-			</div>
+  <div class='row'>
+    <div class='jumbotron col-md-8 col-md-offset-2' id='main'>
+      <div class='btn-group'>
+        <a href='{{ url_for("voting.make_survey_form") }}' class='btn btn-default'>
+          New Survey
+        </a>
+        <a href='{{ url_for("voting.my_surveys") }}' class='btn btn-default'>
+          My Surveys
+        </a>
+      </div>
 
-			<div class='row'>
-				<div class='col-md-6'>
-					<div class='panel panel-default'>
-						<div class='panel-heading'>
-							<h3 class='panel-title'>Active surveys</h3>
-						</div>
-						<div class='panel-body'>
-							<div class='list-group'>
-								{% for survey in active_surveys %}
-									<a class='list-group-item' href='{{ url_for("voting.take_survey", access_key=survey["access_key"]) }}'>
-										<h4 class='list-group-item-heading'>
-											{{ survey['title'] }}
-										</h4>
-										{% if survey['description'] %}
-											<p class='list-group-item-text small'>{{ survey['description'] }}</p>
-										{% endif %}
-										<p class='list-group-item-text small'>
-											Open until {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
-										</p>
-									</a>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class='col-md-6'>
-					<div class='panel panel-default'>
-						<div class='panel-heading'>
-							<h3 class='panel-title'>Survey results</h3>
-						</div>
-						<div class='panel-body'>
-							<div class='list-group'>
-								{% for survey in closed_surveys %}
-									<a class='list-group-item' href='{{ url_for("voting.show_results", access_key=survey["access_key"]) }}'>
-										<h4 class='list-group-item-heading'>
-											{{ survey['title'] }}
-										</h4>
-										{% if survey['description'] %}
-											<p class='list-group-item-text small'>{{ survey['description'] }}</p>
-										{% endif %}
-										<p class='list-group-item-text small'>
-											Closed {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
-										</p>
-										{% if not survey['results_shown'] %}
-											<p class='list-group-item-text small'>
-												<i>Only visible to you</i>
-											</p>
-										{% endif %}
-									</a>
-								{% endfor %}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+      <div class='row'>
+        <div class='col-md-6'>
+          <div class='panel panel-default'>
+            <div class='panel-heading'>
+              <h3 class='panel-title'>Active surveys</h3>
+            </div>
+            <div class='panel-body'>
+              <div class='list-group'>
+                {% for survey in active_surveys %}
+                  <a class='list-group-item' href='{{ url_for("voting.take_survey", access_key=survey["access_key"]) }}'>
+                    <h4 class='list-group-item-heading'>
+                      {{ survey['title'] }}
+                    </h4>
+                    {% if survey['description'] %}
+                      <p class='list-group-item-text small'>{{ survey['description'] }}</p>
+                    {% endif %}
+                    <p class='list-group-item-text small'>
+                      Open until {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                    </p>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class='col-md-6'>
+          <div class='panel panel-default'>
+            <div class='panel-heading'>
+              <h3 class='panel-title'>Survey results</h3>
+            </div>
+            <div class='panel-body'>
+              <div class='list-group'>
+                {% for survey in closed_surveys %}
+                  <a class='list-group-item' href='{{ url_for("voting.show_results", access_key=survey["access_key"]) }}'>
+                    <h4 class='list-group-item-heading'>
+                      {{ survey['title'] }}
+                    </h4>
+                    {% if survey['description'] %}
+                      <p class='list-group-item-text small'>{{ survey['description'] }}</p>
+                    {% endif %}
+                    <p class='list-group-item-text small'>
+                      Closed {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                    </p>
+                    {% if not survey['results_shown'] %}
+                      <p class='list-group-item-text small'>
+                        <i>Only visible to you</i>
+                      </p>
+                    {% endif %}
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 {% block styles %}
-	{{ super() }}
-	<style>
-		p.small {
-			font-size: 15px; /* p should be smaller than h4 */
-		}
-	</style>
+  {{ super() }}
+  <style>
+    p.small {
+      font-size: 15px; /* p should be smaller than h4 */
+    }
+  </style>
 {% endblock %}
