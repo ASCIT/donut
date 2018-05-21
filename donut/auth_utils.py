@@ -241,7 +241,7 @@ def check_reset_key(reset_key):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, reset_key)
-        result = cursor.fetchone() 
+        result = cursor.fetchone()
     if result is not None:
         return result['username']
     else:
