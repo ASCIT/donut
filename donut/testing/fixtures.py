@@ -30,5 +30,4 @@ def client():
 
     yield app.test_client()
     # Teardown logic (happens after each test function)
-    flask.g.tx.rollback()
-    flask.g.db.close()
+    flask.g.pymysql_db.close()
