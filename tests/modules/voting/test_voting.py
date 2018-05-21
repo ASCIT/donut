@@ -2,6 +2,7 @@
 Tests donut/modules/rooms/
 """
 from datetime import date, datetime, timedelta
+import re
 import flask
 import pytest
 from donut.testing.fixtures import client
@@ -711,6 +712,50 @@ def test_edit_params(client):
         follow_redirects=False)
     assert rv.status_code == 200
     assert b'You are not the creator of this survey' in rv.data
+
+
+def test_close(client):
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+
+    def make_survey(start_date):
+        rv = client.post(
+            flask.url_for('voting.make_survey'),
+            data=dict(
+                title='ABC',
+                description='',
+                start_date=start_date.strftime(helpers.YYYY_MM_DD),
+                start_hour='12',
+                start_minute='00',
+                start_period='P',
+                end_date=(start_date + timedelta(
+                    days=2)).strftime(helpers.YYYY_MM_DD),
+                end_hour='12',
+                end_minute='00',
+                end_period='P',
+                public='on',
+                group=''),
+            follow_redirects=False)
+        assert rv.status_code == 302
+        return re.search(r'[A-Za-z0-9]{64}', rv.location)[0]
+
+    past = make_survey(date.today() + timedelta(days=-3))
+    present = make_survey(date.today() + timedelta(days=-1))
+    future = make_survey(date.today() + timedelta(days=1))
+    # Test error cases
+    rv = client.get(flask.url_for('voting.close_survey', access_key=past))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Cannot modify a survey after it has closed"' in rv.data
+    rv = client.get(flask.url_for('voting.close_survey', access_key=future))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Survey has not opened yet"' in rv.data
+    # Test successful case
+    rv = client.get(flask.url_for('voting.close_survey', access_key=present))
+    assert rv.status_code == 200
+    assert rv.data == b'{"success":true}\n'
+    rv = client.get(flask.url_for('voting.close_survey', access_key=present))
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Cannot modify a survey after it has closed"' in rv.data
 
 
 def test_delete(client):

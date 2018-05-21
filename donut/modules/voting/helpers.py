@@ -267,6 +267,10 @@ def get_my_surveys(user_id):
         return cursor.fetchall()
 
 
+def close_survey(survey_id):
+    update_survey_params(survey_id, {'end_time': datetime.now()})
+
+
 def delete_survey(survey_id):
     query = 'DELETE FROM surveys WHERE survey_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:

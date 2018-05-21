@@ -143,6 +143,22 @@ def save_questions(access_key):
     return flask.jsonify({'success': True})
 
 
+@blueprint.route('/1/surveys/<access_key>/close')
+def close_survey(access_key):
+    survey = helpers.get_survey_data(access_key)
+    restrict_message = helpers.restrict_edit_access(survey, False)
+    if restrict_message:
+        return flask.jsonify({'success': False, 'message': restrict_message})
+    if survey['start_time'] > datetime.now():
+        return flask.jsonify({
+            'success': False,
+            'message': 'Survey has not opened yet'
+        })
+
+    helpers.close_survey(survey['survey_id'])
+    return flask.jsonify({'success': True})
+
+
 @blueprint.route('/1/surveys/<access_key>', methods=['DELETE'])
 def delete_survey(access_key):
     survey = helpers.get_survey_data(access_key)

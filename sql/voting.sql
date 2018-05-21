@@ -10,7 +10,7 @@ CREATE TABLE surveys (
     description    TEXT,
     start_time     DATETIME      NOT NULL,
     end_time       DATETIME      NOT NULL,
-    access_key     CHAR(64)      NOT NULL, -- hex string
+    access_key     CHAR(64)      NOT NULL,
     group_id       INT,                    -- restrict to this group if non-NULL
     auth           BOOLEAN       NOT NULL, -- require authentication (UID and birthday)
     public         BOOLEAN       NOT NULL, -- whether survey should appear in the list of active surveys
