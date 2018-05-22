@@ -22,8 +22,13 @@ def take_survey(access_key):
     survey = helpers.get_survey_data(access_key)
     restrict_message = helpers.restrict_take_access(survey)
     if restrict_message:
-        flask.flash(restrict_message)
-        return list_surveys()
+        if restrict_message == helpers.ALREADY_COMPLETED:
+            return flask.redirect(
+                flask.url_for(
+                    'voting.show_my_response', access_key=access_key))
+        else:
+            flask.flash(restrict_message)
+            return list_surveys()
 
     questions_json = helpers.get_questions_json(survey['survey_id'], True)
     user_id = helpers.get_user_id(flask.session['username'])
@@ -251,13 +256,12 @@ def show_results(access_key):
         flask.flash('You are not permitted to see the results at this time')
         return list_surveys()
 
-    question_types = helpers.get_question_types()
     results = helpers.get_results(survey['survey_id'])
     return flask.render_template(
         'results.html',
         access_key=access_key,
         **survey,
-        question_types=question_types,
+        question_types=helpers.get_question_types(),
         results=results)
 
 
@@ -278,3 +282,34 @@ def release_results(access_key):
     helpers.update_survey_params(survey['survey_id'], {'results_shown': True})
     return flask.redirect(
         flask.url_for('voting.show_results', access_key=access_key))
+
+
+@blueprint.route('/1/surveys/<access_key>/my-response')
+def show_my_response(access_key):
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
+        return list_surveys()
+    username = flask.session.get('username')
+    if not username:
+        flask.flash('Must be logged in to see response')
+        return list_surveys()
+    questions = helpers.get_responses(survey['survey_id'],
+                                      helpers.get_user_id(username))
+    some_response = False
+    for question in questions:
+        responses = question['responses']
+        if responses:
+            some_response = True
+            question['response'], = responses
+        else:
+            question['response'] = None
+    if not some_response:
+        flask.flash('You have not responded to this survey')
+        return list_surveys()
+
+    return flask.render_template(
+        'my-response.html',
+        **survey,
+        question_types=helpers.get_question_types(),
+        questions=questions)

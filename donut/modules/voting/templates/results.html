@@ -30,7 +30,7 @@
           {% if question['description'] %}
             <h4>{{ question['description'] }}</h4>
           {% endif %}
-          {% if 'choices' in question %}
+          {% if question['choices'] %}
             <h4>
               <strong>Choices</strong>
             </h4>
@@ -43,7 +43,7 @@
           <h4>
             <strong>Results</strong>
           </h4>
-          {% if question['type'] == question_types['Dropdown'] or question['type'] == question_types['Checkboxes'] %}
+          {% if question['type'] in (question_types['Dropdown'], question_types['Checkboxes']) %}
             <ul class="list-group">
               {% for choice_id, count in question['results'] %}
                 <li class="list-group-item">
@@ -68,7 +68,7 @@
                 {% endfor %}
               </ul>
             {% endif %}
-          {% elif question['type'] == question_types['Short text'] or question['type'] == question_types['Long text'] %}
+          {% elif question['type'] in (question_types['Short text'], question_types['Long text']) %}
             <ul class="list-group">
               {% for response, count in question['results'] %}
                 <li class="list-group-item">
@@ -90,7 +90,7 @@
             </ul>
             <h4>
               Abstentions:
-              {{ question['responses']|length - question['filled_responses']|length }}
+              {{ question['responses']|length - question['responses']|length }}
             </h4>
             <h4>
               <strong>Individual responses:</strong>
@@ -98,7 +98,7 @@
             <label for="show-responses{{ loop.index }}">Show responses?</label>
             <input type="checkbox" class="show-responses" id="show-responses{{ loop.index }}"/>
             <ul class="list-group">
-              {% for response in question['filled_responses'] %}
+              {% for response in question['responses'] %}
                 <li class="list-group-item">
                   {% for vote in response %}
                     <div>{{ vote }}</div>

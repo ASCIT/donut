@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+    <h1>
+      <strong>My responses for {{ title }}</strong>
+    </h1>
+    {% if description %}
+      <h2>{{ description }}</h2>
+    {% endif %}
+    <ul id="question_container">
+      {% for question in questions %}
+        <li class="list-group-item">
+          <h3>
+            {{ question['list_order'] + 1 }}. {{ question['title'] }}
+          </h3>
+          {% if question['description'] %}
+            <h4>{{ question['description'] }}</h4>
+          {% endif %}
+          {% if question['choices'] %}
+            <h4>
+              <strong>Choices</strong>
+            </h4>
+            <ul class="list-group">
+              {% for choice_id in question['choices'] %}
+                <li class="list-group-item">{{ question['choices'][choice_id] }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          <h4>
+            <strong>Response</strong>
+          </h4>
+          {% if question['type'] == question_types['Dropdown'] %}
+            <div>{{ question['choices'][question['response']] }}</div>
+          {% elif question['type'] == question_types['Checkboxes'] %}
+            <ul class="list-group">
+              {% for choice_id in question['response'] %}
+                <li class="list-group-item">
+                    <div>{{ question['choices'][choice_id] }}</div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% elif question['type'] in (question_types['Short text'], question_types['Long text']) %}
+            <div>{{ question['response'] }}</div>
+          {% elif question['type'] == question_types['Elected position'] %}
+            <ul class="list-group">
+              {% for vote in question['response'] %}
+                <li class="list-group-item">
+                    <div>{{ vote }}</div>
+                </li>
+              {% endfor %}
+              {% if not question['response'] %}
+                <li class="list-group-item">
+                    <div>Abstained</div>
+                </li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <div>Unknown question type</div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

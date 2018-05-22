@@ -14,6 +14,7 @@ ACCESS_KEY_LENGTH = 64
 AM_OR_PM = set(['A', 'P'])
 YYYY_MM_DD = '%Y-%m-%d'
 NO = 'NO'
+ALREADY_COMPLETED = 'Already completed'
 
 
 def get_groups():
@@ -296,7 +297,7 @@ def restrict_take_access(survey):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(responses_query, [survey['survey_id'], username])
-        if cursor.fetchone(): return 'Already completed'
+        if cursor.fetchone(): return ALREADY_COMPLETED
 
 
 def restrict_edit_access(survey, allow_after_close):
@@ -332,7 +333,7 @@ def some_responses_for_survey(survey_id):
         return cursor.fetchone() is not None
 
 
-def get_results(survey_id):
+def get_responses(survey_id, user_id=None):
     questions_query = """
         SELECT question_id, title, description, type_id AS type, list_order, choices
         FROM survey_questions NATURAL JOIN survey_question_types
@@ -350,12 +351,9 @@ def get_results(survey_id):
         FROM survey_questions NATURAL JOIN survey_responses
         WHERE question_id = %s
     """
+    if user_id: responses_query += ' AND user_id = %s'
     name_query = 'SELECT full_name FROM members_full_name WHERE user_id = %s'
-    question_types = get_question_types()
-    count_types = set([
-        question_types['Dropdown'], question_types['Short text'],
-        question_types['Long text']
-    ])
+    elected_position = get_question_types()['Elected position']
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(questions_query, [survey_id])
         questions = cursor.fetchall()
@@ -366,8 +364,6 @@ def get_results(survey_id):
                     choice['choice_id']: choice['choice']
                     for choice in cursor.fetchall()
                 }
-            else:
-                del question['choices']
 
             def resolve_name(vote):
                 if vote is None: return NO
@@ -379,21 +375,34 @@ def get_results(survey_id):
                         return question['choices'][vote]
                 raise Exception('Unrecognized elected position vote')
 
-            cursor.execute(responses_query, question['question_id'])
+            cursor.execute(responses_query,
+                           [question['question_id']] + ([user_id]
+                                                        if user_id else []))
             responses = [
                 json.loads(res['response']) for res in cursor.fetchall()
             ]
-            question['responses'] = responses
-            question_type = question['type']
-            if question_type in count_types:
-                question['results'] = Counter(responses).most_common()
-            elif question_type == question_types['Checkboxes']:
-                question['results'] = Counter(chain(*responses)).most_common()
-            elif question_type == question_types['Elected position']:
-                non_abstaining = [list(res) for res in responses if res]
-                question['results'] = list(
-                    map(resolve_name, winners(non_abstaining)))
-                question['filled_responses'] = [
-                    list(map(resolve_name, res)) for res in non_abstaining
+            if question['type'] == elected_position:
+                responses = [
+                    list(map(resolve_name, res)) for res in responses if res
                 ]
+            question['responses'] = responses
+        return questions
+
+
+def get_results(survey_id):
+    question_types = get_question_types()
+    count_types = set([
+        question_types['Dropdown'], question_types['Short text'],
+        question_types['Long text']
+    ])
+    questions = get_responses(survey_id)
+    for question in questions:
+        question_type = question['type']
+        responses = question['responses']
+        if question_type in count_types:
+            question['results'] = Counter(responses).most_common()
+        elif question_type == question_types['Checkboxes']:
+            question['results'] = Counter(chain(*responses)).most_common()
+        elif question_type == question_types['Elected position']:
+            question['results'] = winners(responses)
     return questions

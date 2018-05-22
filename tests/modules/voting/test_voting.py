@@ -421,6 +421,7 @@ def test_respond(client):
         'description': 'bbb',
         'type': 4,
         'list_order': 1,
+        'choices': 0,
         'responses': ['asdf'],
         'results': [('asdf', 1)]
     }, {
@@ -447,6 +448,8 @@ def test_respond(client):
         5,
         'list_order':
         3,
+        'choices':
+        0,
         'responses': ['Lorem ipsum dolor sit amet'],
         'results': [('Lorem ipsum dolor sit amet', 1)]
     }, {
@@ -467,7 +470,7 @@ def test_respond(client):
         },
         'responses': [[7, -1, 9, -2, None]],
         'results': ['do', 'David Qu', 'me'],
-        'filled_responses': [['do', 'David Qu', 'me', 'Robert Eng', 'NO']]
+        'responses': [['do', 'David Qu', 'me', 'Robert Eng', 'NO']]
     }]
     with app.test_request_context():
         flask.session['username'] = 'dqu'
