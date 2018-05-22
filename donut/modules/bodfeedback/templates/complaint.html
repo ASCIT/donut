@@ -29,10 +29,10 @@
 		    <h4>Add an email</h4>
 		</div>
 		<div class="panel-body">
-		    <form method="POST" id="add-email" action="???">
+			<form method="POST" id="add-email" action="/">
 			<div class="form-group">
 			    <p>Email: </p>
-			    <input class="form-control" type="text" name="email" />
+			    <input class="form-control" type="text" name="email" id="addedemail"/>
 			</div>
 			<input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
 		    </form>
@@ -84,36 +84,39 @@
 {% block scripts %}
 {{ super() }}
 <script>
- function addMessage(response) {
-     var msg = response['message'];
-     var poster = response['poster'];
-     var msg_html = "<tr> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
-     $('#messageList').append(msg_html);
- }
  
- function addMessageError(response) {
-     $(messageList).append(response);
- }
  $(document).ready(function() {
      {% if complaint['status'] == 'new_msg' %}
      $('#markUnread').hide();
      {% else %}
      $('#markRead').hide();
-     {% endif %}
+     {% endif %} 
+     $('#add-email').on('submit', function(e) {
+	 e.preventDefault();
+	 var em = $("#addedemail").val();
+	 $.ajax({
+	     url: "{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid'], email=em) }}",
+
+	     type: 'POST' 
+	 }); 
+	 $('#add-email')[0].reset()
+	 location.reload();
+     });
+ 
+	
      $('#addMessage').on('submit', function(e) {
 	 e.preventDefault();
 	 $.ajax({
-	     url: "{{ url_for('arcfeedback.arcfeedback_add_msg', id=complaint['uuid']) }}",
+	     url: "{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}",
 	     data: $('#addMessage').serialize(),
-	     type: 'POST',
-	     success: addMessage,
-	     error: addMessageError
+	     type: 'POST' 
 	 }); 
 	 $('#addMessage')[0].reset()
+	 location.reload();
      });
      $('#markRead').on('click', function() {
 	 $.ajax({
-	     url: "{{ url_for('arcfeedback.arcfeedback_mark_read', id=complaint['uuid']) }}",
+	     url: "{{ url_for('bodfeedback.bodfeedback_mark_read', id=complaint['uuid']) }}",
 	     type: "GET",
 	     success: function(){
 		 $('#markRead').hide();

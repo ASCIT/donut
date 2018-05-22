@@ -71,7 +71,7 @@ def bodfeedback_add_msg(id):
     })
 
 
-# allow arc members to see a summary
+# allow bod members to see a summary
 @blueprint.route('/bodfeedback/view/summary')
 def bodfeedback_view_summary():
     #authenticate
@@ -109,6 +109,7 @@ def bodfeedback_mark_unread(id):
     else:
         return 'Success'
 
+
 # add an email to this complaint
 @blueprint.route('/1/bodfeedback/<uuid:id>/addEmail/<email>')
 def bodfeedback_add_email(id, email):
@@ -117,7 +118,11 @@ def bodfeedback_add_email(id, email):
     if not success: return "Failed to add email"
     return "Success!"
 
+
 # remove an email from this complaint
 @blueprint.route('/1/bodfeedback/<uuid:id>/removeEmail/<email>')
 def bodfeedback_remove_email(id, email):
-    helpers.remove_email(id, email)
+    complaint_id = helpers.get_id(id)
+    success = helpers.remove_email(complaint_id, email)
+    if not success: return "Failed to remove email"
+    return "Success!"
