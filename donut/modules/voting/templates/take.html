@@ -194,13 +194,20 @@
           elementInner.append(select)
           break
         case QUESTION_TYPES['Elected position']:
-          var choices = $('<div>').addClass('col-md-6 choices')
-          question.choices.forEach(function(choice) {
-            choices.append(candidateInput(choice))
+          var choicesDiv = $('<div>').addClass('col-md-6 choices')
+          var choices = question.choices
+          for (var i = choices.length - 1; i > 0; i--) {
+            var j = (Math.random() * (i + 1)) | 0
+            var swap = choices[i]
+            choices[i] = choices[j]
+            choices[j] = swap
+          }
+          choices.forEach(function(choice) {
+            choicesDiv.append(candidateInput(choice))
           })
           var nameInput = $('<input>').addClass('form-control writein').attr('placeholder', 'Write-in')
           var searchResults = $('<ul>').addClass('list-group')
-          choices.append(
+          choicesDiv.append(
             candidateInput(NO),
             nameInput,
             searchResults
@@ -213,7 +220,7 @@
           })
           elementInner.append(
             $('<div>').addClass('row').append(
-              choices,
+              choicesDiv,
               $('<div>').addClass('col-md-6').append(
                 $('<h5>').text('Chosen:'),
                 $('<ul>').addClass('list-group chosen')
