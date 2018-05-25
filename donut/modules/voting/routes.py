@@ -94,7 +94,8 @@ def edit_questions(access_key):
         questions_json=questions_json,
         access_key=access_key,
         survey=survey,
-        opened=survey['start_time'] <= datetime.now())
+        opened=survey['start_time'] <= datetime.now(),
+        NO=helpers.NO)
 
 
 @blueprint.route('/1/surveys/<access_key>', methods=['GET'])

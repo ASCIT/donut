@@ -113,9 +113,9 @@
         case QUESTION_TYPES.Dropdown:
         case QUESTION_TYPES.Checkboxes:
         case QUESTION_TYPES['Elected position']:
-          var makeChoiceFunction = questionType === QUESTION_TYPES.Checkboxes
-            ? makeChoice('checkbox')
-            : makeChoice('radio')
+          var makeChoiceFunction = makeChoice(
+            questionType === QUESTION_TYPES.Checkboxes ? 'checkbox' : 'radio'
+          )
           var choicesDiv = $('<div>').addClass('choices')
           choices.forEach(function(choice) { choicesDiv.append(makeChoiceFunction(choice)) })
           inputs.append(
@@ -127,6 +127,9 @@
             ),
             choicesDiv
           )
+          if (questionType === QUESTION_TYPES['Elected position']) {
+            inputs.append($('<label>').text('({{ NO }})'))
+          }
           break
         case QUESTION_TYPES['Short text']:
           inputs.append($('<input>').addClass('form-control'))
