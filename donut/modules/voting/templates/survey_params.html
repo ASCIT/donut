@@ -30,7 +30,7 @@
               name='start_date'
               id='start_date'
               required
-              value='{{ start_date }}'
+              {% if start_date %}value='{{ start_date }}'{% endif %}
             />
             <label for='start_hour' class='required'>Start time</label>
             <div class='input-group'>
@@ -43,7 +43,7 @@
                 min=1
                 max=12
                 placeholder='4'
-                value={{ start_hour }}
+                {% if start_hour %}value={{ start_hour }}{% endif %}
               />
               <span class='input-group-addon'>:</span>
               <input
@@ -55,7 +55,7 @@
                 min=0
                 max=59
                 placeholder='00'
-                value='{{ start_minute }}'
+                {% if start_minute %}value='{{ start_minute }}'{% endif %}
               />
               <span class='input-group-btn' data-toggle='buttons'>
                 <label class='btn btn-default{% if start_period == "A" %} active{% endif %}'>
@@ -77,7 +77,7 @@
               name='end_date'
               id='end_date'
               required
-              value='{{ end_date }}'
+              {% if end_date %}value='{{ end_date }}'{% endif %}
             />
             <label for='end_hour' class='required'>End time</label>
             <div class='input-group'>
@@ -90,7 +90,7 @@
                 min=1
                 max=12
                 placeholder='4'
-                value={{ end_hour }}
+                {% if end_hour %}value={{ end_hour }}{% endif %}
               />
               <span class='input-group-addon'>:</span>
               <input
@@ -102,7 +102,7 @@
                 min=0
                 max=59
                 placeholder='00'
-                value='{{ end_minute }}'
+                {% if end_minute %}value='{{ end_minute }}'{% endif %}
               />
               <span class='input-group-btn' data-toggle='buttons'>
                 <label class='btn btn-default{% if end_period == "A" %} active{% endif %}'>

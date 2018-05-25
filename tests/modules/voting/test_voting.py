@@ -85,12 +85,12 @@ def test_public_surveys(client):
         'access_key': access_keys['Unrestricted'],
         'group_id': None
     }
-    assert list(helpers.get_public_surveys(helpers.get_user_id(
+    assert list(helpers.get_visible_surveys(helpers.get_user_id(
         'dqu'))) == [  # not a Rudd
             unrestricted
         ]
     assert list(
-        helpers.get_public_surveys(helpers.get_user_id('csander'))) == [
+        helpers.get_visible_surveys(helpers.get_user_id('csander'))) == [
             unrestricted, {
                 'title':
                 'Ruddock only',
@@ -179,7 +179,7 @@ def test_closed_surveys(client):
 
 
 def test_survey_data(client):
-    access_key = list(helpers.get_public_surveys(1))[0]['access_key']
+    access_key = list(helpers.get_visible_surveys(1))[0]['access_key']
     yesterday = date.today() + timedelta(days=-1)
     tomorrow = date.today() + timedelta(days=1)
     assert helpers.get_survey_data(access_key) == {
@@ -366,7 +366,7 @@ def test_my_surveys(client):
         'description':
         None,
         'access_key':
-        list(helpers.get_public_surveys(csander))[0]['access_key'],
+        list(helpers.get_visible_surveys(csander))[0]['access_key'],
         'start_time':
         datetime(yesterday.year, yesterday.month, yesterday.day, 12),
         'unopened':
@@ -381,7 +381,7 @@ def test_my_surveys(client):
         'description':
         None,
         'access_key':
-        list(helpers.get_public_surveys(csander))[1]['access_key'],
+        list(helpers.get_visible_surveys(csander))[1]['access_key'],
         'start_time':
         datetime(yesterday.year, yesterday.month, yesterday.day, 12),
         'unopened':
@@ -539,7 +539,7 @@ def test_home(client):
 
 def test_take(client):
     access_key = list(
-        helpers.get_public_surveys(helpers.get_user_id('csander')))[1][
+        helpers.get_visible_surveys(helpers.get_user_id('csander')))[1][
             'access_key']
     rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))
     assert rv.status_code == 200
@@ -594,7 +594,7 @@ def test_edit_questions(client):
     assert b'Invalid access key' in rv.data
     assert b'Editing survey questions' not in rv.data
     access_key = list(
-        helpers.get_public_surveys(helpers.get_user_id('csander')))[0][
+        helpers.get_visible_surveys(helpers.get_user_id('csander')))[0][
             'access_key']
     rv = client.get(
         flask.url_for('voting.edit_questions', access_key=access_key))
@@ -637,15 +637,15 @@ def test_edit_questions(client):
         flask.url_for('voting.edit_questions', access_key=access_key))
     assert rv.status_code == 200
     assert b'Editing survey questions' in rv.data
-    assert b'WARNING: Previous responses will be deleted if you edit the questions' in rv.data
+    assert b'someResponses = true' in rv.data
     access_key2 = list(
-        helpers.get_public_surveys(helpers.get_user_id('csander')))[1][
+        helpers.get_visible_surveys(helpers.get_user_id('csander')))[1][
             'access_key']
     rv = client.get(
         flask.url_for('voting.edit_questions', access_key=access_key2))
     assert rv.status_code == 200
     assert b'Editing survey questions' in rv.data
-    assert b'WARNING: Previous responses will be deleted if you edit the questions' not in rv.data
+    assert b'someResponses = false' in rv.data
     # Test saving questions
     rv = client.post(
         flask.url_for('voting.save_questions', access_key=closed_access_key),
@@ -677,7 +677,7 @@ def test_edit_params(client):
         sess['username'] = 'csander'
     # Test successful case
     access_key = list(
-        helpers.get_public_surveys(helpers.get_user_id('csander')))[0][
+        helpers.get_visible_surveys(helpers.get_user_id('csander')))[0][
             'access_key']
     rv = client.get(flask.url_for('voting.edit_params', access_key=access_key))
     assert rv.status_code == 200
@@ -811,7 +811,7 @@ def test_submit(client):
         follow_redirects=False)
     access_key = [
         survey
-        for survey in helpers.get_public_surveys(
+        for survey in helpers.get_visible_surveys(
             helpers.get_user_id('csander'))
         if survey['title'] == 'Response test'
     ][0]['access_key']
@@ -1069,7 +1069,7 @@ def test_results(client):
     assert b'Invalid access key' in rv.data
     access_key = [
         survey
-        for survey in helpers.get_public_surveys(
+        for survey in helpers.get_visible_surveys(
             helpers.get_user_id('csander'))
         if survey['title'] == 'Response test'
     ][0]['access_key']

@@ -41,7 +41,7 @@ def allowed_to_take(user_id):
     return lambda survey: survey['group_id'] is None or is_user_in_group(user_id, survey['group_id'])
 
 
-def get_public_surveys(user_id):
+def get_visible_surveys(user_id):
     query = """
         SELECT DISTINCT title, description, end_time, access_key, group_id
         FROM surveys
@@ -248,8 +248,9 @@ def set_questions(survey_id, questions):
         cursor.execute(delete_query, [survey_id])
         for order, question in enumerate(questions):
             cursor.execute(insert_question_query, [
-                survey_id, question['title'], question['description'].strip()
-                or None, order, question['type']
+                survey_id, question['title'].strip(),
+                question['description'].strip() or None, order,
+                question['type']
             ])
             question_id = cursor.lastrowid
             for choice in question.get('choices', []):

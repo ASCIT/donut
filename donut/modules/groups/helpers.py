@@ -184,7 +184,7 @@ def get_members_by_group(group_id):
         group_id: id of group in question
 
     Returns:
-        List where each element is a JSON reprenting the data of each
+        List where each element is a JSON representing the data of each
         person
     '''
     query = "SELECT DISTINCT user_id FROM positions p LEFT JOIN "

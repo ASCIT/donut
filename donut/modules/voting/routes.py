@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 import json
 import flask
 
@@ -9,7 +9,7 @@ from donut.modules.core.helpers import get_member_data
 @blueprint.route('/1/surveys')
 def list_surveys():
     user_id = helpers.get_user_id(flask.session.get('username'))
-    active_surveys = helpers.get_public_surveys(user_id)
+    active_surveys = helpers.get_visible_surveys(user_id)
     closed_surveys = helpers.get_closed_surveys(user_id)
     return flask.render_template(
         'list_surveys.html',
@@ -45,17 +45,8 @@ def take_survey(access_key):
 
 @blueprint.route('/1/surveys/make')
 def make_survey_form():
-    tomorrow = date.today() + timedelta(days=1)
-    one_week_later = tomorrow + timedelta(weeks=1)
     return flask.render_template(
-        'survey_params.html',
-        groups=helpers.get_groups(),
-        start_date=tomorrow,
-        start_hour=12,
-        start_minute='00',
-        end_date=one_week_later,
-        end_hour=12,
-        end_minute='00')
+        'survey_params.html', groups=helpers.get_groups())
 
 
 @blueprint.route('/1/survey', methods=['POST'])
@@ -83,10 +74,6 @@ def edit_questions(access_key):
         return list_surveys()
 
     survey_id = survey['survey_id']
-    if helpers.some_responses_for_survey(survey_id):
-        flask.flash(
-            'WARNING: Previous responses will be deleted if you edit the questions'
-        )
     questions_json = helpers.get_questions_json(survey_id, False)
     return flask.render_template(
         'edit.html',
@@ -95,6 +82,7 @@ def edit_questions(access_key):
         access_key=access_key,
         survey=survey,
         opened=survey['start_time'] <= datetime.now(),
+        some_responses=helpers.some_responses_for_survey(survey_id),
         NO=helpers.NO)
 
 

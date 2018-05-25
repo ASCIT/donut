@@ -2,8 +2,10 @@
 {% block scripts %}
   {{ super() }}
   <script>
+    var PREVIOUS_RESPONSE_WARNING = 'Previous responses will be deleted if you edit the questions. Are you sure you want to continue?'
     var QUESTION_TYPES = {{ question_types|safe }}
     var questionData = {{ questions_json|safe }}
+    var someResponses = {% if some_responses %}true{% else %}false{% endif %}
 
     var dragSrcEl = null
     var questionContainer, typeSelect, saveButton
@@ -164,6 +166,7 @@
     }
     function saveChanges() {
       if (!saveButton.hasClass('btn-primary')) return //submission already in progress
+      if (someResponses && !confirm(PREVIOUS_RESPONSE_WARNING)) return
 
       var newQuestionData = generateJSON()
       saveButton.removeClass('btn-primary').addClass('btn-warning')

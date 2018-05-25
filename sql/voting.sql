@@ -11,15 +11,15 @@ CREATE TABLE surveys (
     start_time     DATETIME      NOT NULL,
     end_time       DATETIME      NOT NULL,
     access_key     CHAR(64)      NOT NULL,
-    group_id       INT,                    -- restrict to this group if non-NULL
-    auth           BOOLEAN       NOT NULL, -- require authentication (UID and birthday)
-    public         BOOLEAN       NOT NULL, -- whether survey should appear in the list of active surveys
+    group_id       INT,                         -- restrict to this group if non-NULL
+    auth           BOOLEAN       NOT NULL,      -- require authentication (UID and birthday)
+    public         BOOLEAN       NOT NULL,      -- whether survey should appear in the list of active surveys
     results_shown  BOOLEAN       DEFAULT FALSE, -- whether survey should appear in the list of results
-    creator        INT           NOT NULL, -- user id of survey creator
+    creator        INT,                         -- user id of survey creator
 
     PRIMARY KEY(survey_id),
     FOREIGN KEY(group_id) REFERENCES groups(group_id) ON DELETE SET NULL,
-    FOREIGN KEY(creator) REFERENCES members(user_id) ON DELETE CASCADE
+    FOREIGN KEY(creator) REFERENCES members(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE survey_question_types (
@@ -44,15 +44,16 @@ CREATE TABLE survey_questions (
 );
 
 CREATE TABLE survey_question_choices (
-    choice_id    INT          NOT NULL AUTO_INCREMENT,
-    question_id  INT          NOT NULL,
-    choice       VARCHAR(50)  NOT NULL,
+    choice_id    INT           NOT NULL AUTO_INCREMENT,
+    question_id  INT           NOT NULL,
+    choice       VARCHAR(255)  NOT NULL,
 
     PRIMARY KEY(choice_id),
     FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE
 );
 
 CREATE TABLE survey_responses (
+    response_id  INT  AUTO_INCREMENT,
     question_id  INT  NOT NULL,
     user_id      INT,
     response     TEXT, -- JSON
@@ -60,9 +61,10 @@ CREATE TABLE survey_responses (
                        -- For checkbox:         [choice_id (number)]
                        -- For short/long text:  text (string)
                        -- For elected position: [choice_id (number) | user_id (negative number) | NO (null)]
-    PRIMARY KEY(question_id, user_id),
+
+    PRIMARY KEY(response_id),
     FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE,
-    FOREIGN KEY(user_id) REFERENCES members(user_id) ON DELETE CASCADE
+    FOREIGN KEY(user_id) REFERENCES members(user_id) ON DELETE SET NULL
 );
 
 INSERT INTO survey_question_types (type_name, choices) VALUES
