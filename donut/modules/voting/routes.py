@@ -93,7 +93,8 @@ def edit_questions(access_key):
         question_types=helpers.get_question_types(),
         questions_json=questions_json,
         access_key=access_key,
-        survey=survey)
+        survey=survey,
+        opened=survey['start_time'] <= datetime.now())
 
 
 @blueprint.route('/1/surveys/<access_key>', methods=['GET'])

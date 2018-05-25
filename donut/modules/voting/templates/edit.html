@@ -267,6 +267,11 @@
       </div>
       <div class="form-group">
         <button class="btn btn-primary" id="save_survey">Save</button>
+        {% if opened %}
+          <a href='{{ url_for("voting.take_survey", access_key=access_key) }}' class='btn btn-default'>
+            View
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
