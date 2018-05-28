@@ -1,6 +1,7 @@
 import flask
 import sqlalchemy
 from donut.modules.groups import helpers as groups
+from donut.modules.core import helpers as core
 
 def get_BoC_member():
     """
@@ -25,7 +26,7 @@ def get_BoC_member():
         result = cursor.fetchall()
     members = [row['user_id'] for row in result]
     members = core.get_member_data(members)
-    hig_pos = []
+    high_pos = []
     pos_house = []
     for i in range(len(result)):
         name = members[i]['first_name'] + " " + members[i]['last_name']
@@ -66,7 +67,7 @@ def get_CRC_member():
         result = cursor.fetchall()
     members = [row['user_id'] for row in result]
     members = core.get_member_data(members)
-    hig_pos = []
+    high_pos = []
     pos_house = []
     for i in range(len(result)):
         name = members[i]['first_name'] + " " + members[i]['last_name']

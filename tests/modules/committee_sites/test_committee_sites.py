@@ -11,7 +11,7 @@ from donut.modules.committee_sites import helpers
 from donut.modules.committee_sites import routes
 
 def test_routes(client):
-    assert client.get(flask.url_for('committee_sites.editor')).status_code == 200
+    assert client.get(flask.url_for('committee_sites.boc')).status_code == 200
     assert client.get(flask.url_for('committee_sites.defendants')).status_code == 200
     assert client.get(flask.url_for('committee_sites.witnesses')).status_code == 200
     assert client.get(flask.url_for('committee_sites.FAQ')).status_code == 200

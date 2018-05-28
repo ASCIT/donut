@@ -66,8 +66,8 @@ INSERT INTO users(user_id, username) VALUES
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
     (2, 'Ruddock House', 'house'),
-    (3, 'IHC', 'committee');
-    (4, 'BoC', '');
+    (3, 'IHC', 'committee'),
+    (4, 'BoC', ''),
     (5, 'CRC', '');
 
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
@@ -88,9 +88,9 @@ INSERT INTO position_holders(pos_id, user_id) VALUES
     (4, 4),
     (4, 2),
     (5, 4),
-    (6, 1);
-    (7, 2);
-    (8, 2);
+    (6, 1),
+    (7, 2),
+    (8, 2),
     (9, 3);
 
 
