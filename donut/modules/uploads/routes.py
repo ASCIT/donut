@@ -3,9 +3,6 @@ import json
 import os
 from werkzeug import secure_filename
 
-#DEBUGGING
-import glob
-
 from donut.modules.uploads import blueprint, helpers
 from donut.resources import Permissions
 from donut.auth_utils import check_permission
@@ -32,7 +29,7 @@ def uploads():
         if file.filename == '':
             flask.flash('No selected file')
             return flask.redirect(request.url)
-        if file and allowed_file(file.filename):
+        if file and helpers.allowed_file(file.filename):
             filename = secure_filename(file.filename)
             uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
@@ -49,34 +46,16 @@ def uploaded_file(filename):
     '''
     Serves the actual uploaded file.
     '''
-    print(filename)
-    print(glob.glob(flask.current_app.config['UPLOAD_FOLDER']+'/*'))
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
-    print(uploads)
     return flask.send_from_directory(uploads,
                                      filename, as_attachment=False)
 
-
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 @blueprint.route('/uploaded_list')
 def uploaded_list():
     '''
     Shows the list of uploaded files
     '''
-    path = os.path.join(flask.current_app.root_path,
-                           flask.current_app.config['UPLOAD_FOLDER'])
-    links = glob.glob(path + '/*')
-    for i in range(len(links)):
-        links[i] = links[i].replace(path + '/', '')
-        links[i] = (flask.url_for(
-            'uploads.uploaded_file', filename=links[i]), links[i])
+    links = helpers.get_links()
     return flask.render_template('uploaded_list.html', links=links)
-
-def allowed_file(filename):
-    '''
-    Checks for allowed file extensions.
-    '''
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
