@@ -6,6 +6,12 @@
   <div class="col-md-24">
     <div class="jumbotron" style="text-align: center">
       <h1 id = "title" class="text-center">Editing</h1>
+      <div id="info">
+        <p>
+          See a list of all created pages
+          <a href="{{ url_for('editor.created_list') }}">here</a>.
+        </p>
+      </div>
 
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
 
@@ -16,9 +22,9 @@
             <button class="btn btn-outline-primary btn-sm" type="button">Styles
             <span class="caret"></span></button>
               <ul class="dropdown-menu">
-		<li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
-		<li><a type="button" onClick="insert_bold()" class="btn btn-outline-secondary btn-sm">bold</a></li>
-		<li><a type="button" onClick="insert_strike_through()" class="btn btn-outline-secondary btn-sm">strike_through</a></li>
+		            <li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
+		            <li><a type="button" onClick="insert_bold()" class="btn btn-outline-secondary btn-sm">bold</a></li>
+		            <li><a type="button" onClick="insert_strike_through()" class="btn btn-outline-secondary btn-sm">strike_through</a></li>
               </ul>
           </div>
         </div>
@@ -37,12 +43,25 @@
           </div>
         </div>
 
+        <div class="btn-group" role="group">
+          <div class="dropdown">
+            <butt
+            on class="btn btn-outline-primary btn-sm" type="button">Lists
+            <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_ulist()">Unordered</a></li>
+              <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_olist()">Ordered</a></li>
+            </ul>
+          </div>
+        </div>
+
         <button class="btn btn-outline-primary btn-sm" type="button" onClick="insert_link()">Links</button>
         <button class="btn btn-outline-primary btn-sm" type="button" onClick="insert_image()">Images</button>
       </div>
       <br/>
 
       <textarea id="source" rows="10" cols="20" width="80%">{{input_text}}
+
       </textarea>
       <hr/>
       <button id="runBtn" onClick="run()">preview</button>
@@ -58,4 +77,3 @@
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
 {% endblock %}
-

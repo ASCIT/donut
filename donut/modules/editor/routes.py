@@ -6,6 +6,7 @@ import glob
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
 
+
 @blueprint.route('/editor', methods=['GET', 'POST'])
 def editor(input_text='Hello World!!!', title="TITLE"):
     input = flask.request.args.get('input_text')
@@ -26,17 +27,20 @@ def redirecting(title='uploads.aaa'):
 def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-
+    print(markdown)
+    print(title)
     if (helpers.write_markdown(markdown, title) == 0):
-        return flask.jsonify({'url' : url_for('uploads.display', url=title)})
+        return flask.jsonify({'url': url_for('uploads.display', url=title)})
     else:
-        return flask.jsonify({'url' : url_for( 'uploads.display', url = title)})
+        return flask.jsonify({'url': url_for('uploads.display', url=title)})
+
 
 @blueprint.route('/created_list')
 def created_list():
-    root = os.path.join(current_app.root_path, current_app.config["UPLOAD_WEBPAGES")
-    links = glob.glob(root+'/*')
+    root = os.path.join(current_app.root_path,
+                        current_app.config["UPLOAD_WEBPAGES"])
+    links = glob.glob(root + '/*')
     for i in range(len(links)):
-        links[i] = links[i].replace(root + '/', '').replace('.md','')
+        links[i] = links[i].replace(root + '/', '').replace('.md', '')
         links[i] = (flask.url_for('uploads.display', url=links[i]), links[i])
     return flask.render_template('uploaded_list.html', links=links)

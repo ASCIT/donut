@@ -39,6 +39,7 @@ app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
 app.register_blueprint(directory_search.blueprint)
 
+
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
 
@@ -68,7 +69,8 @@ def init(environment_name):
     app.config["UPLOAD_WEBPAGES"] = 'modules/uploads/uploaded_files/pages'
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
 
-    app.config["COMMITTEE_UPLOAD_FOLDER"] = 'donut/modules/committee_sites/templates'
+    app.config[
+        "COMMITTEE_UPLOAD_FOLDER"] = 'donut/modules/committee_sites/templates'
     app.config["EXISTING_LIST"] = 'modules/editor/static'
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH
