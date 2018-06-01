@@ -23,13 +23,19 @@ def allowed_file(filename):
     '''
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+           
+def removeLink(filename):
+        path = os.path.join(flask.current_app.root_path,
+                            flask.current_app.config['UPLOAD_FOLDER'])
+        links = glob.glob(path + '/*')
+        for i in links:
+            if filename in links:
+                os.remove(i)
 
 def get_links():
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
-    matches = (x for x in links if 'pages' in x or 'static' in x)
 
     dele = ['', '']
     counter = 0

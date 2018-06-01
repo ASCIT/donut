@@ -15,6 +15,7 @@
         {% for link, name in links %}
         <tr>
 		<td><a href= "{{ link }}">{{name}}</a></td>
+    <td><a href= "{{ url_for('uploads.delete_file', filename = {{name}} ) }}">Delete</td>
         </tr>
         {% endfor %}
 	</table>
@@ -23,4 +24,3 @@
   </div>
 </div>
 {% endblock %}
-
