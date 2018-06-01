@@ -20,7 +20,7 @@ from donut.modules import core
 from donut.modules import groups
 from donut.modules import arcfeedback
 from donut.modules import rooms
-
+from donut.modules import directory_search
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -33,6 +33,7 @@ app.register_blueprint(core.blueprint)
 app.register_blueprint(groups.blueprint)
 app.register_blueprint(arcfeedback.blueprint)
 app.register_blueprint(rooms.blueprint)
+app.register_blueprint(directory_search.blueprint)
 
 
 def init(environment_name):

@@ -42,9 +42,22 @@ def test_get_group_list_of_member(client):
         "group_id": 1,
         "group_name": "Donut Devteam"
     }]
-    assert get_group_list_of_member(3) == []
+    assert get_group_list_of_member(2) == [{
+        "control": 0,
+        "group_id": 1,
+        "group_name": "Donut Devteam"
+    }, {
+        "control": 0,
+        "group_id": 2,
+        "group_name": "Ruddock House"
+    }, {
+        "control": 0,
+        "group_id": 3,
+        "group_name": "IHC"
+    }]
 
 
 # Test Routes
 def test_get_members(client):
-    assert get_members(1) is not None
+    with app.test_request_context('/'):
+        assert get_members(1) is not None
