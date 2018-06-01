@@ -56,20 +56,16 @@ def uploaded_file(filename):
                            flask.current_app.config['UPLOAD_FOLDER'])
     return flask.send_from_directory(uploads, filename, as_attachment=False)
 
+
 @blueprint.route('/uploaded_list')
-def delete_file(filename):
+def uploaded_list(filename='default'):
     '''
     Shows the list of uploaded files
     '''
-    helpers.removeLink(filename)
-    links = helpers.get_links()
-    return flask.render_template('uploaded_list.html', links=links)
 
+    filename = flask.request.args.get('filename')
+    if filename != None:
+        helpers.removeLink(filename)
 
-@blueprint.route('/uploaded_list')
-def uploaded_list():
-    '''
-    Shows the list of uploaded files
-    '''
     links = helpers.get_links()
     return flask.render_template('uploaded_list.html', links=links)
