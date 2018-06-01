@@ -34,11 +34,13 @@ def read_markdown(name):
 
     # Check if the pages were already created prior (only the BoC pages)
     if name in underCommittee:
-        curFile = read_file(os.path.join(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"], name + ".html"))
+        curFile = read_file(
+            os.path.join(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"],
+                         name + ".html"))
         return curFile
     else:
         path = os.path.join(flask.current_app.root_path,
-                                   flask.current_app.config['UPLOAD_WEBPAGES'])
+                            flask.current_app.config['UPLOAD_WEBPAGES'])
         curFile = read_file(os.path.join(path, name + '.md'))
         return curFile
 
@@ -60,8 +62,8 @@ def write_markdown(markdown, title):
     '''
     # Special cases for exisiting BoC and currenly existing pages.
     underCommittee = [
-            'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
-            'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
+        'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
+        'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
     ]
     if title in underCommittee:
         root = flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
@@ -70,7 +72,8 @@ def write_markdown(markdown, title):
         f.write(markdown)
         f.close()
     # Non-special cases.
-    root = os.path.join(flask.current_app.root_path, flask.current_app.config["UPLOAD_WEBPAGES"])
+    root = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config["UPLOAD_WEBPAGES"])
 
     title = title.replace(' ', '_')
     path = os.path.join(root, title + ".md")
@@ -80,8 +83,10 @@ def write_markdown(markdown, title):
     f.write(markdown)
     f.close()
 
-    f = open(os.path.join(flask.current_app.root_path,
-                          flask.current_app.config["EXISTING_LIST"],'pages.txt'), "w+")
+    f = open(
+        os.path.join(flask.current_app.root_path,
+                     flask.current_app.config["EXISTING_LIST"], 'pages.txt'),
+        "w+")
     f.write(title)
     f.close()
     return 0

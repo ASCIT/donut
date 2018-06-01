@@ -71,7 +71,10 @@ def test_get_user(client):
         '6178003347',
         'phone_string':
         '(617) 800-3347',
-        'positions':  [{'group_name': 'CRC', 'pos_name': 'Lloyd'}],
+        'positions': [{
+            'group_name': 'CRC',
+            'pos_name': 'Lloyd'
+        }],
         'preferred_name':
         'Cleb',
         'room':

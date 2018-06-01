@@ -13,13 +13,16 @@ from donut.modules.uploads import routes
 
 def test_routes(client):
     assert client.get(flask.url_for('uploads.uploads')).status_code == 200
-    assert client.get(flask.url_for('uploads.uploaded_list')).status_code == 200
+    assert client.get(
+        flask.url_for('uploads.uploaded_list')).status_code == 200
+
 
 def test_get_links(client):
-    assert helpers.get_links == []
+    assert helpers.get_links() == []
+
 
 def test_allowed_file(client):
-    assert helpers.allowed_file("bleh.bleh") == ""
-    assert helpers.allowed_file("bleh.JPg") == "bleh.jpg"
-    assert helpers.allowed_file("bleh.GiF") == "bleh.gif"
-    assert helpers.allowed_file("bleh.PDF") == "bleh.pdf"
+    assert helpers.allowed_file("bleh.bleh") == False
+    assert helpers.allowed_file("bleh.JPg") == True
+    assert helpers.allowed_file("bleh.GiF") == True
+    assert helpers.allowed_file("bleh.PDF") == True

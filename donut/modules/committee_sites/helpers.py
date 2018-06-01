@@ -3,6 +3,7 @@ import sqlalchemy
 from donut.modules.groups import helpers as groups
 from donut.modules.core import helpers as core
 
+
 def get_BoC_member():
     """
     Queries the database and returns list of people on BoC

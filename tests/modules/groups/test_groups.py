@@ -17,12 +17,14 @@ group = {
 # Helpers
 def test_get_group_list_data(client):
     assert helpers.get_group_list_data(["not_a_real_field"]) == "Invalid field"
-    assert helpers.get_group_list_data(["group_name"]) == [{'group_name': 'BoC'},
-            {'group_name': 'CRC'},
-    {
+    assert helpers.get_group_list_data(["group_name"]) == [{
+        'group_name': 'BoC'
+    }, {
+        'group_name': 'CRC'
+    }, {
         "group_name":
         "Donut Devteam"
-        }, {
+    }, {
         "group_name": "IHC"
     }, {
         "group_name":
