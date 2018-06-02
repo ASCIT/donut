@@ -46,14 +46,39 @@ def read_markdown(name):
 
 
 def read_file(path):
+    '''
+    Reads in a file
+    '''
     curFile = ''
-    if os.path.isfile("path"):
+    if os.path.isfile(path):
         with open(path) as f:
             curFile += f.read()
         return curFile
     else:
         return ""
 
+def get_links():
+    '''
+    Get links for all created webpages
+    '''
+    root = os.path.join(current_app.root_path,
+                    current_app.config["UPLOAD_WEBPAGES"])
+    links = glob.glob(root + '/*')
+    for i in range(len(links)):
+        links[i] = links[i].replace(root + '/', '').replace('.md', '')
+    links[i] = (flask.url_for('uploads.display', url=links[i]), links[i])
+    return links
+
+def remove_link(filename):
+    '''
+    Get rid of matching filenames
+    '''
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config['UPLOAD_WEBPAGES'])
+    links = glob.glob(path + '/*')
+    for i in links:
+        if filename in i:
+            os.remove(i)
 
 def write_markdown(markdown, title):
     '''

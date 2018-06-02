@@ -23,8 +23,11 @@ def allowed_file(filename):
     '''
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-           
-def removeLink(filename):
+
+def remove_link(filename):
+    '''
+    Get rid of matching filenames
+    '''
         path = os.path.join(flask.current_app.root_path,
                             flask.current_app.config['UPLOAD_FOLDER'])
         links = glob.glob(path + '/*')
@@ -33,6 +36,9 @@ def removeLink(filename):
                 os.remove(i)
 
 def get_links():
+    '''
+    Get links for all uploaded files
+    '''
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')

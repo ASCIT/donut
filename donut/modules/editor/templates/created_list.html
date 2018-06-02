@@ -11,10 +11,13 @@
 	<table class = "table">
         <tr>
           <th>Page name</th>
+          <th></th>
         </tr>
         {% for link, name in links %}
         <tr>
 		<td><a href= "{{ link }}">{{name}}</a></td>
+    <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
+
         </tr>
         {% endfor %}
 	</table>

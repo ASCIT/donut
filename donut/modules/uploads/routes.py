@@ -65,7 +65,7 @@ def uploaded_list(filename='default'):
 
     filename = flask.request.args.get('filename')
     if filename != None:
-        helpers.removeLink(filename)
+        helpers.remove_link(filename)
 
     links = helpers.get_links()
     return flask.render_template('uploaded_list.html', links=links)

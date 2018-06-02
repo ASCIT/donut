@@ -27,8 +27,22 @@ def redirecting(title='uploads.aaa'):
 def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-    print(markdown)
-    print(title)
+    if title == 'BoC':
+        return flask.jsonify({'url': url_for('committee_sites.boc')})
+    elif title == 'ASCIT_Bylaws':
+        return flask.jsonify({'url': url_for('committee_sites.ascit_bylaws')})
+    elif title == 'BoC_Bylaws':
+        return flask.jsonify({'url': url_for('committee_sites.bylaws')})
+    elif title == 'BoC_Defendants' :
+        return flask.jsonify({'url': url_for('committee_sites.defendants')})
+    elif title ==  'BoC_FAQ' :
+        return flask.jsonify({'url': url_for('committee_sites.FAQ')})
+    elif title == 'BoC_Reporters' :
+        return flask.jsonify({'url': url_for('committee_sites.reporters')})
+    elif title == 'BoC_Witness' :
+        return flask.jsonify({'url': url_for('committee_sites.winesses')})
+    elif title == 'CRC':
+        return flask.jsonify({'url': url_for('committee_sites.CRC')})
     if (helpers.write_markdown(markdown, title) == 0):
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
     else:
@@ -37,10 +51,9 @@ def save():
 
 @blueprint.route('/created_list')
 def created_list():
-    root = os.path.join(current_app.root_path,
-                        current_app.config["UPLOAD_WEBPAGES"])
-    links = glob.glob(root + '/*')
-    for i in range(len(links)):
-        links[i] = links[i].replace(root + '/', '').replace('.md', '')
-        links[i] = (flask.url_for('uploads.display', url=links[i]), links[i])
-    return flask.render_template('uploaded_list.html', links=links)
+    filename = flask.request.form['filename']
+    if filename != None:
+        helper.remove_link(filename)
+
+    links = helpers.get_links()
+    return flask.render_template('created_list.html', links=links)
