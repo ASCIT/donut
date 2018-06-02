@@ -19,6 +19,9 @@ from donut.modules import marketplace
 from donut.modules import core
 from donut.modules import groups
 from donut.modules import rooms
+from donut.modules import directory_search
+from donut.modules import permissions
+app = flask.Flask(__name__)
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
