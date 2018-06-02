@@ -5,7 +5,7 @@
     <div class="jumbotron">
       <h1 class="text-center">BoC FAQ</h1>
       {% if permission %}
-      <a href="{{ url_for('editor.editor', input_text=BoC_FAQ, title=BoC_FAQ) }}">edit this page</a>
+      <a href="{{ url_for('editor.editor', input_text='BoC_FAQ', title='BoC_FAQ') }}">edit this page</a>
       {% else %}
       {% endif %}
       <div id = 'disclaimer'>

@@ -7,7 +7,7 @@
       <div id = 'title'>
         <h2>Being a BoC Witness</h2>
         {% if permission %}
-        <a href="{{ url_for('editor.editor', input_text=BoC_Witness, title=BoC_Witness) }}">>edit this page</a>
+        <a href="{{ url_for('editor.editor', input_text='BoC_Witness', title='BoC_Witness') }}">>edit this page</a>
         {% else %}
         {% endif %}
       </div>

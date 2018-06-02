@@ -1,5 +1,7 @@
 import flask
 import os
+import glob
+from flask import current_app, redirect, url_for
 
 
 def create_new_html():
@@ -57,17 +59,23 @@ def read_file(path):
     else:
         return ""
 
+
 def get_links():
     '''
     Get links for all created webpages
     '''
     root = os.path.join(current_app.root_path,
-                    current_app.config["UPLOAD_WEBPAGES"])
+                        current_app.config["UPLOAD_WEBPAGES"])
     links = glob.glob(root + '/*')
+    results = []
     for i in range(len(links)):
         links[i] = links[i].replace(root + '/', '').replace('.md', '')
-    links[i] = (flask.url_for('uploads.display', url=links[i]), links[i])
-    return links
+        if links[
+                i] not in 'BoC ASCIT_Bylaws BoC_Bylaws BoC_Defendants BoC_FAQ BoC_Reporters BoC_Witness CRC':
+            link = flask.url_for('uploads.display', url=links[i])
+            results.append((link, links[i]))
+    return results
+
 
 def remove_link(filename):
     '''
@@ -79,6 +87,7 @@ def remove_link(filename):
     for i in links:
         if filename in i:
             os.remove(i)
+
 
 def write_markdown(markdown, title):
     '''

@@ -13,6 +13,7 @@ from donut.modules.editor import routes
 
 def test_plain_editor_page(client):
     assert client.get(flask.url_for('editor.editor')).status_code == 200
+    assert client.get(flask.url_for('editor.created_list')).status_code == 200
 
 
 def test_text_editor_page(client):

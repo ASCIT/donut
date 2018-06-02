@@ -6,7 +6,7 @@
       <div>
         <h1 class="text-center">Information for Defendants in BoC Cases</h1>
         {% if permission %}
-        <a href="{{ url_for('editor.editor', input_text=BoC_Defendants, title=BoC_Defendants) }}">edit this page</a>
+        <a href="{{ url_for('editor.editor', input_text='BoC_Defendants', title='BoC_Defendants') }}">edit this page</a>
         {% else %}
         {% endif %}
       </div>

@@ -5,7 +5,7 @@
     <div class="jumbotron">
       <h1 class="text-center">ASCIT Bylaws</h1>
       {% if permission %}
-      <a href="{{ url_for('editor.editor', input_text=ASCIT_Bylaws, title=ASCIT_Bylaws) }}">edit this page</a>
+      <a href="{{ url_for('editor.editor', input_text='ASCIT_Bylaws', title='ASCIT_Bylaws') }}">edit this page</a>
       {% else %}
       {% endif %}
       <div id = 'content'>
@@ -244,8 +244,7 @@
         </p>
         <a name="ARTICLE_XVI--ADOPTION"></a><h3> <span class="mw-headline">ARTICLE XVI--ADOPTION</span></h3>
         <p>SECTION 1. These bylaws shall become operative immediately upon passage.
-        </p><p><a href="/ascit/Main_Page" title="Main Page">ASCIT Home</a>
-        </p>
+        
 
       </div>
     </div>

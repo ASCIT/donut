@@ -24,16 +24,18 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 def remove_link(filename):
     '''
     Get rid of matching filenames
     '''
-        path = os.path.join(flask.current_app.root_path,
-                            flask.current_app.config['UPLOAD_FOLDER'])
-        links = glob.glob(path + '/*')
-        for i in links:
-            if filename in i:
-                os.remove(i)
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config['UPLOAD_FOLDER'])
+    links = glob.glob(path + '/*')
+    for i in links:
+        if filename in i:
+            os.remove(i)
+
 
 def get_links():
     '''

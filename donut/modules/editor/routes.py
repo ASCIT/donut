@@ -9,22 +9,25 @@ from flask import current_app, redirect, url_for
 
 @blueprint.route('/editor', methods=['GET', 'POST'])
 def editor(input_text='Hello World!!!', title="TITLE"):
+    '''
+    Returns the editor page where users can create and edit
+    existing pages
+    '''
     input = flask.request.args.get('input_text')
-    print(input)
+
     if input != None:
         input_text = helpers.read_markdown(input)
         title = flask.request.args.get('title')
+
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
 
 
-@blueprint.route('/redirecting')
-def redirecting(title='uploads.aaa'):
-    return flask.render_template('redirecting.html', input_text=url_for(title))
-
-
 @blueprint.route('/_save', methods=['POST'])
 def save():
+    '''
+    Actually saves the data from the forms as markdown
+    '''
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     if title == 'BoC':
@@ -33,13 +36,13 @@ def save():
         return flask.jsonify({'url': url_for('committee_sites.ascit_bylaws')})
     elif title == 'BoC_Bylaws':
         return flask.jsonify({'url': url_for('committee_sites.bylaws')})
-    elif title == 'BoC_Defendants' :
+    elif title == 'BoC_Defendants':
         return flask.jsonify({'url': url_for('committee_sites.defendants')})
-    elif title ==  'BoC_FAQ' :
+    elif title == 'BoC_FAQ':
         return flask.jsonify({'url': url_for('committee_sites.FAQ')})
-    elif title == 'BoC_Reporters' :
+    elif title == 'BoC_Reporters':
         return flask.jsonify({'url': url_for('committee_sites.reporters')})
-    elif title == 'BoC_Witness' :
+    elif title == 'BoC_Witness':
         return flask.jsonify({'url': url_for('committee_sites.winesses')})
     elif title == 'CRC':
         return flask.jsonify({'url': url_for('committee_sites.CRC')})
@@ -50,10 +53,14 @@ def save():
 
 
 @blueprint.route('/created_list')
-def created_list():
-    filename = flask.request.form['filename']
+def created_list(filename='default'):
+    '''
+    Returns a list of all created pages
+    '''
+    filename = flask.request.form.get('filename')
     if filename != None:
         helper.remove_link(filename)
 
     links = helpers.get_links()
+
     return flask.render_template('created_list.html', links=links)
