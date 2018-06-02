@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block page %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/groups/groups.css')}}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='js/groups/positions.js') }}"></script>
+<div class="container" style="background-color: #eee">
+    <div id="page-header">
+        <h1 id="pagetitle" > The Ascit Position Service </h1>
+    </div>
+    <ul class="nav nav-tabs nav-justified tabs">
+        <li class="active"><a data-toggle="tab" href="#viewAll">View All </a> </li>
+        <li><a data-toggle="tab" href="#admin">Administrate</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="viewAll" class="tab-pane fade in active">
+            <div class="input">
+                <select class="form-control" id="groupSelect" onchange="filterChange()">
+                    <option value="0">All Groups</option>
+                </select>
+                <select class="form-control" id="positionSelect" onchange="filterChange()">
+                    <option value="0">All Positions</option>
+                </select>
+            </div>
+            <table id="positionsTable">
+                <thead>
+                    <tr>
+                        <td width=25%><strong>Group</strong></td>
+                        <td width=20%><strong>Position</strong></td>
+                        <td width=25%><strong>Student</strong></td>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div id="admin" class="tab-pane fade">
+            <ul class="nav nav-pills tabs">
+                <li class="active">
+                    <a data-toggle="pill" href="#createPos">Create a Position</a>
+                </li>
+                <li>
+                    <a data-toggle="pill" href="#deletePos">Delete a Position</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="createPos" class="tab-pane fade in active">
+                    <form id="posCreate">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="groupCreate">
+                                Group Name:</label>
+                            <select class="form-control" id="groupCreate" 
+                                                            name="group_id"> 
+                                <option> Select a Group </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="posName">
+                                Position Name: </label>
+                            <input class="form-control" id="posName" 
+                                                            name="pos_name">
+                        </div>
+                        <button id="submitPosBtn" class="btn btn-default">
+                            Submit
+                        </button>
+                    </form>
+                </div>
+                <div id="deletePos" class="tab-pane fade in">
+                    <form id="posDelete">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="groupDel">
+                                Group Name:</label>
+                            <select class="form-control" id="groupDel" 
+                                    onchange="groupDelChange()" name="group_id">
+                                <option> Select a Group </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="position">
+                                Position: </label>
+                            <select class="form-control" id="position" name="pos_id">
+                                <option> Pick a position </option>
+                            </select>
+                        </div>
+                        <button id="delPosBtn" class="btn btn-default">Submit</button>
+                    </form>     
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+init({{approved_group_ids}},{{approved_group_names|safe}},
+    {{all_positions|safe}});
+</script>
+{% endblock %}

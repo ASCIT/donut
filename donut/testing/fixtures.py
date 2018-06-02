@@ -30,6 +30,7 @@ def client():
             user=app.config['DB_USER'],
             password=app.config['DB_PASSWORD'],
             db='db',
+            autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)
         flask.g.pymysql_db = connection

@@ -1,5 +1,4 @@
 import flask
-import sqlalchemy
 
 from donut import auth_utils
 from donut import email_templates
@@ -10,13 +9,15 @@ from donut import validation_utils
 
 def get_user_data(user_id):
     """Returns user data for the create account form."""
-    query = sqlalchemy.text("""
+    query = """
     SELECT first_name, last_name, email, uid,
       entry_year, graduation_year
     FROM members
-    WHERE user_id = :user_id
-    """)
-    return flask.g.db.execute(query, user_id=user_id).first()
+    WHERE user_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        return cursor.fetchone()
 
 
 def handle_create_account(user_id, username, password, password2, birthday):
@@ -43,18 +44,18 @@ def handle_create_account(user_id, username, password, password2, birthday):
     flask.g.pymysql_db.begin()
     try:
         # Insert the new row into users.
-        query = sqlalchemy.text("""
+        query = """
       INSERT INTO users (user_id, username, password_hash)
-      VALUES (:user_id, :username, :password_hash)
-      """)
-        flask.g.db.execute(
-            query, user_id=user_id, username=username, password_hash="")
+      VALUES (%s, %s, %s)
+      """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, [user_id, username, ""])
         # Set the password.
         auth_utils.set_password(username, password)
         # Set the birthday and invalidate the account creation key.
-        query = sqlalchemy.text("""
+        query = """
       UPDATE members
-      SET birthday = :birthday,
+      SET birthday = %s,
         create_account_key = NULL
       WHERE user_id = %s
       """
@@ -68,13 +69,15 @@ def handle_create_account(user_id, username, password, password2, birthday):
         )
         return False
     # Email the user.
-    query = sqlalchemy.text("""
+    query = """
     SELECT first_name, email
     FROM members
       NATURAL JOIN users
-    WHERE username = :u
-    """)
-    result = flask.g.db.execute(query, u=username).first()
+    WHERE username = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [username])
+        result = cursor.fetchone()
     # Send confirmation email to user.
     email = result["email"]
     name = result["first_name"]
@@ -92,13 +95,15 @@ def handle_request_account(uid, last_name):
     Tuple (bool, string). The bool indicates success. If not successful,
     the string is an error message.
   """
-    query = sqlalchemy.text("""
+    query = """
     SELECT first_name, last_name, email, username
     FROM members
       NATURAL LEFT JOIN users
-    WHERE uid = :uid
-    """)
-    result = flask.g.db.execute(query, uid=uid).first()
+    WHERE uid = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [uid])
+        result = cursor.fetchone()
     if result is None or result["last_name"].lower() != last_name.lower():
         return (False, "Incorrect UID and/or name.")
     if result["username"] is not None:
@@ -108,12 +113,13 @@ def handle_request_account(uid, last_name):
 
     # Generate a new account creation key.
     create_account_key = auth_utils.generate_create_account_key()
-    query = sqlalchemy.text("""
+    query = """
     UPDATE members
-    SET create_account_key = :create_account_key
-    WHERE uid = :uid
-    """)
-    flask.g.db.execute(query, create_account_key=create_account_key, uid=uid)
+    SET create_account_key = %s
+    WHERE uid = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [create_account_key, uid])
 
     create_account_link = flask.url_for(
         "account.create_account",

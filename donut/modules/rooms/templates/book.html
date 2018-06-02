@@ -6,12 +6,12 @@
 			<option value="">Please choose a room</option>
 			{% for room_option in rooms %}
 				<option
-					value={{ room_option["id"] }}
-					{% if (room is not none) and room_option["id"] == room %}
+					value={{ room_option["room_id"] }}
+					{% if (room is not none) and room_option["room_id"] == room %}
 						selected
 					{% endif %}
 				>
-					{{ room_option["name"] }}
+					{{ room_option["location"] }} - {{ room_option["title"] }}
 				</option>
 			{% endfor %}
 		</select>
