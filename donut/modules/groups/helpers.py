@@ -174,7 +174,6 @@ def delete_position(pos_id):
         cursor.execute(s)
 
 
-# TODO: Implement this helper function
 def create_position_holder(pos_id, user_id, start_date, end_date):
     '''
     Inserts row into position_holders table

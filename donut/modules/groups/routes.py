@@ -69,10 +69,6 @@ def get_group_members(group_id):
     return jsonify(helpers.get_members_by_group(group_id))
 
 
-# TODO: Modify this end point to have both POST and GET methods
-# The POST method should use a flask.request.form and call the
-# helper function to create a position holding
-# GET method should just query for position holders
 @blueprint.route("/1/positions/<int:pos_id>/", methods=["GET"])
 def get_pos_holders(pos_id):
     """GET /1/positions/<int:pos_id>/"""
