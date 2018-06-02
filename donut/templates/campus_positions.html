@@ -42,6 +42,9 @@
                 <li>
                     <a data-toggle="pill" href="#deletePos">Delete a Position</a>
                 </li>
+                <li>
+                    <a data-toggle="pill" href="#assignHold">Assign a Position Holder</a>
+                </li>
             </ul>
             <div class="tab-content">
                 <div id="createPos" class="tab-pane fade in active">
@@ -84,6 +87,44 @@
                         </div>
                         <button id="delPosBtn" class="btn">Submit</button>
                     </form>     
+                </div>
+                <div id="assignHold" class="tab-pane fade in">
+                    <form id="holdForm">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="groupPosHold">
+                                Group Name:</label>
+                            <select class="form-control" id="groupPosHold" 
+                                    onchange="groupPosHoldChange()" name="group_id"> 
+                                <option> Select a Group </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="posIdHold">
+                                Position: </label>
+                            <select class="form-control" id="posIdHold" 
+                                                            name="pos_id">
+                                <option> Pick a position </option>
+                            </select>
+                        </div>
+                        <div class='form-group'>
+                            <label for='name'>Name: </label>
+                            <input class='form-control' id='name' name='name' 
+                                        placeholder='Name' autofocus />
+                            <ul class='list-group' id='name-search'></ul>
+                        </div>
+                        <input type="hidden" id="userId" name="userId">
+                        <div class='form-group'>
+                            <label for='start_date'> Start Date: </label>
+                            <input id='start_date' type='date' name='start_date'/>
+                        </div>
+                        <div class='form-group'>
+                            <label for='end_date'> End Date: </label>
+                            <input id='end_date' type='date' name='end_date'/>
+                        </div>
+                        <button id="submitPosHoldBtn" class="btn btn-default">
+                            Submit
+                        </button>
+                    </form>
                 </div>
             </div> 
         </div>

@@ -25,6 +25,7 @@ function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
             approvedGroupNames[i] + '</option>'
         $('#groupCreate option:last').after(newOption);
         $('#groupDel option:last').after(newOption);
+        $('#groupPosHold option:last').after(newOption);
     }
 }
 
@@ -91,12 +92,13 @@ function addRowToTable(pos) {
     var groupId = pos.group_id;
     var posId =  pos.pos_id;
     var studentName = pos.first_name + " " + pos.last_name;
+    var userId = pos.user_id;
     var newRow = '<tr>'  
         + '<td> <a onclick=changeGroup(' + groupId + ')>' 
                             + groupDict[groupId] + '</a> </td>'
         + '<td> <a onclick=changePosition(' + posId + ')>' 
                             + positionsDict[posId] + '</a> </td>'
-        + '<td>' + studentName + '</td>' 
+        + '<td> <a href=/1/users/' + userId + ">" + studentName + '</a> </td>' 
                 + '</tr>';
     $('#positionsTable tbody').append(newRow);
 }
@@ -130,12 +132,31 @@ function changePosition(posName) {
 }
 
 /*
- * Called a group is selected for the "delete position" tab.
+ * Called when a group is selected for the "delete position" tab.
  * Queries for all positions associated with the group
  */
 function groupDelChange() {
     var groupIndex = $('#groupDel').val();
     $('#position').find('option').remove();
+    populateListOfPositions(groupIndex, '#position');
+}
+
+/*
+ * Called when a group is selected for the "assign position holder" tab.
+ * Queries for all positions associated with the group
+ */
+function groupPosHoldChange() {
+    var groupIndex = $('#groupPosHold').val();
+    $('#posIdHold').find('option').remove();
+    populateListOfPositions(groupIndex, '#posIdHold');
+}
+
+/*
+ * This method takes in a group id and a select element id and populates
+ * the select element with a list of options representing all positions
+ * associated with the group
+ */
+function populateListOfPositions(groupIndex, posSelectId) {
     var url = '/1/groups/' + groupIndex + '/positions/';
     $.ajax({
         url: url,
@@ -143,14 +164,18 @@ function groupDelChange() {
             for (var i = 0; i < data.length; i++) {
                 var newOption = '<option value=' + data[i].pos_id + '>' + 
                     data[i].pos_name + '</option>';
-                $('#position').append(newOption);
+                $(posSelectId).append(newOption);
             }
         }
-    })
+    });
 }
 
-// Setting up triggers for administration tasks
+var MIN_SEARCH_LENGTH = 3
+var SEARCH_TIMEOUT = 100 //ms
+var searchToken
+
 $(document).ready(function() {
+    // Setting up triggers for administration tasks
     $('#submitPosBtn').click(function(e) {
         e.preventDefault();
         $.ajax({
@@ -179,6 +204,48 @@ $(document).ready(function() {
             }
         });
     });
+    $('#submitPosHoldBtn').click(function(e) {
+        e.preventDefault();
+        var s = $("#holdForm").serialize();
+        debugger;
+    });
+    var nameInput = $('input#name'), nameSearch = $('ul#name-search')
+    nameInput.keyup(function() {
+        var name = nameInput.val()
+        if (name.length < MIN_SEARCH_LENGTH) return nameSearch.children().remove()
+        var token = {}
+        searchToken = token
+        setTimeout(function() {
+            if (searchToken !== token) return //new request issued
+            $.ajax({
+                url: '/1/users/search/' + encodeURIComponent(name),
+                dataType: 'json',
+                success: function(users) {
+                    if (searchToken !== token) return // newer request issued
+                    nameSearch.children().remove()
+                    for (var i = 0; i < users.length; i++) {
+                        var user = users[i];
+                        nameSearch.append(
+                            $('<li>').addClass('list-group-item').append($('<a>')
+                                .text(user.full_name + ", " + user.graduation_year)
+                                .click({name: user.full_name, userId: user.user_id}, 
+                                    function(event){
+                                        nameInput.val(event.data.name);
+                                        nameSearch.children().remove(); 
+                                        $('input#userId').val(event.data.userId); 
+                                })
+                            )
+                        );
+                    }         
+                    if (!users.length) {
+                        nameSearch.append($('<li>')
+                                  .addClass('list-group-item')
+                                  .text('No users found'));
+                    }
+                }
+            }) 
+        }, SEARCH_TIMEOUT)
+    })
 }); 
 
 /*
@@ -190,5 +257,4 @@ function setUpForms() {
                   .remove()
                   .end()
                   .append('<option>Select a Position</option>');
-
 }
