@@ -9,7 +9,8 @@ from donut import app
 import donut.modules.core.helpers as core_helpers
 from donut.modules.uploads import helpers
 from donut.modules.uploads import routes
-from donut.modules.editor import editor_helpers
+from donut.modules.editor import helpers as editor_helpers
+import os
 
 
 def test_routes(client):
@@ -19,13 +20,36 @@ def test_routes(client):
 
 
 def test_get_links(client):
-    assert helpers.get_links() == []
-    editor_helpers.write_markdown("BLEH", "SOME_TITLE")
-    assert "SOME_TITLE" in helpers.get_links()
-    assert helpers.get_links() != []
-    assert "SOME_TITLE" == helpers.readPage("SOME_TITLE")
+   
     helpers.remove_link("SOME_TITLE")
-    assert helpers.get_links() != []
+    links = helpers.get_links()
+    titles= []
+    for (discard, title) in links:
+        titles.append(title)
+    assert "SOME_TITLE" not in ''.join(titles)
+
+    root = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config["UPLOAD_FOLDER"])
+    path = os.path.join(root, "SOME_TITLE"+ ".jpg")
+
+    f = open(path, "w+")
+    f.write("")
+    f.close()
+    links = helpers.get_links()
+    titles= []
+    for (discard, title) in links:
+        titles.append(title)
+    assert "SOME_TITLE" in ''.join(titles)
+
+    editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
+    assert "BLEH" == helpers.readPage("ANOTHER_TITLE")
+
+    helpers.remove_link("SOME_TITLE")
+    links = helpers.get_links()
+    titles= []
+    for (discard, title) in links:
+        titles.append(title)
+    assert "SOME_TITLE" not in ''.join(titles)
 
 
 def test_allowed_file(client):
