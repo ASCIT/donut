@@ -20,23 +20,23 @@ def test_routes(client):
 
 
 def test_get_links(client):
-   
+
     helpers.remove_link("SOME_TITLE")
     links = helpers.get_links()
-    titles= []
+    titles = []
     for (discard, title) in links:
         titles.append(title)
     assert "SOME_TITLE" not in ''.join(titles)
 
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_FOLDER"])
-    path = os.path.join(root, "SOME_TITLE"+ ".jpg")
+    path = os.path.join(root, "SOME_TITLE" + ".jpg")
 
     f = open(path, "w+")
     f.write("")
     f.close()
     links = helpers.get_links()
-    titles= []
+    titles = []
     for (discard, title) in links:
         titles.append(title)
     assert "SOME_TITLE" in ''.join(titles)
@@ -46,7 +46,7 @@ def test_get_links(client):
 
     helpers.remove_link("SOME_TITLE")
     links = helpers.get_links()
-    titles= []
+    titles = []
     for (discard, title) in links:
         titles.append(title)
     assert "SOME_TITLE" not in ''.join(titles)
