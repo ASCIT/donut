@@ -9,6 +9,7 @@ from donut import app
 import donut.modules.core.helpers as core_helpers
 from donut.modules.editor import helpers
 from donut.modules.editor import routes
+import os
 
 
 def test_plain_editor_page(client):
@@ -21,15 +22,15 @@ def test_text_editor_page(client):
         flask.url_for(
             'editor.editor', input_text='TESTING TESTING',
             title="TEST")).status_code == 200
-    print(
-        client.get(
-            flask.url_for(
-                'editor.editor', input_text='TESTING TESTING', title="TEST")))
-    print(client.post(flask.url_for('editor.save')))
-    #assert flask.request.args['input_text'] == 'TESTING TESTING'
-    #assert flask.request.args['title'] == 'TEST'
-    #assert client.get(flask.url_for('uploads.display', url="TEST")).status_code == 200
 
-
-def test_create_list(client):
-    assert client.get(flask.url_for('editor.created_list')).status_code == 200
+def test_path_related_funciton(client):
+    helpers.write_markdown("BLAHBLAH", "TEST_TITLE")
+    root = os.path.join(flask.current_app.root_path,
+                            flask.current_app.config["UPLOAD_WEBPAGES"])
+    assert helpers.get_links() != []
+    assert 'TEST_TITLE' in helpers.get_links()
+    client.get(flask.url_for('uploads.display', url="TEST_TITLE")).status_code == 200
+    helpers.rename_title('TEST TITLE','ANOTHER_TITLE')
+    assert 'ANOTHER_TITLE' in helpers.get_links()
+    client.get(flask.url_for('uploads.display', url="ANOTHER_TITLE")).status_code == 200
+    assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_TITLE')

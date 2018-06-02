@@ -9,6 +9,7 @@ from donut import app
 import donut.modules.core.helpers as core_helpers
 from donut.modules.uploads import helpers
 from donut.modules.uploads import routes
+from donut.modules.editor import editor_helpers
 
 
 def test_routes(client):
@@ -19,6 +20,12 @@ def test_routes(client):
 
 def test_get_links(client):
     assert helpers.get_links() == []
+    editor_helpers.write_markdown("BLEH", "SOME_TITLE")
+    assert "SOME_TITLE" in helpers.get_links()
+    assert helpers.get_links() != []
+    assert "SOME_TITLE" == helpers.readPage("SOME_TITLE")
+    helpers.remove_link("SOME_TITLE")
+    assert helpers.get_links() != []
 
 
 def test_allowed_file(client):
