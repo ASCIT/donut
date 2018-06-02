@@ -283,13 +283,13 @@ def release_results(access_key):
 
 @blueprint.route('/1/surveys/<access_key>/my-response')
 def show_my_response(access_key):
-    survey = helpers.get_survey_data(access_key)
-    if not survey:
-        flask.flash('Invalid access key')
-        return list_surveys()
     username = flask.session.get('username')
     if not username:
         flask.flash('Must be logged in to see response')
+        return list_surveys()
+    survey = helpers.get_survey_data(access_key)
+    if not survey:
+        flask.flash('Invalid access key')
         return list_surveys()
     questions = helpers.get_responses(survey['survey_id'],
                                       helpers.get_user_id(username))
