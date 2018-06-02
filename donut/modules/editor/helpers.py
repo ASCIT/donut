@@ -10,9 +10,11 @@ def rename_title(oldfilename, newfilename):
     Need to look for paths
     """
     oldpath = os.path.join(current_app.root_path,
-                            current_app.config["UPLOAD_WEBPAGES"], oldfilename +'.md')
+                           current_app.config["UPLOAD_WEBPAGES"],
+                           oldfilename + '.md')
     newpath = os.path.join(current_app.root_path,
-                                current_app.config["UPLOAD_WEBPAGES"], newfilename +'.md')
+                           current_app.config["UPLOAD_WEBPAGES"],
+                           newfilename + '.md')
     os.rename(oldpath, newpath)
     return
 
