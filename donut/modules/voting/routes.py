@@ -193,38 +193,45 @@ def submit(access_key):
         value = response['response']
         type_id = helpers.get_question_type(question_id)
         if type_id == question_types['Dropdown']:
-            choice = helpers.get_choice(question_id, value)
-            if choice is None: return error('Invalid choice for dropdown')
-            response_json = choice['choice_id']
+            if type(value) != int:
+                return error('Invalid response to dropdown')
+            if helpers.invalid_choice_id(question_id, value):
+                return error('Invalid choice for dropdown')
+            response_json = value
         elif type_id == question_types['Elected position']:
             if type(value) != list:
                 return error('Invalid response to elected position')
             response_json = []
             for order_value in value:
-                if type(order_value) == str:
-                    if order_value == helpers.NO: response_json.append(None)
-                    else:
-                        choice = helpers.get_choice(question_id, order_value)
-                        if choice is None:
-                            return error('Invalid choice for elected position')
-                        response_json.append(choice['choice_id'])
-                elif type(order_value) == int:
-                    if get_member_data(order_value, ['user_id']) == {}:
-                        return error('Invalid write-in for elected position')
-                    response_json.append(-order_value)
+                if order_value is None: response_json.append(None)
                 else:
-                    return error('Invalid response to elected position')
+                    if type(order_value) != dict:
+                        return error('Invalid response to elected position')
+                    choice_id = order_value.get('choice_id')
+                    if choice_id is None:
+                        user_id = order_value.get('user_id')
+                        if user_id is None:
+                            return error(
+                                'Invalid response to elected position')
+                        else:
+                            if get_member_data(user_id, ['user_id']) == {}:
+                                return error(
+                                    'Invalid write-in for elected position')
+                            response_json.append(-user_id)
+                    else:
+                        if helpers.invalid_choice_id(question_id, choice_id):
+                            return error('Invalid choice for elected position')
+                        response_json.append(choice_id)
         elif type_id == question_types['Checkboxes']:
             if type(value) != list:
                 return error('Invalid response to checkboxes')
             response_json = []
             for chosen in value:
-                if type(chosen) != str:
+                if type(chosen) != int:
                     return error('Invalid response to checkboxes')
-                choice = helpers.get_choice(question_id, chosen)
-                if choice is None:
+                if helpers.invalid_choice_id(question_id, chosen):
                     return error('Invalid choice for checkboxes')
-                response_json.append(choice['choice_id'])
+                response_json.append(chosen)
         else:  # input field
             if type(value) != str: return error('Invalid text response')
             response_json = value

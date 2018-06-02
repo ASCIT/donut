@@ -54,10 +54,12 @@
       var inputGroup = $this.closest('.input-group')
       var choiceSpan = inputGroup.find('.candidate')
       var choice = choiceSpan.text()
+      var choiceId = choiceSpan.attr('choice-id')
       inputGroup.remove()
     }
     var displayedChoice = $('<span>').addClass('choice-text').text(choice)
-    if (userId) displayedChoice.attr('user-id', userId)
+    if (choiceId) displayedChoice.attr('choice-id', choiceId)
+    else if (userId) displayedChoice.attr('user-id', userId)
     chosenList.append(
       $('<li>').addClass('list-group-item').append(
         displayedChoice,
@@ -80,8 +82,12 @@
       var $this = $(this)
       var listGroupItem = $this.closest('.list-group-item')
       if (!writein) {
-        var choice = listGroupItem.find('span').text()
-        $this.closest('.element').find('.choices').prepend(candidateInput(choice)) //add back to choices list
+        var displayedChoice = listGroupItem.find('span')
+        $this.closest('.element').find('.choices')
+          .prepend(candidateInput({ //add back to choices list
+            choice: displayedChoice.text(),
+            id: displayedChoice.attr('choice-id')
+          }))
       }
       listGroupItem.remove()
     }
@@ -114,7 +120,10 @@
   }
   function candidateInput(choice) {
     return electedPositionChoice(
-      $('<span>').addClass('input-group-addon candidate').text(choice)
+      $('<span>')
+        .addClass('input-group-addon candidate')
+        .attr('choice-id', choice.id)
+        .text(choice.choice)
     )
   }
   function submitSurvey() {
@@ -125,23 +134,27 @@
       var element = elements.eq(i)
       switch (question.type) {
         case QUESTION_TYPES.Dropdown:
-          var response = element.find('select').val()
+          var response = Number(element.find('select').val())
           break
         case QUESTION_TYPES['Elected position']:
           var response = []
           var chosen = element.find('.chosen .list-group-item span.choice-text')
           chosen.each(function() {
             var $this = $(this)
-            var userId = $this.attr('user-id')
-            response.push(userId ? Number(userId) : $this.text())
+            var choiceId = $this.attr('choice-id'), userId = $this.attr('user-id')
+            response.push(
+              choiceId
+                ? {choice_id: Number(choiceId)}
+                : userId ? {user_id: Number(userId)} : null
+            )
           })
           break
         case QUESTION_TYPES.Checkboxes:
           var response = []
           var choices = element.find('.choices').children()
           choices.each(function() {
-            var $this = $(this)
-            if ($this.find(':checked').length) response.push($this.find('label').text())
+            var checked = $(this).find(':checked')
+            if (checked.length) response.push(Number(checked.val()))
           })
           break
         case QUESTION_TYPES['Short text']:
@@ -174,6 +187,14 @@
       }
     })
   }
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = (Math.random() * (i + 1)) | 0
+      var swap = arr[i]
+      arr[i] = arr[j]
+      arr[j] = swap
+    }
+  }
 
   $(document).ready(function() {
     questionContainer = $('#question_container')
@@ -189,26 +210,21 @@
         case QUESTION_TYPES.Dropdown:
           var select = $('<select>').addClass('form-control choices')
           question.choices.forEach(function(choice) {
-            select.append($('<option>').text(choice))
+            select.append($('<option>').val(choice.id).text(choice.choice))
           })
           elementInner.append(select)
           break
         case QUESTION_TYPES['Elected position']:
           var choicesDiv = $('<div>').addClass('col-md-6 choices')
           var choices = question.choices
-          for (var i = choices.length - 1; i > 0; i--) {
-            var j = (Math.random() * (i + 1)) | 0
-            var swap = choices[i]
-            choices[i] = choices[j]
-            choices[j] = swap
-          }
+          shuffle(choices)
           choices.forEach(function(choice) {
             choicesDiv.append(candidateInput(choice))
           })
           var nameInput = $('<input>').addClass('form-control writein').attr('placeholder', 'Write-in')
           var searchResults = $('<ul>').addClass('list-group')
           choicesDiv.append(
-            candidateInput(NO),
+            candidateInput({choice: NO, id: null}),
             nameInput,
             searchResults
           )
@@ -232,8 +248,8 @@
           var choicesDiv = $('<div>').addClass('choices')
           question.choices.forEach(function(choice) {
             choicesDiv.append($('<div>').append(
-              $('<label>').text(choice).append(
-                $('<input>').attr('type', 'checkbox')
+              $('<label>').text(choice.choice).append(
+                $('<input>').attr('type', 'checkbox').val(choice.id)
               )
             ))
           })

@@ -235,7 +235,7 @@ def test_question_json(client):
     ) == '[{"title":"A","description":"","type":1,"choices":["1","2","3"]},{"title":"B","description":"bbb","type":4},{"title":"C","description":"ccc","type":2,"choices":["a","b","c"]},{"title":"D","description":"","type":5},{"title":"E","description":"","type":3,"choices":["do","re","me"]}]'
     assert helpers.get_questions_json(
         1, True
-    ) == '[{"question_id":1,"title":"A","description":"","type":1,"choices":["1","2","3"]},{"question_id":2,"title":"B","description":"bbb","type":4},{"question_id":3,"title":"C","description":"ccc","type":2,"choices":["a","b","c"]},{"question_id":4,"title":"D","description":"","type":5},{"question_id":5,"title":"E","description":"","type":3,"choices":["do","re","me"]}]'
+    ) == '[{"question_id":1,"title":"A","description":"","type":1,"choices":[{"id":1,"choice":"1"},{"id":2,"choice":"2"},{"id":3,"choice":"3"}]},{"question_id":2,"title":"B","description":"bbb","type":4},{"question_id":3,"title":"C","description":"ccc","type":2,"choices":[{"id":4,"choice":"a"},{"id":5,"choice":"b"},{"id":6,"choice":"c"}]},{"question_id":4,"title":"D","description":"","type":5},{"question_id":5,"title":"E","description":"","type":3,"choices":[{"id":7,"choice":"do"},{"id":8,"choice":"re"},{"id":9,"choice":"me"}]}]'
 
 
 def test_question_ids(client):
@@ -249,14 +249,9 @@ def test_question_type(client):
 
 def test_get_choice(client):
     assert [
-        helpers.get_choice(5, choice) for choice in ['do', 're', 'me', 'z']
-    ] == [{
-        'choice_id': 7
-    }, {
-        'choice_id': 8
-    }, {
-        'choice_id': 9
-    }, None]
+        helpers.invalid_choice_id(5, choice)
+        for choice in ['abc', 7, 8, 9, 10]
+    ] == [True, False, False, False, True]
 
 
 def test_process_params_error(client):
@@ -826,7 +821,7 @@ def test_submit(client):
         'title': 'Question A',
         'description': '',
         'type': question_types['Dropdown'],
-        'choices': ['1', '2', '3']
+        'choices': ['1', '2', '3'] # choices 12, 13, 14
     }, {  # question id 9
         'title': 'Question B',
         'description': 'bbb',
@@ -835,7 +830,7 @@ def test_submit(client):
         'title': 'Question C',
         'description': 'ccc',
         'type': question_types['Checkboxes'],
-        'choices': ['a', 'b', 'c']
+        'choices': ['a', 'b', 'c'] # choices 15, 16, 17
     }, { # question id 11
         'title': 'Question D',
         'description': '',
@@ -844,8 +839,9 @@ def test_submit(client):
         'title': 'Question E',
         'description': '',
         'type': question_types['Elected position'],
-        'choices': ['do', 're', 'me']
+        'choices': ['do', 're', 'me'] # choices 18, 19, 20
     }])
+    print(helpers.get_questions_json(survey_id, True))
     # Test (some) restriction
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key), data='')
@@ -889,6 +885,23 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to dropdown"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":15},
+                    {"question":9},
+                    {"question":10},
+                    {"question":11},
+                    {"question":12}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
     assert b'"success":false' in rv.data and b'"message":"Invalid choice for dropdown"' in rv.data
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
@@ -897,7 +910,7 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":10},
                     {"question":10},
                     {"question":11},
@@ -914,7 +927,7 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
                     {"question":10,"response":10},
                     {"question":11},
@@ -931,9 +944,9 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":[3]},
+                    {"question":10,"response":["3"]},
                     {"question":11},
                     {"question":12}
                 ]
@@ -948,9 +961,9 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["d"]},
+                    {"question":10,"response":[14]},
                     {"question":11},
                     {"question":12}
                 ]
@@ -965,9 +978,9 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":100},
                     {"question":12}
                 ]
@@ -982,9 +995,9 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
                     {"question":12,"response":"NO"}
                 ]
@@ -999,9 +1012,9 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
                     {"question":12,"response":[true]}
                 ]
@@ -1016,11 +1029,28 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":["fa"]}
+                    {"question":12,"response":[{}]}
+                ]
+            }
+        """)
+    assert rv.status_code == 200
+    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    rv = client.post(
+        flask.url_for('voting.submit', access_key=access_key),
+        data="""
+            {
+                "uid":"2078141",
+                "birthday":"1999-05-08",
+                "responses":[
+                    {"question":8,"response":13},
+                    {"question":9,"response":"shorty"},
+                    {"question":10,"response":[15,17]},
+                    {"question":11,"response":"looooooooong"},
+                    {"question":12,"response":[{"choice_id":2}]}
                 ]
             }
         """)
@@ -1033,11 +1063,11 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[100]}
+                    {"question":12,"response":[{"user_id":-100}]}
                 ]
             }
         """)
@@ -1050,16 +1080,81 @@ def test_submit(client):
                 "uid":"2078141",
                 "birthday":"1999-05-08",
                 "responses":[
-                    {"question":8,"response":"2"},
+                    {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
-                    {"question":10,"response":["a","c"]},
+                    {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[3,"re",2,"NO"]}
+                    {"question":12,"response":[{"user_id":3},{"choice_id":19},{"user_id":2},null]}
                 ]
             }
         """)
     assert rv.status_code == 200
     assert rv.data == b'{"success":true}\n'
+    assert helpers.get_responses(
+        survey_id, helpers.get_user_id('csander')) == [{
+            'question_id': 8,
+            'title': 'Question A',
+            'description': None,
+            'type': 1,
+            'list_order': 0,
+            'choices': {
+                12: '1',
+                13: '2',
+                14: '3'
+            },
+            'responses': [13]
+        }, {
+            'question_id': 9,
+            'title': 'Question B',
+            'description': 'bbb',
+            'type': 4,
+            'list_order': 1,
+            'choices': 0,
+            'responses': ['shorty']
+        }, {
+            'question_id': 10,
+            'title': 'Question C',
+            'description': 'ccc',
+            'type': 2,
+            'list_order': 2,
+            'choices': {
+                15: 'a',
+                16: 'b',
+                17: 'c'
+            },
+            'responses': [[15, 17]]
+        }, {
+            'question_id':
+            11,
+            'title':
+            'Question D',
+            'description':
+            None,
+            'type':
+            5,
+            'list_order':
+            3,
+            'choices':
+            0,
+            'responses': ['looooooooong']
+        }, {
+            'question_id':
+            12,
+            'title':
+            'Question E',
+            'description':
+            None,
+            'type':
+            3,
+            'list_order':
+            4,
+            'choices': {
+                18: 'do',
+                19: 're',
+                20: 'me'
+            },
+            'responses': [['Belac Sander', 're', 'Robert Eng', 'NO']]
+        }]
 
 
 def test_results(client):

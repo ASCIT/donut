@@ -85,7 +85,12 @@ def get_questions_json(survey_id, include_id):
         WHERE survey_id = %s
         ORDER BY list_order
     """
-    choices_query = 'SELECT choice FROM survey_question_choices WHERE question_id = %s ORDER BY choice_id'
+    choices_query = """
+        SELECT choice_id AS id, choice
+        FROM survey_question_choices
+        WHERE question_id = %s
+        ORDER BY choice_id
+    """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(questions_query, [survey_id])
         questions = cursor.fetchall()
@@ -93,9 +98,10 @@ def get_questions_json(survey_id, include_id):
             question['description'] = question['description'] or ''
             if question['choices']:
                 cursor.execute(choices_query, [question['question_id']])
-                question['choices'] = [
-                    choice['choice'] for choice in cursor.fetchall()
-                ]
+                question['choices'] = list(
+                    cursor.fetchall()) if include_id else [
+                        choice['choice'] for choice in cursor.fetchall()
+                    ]
             else:
                 del question['choices']
             if not include_id: del question['question_id']
@@ -116,11 +122,11 @@ def get_question_type(question_id):
         return cursor.fetchone()['type_id']
 
 
-def get_choice(question_id, value):
-    query = 'SELECT choice_id FROM survey_question_choices WHERE question_id = %s AND choice = %s'
+def invalid_choice_id(question_id, choice_id):
+    query = 'SELECT choice_id FROM survey_question_choices WHERE question_id = %s AND choice_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [question_id, value])
-        return cursor.fetchone()
+        cursor.execute(query, [question_id, choice_id])
+        return cursor.fetchone() is None
 
 
 def process_params_request(editing, survey_id=None, access_key=None):
