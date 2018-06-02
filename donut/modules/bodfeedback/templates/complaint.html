@@ -94,13 +94,16 @@
      $('#add-email').on('submit', function(e) {
 	 e.preventDefault();
 	 var em = $("#addedemail").val();
+	 console.log(em);
+	  
 	 $.ajax({
-	     url: "{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid'], email=em) }}",
-
-	     type: 'POST' 
+		 url: "{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid'], email=em) }}",
+	     type: 'GET', 
+	     success: function(){
+		 $('#add-email')[0].reset();
+	         location.reload();
+	     }     	 
 	 }); 
-	 $('#add-email')[0].reset()
-	 location.reload();
      });
  
 	
@@ -109,10 +112,12 @@
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}",
 	     data: $('#addMessage').serialize(),
-	     type: 'POST' 
+	     type: 'POST', 
+	     success: function(){
+		 $('#addMessage')[0].reset();
+	         location.reload();
+	     }
 	 }); 
-	 $('#addMessage')[0].reset()
-	 location.reload();
      });
      $('#markRead').on('click', function() {
 	 $.ajax({

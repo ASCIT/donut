@@ -114,7 +114,7 @@ def bodfeedback_mark_unread(id):
 @blueprint.route('/1/bodfeedback/<uuid:id>/addEmail/<email>')
 def bodfeedback_add_email(id, email):
     complaint_id = helpers.get_id(id)
-    sucess = helpers.add_email(complaint_id, email)
+    success = helpers.add_email(complaint_id, email)
     if not success: return "Failed to add email"
     return "Success!"
 
