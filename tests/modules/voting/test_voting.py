@@ -27,11 +27,7 @@ def test_ranked_pairs():
     assert ranked_pairs.winners(responses) == correct_winners
 
     # Test incomplete lists
-    assert ranked_pairs.winners([
-        ['A'],
-        ['B'],
-        ['A']
-    ]) == ['A', 'B']
+    assert ranked_pairs.winners([['A'], ['B'], ['A']]) == ['A', 'B']
 
 
 # Helpers
@@ -1165,7 +1161,8 @@ def test_submit(client):
 
     rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))
     assert rv.status_code == 302
-    assert rv.location == flask.url_for('voting.show_my_response', access_key=access_key)
+    assert rv.location == flask.url_for(
+        'voting.show_my_response', access_key=access_key)
 
 
 def test_my_response(client):
@@ -1175,12 +1172,14 @@ def test_my_response(client):
             helpers.get_user_id('csander'))
         if survey['title'] == 'Response test'
     ][0]['access_key']
-    rv = client.get(flask.url_for('voting.show_my_response', access_key=access_key))
+    rv = client.get(
+        flask.url_for('voting.show_my_response', access_key=access_key))
     assert rv.status_code == 200
     assert b'Must be logged in to see response' in rv.data
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
-    rv = client.get(flask.url_for('voting.show_my_response', access_key='not-a-real-key'))
+    rv = client.get(
+        flask.url_for('voting.show_my_response', access_key='not-a-real-key'))
     assert rv.status_code == 200
     assert b'Invalid access key' in rv.data
     unresponded_access_key = [
@@ -1189,10 +1188,13 @@ def test_my_response(client):
             helpers.get_user_id('csander'))
         if survey['title'] != 'Response test'
     ][0]['access_key']
-    rv = client.get(flask.url_for('voting.show_my_response', access_key=unresponded_access_key))
+    rv = client.get(
+        flask.url_for(
+            'voting.show_my_response', access_key=unresponded_access_key))
     assert rv.status_code == 200
     assert b'You have not responded to this survey' in rv.data
-    rv = client.get(flask.url_for('voting.show_my_response', access_key=access_key))
+    rv = client.get(
+        flask.url_for('voting.show_my_response', access_key=access_key))
     assert rv.status_code == 200
     assert b'My responses for Response test' in rv.data
 
