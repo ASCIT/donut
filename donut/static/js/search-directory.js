@@ -1,6 +1,5 @@
 var MIN_SEARCH_LENGTH = 3 //minimum number of characters that must be entered to execute a search
 var SEARCH_TIMEOUT = 200 //ms
-var searchToken
 
 /**
  * Displays matching directory names when the given input's value changes
@@ -9,6 +8,7 @@ var searchToken
  * @param makeElement A function that creates an element to display given a user object
  */
 function attachDirectorySearch(nameInput, resultsList, makeElement) {
+	var searchToken
 	nameInput.keyup(function() {
 		var name = nameInput.val()
 		if (name.length < MIN_SEARCH_LENGTH) return resultsList.children().remove()

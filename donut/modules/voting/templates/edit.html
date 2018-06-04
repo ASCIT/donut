@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block scripts %}
   {{ super() }}
+  <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
   <script>
     var PREVIOUS_RESPONSE_WARNING = 'Previous responses will be deleted if you edit the questions. Are you sure you want to continue?'
     var QUESTION_TYPES = {{ question_types|safe }}
@@ -126,9 +127,24 @@
               $('<span>').addClass('input-group-btn').append(
                 $('<button>').addClass('btn btn-success').click(addChoice(makeChoiceFunction)).text('Add option')
               )
-            ),
-            choicesDiv
+            )
           )
+          if (questionType === QUESTION_TYPES['Elected position']) {
+            var nameInput = $('<input>').addClass('form-control').attr('placeholder', 'Candidate name')
+            var searchResults = $('<ul>').addClass('list-group')
+            attachDirectorySearch(nameInput, searchResults, function(user) {
+              return $('<button>').addClass('list-group-item')
+                .click(function() {
+                  var val = choiceName.val().trim()
+                  if (val) val += ', '
+                  choiceName.val(val + user.full_name)
+                  nameInput.val('').keyup() //clear directory search results
+                })
+                .append($('<p>').text(user.full_name))
+            })
+            inputs.append(nameInput, searchResults)
+          }
+          inputs.append(choicesDiv)
           if (questionType === QUESTION_TYPES['Elected position']) {
             inputs.append($('<label>').text('({{ NO }})'))
           }
