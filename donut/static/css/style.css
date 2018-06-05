@@ -241,10 +241,12 @@ label.required:after {
 
   .half-float-left {
     width: 100%;
+    display: block;
   }
 
   .half-float-right {
     width: 100%;
+    display: block;
   }
 
   .jumbotron button {
@@ -297,14 +299,17 @@ label.required:after {
 
   .triple-split-right {
     width: 100%;
+    display: block;
   }
 
   .triple-split-left {
     width: 100%;
+    display: block;
   }
 
   .triple-split-center {
     width: 100%;
+    display: block;
   }
 
   #navbar button {
