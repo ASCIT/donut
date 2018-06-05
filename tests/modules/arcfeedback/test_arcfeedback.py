@@ -110,6 +110,11 @@ def test_add_email(client):
     assert helpers.get_emails(1) == [
         'test@example.com', 'test2@example.com', 'sample_text@example.com'
     ]
+    helpers.add_email(1, ['test3@example.com', 'test4@example.com'])
+    assert helpers.get_emails(1) == [
+        'test@example.com', 'test2@example.com', 'sample_text@example.com',
+        'test3@example.com', 'test4@example.com'
+    ]
     assert helpers.add_email(500, 'text') == False
 
 

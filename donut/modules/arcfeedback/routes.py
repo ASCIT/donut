@@ -110,12 +110,15 @@ def arcfeedback_mark_unread(id):
         return 'Success'
 
 # add an email to this complaint
-# TODO: make this work from the front end / maybe rename it
-@blueprint.route('/1/arcfeedback/<uuid:id>/addEmail/<email>')
-def arcfeedback_add_email(id, email):
+@blueprint.route('/1/arcfeedback/<uuid:id>/addEmail', methods=['POST'])
+def arcfeedback_add_email(id):
     complaint_id = helpers.get_id(id)
-    sucess = helpers.add_email(complaint_id, email)
-    if not success: return "Failed to add email"
+    emails = flask.request.form.get('email')
+    emails = emails.split(',')
+    for email in emails:
+        email = email.strip()
+    success = helpers.add_email(complaint_id, emails)
+    if not success: return "Failed to add email(s)"
     return "Success!"
 
 # remove an email from this complaint

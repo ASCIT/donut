@@ -30,9 +30,9 @@
 			<h4>Add an email</h4>
 		    </div>
 		    <div class="panel-body">
-			<form method="POST" id="add-email" action="">
+			<form method="POST" id="add-email" action="{{url_for('arcfeedback.arcfeedback_add_email', id=complaint['uuid'])}}">
 			    <div class="form-group">
-				<p>Email: </p>
+				<p>Email (or comma separated list of emails): </p>
 				<input class="form-control" type="text" name="email" />
 			    </div>
 			    <input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
