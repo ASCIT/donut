@@ -159,6 +159,7 @@ def get_position_data(fields=None):
         cursor.execute(query)
         return cursor.fetchall()
 
+
 def add_position(group_id, pos_name):
     ''' 
     Inserts new position into the database associated
