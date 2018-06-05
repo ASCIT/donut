@@ -48,16 +48,3 @@
                             {% for i in range(cats|length) %}
                                 {% for j in range(cats[i]|length) %}
                                 <option {% if i*cats[0]|length+j+1 == cat_id %} selected {% endif%}
-                                        value={{ i*cats[0]|length+j+1 }}>
-                                    {{ cats[i][j] }}
-                                </option>
-                                {% endfor %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button class="btn btn-primary">Search</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
