@@ -111,18 +111,36 @@ def bodfeedback_mark_unread(id):
 
 
 # add an email to this complaint
-@blueprint.route('/1/bodfeedback/<uuid:id>/addEmail/<email>')
-def bodfeedback_add_email(id, email):
+@blueprint.route('/1/bodfeedback/addEmail/<uuid:id>', methods=['POST'])
+def bodfeedback_add_email(id):
     complaint_id = helpers.get_id(id)
-    success = helpers.add_email(complaint_id, email)
-    if not success: return "Failed to add email"
-    return "Success!"
+    if not complaint_id:
+        flask.abort(400)
+        return
+    fields = ['email']
+    data = {}
+    for field in fields:
+        data[field] = flask.request.form.get(field)
+    if data['email'] == "":
+        flask.abort(400)
+        return
+    helpers.add_email(complaint_id, data['email'])
+    return flask.jsonify({'email': data['email']})
 
 
 # remove an email from this complaint
-@blueprint.route('/1/bodfeedback/<uuid:id>/removeEmail/<email>')
-def bodfeedback_remove_email(id, email):
+@blueprint.route('/1/bodfeedback/removeEmail/<uuid:id>', methods=['POST'])
+def bodfeedback_remove_email(id):
     complaint_id = helpers.get_id(id)
-    success = helpers.remove_email(complaint_id, email)
-    if not success: return "Failed to remove email"
-    return "Success!"
+    if not complaint_id:
+        flask.abort(400)
+        return
+    fields = ['email']
+    data = {}
+    for field in fields:
+        data[field] = flask.request.form.get(field)
+    if data['email'] == "":
+        flask.abort(400)
+        return
+    helpers.remove_email(complaint_id, data['email'])
+    return flask.jsonify({'email': data['email']})
