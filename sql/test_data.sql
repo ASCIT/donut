@@ -91,8 +91,8 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
 INSERT INTO permissions(permission_id, permission_name) VALUES
-    (1, 'Ruddock full member'),
-    (2, 'IHC member');
+    (1, 'View ruddock website (Ruddock member)'),
+    (2, 'Edit Rotation info (IHC member)');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
     (3, 1),
