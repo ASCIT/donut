@@ -51,6 +51,17 @@ def test_get_group_positions_data(client):
     assert helpers.get_group_positions(4) == []
 
 
+def test_get_position_holders(client):
+    res = helpers.get_position_holders(5)
+    assert len(res) == 2
+    assert res[0]["first_name"] == "Sean"
+    assert res[1]["first_name"] == "Robert"
+    res = helpers.get_position_holders(1)
+    assert len(res) == 2
+    assert res[0]["first_name"] == "David"
+    assert res[1]["first_name"] == "Robert"
+
+
 def test_get_position_data(client):
     res = helpers.get_position_data()
     assert res[0]["first_name"] == "David"
@@ -60,6 +71,18 @@ def test_get_position_data(client):
     assert res[0]["pos_name"] == "Head"
     assert res[0]["group_id"] == 1
     assert res[0]["pos_id"] == 1
+    assert {
+        "first_name": "Robert",
+        "last_name": "Eng",
+        "group_name": "IHC",
+        "user_id": 2,
+        "pos_name": "Member",
+        "group_id": 3,
+        "pos_id": 5,
+        "start_date": None,
+        "end_date": None
+    } in res
+    assert len(res) == 7
 
 
 def test_delete_position(client):
