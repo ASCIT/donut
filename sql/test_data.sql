@@ -83,8 +83,17 @@ INSERT INTO position_holders(pos_id, user_id) VALUES
     (4, 2),
     (5, 4);
 
+
 INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
     (4, 5);
 
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
+
+INSERT INTO permissions(permission_id, permission_name) VALUES
+    (1, 'Ruddock full member'),
+    (2, 'IHC member');
+
+INSERT INTO position_permissions(pos_id, permission_id) VALUES
+    (3, 1),
+    (5, 2);
