@@ -11,13 +11,13 @@
 		    <div class="panel-body" id="summary-panel">
 			<p>Course: {{complaint['course']}} </p>
 			<p>Status: {{complaint['status']}} </p>
-			{% if complaint['emails']|length == 0 %}
-			<p>No emails subscribed to this complaint </p>
+			{% if not complaint['emails'] %}
+			    <p>No emails subscribed to this complaint </p>
 			{% else %}
-			<p>Subscribed emails: </p>
-			{% for email in complaint['emails'] %}
-			<p>{{email}}</p>
-			{% endfor %}
+			    <p>Subscribed emails: </p>
+			    {% for email in complaint['emails'] %}
+			        <p>{{email}}</p>
+			    {% endfor %}
 			{% endif %}
 		    </div>
 		    <button class="btn btn-primary" id="markRead">Mark as read</button>
@@ -33,7 +33,7 @@
 			<form method="POST" id="add-email" action="{{url_for('arcfeedback.arcfeedback_add_email', id=complaint['uuid'])}}">
 			    <div class="form-group">
 				<p>Email (or comma separated list of emails): </p>
-				<input class="form-control" type="text" name="email" />
+				<input class="form-control" type="email" name="email" />
 			    </div>
 			    <input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
 			</form>

@@ -53,14 +53,15 @@ def add_email(complaint_id, emails):
     if not get_course(complaint_id): return False
     if not isinstance(emails, list): emails = [emails]
     query = "INSERT INTO arc_complaint_emails (complaint_id, email) VALUES"
-    query += ','.join('(%s, %s)' for email in emails) 
+    query += ','.join('(%s, %s)' for email in emails)
     to_insert = []
     for email in emails:
         to_insert.append(complaint_id)
         to_insert.append(email)
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (to_insert))
+        cursor.execute(query, to_insert)
     return True
+
 
 def remove_email(complaint_id, email):
     '''
