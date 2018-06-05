@@ -18,6 +18,7 @@ def has_permission(user_id, permission_id):
     pos_ids = [row['pos_id'] for row in result]
     for pos_id in pos_ids:
         holders = groups.get_position_holders(pos_id)
-        if {'user_id': user_id} in holders:
+        holders = [row['user_id'] for row in holders]
+        if user_id in holders:
             return True
     return False
