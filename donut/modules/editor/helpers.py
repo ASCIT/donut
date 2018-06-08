@@ -4,9 +4,10 @@ import glob
 from flask import current_app, redirect, url_for
 
 underCommittee = [
-            'BoC', 'ASCIT_Bylaws', 'BoC_Bylaws', 'BoC_Defendants', 'BoC_FAQ',
-            'BoC_Reporters', 'BoC_Witness', 'CRC', 'honor_system_handbook'
-            ]
+    'BoC', 'ASCIT_Bylaws', 'BoC_Bylaws', 'BoC_Defendants', 'BoC_FAQ',
+    'BoC_Reporters', 'BoC_Witness', 'CRC', 'honor_system_handbook'
+]
+
 
 def rename_title(oldfilename, newfilename):
     """
