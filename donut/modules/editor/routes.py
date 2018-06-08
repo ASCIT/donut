@@ -8,6 +8,7 @@ from flask import current_app, redirect, url_for
 from donut.resources import Permissions
 from donut.auth_utils import check_permission
 
+
 @blueprint.route('/editor', methods=['GET', 'POST'])
 def editor(input_text='Hello World!!!', title="TITLE"):
     '''
@@ -19,7 +20,7 @@ def editor(input_text='Hello World!!!', title="TITLE"):
     if input != None:
         input_text = helpers.read_markdown(input)
         title = flask.request.args.get('title')
-    
+
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
 

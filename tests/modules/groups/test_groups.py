@@ -87,7 +87,7 @@ def test_get_position_data(client):
         "start_date": None,
         "end_date": None
     } in res
-    assert len(res) == 7
+    assert len(res) == 11
 
 
 def test_delete_position(client):

@@ -29,12 +29,8 @@ def get_member(name):
         high_pos = []
         pos_house = []
         for i in range(len(result)):
-            if 'preferred_name' in members[i]:
-                first_name = members[i]['preferred_name']
-            else:
-                first_name = members[i]['first_name']
-            name = first_name + ' ' + members[i]['last_name']
-            email = members[i]['email']
+
+            (name, email) = core.get_name_and_email(members[i]['user_id'])
             pos_name = result[i]['pos_name']
             if pos_name == 'Chair' or 'ecretary' in pos_name:
                 high_pos.append((name, pos_name, email))

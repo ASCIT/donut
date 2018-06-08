@@ -38,4 +38,4 @@ def test_get_boc(client):
 def test_get_crc(client):
     result = helpers.get_member('CRC')
     assert result == [('Robert Eng', 'Chair', 'reng@caltech.edu'),
-                      ('Caleb Sander', 'Lloyd', 'csander@caltech.edu')]
+                      ('Cleb Sander', 'Lloyd', 'csander@caltech.edu')]
