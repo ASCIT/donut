@@ -191,6 +191,10 @@ table {
   line-height: 100%;
 }
 
+.light-border {
+  border: 1px solid #9d9d9d;
+}
+
 .navbar:before {
   content: "";
   position: relative;
