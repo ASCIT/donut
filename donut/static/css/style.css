@@ -199,6 +199,10 @@ table {
   background: linear-gradient(to right, orange, #d96924);
 }
 
+.no-border {
+  border: none;
+}
+
 .message {
   text-align: center;
   font-weight: 600;
