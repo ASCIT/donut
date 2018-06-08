@@ -67,6 +67,7 @@ table {
 
   background-color: #FFF;
   color: #333;
+  border-color: orange;
   margin-bottom: 5%;
 }
 
@@ -78,6 +79,7 @@ table {
 
   background-color: orange;
   color: #FFF;
+  border-color: orange;
   margin-bottom: 5%;
 }
 
@@ -96,6 +98,13 @@ table {
   border-color: orange;
 }
 
+.center {
+  margin-left: 25%;
+  margin-right: 25%;
+  margin: auto;
+  width: 50%;
+}
+
 .container {
   width: 90%;
 }
@@ -112,6 +121,10 @@ table {
   float: left;
   display: inline-block;
   margin: 0;
+}
+
+.white-border {
+  border: 1px solid #FFF;
 }
 
 .jumbotron {
@@ -145,6 +158,15 @@ table {
   border: 1px orange solid;
 }
 
+.jumbotron form select {
+  border: 1px orange solid;
+}
+
+.jumbotron form select:focus {
+  border: 1px orange solid;
+}
+
+
 .large-text p {
   font-size: 150%;
 }
@@ -155,6 +177,18 @@ table {
 
 .small-text p {
   font-size: 90%;
+}
+
+.large-spacing {
+  line-height: 200%;
+}
+
+.medium-spacing {
+  line-height: 150%;
+}
+
+.small-spacing {
+  line-height: 100%;
 }
 
 .navbar:before {
@@ -180,6 +214,12 @@ table {
 
 .pos-right {
   text-align: right;
+}
+
+.row {
+  width: 100%;
+  height: 5%;
+  display: block;
 }
 
 .triple-split-right {
@@ -230,11 +270,6 @@ label.required:after {
 }
 
 @media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
-
-  h2 {
-    font-size: 5vw;
-  }
-
   .caret {
     display: none;
   }
