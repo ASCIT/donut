@@ -138,7 +138,7 @@ table {
   width: 60%;
 }
 
-.jumbotron form input {
+.jumbotron input {
   padding: 0.5%;
   margin-top: 1%;
   border: 1px orange solid;
@@ -146,23 +146,23 @@ table {
   padding: 5px;
 }
 
-.jumbotron form input:focus {
+.jumbotron input:focus {
   border: 1px orange solid;
 }
 
-.jumbotron form textarea {
+.jumbotron textarea {
   border: 1px orange solid;
 }
 
-.jumbotron form textarea:focus {
+.jumbotron textarea:focus {
   border: 1px orange solid;
 }
 
-.jumbotron form select {
+.jumbotron select {
   border: 1px orange solid;
 }
 
-.jumbotron form select:focus {
+.jumbotron select:focus {
   border: 1px orange solid;
 }
 
