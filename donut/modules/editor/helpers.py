@@ -49,8 +49,7 @@ def read_file(path):
     curFile = ''
     if os.path.isfile(path):
         with open(path) as f:
-            curFile += f.read()
-        return curFile
+            return f.read()
     else:
         return ""
 

@@ -58,7 +58,7 @@ def uploaded_file(filename):
 
 
 @blueprint.route('/uploaded_list')
-def uploaded_list(filename='default'):
+def uploaded_list():
     '''
     Shows the list of uploaded files
     '''

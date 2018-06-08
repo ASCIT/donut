@@ -28,9 +28,9 @@ def test_get_links(client):
         titles.append(title)
     assert "SOME_TITLE" not in ''.join(titles)
 
-    root = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config["UPLOAD_FOLDER"])
-    path = os.path.join(root, "SOME_TITLE" + ".jpg")
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config["UPLOAD_FOLDER"],
+                        "SOME_TITLE" + ".jpg")
 
     f = open(path, "w+")
     f.write("")
@@ -53,7 +53,7 @@ def test_get_links(client):
 
 
 def test_allowed_file(client):
-    assert helpers.allowed_file("bleh.bleh") == False
-    assert helpers.allowed_file("bleh.JPg") == True
-    assert helpers.allowed_file("bleh.GiF") == True
-    assert helpers.allowed_file("bleh.PDF") == True
+    assert not helpers.allowed_file("bleh.bleh")
+    assert helpers.allowed_file("bleh.JPg")
+    assert helpers.allowed_file("bleh.GiF")
+    assert helpers.allowed_file("bleh.PDF")

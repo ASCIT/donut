@@ -12,7 +12,7 @@ function run() {
 
 // Changes the title of a file
 function change_title(){
- var title = document.getElementById('title').value,
+ var title = document.getElementById('title').value;
  var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
  if (valid && title.length < TITLE_CUTOFF)
@@ -32,79 +32,57 @@ function change_title(){
 }
 
 //###########
+
+function selectedString(string1, string2)
+{
+  var ta = document.getElementById('source');
+  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
+  {
+    insert(string1, false);
+  }
+  else {
+    insert(string2, true);
+  }
+}
+
 // All markdown related functions
 function insert_heading(size){
   var string = "";
-  console.log("headings???");
   for(var i = 0; i< size; i++)
   {
     string += "#";
   }
-  var ta = document.getElementById('source')
-  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
-  {
-    insert(string, false);
-  }
-  else {
-    insert(string + "Heading_title" + string+ "\n", true);
-  }
+  selectedString(string, string + "Heading_title" + string+ "\n");
 }
 
 function insert_italic(){
-  var ta = document.getElementById("source");
-  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) != "")
-  {
-    insert("*", false);
-  }
-  else {
-    insert("*italicText*", true);
-  }
+  selectedString("*", "*italicText*");
 }
 
 function insert_bold(){
-  var ta = document.getElementById("source");
-  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
-  {
-    insert("**", false);
-  }
-  else {
-    insert("**boldText**", true);
-  }
-}
-
-function insert_strike_through(){
-  var ta = document.getElementById("source");
-  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
-  {
-    insert("~~", false);
-  }
-  else {
-    insert("~~strikeThroughText~~", true);
-  }
-
+  selectedString("**", "**boldText**");
 }
 
 function insert_link(){
   insert("[linkTitle](example.com)", true);
 }
 
-
 function insert_image(){
   insert("![Alt text](url/to/image", true);
 }
 
 function insert_ulist(){
-  insert("* ", true);
+  insert("* list \n", true);
 }
 
 function insert_olist(){
   var number = 1;
-  var ta = document.getElementById("source");
-  while(ta.includes(number+"."))
+  var ta = document.getElementById("source").value.toString();
+  while(ta.indexOf(number+".") > -1)
   {
     number = number + 1;
   }
-  insert(number+". ", true);
+  insert(number+". list \n", true);
 }
 
 
@@ -157,3 +135,4 @@ function save(){
     }
   }
 }
+
