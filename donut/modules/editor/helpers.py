@@ -3,6 +3,10 @@ import os
 import glob
 from flask import current_app, redirect, url_for
 
+underCommittee = [
+            'BoC', 'ASCIT_Bylaws', 'BoC_Bylaws', 'BoC_Defendants', 'BoC_FAQ',
+            'BoC_Reporters', 'BoC_Witness', 'CRC', 'honor_system_handbook'
+            ]
 
 def rename_title(oldfilename, newfilename):
     """
@@ -23,10 +27,6 @@ def read_markdown(name):
     '''
     Reads in the mark down text from a file.
     '''
-    underCommittee = [
-        'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
-        'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
-    ]
 
     # Check if the pages were already created prior (only the BoC pages)
     if name in underCommittee:
@@ -64,8 +64,7 @@ def get_links():
     results = []
     for i in range(len(links)):
         links[i] = links[i].replace(root + '/', '').replace('.md', '')
-        if links[
-                i] not in 'BoC ASCIT_Bylaws BoC_Bylaws BoC_Defendants BoC_FAQ BoC_Reporters BoC_Witness CRC':
+        if links[i] not in underCommittee:
             link = flask.url_for('uploads.display', url=links[i])
             results.append((link, links[i]))
     return results
@@ -89,10 +88,6 @@ def write_markdown(markdown, title):
         as well as the routes for flask
     '''
     # Special cases for exisiting BoC and currenly existing pages.
-    underCommittee = [
-        'BoC', 'ascit_bylaws', 'BoC.bylaws', 'BoC.defendants', 'BoC.FAQ',
-        'BoC.reporters', 'BoC.witnesses', 'CRC', 'honor_system_handbook'
-    ]
     if title in underCommittee:
         root = flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
         path = os.path.join(root, title + '.html')

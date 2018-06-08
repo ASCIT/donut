@@ -30,12 +30,12 @@ def test_routes(client):
 
 
 def test_get_boc(client):
-    result = helpers.get_BoC_member()
+    result = helpers.get_member('BoC')
     assert result == [('David Qu', 'Chair', 'davidqu12345@gmail.com'),
                       ('Robert Eng', 'Avery', 'reng@caltech.edu')]
 
 
 def test_get_crc(client):
-    result = helpers.get_CRC_member()
+    result = helpers.get_member('CRC')
     assert result == [('Robert Eng', 'Chair', 'reng@caltech.edu'),
                       ('Caleb Sander', 'Lloyd', 'csander@caltech.edu')]

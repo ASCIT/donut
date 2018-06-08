@@ -11,7 +11,7 @@ def boc():
     """Display Boc page."""
     return flask.render_template(
         'BoC.html',
-        BoC=helpers.get_BoC_member(),
+        BoC=helpers.get_member('BoC'),
         permission=check_permission(Permissions.ADMIN))
 
 
@@ -70,5 +70,5 @@ def CRC():
     """Display CRC page."""
     return flask.render_template(
         'CRC.html',
-        CRC=helpers.get_CRC_member(),
+        CRC=helpers.get_member('CRC'),
         permission=check_permission(Permissions.ADMIN))

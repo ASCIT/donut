@@ -22,6 +22,12 @@ def editor(input_text='Hello World!!!', title="TITLE"):
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
 
+@blueprint.route('/_change_title', methods=['POST'])
+def change_title():
+    '''
+    Actually saves the data from the forms as markdown
+    '''
+    title = flask.request.form['title']
 
 @blueprint.route('/_save', methods=['POST'])
 def save():

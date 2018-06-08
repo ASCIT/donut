@@ -1,5 +1,6 @@
 var TITLE_CUTOFF = 16;
 
+// Creates html
 function run() {
   var text = document.getElementById('source').value,
       target = document.getElementById('preview'),
@@ -9,11 +10,29 @@ function run() {
     target.innerHTML = html;
 }
 
+// Changes the title of a file
 function change_title(){
- //var text = document.getElementById('title').value,
+ var title = document.getElementById('title').value,
+ var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
+ if (valid && title.length < TITLE_CUTOFF)
+ {
+   $.ajax({
+         url: $SCRIPT_ROOT+'/_change_title',
+         type: 'POST',
+         data:{title:title},
+  success: function(data) {
+        document.getElementById("chang_title").innerHTML = "Title Change Sucessfully";
+     }
+   });
+ }
+ else {
+   window.alert("Please enter a valid title!");
+ }
 }
 
+//###########
+// All markdown related functions
 function insert_heading(size){
   var string = "";
   console.log("headings???");
@@ -89,8 +108,6 @@ function insert_olist(){
 }
 
 
-// bool true  = string + selection
-// bool false = string + selection + string
 function insert(string, bool){
   var ta = document.getElementById('source');
   if(!bool)
@@ -111,13 +128,8 @@ function save(){
   // Construct the html and get the info needed
   var text = document.getElementById('source').value;
   var target = document.getElementById('preview');
-      //converter = new showdown.Converter(),
-      //html = converter.makeHtml(text),
   var title = document.getElementById("text_title").value;
-  //title = title.substring(38, title.length - 12);
-	console.log(typeof(title));
-	console.log(title);
-	//console.log(html);
+
   // Checking for valid titles
   if (title === '')
   {
@@ -129,10 +141,6 @@ function save(){
     // period, front slash, hyphen, and spaces.
     var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
-    var reader = new XMLHttpRequest();
-    reader.open('get', 'pages.txt', true);
-    console.log(reader.responseText);
-
     if (valid && title.length < TITLE_CUTOFF)
     {
       $.ajax({
@@ -142,7 +150,6 @@ function save(){
 	    success: function(data) {
             window.location.href = data['url']
         }
-
       });
     }
     else {
