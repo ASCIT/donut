@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from itertools import product
 
 WINNERS_TO_LIST = 3
@@ -18,12 +19,13 @@ def winners(responses):
         for pair in product(all_candidates, repeat=2)
     }
     for response in responses:
+        response_dict = OrderedDict.fromkeys(response)
+        response = list(response_dict)
         for i, A in enumerate(response[:-1]):
             for B in response[i + 1:]:
                 tallies[A, B] += 1
-        response_set = set(response)
         for candidate in all_candidates:  # assume voter put all unpicked candidates lower
-            if candidate not in response_set:
+            if candidate not in response_dict:
                 for vote in response:
                     tallies[vote, candidate] += 1
 

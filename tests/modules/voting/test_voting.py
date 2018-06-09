@@ -29,6 +29,9 @@ def test_ranked_pairs():
     # Test incomplete lists
     assert ranked_pairs.winners([['A'], ['B'], ['A']]) == ['A', 'B']
 
+    # Test duplicate entries
+    assert ranked_pairs.winners([['A', 'B', 'A', 'A']]) == ['A', 'B']
+
 
 # Helpers
 def test_question_types(client):
