@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS arc_complaint_messages;
+DROP TABLE IF EXISTS arc_complaint_emails;
 DROP TABLE IF EXISTS arc_complaint_info;
 
 CREATE TABLE arc_complaint_info (
@@ -9,7 +11,6 @@ CREATE TABLE arc_complaint_info (
   UNIQUE KEY (uuid)
 );
 
-DROP TABLE IF EXISTS arc_complaint_messages;
 
 CREATE TABLE arc_complaint_messages (
   complaint_id int(11) DEFAULT NULL,
@@ -21,12 +22,12 @@ CREATE TABLE arc_complaint_messages (
   FOREIGN KEY (complaint_id) REFERENCES arc_complaint_info (complaint_id) ON DELETE CASCADE
 );
 
-DROP TABLE IF EXISTS arc_complaint_emails;
 
 CREATE TABLE arc_complaint_emails (
   complaint_id int(11) NOT NULL,
-  email varchar(50) UNIQUE DEFAULT NULL,
+  email varchar(50) DEFAULT NULL,
   email_id int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (email_id),
-  FOREIGN KEY (complaint_id) REFERENCES arc_complaint_info (complaint_id) ON DELETE CASCADE
+  FOREIGN KEY (complaint_id) REFERENCES arc_complaint_info (complaint_id) ON DELETE CASCADE,
+  CONSTRAINT complaint_email UNIQUE(complaint_id, email)
 );
