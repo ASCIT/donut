@@ -88,7 +88,8 @@
  function addMessage(response) {
      var msg = response['message'];
      var poster = response['poster'];
-     var msg_html = "<tr> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
+     var time = response['time'];
+     var msg_html = "<tr> <td>" + time + "</td> <td>" + poster + "</td> <td>" + msg + "</td> </tr>";
      $('#messageList').append(msg_html);
  }
  

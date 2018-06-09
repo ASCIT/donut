@@ -2,6 +2,7 @@ import flask
 from donut.modules.arcfeedback import blueprint
 from donut.modules.arcfeedback import helpers
 from donut import auth_utils
+from datetime import datetime
 
 
 @blueprint.route('/arcfeedback')
@@ -67,7 +68,8 @@ def arcfeedback_add_msg(id):
     helpers.add_msg(complaint_id, data['message'], data['poster'])
     return flask.jsonify({
         'poster': data['poster'],
-        'message': data['message']
+        'message': data['message'],
+        'time': datetime.now().strftime('%b %d %Y %-I:%M%p')
     })
 
 
