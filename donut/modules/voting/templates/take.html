@@ -11,7 +11,7 @@
       <strong>{{ title }}</strong>
     </h1>
     {% if description %}
-      <h2>{{ description }}</h2>
+      <div id="description"></div>
     {% endif %}
     {% if auth %}
       <h4>Please enter your UID and birthday to verify your identity</h4>
@@ -31,9 +31,11 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+<script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
 <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
 <script>
   var NO = '{{ NO }}'
+  var description = {{ description|tojson }}
   var QUESTION_TYPES = {{ question_types|safe }}
   var questionData = {{ questions_json|safe }}
 
@@ -197,6 +199,7 @@
   }
 
   $(document).ready(function() {
+    if (description) $('#description').append(formatText(description, 'h2'))
     questionContainer = $('#question_container')
     questionData.forEach(function(question, index) {
       var elementInner = $('<div>').addClass('left').append(

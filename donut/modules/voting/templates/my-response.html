@@ -6,7 +6,7 @@
       <strong>My responses for {{ title }}</strong>
     </h1>
     {% if description %}
-      <h2>{{ description }}</h2>
+      <div id="description" style="padding-bottom:15px"></div>
     {% endif %}
     <ul id="question_container">
       {% for question in questions %}
@@ -63,4 +63,17 @@
     </ul>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
+  <script>
+    var description = {{ description|tojson }}
+
+    if (description) {
+      $(document).ready(function() {
+        $('#description').append(formatText(description, 'h2'))
+      })
+    }
+  </script>
 {% endblock %}

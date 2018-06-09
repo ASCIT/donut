@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 {% block scripts %}
   {{ super() }}
+  <script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
   <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
   <script>
     var PREVIOUS_RESPONSE_WARNING = 'Previous responses will be deleted if you edit the questions. Are you sure you want to continue?'
+    var description = {{ survey['description']|tojson }}
     var QUESTION_TYPES = {{ question_types|safe }}
     var questionData = {{ questions_json|safe }}
     var someResponses = {% if some_responses %}true{% else %}false{% endif %}
@@ -229,6 +231,7 @@
     }
 
     $(document).ready(function() {
+      if (description) $('#description').append(formatText(description, 'h3'))
       questionContainer = $('#question_container')
       questionData.forEach(function(question) {
         addElement(question.type, question.title, question.description, question.choices)
@@ -271,7 +274,7 @@
     <div class="col-md-8 col-md-offset-2">
       <h1>Editing survey questions for {{ survey['title'] }}</h1>
       {% if survey['description'] %}
-        <h3>{{ survey['description'] }}</h3>
+        <div id='description'></div>
       {% endif %}
       <label for="take-link">Link to take survey:</label>
       <input class="form-control" id="take-link" disabled/>
