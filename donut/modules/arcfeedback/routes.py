@@ -132,10 +132,13 @@ def arcfeedback_add_email(id):
     for email in emails:
         if len(email) > 50:
             flask.flash("An email exceeded the character limit")
-            return
+            return arcfeedback_view_complaint(id)
     success = helpers.add_email(complaint_id, emails)
-    if not success: return "Failed to add email(s)"
-    return "Success!"
+    if not success: 
+        flask.flash("Failed to add email(s)")
+        return arcfeedback_view_complaint(id)
+    flask.flash("Success!")
+    return arcfeedback_view_complaint(id)
 
 
 # remove an email from this complaint
