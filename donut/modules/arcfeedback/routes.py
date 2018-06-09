@@ -135,8 +135,8 @@ def arcfeedback_add_email(id):
     success = helpers.add_email(complaint_id, emails)
     if not success:
         flask.flash("Failed to add email(s)")
-        return arcfeedback_view_complaint(id)
-    flask.flash("Success!")
+    else:
+        flask.flash("Success!")
     return arcfeedback_view_complaint(id)
 
 
