@@ -11,7 +11,7 @@
       <strong>{{ title }}</strong>
     </h1>
     {% if description %}
-      <h2>{{ description }}</h2>
+      <div id="description"></div>
     {% endif %}
     <h4>
       Responses:
@@ -122,4 +122,16 @@
       display: none;
     }
   </style>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
+  <script>
+    var description = {{ description|tojson }}
+    if (description) {
+      $(document).ready(function() {
+        $('#description').append(formatText(description, 'h2'))
+      })
+    }
+  </script>
 {% endblock %}
