@@ -69,6 +69,42 @@ button {
   opacity: 0.9;
 }
 
+/* All inputs should have an orange border with light spacing around
+ * the element.
+ */
+input {
+  padding: 0.5%;
+  margin-top: 1%;
+  border: 1px orange solid;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* Removes blue coloring when focusing. */
+input:focus {
+  border: 1px orange solid;
+}
+
+/* All textareas should have an orange border. */
+textarea {
+  border: 1px orange solid;
+}
+
+/* Removes blue coloring when focusing. */
+textarea:focus {
+  border: 1px orange solid;
+}
+
+/* All dropdowns should have an orange border. */
+select {
+  border: 1px orange solid;
+}
+
+/* Removes blue coloring when focusing. */
+select:focus {
+  border: 1px orange solid;
+}
+
 /* Anything that has a required tag should have a red star next to it to
  * indicate that.
  */
@@ -166,42 +202,6 @@ table {
   width: 60%;
 }
 
-/* All inputs should have an orange border with light spacing around
- * the element.
- */
-.jumbotron input {
-  padding: 0.5%;
-  margin-top: 1%;
-  border: 1px orange solid;
-  border-radius: 5px;
-  padding: 5px;
-}
-
-/* Removes blue coloring when focusing. */
-.jumbotron input:focus {
-  border: 1px orange solid;
-}
-
-/* All textareas should have an orange border. */
-.jumbotron textarea {
-  border: 1px orange solid;
-}
-
-/* Removes blue coloring when focusing. */
-.jumbotron textarea:focus {
-  border: 1px orange solid;
-}
-
-/* All dropdowns should have an orange border. */
-.jumbotron select {
-  border: 1px orange solid;
-}
-
-/* Removes blue coloring when focusing. */
-.jumbotron select:focus {
-  border: 1px orange solid;
-}
-
 /* Class for making paragraph text large. */
 .large-text p {
   font-size: 150%;
@@ -230,6 +230,11 @@ table {
 /* Class for small line spacing between paragraph lines. */
 .small-spacing {
   line-height: 100%;
+}
+
+/* Class for a thin, grey border around an element. */
+.light-border {
+  border: 1px solid #9d9d9d;
 }
 
 /* Make sure that the navbar has a nice gradient top border. */
