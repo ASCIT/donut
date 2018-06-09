@@ -52,7 +52,7 @@ def add_email(complaint_id, emails):
     """
     if not get_course(complaint_id): return False
     if not isinstance(emails, list): emails = [emails]
-    query = "INSERT INTO arc_complaint_emails (complaint_id, email) VALUES"
+    query = "REPLACE INTO arc_complaint_emails (complaint_id, email) VALUES"
     query += ','.join('(%s, %s)' for email in emails)
     to_insert = []
     for email in emails:
