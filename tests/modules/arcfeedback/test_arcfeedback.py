@@ -60,14 +60,16 @@ def test_mark_read(client):
 
 
 def test_get_emails(client):
-    assert set(helpers.get_emails(1)) == set(['test@example.com', 'test2@example.com'])
+    assert set(helpers.get_emails(1)) == set(
+        ['test@example.com', 'test2@example.com'])
     assert helpers.get_emails(2) == []
     assert helpers.get_emails(500) == []
 
 
 def test_get_all_fields(client):
     fields = helpers.get_all_fields(1)
-    assert set(fields['emails']) == set(['test@example.com', 'test2@example.com'])
+    assert set(fields['emails']) == set(
+        ['test@example.com', 'test2@example.com'])
     assert fields['messages'][0]['message'] == 'Sample Message'
     assert fields['course'] == 'Math 1a'
     assert fields['status'] == 'new_msg'
@@ -107,14 +109,12 @@ def test_register_complaint(client):
 
 def test_add_email(client):
     helpers.add_email(1, 'sample_text@example.com')
-    assert set(helpers.get_emails(1)) == set([
-        'test@example.com', 'test2@example.com', 'sample_text@example.com'
-    ])
+    assert set(helpers.get_emails(1)) == set(
+        ['test@example.com', 'test2@example.com', 'sample_text@example.com'])
     # test that adding a duplicate doesn't create a duplicate entry in DB
     helpers.add_email(1, 'sample_text@example.com')
-    assert set(helpers.get_emails(1)) == set([
-        'test@example.com', 'test2@example.com', 'sample_text@example.com'
-    ])
+    assert set(helpers.get_emails(1)) == set(
+        ['test@example.com', 'test2@example.com', 'sample_text@example.com'])
     helpers.add_email(1, ['test3@example.com', 'test4@example.com'])
     assert set(helpers.get_emails(1)) == set([
         'test@example.com', 'test2@example.com', 'sample_text@example.com',
