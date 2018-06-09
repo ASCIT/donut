@@ -135,12 +135,11 @@ def bodfeedback_remove_email(id):
     if not complaint_id:
         flask.abort(400)
         return
-    fields = ['email']
-    data = {}
-    for field in fields:
-        data[field] = flask.request.form.get(field)
-    if data['email'] == "":
+    data = []
+    data = flask.request.form.getlist('emails')
+    if data == []:
         flask.abort(400)
         return
-    helpers.remove_email(complaint_id, data['email'])
-    return flask.jsonify({'email': data['email']})
+    for em in data:
+        helpers.remove_email(complaint_id, em)
+    return flask.jsonify({'email': data[0]})

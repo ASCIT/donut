@@ -14,9 +14,12 @@
 		    <p>No emails subscribed to this complaint </p>
 		    {% else %}
 		    <p>Subscribed emails: </p>
+	            <form method="POST" id="remove-email" action="/">
 		    {% for email in complaint['emails'] %}
-		    <p>{{email}}</p>
+		    <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
 		    {% endfor %}
+		    <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" />
+		    </form>
 		    {% endif %}
 		</div>
 		<button class="btn btn-primary" id="markRead">Mark as read</button>
@@ -26,7 +29,7 @@
 	<div class="col-md-4">
 	    <div class="panel panel-default">
 		<div class="panel-heading">
-		    <h4>Add/Remove an email</h4>
+		    <h4>Add an email</h4>
 		</div>
 		<div class="panel-body">
 			<form method="POST" id="add-email" action="/">
@@ -103,7 +106,19 @@
 	     }     	 
 	 }); 
      });
- 
+
+     $("#remove-email").on("submit", function(e) {
+	 e.preventDefault();
+	 $.ajax({
+	     url: "{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}",
+             data: $('#remove-email').serialize(),
+	     type: 'POST', 
+	     success: function(){
+	         location.reload();
+	     }     	 
+	 }); 
+     });
+
 	
      $('#addMessage').on('submit', function(e) {
 	 e.preventDefault();
