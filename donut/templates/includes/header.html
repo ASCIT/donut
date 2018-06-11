@@ -30,11 +30,11 @@
                             <li><a href="#">Calendar</a></li>
                             <li><a href="#">Course Reviews</a></li>
                             <li><a href="#">Course Scheduler</a></li>
-                            <li><a href={{ url_for('directory_search.directory_search') }}>Directory</a></li>
+                            <li><a href="{{ url_for('directory_search.directory_search') }}">Directory</a></li>
                             <li><a href=" {{url_for('marketplace.marketplace') }} ">Marketplace</a></li>
                             <li><a href="#">Newsgroups</a></li>
-                            <li><a href={{url_for('rooms.rooms_home') }}>Room Reservations</a></li>
-                            <li><a href="#">Surveys and Voting</a></li>
+                            <li><a href="{{ url_for('rooms.rooms_home') }}">Room Reservations</a></li>
+                            <li><a href="{{ url_for('voting.list_surveys') }}">Surveys and Voting</a></li>
                         </ul>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Committees <span class="caret"></span></a>
