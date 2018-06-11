@@ -34,7 +34,6 @@ app.register_blueprint(directory_search.blueprint)
 app.register_blueprint(voting.blueprint)
 
 
-
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
 
