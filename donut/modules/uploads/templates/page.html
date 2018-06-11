@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block page %}
 <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-<script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+<script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron">
@@ -10,9 +10,8 @@
 
       <script>convert(`{{page}}`);</script>
     </div>
-    {% if permission %}
-    <a href="{{ url_for('editor.editor', input_text=title, title=title) }}">edit this page</a>
-    {% else %}
+    {% if permissions%}
+    <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
     {% endif %}
     </div>
   </div>

@@ -33,16 +33,13 @@ def test_get_links(client):
                         "SOME_TITLE" + ".jpg")
 
     f = open(path, "w+")
-    f.write("")
     f.close()
     links = helpers.get_links()
-    titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for _, title in links]
     assert "SOME_TITLE" in ''.join(titles)
 
     editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
-    assert "BLEH" == helpers.readPage("ANOTHER_TITLE")
+    assert "BLEH" == helpers.read_page("ANOTHER_TITLE")
 
     helpers.remove_link("SOME_TITLE")
     links = helpers.get_links()

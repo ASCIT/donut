@@ -1,6 +1,7 @@
 import flask
 import json
 import os
+import re
 
 import glob
 from donut.modules.editor import blueprint, helpers
@@ -15,10 +16,10 @@ def editor(input_text='Hello World!!!', title="TITLE"):
     Returns the editor page where users can create and edit
     existing pages
     '''
-    input = flask.request.args.get('input_text')
+    inputt = flask.request.args.get('input_text')
 
-    if input != None:
-        input_text = helpers.read_markdown(input)
+    if inputt != None:
+        input_text = helpers.read_markdown(inputt)
         title = flask.request.args.get('title')
 
     return flask.render_template(
@@ -33,43 +34,30 @@ def change_title():
     title = flask.request.form['title']
 
 
-@blueprint.route('/_save', methods=['POST'])
+@blueprint.route('/pages/_save', methods=['POST'])
 def save():
     '''
     Actually saves the data from the forms as markdown
     '''
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-    if title == 'BoC':
-        return flask.jsonify({'url': url_for('committee_sites.boc')})
-    elif title == 'ASCIT_Bylaws':
-        return flask.jsonify({'url': url_for('committee_sites.ascit_bylaws')})
-    elif title == 'BoC_Bylaws':
-        return flask.jsonify({'url': url_for('committee_sites.bylaws')})
-    elif title == 'BoC_Defendants':
-        return flask.jsonify({'url': url_for('committee_sites.defendants')})
-    elif title == 'BoC_FAQ':
-        return flask.jsonify({'url': url_for('committee_sites.FAQ')})
-    elif title == 'BoC_Reporters':
-        return flask.jsonify({'url': url_for('committee_sites.reporters')})
-    elif title == 'BoC_Witness':
-        return flask.jsonify({'url': url_for('committee_sites.winesses')})
-    elif title == 'CRC':
-        return flask.jsonify({'url': url_for('committee_sites.CRC')})
-    if (helpers.write_markdown(markdown, title) == 0):
+    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
+    if (title_res != None):
+        helpers.write_markdown(markdown, title)
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
+
     else:
-        return flask.jsonify({'url': url_for('uploads.display', url=title)})
+        return flask.jsonify(500)
 
 
 @blueprint.route('/created_list')
-def created_list(filename='default'):
+def created_list():
     '''
     Returns a list of all created pages
     '''
-    filename = flask.request.form.get('filename')
+    filename = flask.request.args.get('filename')
     if filename != None:
-        helper.remove_link(filename)
+        helpers.remove_link(filename.replace(" ", "_"))
 
     links = helpers.get_links()
 

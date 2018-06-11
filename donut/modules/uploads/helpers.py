@@ -4,14 +4,12 @@ from flask import current_app
 import glob
 
 
-def readPage(url):
+def read_page(url):
     root = os.path.join(current_app.root_path,
                         current_app.config["UPLOAD_WEBPAGES"])
     path = os.path.join(root, url + '.md')
-    content = ''
     with open(path, 'r') as f:
-        content += f.read()
-    return content
+        return f.read()
 
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -45,16 +43,10 @@ def get_links():
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
 
-    dele = ['', '']
-    counter = 0
-    for i in links:
-        if 'pages' in i or 'static' in i:
-            dele[counter] = i
-            counter += 1
-    links.remove(dele[0])
-    links.remove(dele[1])
+    processed_links = []
     for i in range(len(links)):
-        links[i] = links[i].replace(path + '/', '')
-        links[i] = (flask.url_for('uploads.uploaded_file', filename=links[i]),
-                    links[i])
-    return links
+        filename = os.path.basename(links[i])
+        if filename != 'static' and filename != 'pages' and filename != '':
+            processed_links.append((flask.url_for(
+                'uploads.uploaded_file', filename=filename), filename))
+    return processed_links

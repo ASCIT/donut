@@ -1,4 +1,4 @@
-var TITLE_CUTOFF = 16;
+var TITLE_CUTOFF = 20;
 
 // Creates html
 function run() {
@@ -6,29 +6,25 @@ function run() {
       target = document.getElementById('preview'),
       converter = new showdown.Converter({strikethrough: true}),
       html = converter.makeHtml(text);
-
-    target.innerHTML = html;
+  target.innerHTML = html;
 }
 
 // Changes the title of a file
 function change_title(){
- var title = document.getElementById('title').value;
- var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
+  var title = document.getElementById('title').value;
+  var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
 
- if (valid && title.length < TITLE_CUTOFF)
- {
-   $.ajax({
-         url: $SCRIPT_ROOT+'/_change_title',
-         type: 'POST',
-         data:{title:title},
-  success: function(data) {
-        document.getElementById("chang_title").innerHTML = "Title Change Sucessfully";
-     }
-   });
- }
- else {
-   window.alert("Please enter a valid title!");
- }
+  $.ajax({
+    url: $SCRIPT_ROOT+'/_change_title',
+    type: 'POST',
+    data:{title:title},
+    success: function(data) {
+      window.alert("Title Change Sucessfully");
+    },
+    error: function(data){
+      window.alert("Please enter a valid title!");
+    }
+  }); 
 }
 
 //###########
@@ -36,7 +32,7 @@ function change_title(){
 function selectedString(string1, string2)
 {
   var ta = document.getElementById('source');
-  if ((ta.value.substring(ta.selectionStart, ta.selectionEnd)) != "")
+  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) != "")
   {
     insert(string1, false);
   }
@@ -48,7 +44,7 @@ function selectedString(string1, string2)
 // All markdown related functions
 function insert_heading(size){
   var string = "";
-  for(var i = 0; i< size; i++)
+  for(var i = 0; i < size; i++)
   {
     string += "#";
   }
@@ -77,7 +73,7 @@ function insert_ulist(){
 
 function insert_olist(){
   var number = 1;
-  var ta = document.getElementById("source").value.toString();
+  var ta = document.getElementById("source").value;
   while(ta.indexOf(number+".") > -1)
   {
     number = number + 1;
@@ -86,9 +82,9 @@ function insert_olist(){
 }
 
 
-function insert(string, bool){
+function insert(string, selected){
   var ta = document.getElementById('source');
-  if(!bool)
+  if(selected)
   {
     var txt2 = ta.value.substring(0, ta.selectionStart)
   + string + ta.value.substring(ta.selectionStart, ta.selectionEnd) + string
@@ -114,25 +110,17 @@ function save(){
     window.alert("Enter a title for your new page!");
   }
   else {
-    // Checking for valid titles; should not have
-    // anything other than numbers, characters, underscore,
-    // period, front slash, hyphen, and spaces.
-    var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
-
-    if (valid && title.length < TITLE_CUTOFF)
-    {
-      $.ajax({
-            url: $SCRIPT_ROOT+'/_save',
-            type: 'POST',
-            data:{markdown:text, title:title},
-	    success: function(data) {
-            window.location.href = data['url']
-        }
-      });
-    }
-    else {
-      window.alert("Please enter a valid title!");
-    }
+    $.ajax({
+      url: $SCRIPT_ROOT+'/pages/_save',
+      type: 'POST',
+      data:{markdown:text, title:title},
+      success: function(data) {
+        window.location.href = data.url
+      },
+      error: function(data){
+        window.alert("Please enter a valid title");
+      }
+    });
   }
 }
 

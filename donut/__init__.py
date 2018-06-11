@@ -33,7 +33,6 @@ app.register_blueprint(auth.blueprint)
 app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
 app.register_blueprint(groups.blueprint)
-app.register_blueprint(committee_sites.blueprint)
 app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
@@ -69,8 +68,6 @@ def init(environment_name):
     app.config["UPLOAD_WEBPAGES"] = 'modules/uploads/uploaded_files/pages'
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
 
-    app.config[
-        "COMMITTEE_UPLOAD_FOLDER"] = 'donut/modules/committee_sites/templates'
     app.config["EXISTING_LIST"] = 'modules/editor/static'
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH

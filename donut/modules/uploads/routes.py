@@ -13,12 +13,10 @@ def display(url):
     '''
         Displays the webpages that have been created by users.
     '''
-    page = helpers.readPage(url.replace(' ', '_'))
+    page = helpers.read_page(url.replace(' ', '_'))
     return flask.render_template(
-        'page.html',
-        page=page,
-        title=url,
-        permission=check_permission(Permissions.ADMIN))
+        'page.html', page=page, title=url.replace('_', ' '), permissions=True)
+    # permission=check_permission(Permissions.ADMIN))
 
 
 @blueprint.route('/uploads', methods=['GET', 'POST'])
@@ -34,8 +32,8 @@ def uploads():
 
         if file.filename == '':
             flask.flash('No selected file')
-            return flask.redirect(request.url)
-        if file and helpers.allowed_file(file.filename):
+            return flask.render_template('uploads.html')
+        if helpers.allowed_file(file.filename):
             filename = secure_filename(file.filename)
             uploads = os.path.join(flask.current_app.root_path,
                                    flask.current_app.config['UPLOAD_FOLDER'])

@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block page %}
 <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-<script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+<script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">List of User Created Pages</h1>
-      <div id = "content" style = "font-size:21px;font-weight:200;
-        margin-bottom:15px;">
+      <div id = "content" style = "font-size:21px;font-weight:200; margin-bottom:15px;">
 	<table class = "table">
         <tr>
           <th>Page name</th>
@@ -15,9 +14,8 @@
         </tr>
         {% for link, name in links %}
         <tr>
-		<td><a href= "{{ link }}">{{name}}</a></td>
-    <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
-
+	  <td><a href= "{{ link }}">{{name}}</a></td>
+   	  <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
         </tr>
         {% endfor %}
 	</table>

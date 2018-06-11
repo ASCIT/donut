@@ -2,7 +2,6 @@ import flask
 import os
 import glob
 from flask import current_app, redirect, url_for
-
 underCommittee = [
     'BoC', 'ASCIT_Bylaws', 'BoC_Bylaws', 'BoC_Defendants', 'BoC_FAQ',
     'BoC_Reporters', 'BoC_Witness', 'CRC', 'honor_system_handbook'
@@ -21,7 +20,6 @@ def rename_title(oldfilename, newfilename):
                            current_app.config["UPLOAD_WEBPAGES"],
                            newfilename + '.md')
     os.rename(oldpath, newpath)
-    return
 
 
 def read_markdown(name):
@@ -29,17 +27,10 @@ def read_markdown(name):
     Reads in the mark down text from a file.
     '''
 
-    # Check if the pages were already created prior (only the BoC pages)
-    if name in underCommittee:
-        curFile = read_file(
-            os.path.join(flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"],
-                         name + ".html"))
-        return curFile
-    else:
-        path = os.path.join(flask.current_app.root_path,
-                            flask.current_app.config['UPLOAD_WEBPAGES'])
-        curFile = read_file(os.path.join(path, name + '.md'))
-        return curFile
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config['UPLOAD_WEBPAGES'])
+    curFile = read_file(os.path.join(path, name + '.md'))
+    return curFile
 
 
 def read_file(path):
@@ -62,11 +53,10 @@ def get_links():
                         current_app.config["UPLOAD_WEBPAGES"])
     links = glob.glob(root + '/*')
     results = []
-    for i in range(len(links)):
-        links[i] = links[i].replace(root + '/', '').replace('.md', '')
-        if links[i] not in underCommittee:
-            link = flask.url_for('uploads.display', url=links[i])
-            results.append((link, links[i]))
+    for f in links:
+        f = f.replace(root + '/', '').replace('.md', '').replace('_', ' ')
+        link = flask.url_for('uploads.display', url=f)
+        results.append((link, f))
     return results
 
 
@@ -77,8 +67,10 @@ def remove_link(filename):
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
     links = glob.glob(path + '/*')
+
     for i in links:
-        if filename in i:
+        name = i.replace(path + '/', '').replace('.md', '')
+        if filename == name:
             os.remove(i)
 
 
@@ -87,13 +79,7 @@ def write_markdown(markdown, title):
         Creates an html file that was just created,
         as well as the routes for flask
     '''
-    # Special cases for exisiting BoC and currenly existing pages.
-    if title in underCommittee:
-        root = flask.current_app.config["COMMITTEE_UPLOAD_FOLDER"]
-        path = os.path.join(root, title + '.html')
-        f = open(path, "w+")
-        f.write(markdown)
-        f.close()
+
     # Non-special cases.
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_WEBPAGES"])
@@ -102,14 +88,5 @@ def write_markdown(markdown, title):
     path = os.path.join(root, title + ".md")
 
     # Writing to the new html file
-    f = open(path, "w+")
-    f.write(markdown)
-    f.close()
-
-    f = open(
-        os.path.join(flask.current_app.root_path,
-                     flask.current_app.config["EXISTING_LIST"], 'pages.txt'),
-        "w+")
-    f.write(title)
-    f.close()
-    return 0
+    with open(path, 'w+') as f:
+        f.write(markdown)

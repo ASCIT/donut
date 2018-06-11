@@ -31,10 +31,10 @@ def test_path_related_funciton(client):
     titles = []
     for (discard, title) in links:
         titles.append(title)
-    assert "TEST_TITLE" not in ''.join(titles)
-    assert "ANOTHER_TITLE" not in ''.join(titles)
+    assert "TEST TITLE" not in ' '.join(titles)
+    assert "ANOTHER TITLE" not in ' '.join(titles)
 
-    helpers.write_markdown("BLAHBLAH", "TEST_TITLE")
+    helpers.write_markdown("BLAHBLAH", "TEST TITLE")
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_WEBPAGES"])
     assert helpers.get_links() != []
@@ -43,19 +43,19 @@ def test_path_related_funciton(client):
     titles = []
     for (discard, title) in links:
         titles.append(title)
-    assert "TEST_TITLE" in ''.join(titles)
+    assert "TEST TITLE" in ' '.join(titles)
 
     client.get(
-        flask.url_for('uploads.display', url="TEST_TITLE")).status_code == 200
+        flask.url_for('uploads.display', url="TEST TITLE")).status_code == 200
     helpers.rename_title('TEST_TITLE', 'ANOTHER_TITLE')
 
     links = helpers.get_links()
     titles = []
     for (discard, title) in links:
         titles.append(title)
-    assert "TEST_TITLE" not in ''.join(titles)
-    assert "ANOTHER_TITLE" in ''.join(titles)
+    assert "TEST TITLE" not in ' '.join(titles)
+    assert "ANOTHER TITLE" in ' '.join(titles)
 
     client.get(flask.url_for('uploads.display',
-                             url="ANOTHER_TITLE")).status_code == 200
+                             url="ANOTHER TITLE")).status_code == 200
     assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_TITLE')
