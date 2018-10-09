@@ -11,7 +11,7 @@ from donut.auth_utils import check_permission
 
 
 @blueprint.route('/editor', methods=['GET', 'POST'])
-def editor(input_text='Hello World!!!', title="TITLE"):
+def editor(input_text='Hello World!!', title="TITLE"):
     '''
     Returns the editor page where users can create and edit
     existing pages
@@ -42,12 +42,12 @@ def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if (title_res != None):
+    if title_res != None:
         helpers.write_markdown(markdown, title)
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
 
     else:
-        return flask.jsonify(500)
+        flask.abort(500)
 
 
 @blueprint.route('/created_list')

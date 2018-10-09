@@ -44,8 +44,8 @@ def get_links():
     links = glob.glob(path + '/*')
 
     processed_links = []
-    for i in range(len(links)):
-        filename = os.path.basename(links[i])
+    for link in links:
+        filename = os.path.basename(link)
         if filename != 'static' and filename != 'pages' and filename != '':
             processed_links.append((flask.url_for(
                 'uploads.uploaded_file', filename=filename), filename))

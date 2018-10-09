@@ -2,11 +2,6 @@ import flask
 import os
 import glob
 from flask import current_app, redirect, url_for
-underCommittee = [
-    'BoC', 'ASCIT_Bylaws', 'BoC_Bylaws', 'BoC_Defendants', 'BoC_FAQ',
-    'BoC_Reporters', 'BoC_Witness', 'CRC', 'honor_system_handbook'
-]
-
 
 def rename_title(oldfilename, newfilename):
     """
@@ -53,10 +48,10 @@ def get_links():
                         current_app.config["UPLOAD_WEBPAGES"])
     links = glob.glob(root + '/*')
     results = []
-    for f in links:
-        f = f.replace(root + '/', '').replace('.md', '').replace('_', ' ')
-        link = flask.url_for('uploads.display', url=f)
-        results.append((link, f))
+    for filenames in links:
+        filenames = filenames.replace(root + '/', '').replace('.md', '').replace('_', ' ')
+        link = flask.url_for('uploads.display', url=filenames)
+        results.append((link, filenames))
     return results
 
 
@@ -79,8 +74,6 @@ def write_markdown(markdown, title):
         Creates an html file that was just created,
         as well as the routes for flask
     '''
-
-    # Non-special cases.
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_WEBPAGES"])
 

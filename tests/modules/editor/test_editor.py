@@ -40,9 +40,7 @@ def test_path_related_funciton(client):
     assert helpers.get_links() != []
 
     links = helpers.get_links()
-    titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for _, title in links]
     assert "TEST TITLE" in ' '.join(titles)
 
     client.get(
