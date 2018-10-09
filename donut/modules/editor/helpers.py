@@ -3,6 +3,7 @@ import os
 import glob
 from flask import current_app, redirect, url_for
 
+
 def rename_title(oldfilename, newfilename):
     """
     Changes the file name of an html file
@@ -49,7 +50,8 @@ def get_links():
     links = glob.glob(root + '/*')
     results = []
     for filenames in links:
-        filenames = filenames.replace(root + '/', '').replace('.md', '').replace('_', ' ')
+        filenames = filenames.replace(root + '/',
+                                      '').replace('.md', '').replace('_', ' ')
         link = flask.url_for('uploads.display', url=filenames)
         results.append((link, filenames))
     return results
