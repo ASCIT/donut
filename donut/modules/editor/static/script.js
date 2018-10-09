@@ -32,12 +32,12 @@ function change_title(){
 function selectedString(string1, string2)
 {
   var ta = document.getElementById('source');
-  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) != "")
+  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) == "")
   {
-    insert(string1, false);
+    insert(string2, true);
   }
   else {
-    insert(string2, true);
+    insert(string1, false);
   }
 }
 

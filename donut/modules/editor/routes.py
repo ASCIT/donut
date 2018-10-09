@@ -55,10 +55,6 @@ def created_list():
     '''
     Returns a list of all created pages
     '''
-    filename = flask.request.args.get('filename')
-    if filename != None:
-        helpers.remove_link(filename.replace(" ", "_"))
-
     links = helpers.get_links()
 
     return flask.render_template('created_list.html', links=links)
