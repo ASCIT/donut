@@ -14,6 +14,15 @@ def send_confirmation_email(email, complaint_id):
     email_utils.send_email(email, msg, subject)
     return
 
+def send_added_message_email(email, complaint_id):
+    """
+    Sends a confirmation email to [address] which should be an
+    email address of a user as a string
+    """
+    msg = email_templates.added_message.format(get_link(complaint_id))
+    subject = "Message Added to BoD Feedback"
+    email_utils.send_email(email, msg, subject)
+    return
 
 def register_complaint(data):
     """
@@ -59,6 +68,7 @@ def add_email(complaint_id, email):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
+    send_confirmation_email(email, complaint_id)
     return True
 
 
@@ -99,6 +109,15 @@ def add_msg(complaint_id, message, poster):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
+    query = """
+    SELECT email FROM bod_complaint_emails WHERE complaint_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, complaint_id)
+        res = cursor.fetchall()
+    emails = []
+    for row in res:
+        send_added_message_email(row['email'], complaint_id)
     return
 
 
