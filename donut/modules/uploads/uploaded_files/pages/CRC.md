@@ -1,1 +1,1 @@
-[Current Members](example.com)
+Current Members
