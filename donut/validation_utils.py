@@ -1,7 +1,7 @@
 import re
 import datetime
 import flask
-import sqlalchemy
+import pymysql.cursors
 
 from donut import constants
 
@@ -30,8 +30,10 @@ def validate_username(username, flash_errors=True):
         error = 'Username may contain only alphanumeric characters, hyphens, or underscores and must begin with a letter.'
     else:
         # Check if username is already in use.
-        query = sqlalchemy.text("SELECT 1 FROM users WHERE username = :u")
-        result = flask.g.db.execute(query, u=username).first()
+        query = "SELECT 1 FROM users WHERE username = %s"
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, username)
+            result = cursor.fetchone()
         if result is not None:
             error = 'Username is already in use!'
 
@@ -97,8 +99,10 @@ def check_uid_exists(uid):
     if not validate_uid(uid, flash_errors=False):
         return False
 
-    query = sqlalchemy.text("SELECT 1 FROM members WHERE uid = :uid")
-    result = flask.g.db.execute(query, uid=uid).first()
+    query = "SELECT 1 FROM members WHERE uid = %s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, uid)
+        result = cursor.fetchone()
     return result is not None
 
 

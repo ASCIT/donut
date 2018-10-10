@@ -78,7 +78,7 @@ def set_image():
     user_id = get_user_id(flask.session['username'])
 
     def flash_error(message):
-        flash(message)
+        flask.flash(message)
         return redirect(
             flask.url_for('directory_search.edit_user', user_id=user_id))
 
