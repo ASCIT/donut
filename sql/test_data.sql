@@ -90,9 +90,10 @@ INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
-INSERT INTO permissions(permission_id, permission_name) VALUES
-    (1, 'View ruddock website (Ruddock member)'),
-    (2, 'Edit Rotation info (IHC member)');
+INSERT INTO permissions(permission_id, permission_type, resource_name,
+       	    	        description) VALUES
+    (1, 'View', 'Ruddock Rotation Info', 'Ruddock members may view Ruddock rotation information'),
+    (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
     (3, 1),

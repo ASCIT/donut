@@ -4,7 +4,9 @@ DROP TABLE IF EXISTS permissions;
 
 CREATE TABLE permissions (
        permission_id INT NOT NULL AUTO_INCREMENT,
-       permission_name VARCHAR(255),
+       permission_type VARCHAR(255) NOT NULL,
+       resource_name VARCHAR(255),
+       description VARCHAR(255),
        PRIMARY KEY(permission_id)
 );
 
