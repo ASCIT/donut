@@ -5,6 +5,12 @@
     {{ super() }}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+        @font-face {
+            font-family: 'donutfont';
+            src:url('../static/fonts/donutfont.ttf');
+        }
+    </style>
 {% endblock %}
 {% block title %}Donut{% endblock %}
 {% block navbar %}
