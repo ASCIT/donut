@@ -14,6 +14,7 @@ def send_confirmation_email(email, complaint_id):
     email_utils.send_email(email, msg, subject)
     return
 
+
 def send_added_message_email(email, complaint_id):
     """
     Sends a confirmation email to [address] which should be an
@@ -23,6 +24,7 @@ def send_added_message_email(email, complaint_id):
     subject = "Message Added to BoD Feedback"
     email_utils.send_email(email, msg, subject)
     return
+
 
 def register_complaint(data):
     """
