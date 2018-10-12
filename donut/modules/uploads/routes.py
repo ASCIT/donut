@@ -97,4 +97,7 @@ def uploaded_list():
         helpers.remove_link(filename)
 
     links = helpers.get_links()
-    return flask.render_template('uploaded_list.html', links=links)
+    return flask.render_template(
+        'uploaded_list.html',
+        links=links,
+        permissions=check_permission(Permissions.ADMIN))

@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block page %}
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
 <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+</head>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron">
@@ -16,8 +19,10 @@
           {% for link, name in links %}
             <tr>
     		      <td><a href= "{{ link }}">{{name}}</a></td>
+		      {% if permissions%}
     		      <td><a href= "{{ url_for('uploads.uploaded_list', filename=name)}}">Delete</td>
-            </tr>
+           	      {% endif %}
+	    </tr>
           {% endfor %}
   	    </table>
       </div>
