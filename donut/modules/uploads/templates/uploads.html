@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 {% block page %}
-<script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+<script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+</head>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron">
@@ -11,11 +18,14 @@
           <a href="{{ url_for('uploads.uploaded_list') }}">here</a>. 
         </p>
       </div>
-      <form method=post enctype=multipart/form-data>
-        <p><input type=file name=file>
-           <input type=submit value=Upload>
-       </form>
-
+<form id="upload-file" method="post" enctype="multipart/form-data">
+    
+        <label for="file">Select a file</label>
+        <input name="file" type="file">
+    
+        <button id="submit_btn">Upload</button>
+   
+</form>
     </div>
   </div>
 </div>

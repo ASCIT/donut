@@ -10,21 +10,23 @@ function run() {
 }
 
 // Changes the title of a file
-function change_title(){
+function change_title(oldTitle){
   var title = document.getElementById('title').value;
   var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
-
-  $.ajax({
-    url: $SCRIPT_ROOT+'/_change_title',
-    type: 'POST',
-    data:{title:title},
-    success: function(data) {
-      window.alert("Title Change Sucessfully");
-    },
-    error: function(data){
-      window.alert("Please enter a valid title!");
-    }
-  }); 
+  if (valid)
+  {
+    $.ajax({
+      url: $SCRIPT_ROOT+'/_change_title',
+      type: 'POST',
+      data:{title:title, old_title:oldTitle},
+      success: function(data) {
+        window.alert("Title Change Sucessfully");
+      },
+      error: function(data){
+        window.alert("Please enter a valid title!");
+      }
+    });
+  }
 }
 
 //###########

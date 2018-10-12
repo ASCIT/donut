@@ -30,7 +30,6 @@ app.register_blueprint(groups.blueprint)
 app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
-app.register_blueprint(directory_search.blueprint)
 app.register_blueprint(voting.blueprint)
 
 

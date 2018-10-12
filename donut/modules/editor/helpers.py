@@ -33,7 +33,6 @@ def read_file(path):
     '''
     Reads in a file
     '''
-    curFile = ''
     if os.path.isfile(path):
         with open(path) as f:
             return f.read()
@@ -83,5 +82,5 @@ def write_markdown(markdown, title):
     path = os.path.join(root, title + ".md")
 
     # Writing to the new html file
-    with open(path, 'w+') as f:
+    with open(path, 'w') as f:
         f.write(markdown)

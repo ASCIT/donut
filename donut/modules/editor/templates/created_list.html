@@ -15,8 +15,10 @@
         {% for link, name in links %}
         <tr>
 	  <td><a href= "{{ link }}">{{name}}</a></td>
-   	  <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
-        </tr>
+	  {% if permissions%}
+   	    <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
+       	  {% endif %}
+	</tr>
         {% endfor %}
 	</table>
       </div>

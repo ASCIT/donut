@@ -12,13 +12,16 @@ def read_page(url):
         return f.read()
 
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(
+    ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
 def allowed_file(filename):
     '''
     Checks for allowed file extensions.
     '''
+    print(filename.rsplit('.', 1)[1])
+    print(filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 

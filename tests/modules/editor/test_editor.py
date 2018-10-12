@@ -13,7 +13,7 @@ import os
 
 
 def test_plain_editor_page(client):
-    assert client.get(flask.url_for('editor.editor')).status_code == 200
+    assert client.get(flask.url_for('editor.editor')).status_code == 403
     assert client.get(flask.url_for('editor.created_list')).status_code == 200
 
 
@@ -21,7 +21,7 @@ def test_text_editor_page(client):
     assert client.get(
         flask.url_for(
             'editor.editor', input_text='TESTING TESTING',
-            title="TEST")).status_code == 200
+            title="TEST")).status_code == 403
 
 
 def test_path_related_funciton(client):
@@ -44,7 +44,7 @@ def test_path_related_funciton(client):
     assert "TEST TITLE" in ' '.join(titles)
 
     client.get(
-        flask.url_for('uploads.display', url="TEST TITLE")).status_code == 200
+        flask.url_for('uploads.display', url="TEST TITLE")).status_code == 403
     helpers.rename_title('TEST_TITLE', 'ANOTHER_TITLE')
 
     links = helpers.get_links()
@@ -55,5 +55,5 @@ def test_path_related_funciton(client):
     assert "ANOTHER TITLE" in ' '.join(titles)
 
     client.get(flask.url_for('uploads.display',
-                             url="ANOTHER TITLE")).status_code == 200
+                             url="ANOTHER TITLE")).status_code == 403
     assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_TITLE')
