@@ -74,8 +74,6 @@ def bodfeedback_add_msg(id):
 # allow bod members to see a summary
 @blueprint.route('/bodfeedback/view/summary')
 def bodfeedback_view_summary():
-    #authenticate
-
     #get a list containing data for each post
     complaints = helpers.get_new_posts()
     #add links to each complaint
@@ -88,13 +86,11 @@ def bodfeedback_view_summary():
 @blueprint.route('/1/bodfeedback/markRead/<uuid:id>')
 def bodfeedback_mark_read(id):
     #authenticate
-
     complaint_id = helpers.get_id(id)
     if helpers.mark_read(complaint_id) == False:
         flask.abort(400)
         return
-    else:
-        return 'Success'
+    return 'Success'
 
 
 # mark a complaint unread
@@ -106,8 +102,7 @@ def bodfeedback_mark_unread(id):
     if helpers.mark_unread(complaint_id) == False:
         flask.abort(400)
         return
-    else:
-        return 'Success'
+    return 'Success'
 
 
 # add an email to this complaint

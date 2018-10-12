@@ -12,7 +12,6 @@ def send_confirmation_email(email, complaint_id):
     msg = email_templates.received_feedback.format(get_link(complaint_id))
     subject = "Received BoD Feedback"
     email_utils.send_email(email, msg, subject)
-    return
 
 
 def send_added_message_email(email, complaint_id):
@@ -23,7 +22,6 @@ def send_added_message_email(email, complaint_id):
     msg = email_templates.added_message.format(get_link(complaint_id))
     subject = "Message Added to BoD Feedback"
     email_utils.send_email(email, msg, subject)
-    return
 
 
 def register_complaint(data):
@@ -120,7 +118,6 @@ def add_msg(complaint_id, message, poster):
     emails = []
     for row in res:
         send_added_message_email(row['email'], complaint_id)
-    return
 
 
 def get_link(complaint_id):
