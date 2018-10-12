@@ -13,19 +13,19 @@ CREATE TABLE courses (
     course_number   VARCHAR(10)   NOT NULL, -- e.g. 124
     name            VARCHAR(150)  NOT NULL, -- e.g. Operating Systems
     description     TEXT,
-    units_lecture   TINYINT       NOT NULL, -- e.g. 3
-    units_lab       TINYINT       NOT NULL, -- e.g. 6
-    units_homework  TINYINT       NOT NULL, -- e.g. 3
-    units           TINYINT       AS (units_lecture + units_lab + units_homework),
+    units_lecture   FLOAT         NOT NULL, -- e.g. 3
+    units_lab       FLOAT         NOT NULL, -- e.g. 6
+    units_homework  FLOAT         NOT NULL, -- e.g. 3
+    units           FLOAT         AS (units_lecture + units_lab + units_homework),
     PRIMARY KEY (course_id),
     UNIQUE (year, term, department, course_number)
 );
 
 CREATE TABLE instructors (
-    instructors_id  INT          NOT NULL AUTO_INCREMENT,
-    instructors     VARCHAR(60)  NOT NULL, -- e.g. Pinkston, D
-    PRIMARY KEY (instructors_id),
-    UNIQUE (instructors)
+    instructor_id  INT          NOT NULL AUTO_INCREMENT,
+    instructor     VARCHAR(60)  NOT NULL, -- e.g. Pinkston, D
+    PRIMARY KEY (instructor_id),
+    UNIQUE (instructor)
 );
 
 CREATE TABLE grades_types (
@@ -38,13 +38,13 @@ CREATE TABLE sections (
     section_id      INT      NOT NULL AUTO_INCREMENT,
     course_id       INT      NOT NULL,
     section_number  TINYINT  NOT NULL, -- e.g. 1
-    instructors_id  INT      NOT NULL,
+    instructor_id   INT      NOT NULL,
     grades_type_id  INT      NOT NULL,
     times           VARCHAR(100), -- e.g. MWF 13:00 - 13:55
     locations       VARCHAR(100), -- e.g. 213 ANB
     PRIMARY KEY (section_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
-    FOREIGN KEY (instructors_id) REFERENCES instructors(instructors_id),
+    FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id),
     FOREIGN KEY (grades_type_id) REFERENCES grades_types(grades_type_id),
     UNIQUE (course_id, section_number)
 );
