@@ -27,6 +27,9 @@ function change_title(oldTitle){
       }
     });
   }
+  else {
+    window.alert("Please enter a valid title!");
+  }
 }
 
 //###########
@@ -74,13 +77,7 @@ function insert_ulist(){
 }
 
 function insert_olist(){
-  var number = 1;
-  var ta = document.getElementById("source").value;
-  while(ta.indexOf(number+".") > -1)
-  {
-    number = number + 1;
-  }
-  insert(number+". list \n", true);
+  insert(1 + ". list \n", true);
 }
 
 
@@ -113,11 +110,21 @@ function save(){
   }
   else {
     $.ajax({
-      url: $SCRIPT_ROOT+'/pages/_save',
+      url: $SCRIPT_ROOT+'/pages/_check_override',
       type: 'POST',
       data:{markdown:text, title:title},
       success: function(data) {
-        window.location.href = data.url
+        $.ajax({
+          url: $SCRIPT_ROOT+'/pages/_save',
+          type: 'POST',
+          data:{markdown:text, title:title},
+          success: function(data) {
+            window.location.href = data.url;
+          },
+          error: function(data){
+            window.alert("Please enter a valid title");
+          }
+        });
       },
       error: function(data){
         window.alert("Please enter a valid title");
@@ -125,4 +132,3 @@ function save(){
     });
   }
 }
-

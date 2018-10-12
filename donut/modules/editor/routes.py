@@ -3,7 +3,6 @@ import json
 import os
 import re
 
-import glob
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
 from donut.resources import Permissions
@@ -34,7 +33,7 @@ def editor():
 @blueprint.route('/_change_title', methods=['POST'])
 def change_title():
     '''
-    
+    Allows one to change a file/page title.
     '''
     title = flask.request.form['title']
     old_title = flask.request.form['old_title']
@@ -56,7 +55,7 @@ def save():
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
 
     else:
-        flask.abort(500)
+        flask.abort(403)
 
 
 @blueprint.route('/created_list')

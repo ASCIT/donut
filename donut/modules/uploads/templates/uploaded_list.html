@@ -8,18 +8,18 @@
       <h1 id = "title" class="text-center">List of Uploaded Pages</h1>
       <div id = "content" style="font-size:21px;font-weight:200;
         margin-bottom:15px;">
-	<table class = "table">
-        <tr>
-          <th>File name</th>
-          <th> </th>
-        </tr>
-        {% for link, name in links %}
-        <tr>
-		<td><a href= "{{ link }}">{{name}}</a></td>
-		<td><a href= "{{ url_for('uploads.uploaded_list', filename=name)}}">Delete</td>
-        </tr>
-        {% endfor %}
-	</table>
+  	    <table class = "table">
+          <tr>
+            <th>File name</th>
+            <th> </th>
+          </tr>
+          {% for link, name in links %}
+            <tr>
+    		      <td><a href= "{{ link }}">{{name}}</a></td>
+    		      <td><a href= "{{ url_for('uploads.uploaded_list', filename=name)}}">Delete</td>
+            </tr>
+          {% endfor %}
+  	    </table>
       </div>
     </div>
   </div>

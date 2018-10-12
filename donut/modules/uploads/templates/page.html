@@ -14,10 +14,10 @@
       <h1 id = "title" class="text-center">{{title}}</h1>
       <div id = "content">
 
-	<script>load('{{title}}')</script>
+	    <script>load('{{title}}')</script>
     </div>
     {% if permissions%}
-    <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
+      <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
     {% endif %}
     </div>
   </div>

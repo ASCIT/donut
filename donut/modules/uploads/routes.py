@@ -1,6 +1,5 @@
 import flask
 import json
-import glob
 import os
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
@@ -11,7 +10,7 @@ from donut.auth_utils import check_permission
 @blueprint.route('/lib/<path:url>')
 def display(url):
     '''
-        Displays the webpages that have been created by users.
+    Displays the webpages that have been created by users.
     '''
     page = helpers.read_page(url.replace(' ', '_'))
     return flask.render_template(
@@ -23,6 +22,9 @@ def display(url):
 
 @blueprint.route('/_send_page', methods=['GET'])
 def get_page():
+    '''
+    Sends the page to frontend.
+    '''
     url = flask.request.args.get('url')
     page = helpers.read_page(url.replace(' ', '_'))
     return flask.jsonify(result=page)
@@ -51,38 +53,25 @@ def upload_file():
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
     file.save(os.path.join(uploads, filename))
-    return flask.jsonify({
-        'url':
-        flask.url_for('uploads.uploaded_file', filename=filename)
-    })
+    if 'username' in flask.session and check_permission(Permissions.ADMIN):
+        return flask.jsonify({
+            'url':
+            flask.url_for('uploads.uploaded_file', filename=filename)
+        })
+    else:
+        return flask.abort(403)
 
 
 @blueprint.route('/_check_valid_file', methods=['POST'])
-def check_title():
+def check_file():
     '''
     Checks if the file: exists, has a valid extension, and
     smaller than 10 mb
     '''
     if 'file' not in flask.request.files:
         return flask.jsonify({'error': 'No file selected'})
-
-    file = flask.request.files['file']
-    file.seek(0, os.SEEK_END)
-    file_length = file.tell()
-    if file_length > 10 * 1024 * 1024:
-        return flask.jsonify({'error': "File size larger than 10 mb"})
-    if not helpers.allowed_file(file.filename):
-        return flask.jsonify({'error': "Invalid file name"})
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_FOLDER'])
-    links = glob.glob(path + '/*')
-    filename = file.filename.replace(' ', '_')
-    for link in links:
-        cur_filename = os.path.basename(link)
-        if cur_filename == filename:
-            return flask.jsonify({'error': 'Duplicate title'})
     if 'username' in flask.session and check_permission(Permissions.ADMIN):
-        return flask.jsonify({'error': 'None'})
+        return flask.jsonify({'error': helpers.check_valid_file(file)})
     else:
         return flask.abort(403)
 

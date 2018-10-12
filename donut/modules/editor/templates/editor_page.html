@@ -9,7 +9,10 @@
       <div id="info">
         <p>
           See a list of all created pages
-          <a href="{{ url_for('editor.created_list') }}">here</a>.
+          <a href="{{ url_for('editor.created_list') }}">here</a>. See the
+          exact syntax for markdown pages
+          <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax">here</a>
+          You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>
         </p>
       </div>
 
@@ -19,7 +22,7 @@
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
       <br/>
       <button id="change_title" onClick="change_title()">Change Title</button>
-      
+
       <br/>
       <div class="btn-group">
         <div class="btn-group" role="group">

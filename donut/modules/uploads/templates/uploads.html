@@ -15,17 +15,14 @@
       <div id="info">
         <p>
           See a list of all uploaded files
-          <a href="{{ url_for('uploads.uploaded_list') }}">here</a>. 
+          <a href="{{ url_for('uploads.uploaded_list') }}">here</a>.
         </p>
       </div>
-<form id="upload-file" method="post" enctype="multipart/form-data">
-    
-        <label for="file">Select a file</label>
-        <input name="file" type="file">
-    
-        <button id="submit_btn">Upload</button>
-   
-</form>
+        <form id="upload-file" method="post" enctype="multipart/form-data">
+          <label for="file">Select a file</label>
+          <input name="file" type="file">
+          <button id="submit_btn">Upload</button>
+        </form>
     </div>
   </div>
 </div>
