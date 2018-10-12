@@ -6,6 +6,7 @@ import glob
 ALLOWED_EXTENSIONS = set(
     ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
+
 def read_page(url):
     root = os.path.join(current_app.root_path,
                         current_app.config["UPLOAD_WEBPAGES"])
@@ -13,12 +14,14 @@ def read_page(url):
     with open(path, 'r') as f:
         return f.read()
 
+
 def allowed_file(filename):
     '''
     Checks for allowed file extensions.
     '''
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def remove_link(filename):
     '''
@@ -30,6 +33,8 @@ def remove_link(filename):
     for i in links:
         if filename in i:
             os.remove(i)
+
+
 def check_valid_file(file):
     '''
     Checks if the file: exists, has a valid extension, and
@@ -40,7 +45,7 @@ def check_valid_file(file):
     if file_length > 10 * 1024 * 1024:
         return "File size larger than 10 mb"
     if not helpers.allowed_file(file.filename):
-        return  "Invalid file name"
+        return "Invalid file name"
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
@@ -50,6 +55,7 @@ def check_valid_file(file):
         if cur_filename == filename:
             return 'Duplicate title'
     return 'None'
+
 
 def get_links():
     '''
