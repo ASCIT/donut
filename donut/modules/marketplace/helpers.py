@@ -89,7 +89,6 @@ def manage_set_active_status(item, is_active):
     s = 'UPDATE marketplace_items SET item_active=%s WHERE item_id=%s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (is_active, item))
-        result = cursor.fetchone()
 
     return True
 
@@ -108,8 +107,8 @@ def manage_delete_item(item_id):
 
 def manage_display_confirmation(action, item_id):
     """
-    Displays a confirmation message where the user can confirm
-    that they want to delete of one of their items.
+    Displays a confirmation message where the user can confirm that they want
+    to archive, unarchive, or delete of one of their items.
     """
     headers = ['Category', 'Item', 'Price', 'Date']
 
@@ -324,10 +323,7 @@ def generate_search_table(fields=None, attrs={}, query=''):
     # should go to.
     # Also, we add it to the front so that we can get the id before we need to
     # use it (i.e., when we're adding it to links)
-    if fields != None:
-        fields = ['item_id'] + fields
-    else:
-        fields = ['item_id']
+    fields = ['item_id'] + (fields or [])
 
     if query:
         # Also add cat_id, textbook_author and textbook_isbn to the end so
@@ -425,8 +421,8 @@ def merge_titles(datalist, fields, field_index_map):
         datalist: the original table, but with the two columns merged.
         fields: the column titles similarly merged together into item_title.
     """
-    item_index = field_index_map.get('item_title', None)
-    textbook_index = field_index_map.get('textbook_title', None)
+    item_index = field_index_map.get('item_title')
+    textbook_index = field_index_map.get('textbook_title')
 
     if item_index is None or textbook_index is None:
         # Can't merge, since the two columns aren't there.
@@ -516,6 +512,7 @@ def search_datalist(fields, datalist, query):
             for isbn in query_isbns:
                 if listing[field_index_map['textbook_isbn']] == isbn:
                     is_isbn_match = True
+                    break
         else:
             # only include the item title
             item_tokens = tokenize_query(
@@ -541,27 +538,7 @@ def search_datalist(fields, datalist, query):
 
     search_results = []
     # if we have any perfect matches, don't include the imperfect ones
-    if len(perfect_matches) > 0:
-        search_results = perfect_matches
-    else:
-        search_results = imperfect_matches
-
-    # define a custom comparison function to use in python's sort
-    # -1 if item1 goes above item2, i.e. either item1's score is higher
-    # or item1 was posted earlier.
-    def compare(item1, item2):
-        if item1[field_index_map['score']] < item2[field_index_map['score']]:
-            return 1
-        elif item1[field_index_map['score']] > item2[field_index_map['score']]:
-            return -1
-        # they have the same number of matches, so we sort by timestamp
-        if item1[field_index_map['item_timestamp']] < item2[field_index_map['item_timestamp']]:
-            return 1
-        elif item1[field_index_map['item_timestamp']] == item2[field_index_map[
-                'item_timestamp']]:
-            return 0
-        else:
-            return -1
+    search_results = perfect_matches or imperfect_matches
 
     search_results = sorted(
         search_results,
@@ -571,7 +548,7 @@ def search_datalist(fields, datalist, query):
 
     # chop off the last column, which holds the score
     for i in range(len(search_results)):
-        search_results[i] = search_results[i][:-1]
+        search_results[i].pop()
 
     return search_results
 
@@ -580,6 +557,8 @@ def get_matches(l1, l2):
     """
     Returns the number of matches between list 1 and list 2.
     """
+    l1 = set(l1)
+    l2 = set(l2)
     if len(l1) < len(l2):
         return len([x for x in l1 if x in l2])
     else:
@@ -590,28 +569,21 @@ def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
     """
-    tokens = []
-
     query = query.split()
     # Validate ISBNs before we remove hyphens.
-    for token_index in range(len(query)):
-        token = query[token_index]
-        if (validate_isbn(token)):
-            tokens.append(token)
-            del query[token_index]
+    tokens = list(filter(validate_isbn, query))
+    query = filter(lambda token: not validate_isbn(token), query)
 
-    query = ' '.join(query)
     # Remove punctuation.
-    punctuation = [',', '.', '-', '_', '!', ';', ':', '/', '\\']
-    for p in punctuation:
-        query = query.replace(p, ' ')
-    query = query.split()
+    query = ' '.join(query)
+    punctuation_regex = r'[,.\-_!;:/\\]'
+    query = re.sub(punctuation_regex, ' ', query).split()
 
     # If any of the words in query are in our SKIP_WORDS, don't add them
     # to tokens.
     for token in query:
         token = token.lower()
-        if not token in SKIP_WORDS:
+        if token not in SKIP_WORDS:
             tokens.append(token)
 
     return tokens
@@ -650,12 +622,9 @@ def validate_isbn(isbn):
                 digit = int(char)
             weight = 10 - i
             total += digit * weight
-        if total % 11 == 0:
-            return True
-        else:
-            return False
+        return total % 11 == 0
 
-    elif re.match('^[0-9]{13}$', isbn, re.IGNORECASE) != None:
+    if re.match('^[0-9]{13}$', isbn, re.IGNORECASE) != None:
         # Check the check digit.
         total = 0
         for i in range(13):
@@ -735,7 +704,7 @@ def get_table_list_data(tables, fields=None, attrs={}):
     s_where = ''
     if attrs:
         s_where = ' WHERE '
-        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
+        s_where += ' AND '.join([key + ' = %s' for key in attrs])
 
     s = s_select_columns + s_from + s_where
 

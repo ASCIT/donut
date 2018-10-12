@@ -448,7 +448,7 @@ def sell():
         textbooks = helpers.get_table_list_data('marketplace_textbooks', [
             'textbook_id', 'textbook_title', 'textbook_author'
         ])
-        textbook_id = flask.request.form.get('textbook_id', None)
+        textbook_id = flask.request.form.get('textbook_id')
         if textbook_id == None and stored['textbook_id'] != '':
             textbook_id = stored['textbook_id']
 
