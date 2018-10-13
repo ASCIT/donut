@@ -15,7 +15,7 @@ $(function() {
   	  processData: false,
       contentType: false,
       success: function(data) {
-        if(data.error === "None")
+        if(data.error === "")
         {
           $.ajax({
             url: $SCRIPT_ROOT+'/_upload_file',

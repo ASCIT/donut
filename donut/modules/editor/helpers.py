@@ -70,6 +70,18 @@ def remove_link(filename):
             os.remove(i)
 
 
+def check_duplicate(filename):
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config['UPLOAD_WEBPAGES'])
+    links = glob.glob(path + '/*')
+
+    for i in links:
+        name = i.replace(path + '/', '').replace('.md', '')
+        if filename == name:
+            return "Duplicate title"
+    return ""
+
+
 def write_markdown(markdown, title):
     '''
         Creates an html file that was just created,

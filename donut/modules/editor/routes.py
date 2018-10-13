@@ -58,14 +58,25 @@ def save():
         flask.abort(403)
 
 
+@blueprint.route('/pages/_check_override', methods=['POST'])
+def check_duplicate():
+    title = flask.request.form['title']
+    return flask.jsonify({'error': helpers.check_duplicate(title)})
+
+
 @blueprint.route('/created_list')
 def created_list():
     '''
     Returns a list of all created pages
     '''
+
+    filename = flask.request.args.get('filename')
+    if filename != None and check_permission(
+            Permissions.ADMIN) and 'username' in flask.session:
+        helpers.remove_link(filename)
+
     links = helpers.get_links()
 
     return flask.render_template(
-        'created_list.html',
-        links=links,
-        permission=check_permission(Permissions.ADMIN))
+        'created_list.html', links=links,
+        permissions=True)  #check_permission(Permissions.ADMIN))

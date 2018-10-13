@@ -24,15 +24,17 @@ def allowed_file(filename):
 
 
 def remove_link(filename):
+    if filename == None:
+        filename = "BLEHHH"
     '''
     Get rid of matching filenames
     '''
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
-    for i in links:
-        if filename in i:
-            os.remove(i)
+    for link in links:
+        if filename in link:
+            os.remove(link)
 
 
 def check_valid_file(file):
@@ -44,7 +46,7 @@ def check_valid_file(file):
     file_length = file.tell()
     if file_length > 10 * 1024 * 1024:
         return "File size larger than 10 mb"
-    if not helpers.allowed_file(file.filename):
+    if not allowed_file(file.filename):
         return "Invalid file name"
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
@@ -54,7 +56,7 @@ def check_valid_file(file):
         cur_filename = os.path.basename(link)
         if cur_filename == filename:
             return 'Duplicate title'
-    return 'None'
+    return ''
 
 
 def get_links():

@@ -70,6 +70,7 @@ def check_file():
     '''
     if 'file' not in flask.request.files:
         return flask.jsonify({'error': 'No file selected'})
+    file = flask.request.files['file']
     if 'username' in flask.session and check_permission(Permissions.ADMIN):
         return flask.jsonify({'error': helpers.check_valid_file(file)})
     else:
@@ -93,7 +94,8 @@ def uploaded_list():
     '''
 
     filename = flask.request.args.get('filename')
-    if filename != None:
+    if filename != None and check_permission(
+            Permissions.ADMIN) and 'username' in flask.session:
         helpers.remove_link(filename)
 
     links = helpers.get_links()

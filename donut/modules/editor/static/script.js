@@ -39,10 +39,10 @@ function selectedString(string1, string2)
   var ta = document.getElementById('source');
   if (ta.value.substring(ta.selectionStart, ta.selectionEnd) == "")
   {
-    insert(string2, true);
+    insert(string2, false);
   }
   else {
-    insert(string1, false);
+    insert(string1, true);
   }
 }
 
@@ -65,19 +65,19 @@ function insert_bold(){
 }
 
 function insert_link(){
-  insert("[linkTitle](example.com)", true);
+  insert("[linkTitle](example.com)", false);
 }
 
 function insert_image(){
-  insert("![Alt text](url/to/image", true);
+  insert("![Alt text](url/to/image", false);
 }
 
 function insert_ulist(){
-  insert("* list \n", true);
+  insert("* list \n", false);
 }
 
 function insert_olist(){
-  insert(1 + ". list \n", true);
+  insert("1. list \n", false);
 }
 
 
@@ -114,17 +114,39 @@ function save(){
       type: 'POST',
       data:{markdown:text, title:title},
       success: function(data) {
-        $.ajax({
-          url: $SCRIPT_ROOT+'/pages/_save',
-          type: 'POST',
-          data:{markdown:text, title:title},
-          success: function(data) {
-            window.location.href = data.url;
-          },
-          error: function(data){
-            window.alert("Please enter a valid title");
-          }
-        });
+        if (data.error === "")
+	{
+          $.ajax({
+            url: $SCRIPT_ROOT+'/pages/_save',
+            type: 'POST',
+            data:{markdown:text, title:title},
+            success: function(data) {
+              window.location.href = data.url;
+            },
+            error: function(data){
+              window.alert("Please enter a valid title");
+            }
+          });
+        }
+	else if (data.error === "Duplicate title") {
+	  var res = confirm("You are overriding an existing file!");
+          if (res){
+	    $.ajax({
+              url: $SCRIPT_ROOT+'/pages/_save',
+              type: 'POST',
+              data:{markdown:text, title:title},
+              success: function(data) {
+                window.location.href = data.url;
+              },
+              error: function(data){
+                window.alert("Please enter a valid title");
+              }
+            });
+	  }
+	}
+	else {
+	  window.alert(data.error)
+	}
       },
       error: function(data){
         window.alert("Please enter a valid title");
