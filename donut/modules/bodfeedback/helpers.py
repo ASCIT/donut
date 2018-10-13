@@ -24,7 +24,7 @@ def send_added_message_email(email, complaint_id):
     email_utils.send_email(email, msg, subject)
 
 
-def register_complaint(data):
+def register_complaint(data, testing=False):
     """
     Inputs a complaint into the database and returns the complaint id
     associated with this complaint
@@ -47,12 +47,12 @@ def register_complaint(data):
         res = cursor.fetchone()
         complaint_id = res['LAST_INSERT_ID()']
     # add message to database
-    add_msg(complaint_id, data['msg'], data['name'])
+    add_msg(complaint_id, data['msg'], data['name'], testing)
     # add email to db if applicable
     if data['email'] != "":
         emails = [x.strip() for x in data['email'].split(',')]
         for e in emails:
-            add_email(complaint_id, e)
+            add_email(complaint_id, e, testing)
     return complaint_id
 
 
@@ -87,7 +87,7 @@ def remove_email(complaint_id, email):
     return True
 
 
-def add_msg(complaint_id, message, poster):
+def add_msg(complaint_id, message, poster, testing=False):
     '''
     Adds a message to a complaint in the database
     and updates status of complaint to 'new_msg'
@@ -110,15 +110,15 @@ def add_msg(complaint_id, message, poster):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
-    query = """
-    SELECT email FROM bod_complaint_emails WHERE complaint_id = %s
-    """
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, complaint_id)
-        res = cursor.fetchall()
-    emails = []
-    for row in res:
-        send_added_message_email(row['email'], complaint_id)
+    if not testing:
+        query = """
+        SELECT email FROM bod_complaint_emails WHERE complaint_id = %s
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, complaint_id)
+            res = cursor.fetchall()
+        for row in res:
+            send_added_message_email(row['email'], complaint_id)
 
 
 def get_link(complaint_id):
@@ -187,9 +187,7 @@ def get_subject(complaint_id):
     Returns the suject or None if complaint_id is invalid
     '''
     res = get_summary(complaint_id)
-    if res:
-        return res['subject']
-    return None
+    return res['subject'] if res else None
 
 
 def get_status(complaint_id):
