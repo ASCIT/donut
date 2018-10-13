@@ -63,7 +63,7 @@ def get_position_holders(pos_id):
     and Y is linked to X
 
     Arguments:
-        pos_id:     The position to look up -- may be a single int or a list of int's 
+        pos_id:     The position to look up -- may be a single int or a list of int's
 
     Returns:
         results:    A list where each element describes a user who holds the
@@ -85,13 +85,13 @@ def get_position_holders(pos_id):
 
 
 def get_positions_held(user_id):
-    ''' Returns a list of all position id's held (directly or indirectly) 
+    ''' Returns a list of all position id's held (directly or indirectly)
     by the given user. If no positions are found, [] is returned. '''
-    query = '''SELECT pos_id FROM position_holders ph 
+    query = '''SELECT pos_id FROM position_holders ph
                WHERE user_id = %s
-               UNION 
+               UNION
                SELECT pos_id FROM (
-               SELECT pos_id_to as pos_id FROM position_holders ph 
+               SELECT pos_id_to as pos_id FROM position_holders ph
                JOIN position_relations pr
                ON ph.pos_id = pr.pos_id_from WHERE user_id = %s
                ) sub'''
@@ -102,7 +102,7 @@ def get_positions_held(user_id):
 
 
 def get_position_id(group_name, position_name):
-    ''' Returns the position id associated with the given group name and 
+    ''' Returns the position id associated with the given group name and
     position name '''
     query = '''SELECT pos_id FROM positions WHERE pos_name = %s
     AND group_id = (SELECT min(group_id) FROM groups WHERE group_name = %s)'''
@@ -147,10 +147,10 @@ def get_group_data(group_id, fields=None):
 
 
 def get_position_data(fields=None):
-    """ 
+    """
     Queries database for all instances where an individual holds a position.
     This includes when person A directly holds position Y, or when person A
-    indirectly holds Y by holding position X and with 
+    indirectly holds Y by holding position X and with
     an entry in the position relation table that links position X to position Y.
 
     Arguments:
@@ -180,7 +180,7 @@ def get_position_data(fields=None):
         fields.remove("pos_id")
         fields.append("p.pos_id")
     query = "SELECT DISTINCT " + ', '.join(fields) + " "
-    query += """FROM positions p 
+    query += """FROM positions p
             LEFT JOIN position_relations pr ON p.pos_id=pr.pos_id_to
             INNER JOIN position_holders ph ON ph.pos_id=pr.pos_id_from
             OR ph.pos_id = p.pos_id NATURAL JOIN members NATURAL JOIN groups"""
@@ -237,7 +237,7 @@ def create_position_holder(pos_id, user_id, start_date, end_date):
         start_date: Starting date of the holding period, format is 'yyyy-mm-dd'
         end_date: end date of the hold period
     '''
-    s = """INSERT INTO position_holders (pos_id, user_id, start_date, 
+    s = """INSERT INTO position_holders (pos_id, user_id, start_date,
     end_date) VALUES (%s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (pos_id, user_id, start_date, end_date))

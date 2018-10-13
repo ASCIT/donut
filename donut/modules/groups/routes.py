@@ -17,7 +17,7 @@ def get_groups_list():
     fields = None
     if "fields" in flask.request.args:
         fields = [f.strip() for f in flask.request.args["fields"].split(',')]
-    return json.dumps(helpers.get_group_list_data(fields=fields, attrs=attrs))
+    return jsonify(helpers.get_group_list_data(fields=fields, attrs=attrs))
 
 
 @blueprint.route("/1/groups/<int:group_id>/positions/")
@@ -37,6 +37,7 @@ def get_positions():
             and validate_int(form["group_id"]),
             validate_exists(form, "pos_name"),
         ]
+        print(str(form))
         if not all(validations):
             return jsonify({'success': False})
         else:
@@ -78,15 +79,14 @@ def get_pos_holders(pos_id):
 @blueprint.route("/1/positions/<int:pos_id>/", methods=["POST"])
 def create_pos_holder(pos_id):
     form = flask.request.form
+    print(form)
     validations = [
-        validate_exists(form, "user_id") and validate_int(form["user_id"]),
-        validate_exists(form, "start_date")
-        and validate_date(form["start_date"]),
-        validate_exists(form, "end_date") and validate_date(form["end_date"])
+        validate_exists(form, "userId"),
+        validate_exists(form, "start_date"),
+        validate_exists(form, "end_date")
     ]
     if not all(validations):
         return jsonify({'success': False})
-    helpers.create_position_holder(
-        int(pos_id), int(form["user_id"]), form["start_date"],
-        form["end_date"])
+    helpers.create_position_holder(pos_id, form["userId"], form["start_date"],
+                                   form["end_date"])
     return jsonify({'success': True})
