@@ -106,11 +106,11 @@ def test_register_complaint(client):
 
 
 def test_add_email(client):
-    helpers.add_email(1, 'sample_text@example.com')
+    helpers.add_email(1, 'sample_text@example.com', True)
     assert helpers.get_emails(1) == [
         'test@example.com', 'test2@example.com', 'sample_text@example.com'
     ]
-    assert helpers.add_email(500, 'text') == False
+    assert helpers.add_email(500, 'text', True) == False
 
 
 def test_add_msg(client):

@@ -56,7 +56,7 @@ def register_complaint(data):
     return complaint_id
 
 
-def add_email(complaint_id, email):
+def add_email(complaint_id, email, testing=False):
     """
     Adds an email to list of addresses subscribed to this complaint
     returns false if complaint_id is invalid
@@ -68,7 +68,8 @@ def add_email(complaint_id, email):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
-    send_confirmation_email(email, complaint_id)
+    if not testing:
+        send_confirmation_email(email, complaint_id)
     return True
 
 
