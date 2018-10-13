@@ -206,9 +206,21 @@ $(document).ready(function() {
     });
     $('#submitPosHoldBtn').click(function(e) {
         e.preventDefault();
-        var s = $("#holdForm").serialize();
-        debugger;
+        $.ajax({
+            type: 'POST',
+            url: '/1/positions/' + $("#posIdHold").val() + '/',
+            data: $("#holdForm").serialize(),
+            success: function(data) {
+                if(data.success) {
+                    setUpForms();
+                    alert("Assigned Position!") 
+                }
+            }
+        });
     });
+
+    // script for updating the seach bar for looking up people
+    // taken from csanders directory search code
     var nameInput = $('input#name'), nameSearch = $('ul#name-search')
     nameInput.keyup(function() {
         var name = nameInput.val()
@@ -253,8 +265,14 @@ $(document).ready(function() {
  */
 function setUpForms() {
     $('#posDelete').trigger("reset");
+    $('#holdForm').trigger("reset")
     $('#position').find('option')
                   .remove()
                   .end()
                   .append('<option>Select a Position</option>');
+    $('#posIdHold').find('option')
+                    .remove()
+                    .end() 
+                    .append('<option>Select a Position</option>');
+
 }

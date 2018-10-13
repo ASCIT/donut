@@ -58,7 +58,7 @@ def get_group_positions(group_id):
 def get_position_holders(pos_id):
     """
     Queries the database and returns a list of all members and their
-    Names that current hold the position specified by pos_id
+    Names that currently hold the position specified by pos_id
 
     Arguments:
         pos_id:     The position to look up
