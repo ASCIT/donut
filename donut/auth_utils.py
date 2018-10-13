@@ -254,9 +254,7 @@ def get_user_id(username):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [username])
         user = cursor.fetchone()
-    if user is None:
-        return None
-    return user['user_id']
+    return user and user['user_id']
 
 
 def update_last_login(username):
