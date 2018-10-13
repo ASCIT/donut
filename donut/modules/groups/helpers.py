@@ -63,22 +63,24 @@ def get_position_holders(pos_id):
     and Y is linked to X
 
     Arguments:
-        pos_id:     The position to look up
+        pos_id:     The position to look up -- may be a single int or a list of int's 
 
     Returns:
         results:    A list where each element describes a user who holds the
                     position. Each element is a dict with key:value of
                     columnname:columnvalue
     """
+    if not isinstance(pos_id, list): pos_id = [pos_id]
+    pos_id_string = ', '.join(pos_id)
     fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
     query = "SELECT DISTINCT " + ', '.join(fields) + " "
     query += """FROM positions p LEFT JOIN position_relations pr
              ON p.pos_id=pr.pos_id_to INNER JOIN position_holders ph
              ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
-             NATURAL JOIN members WHERE p.pos_id = %s OR pr.pos_id_to = %s"""
+             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [pos_id, pos_id])
+        cursor.execute(query, [pos_id_string, pos_id_string])
         return cursor.fetchall()
 
 
