@@ -78,5 +78,4 @@ def created_list():
     links = helpers.get_links()
 
     return flask.render_template(
-        'created_list.html', links=links,
-        permissions=True)  #check_permission(Permissions.ADMIN))
+        'created_list.html', links=links, check_permission(Permissions.ADMIN))
