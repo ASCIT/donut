@@ -12,7 +12,7 @@ import flask
 from donut import constants
 from donut.resources import Permissions
 from donut import misc_utils
-
+from donut.modules.groups import helpers as groups
 
 class PasswordHashParser:
     """
