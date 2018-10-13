@@ -29,7 +29,8 @@
                             <li><a href="#">ARC Feedback</a></li>
                             <li><a href="#">Calendar</a></li>
                             <li><a href="#">Course Reviews</a></li>
-                            <li><a href="#">Course Scheduler</a></li>
+                            <li><a href="{{ url_for('courses.planner') }}">Course Planner</a></li>
+                            <li><a href="{{ url_for('courses.scheduler') }}">Course Scheduler</a></li>
                             <li><a href="{{ url_for('directory_search.directory_search') }}">Directory</a></li>
                             <li><a href=" {{url_for('marketplace.marketplace') }} ">Marketplace</a></li>
                             <li><a href="#">Newsgroups</a></li>

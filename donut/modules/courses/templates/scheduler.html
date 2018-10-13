@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block page %}
+  <div class='col-md-8 col-md-offset-2' style='float: none; padding-bottom: 25px'>
+    <h1>Course Scheduler</h1>
+    <form>
+      <div class='form-group'>
+        <label for='term'>Term</label>
+        <select class='form-control' id='term'>
+          {% for term in terms %}
+            <option value='{{ term["year"] }}-{{ term["term"] }}'>
+              {{ TERMS[term["term"]] }} {{ term["year"] }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+{% endblock %}

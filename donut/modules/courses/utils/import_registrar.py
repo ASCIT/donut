@@ -6,14 +6,14 @@ import csv
 import re
 import sys
 from donut.pymysql_connection import make_db
+from donut.modules.courses import helpers
 
-TERMS = {'FA': 1, 'WI': 2, 'SP': 3}
 COURSE_MATCH = r'^(?P<dept>[A-Za-z/]+) *0*(?P<number>[0-9]+[A-Z]*)$'
 
 db = make_db('dev')
 
 _, filename, year, term = sys.argv
-term = TERMS[term]
+term = helpers.TERMS[term]
 courses = {}  # map of course numbers to courses data
 instructors = set()
 grades_types = set()
