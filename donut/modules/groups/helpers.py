@@ -77,7 +77,8 @@ def get_position_holders(pos_id):
     query += """FROM positions p LEFT JOIN position_relations pr
              ON p.pos_id=pr.pos_id_to INNER JOIN position_holders ph
              ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
-             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)""" % (format_string, format_string)
+             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)""" % (
+        format_string, format_string)
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, pos_id * 2)
