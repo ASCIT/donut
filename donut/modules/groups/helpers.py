@@ -71,16 +71,16 @@ def get_position_holders(pos_id):
                     columnname:columnvalue
     """
     if not isinstance(pos_id, list): pos_id = [pos_id]
-    pos_id_string = ', '.join(pos_id)
+    format_string = ', '.join(['%s'] * len(pos_id))
     fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
     query = "SELECT DISTINCT " + ', '.join(fields) + " "
     query += """FROM positions p LEFT JOIN position_relations pr
              ON p.pos_id=pr.pos_id_to INNER JOIN position_holders ph
              ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
-             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)"""
+             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)""" % (format_string, format_string)
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [pos_id_string, pos_id_string])
+        cursor.execute(query, pos_id * 2)
         return cursor.fetchall()
 
 

@@ -60,6 +60,11 @@ def test_get_position_holders(client):
     assert len(res) == 2
     assert res[0]["first_name"] == "David"
     assert res[1]["first_name"] == "Robert"
+    res = helpers.get_position_holders([1,5])
+    assert len(res) == 3
+    assert res[0]["first_name"] == "David"
+    assert res[1]["first_name"] == "Robert"
+    assert res[2]["first_name"] == "Sean"
 
 
 def test_get_position_data(client):
