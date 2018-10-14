@@ -30,23 +30,23 @@ def test_get_links(client):
 
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_FOLDER"],
-                        "SOME_TITLE" + ".jpg")
+                        "SOME.TITLE" + ".jpg")
 
     f = open(path, "w+")
     f.close()
     links = helpers.get_links()
     titles = [title for _, title in links]
-    assert "SOME_TITLE" in ''.join(titles)
+    assert "SOME.TITLE" in ''.join(titles)
 
     editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
     assert "BLEH" == helpers.read_page("ANOTHER_TITLE")
 
-    helpers.remove_link("SOME_TITLE")
+    helpers.remove_link("SOME.TITLE")
     links = helpers.get_links()
     titles = []
     for (discard, title) in links:
         titles.append(title)
-    assert "SOME_TITLE" not in ''.join(titles)
+    assert "SOME.TITLE" not in ''.join(titles)
 
 
 def test_allowed_file(client):

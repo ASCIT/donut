@@ -24,8 +24,6 @@ def allowed_file(filename):
 
 
 def remove_link(filename):
-    if filename == None:
-        filename = "BLEHHH"
     '''
     Get rid of matching filenames
     '''
@@ -33,7 +31,8 @@ def remove_link(filename):
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
     for link in links:
-        if filename in link:
+        name = link.replace(path + '/', '').rsplit('.', 1)[0]
+        if filename == name:
             os.remove(link)
 
 
