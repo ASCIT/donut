@@ -1,9 +1,8 @@
 {% extends "layout.html" %}
 {% block page %}
-<link rel="stylesheet" href="{{url_for('static', filename='css/groups/groups.css')}}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="{{ url_for('static', filename='js/groups/positions.js') }}"></script>
-<div class="container" style="background-color: #eee">
+<div class="container">
     <div id="page-header">
         <h1 id="pagetitle" > The Ascit Position Service </h1>
     </div>
@@ -11,6 +10,7 @@
         <li class="active"><a data-toggle="tab" href="#viewAll">View All </a> </li>
         <li><a data-toggle="tab" href="#admin">Administrate</a></li>
     </ul>
+    <div class="jumbotron">
     <div class="tab-content">
         <div id="viewAll" class="tab-pane fade in active">
             <div class="input">
@@ -36,10 +36,10 @@
         <div id="admin" class="tab-pane fade">
             <ul class="nav nav-pills tabs">
                 <li class="active">
-                    <a data-toggle="pill" href="#createPos">Create a Position</a>
+                    <a data-toggle="pill" class="btn btn-primary" href="#createPos">Create a Position</a>
                 </li>
                 <li>
-                    <a data-toggle="pill" href="#deletePos">Delete a Position</a>
+                    <a data-toggle="pill" class="btn btn-primary" href="#deletePos">Delete a Position</a>
                 </li>
             </ul>
             <div class="tab-content">
@@ -57,7 +57,7 @@
                                 Position Name: </label>
                             <input class="form-control" id="posName">
                         </div>
-                        <button type="submit" class="btn btn-default">Submit</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
                 </div>
                 <div id="deletePos" class="tab-pane fade in">
@@ -74,11 +74,12 @@
                                 Position: </label>
                             <input class="form-control" id="position">
                         </div>
-                        <button type="submit" class="btn btn-default">Submit</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </form>     
                 </div>
             </div> 
         </div>
+    </div>
     </div>
 </div>
 <script type="text/javascript">
