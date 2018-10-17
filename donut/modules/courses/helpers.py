@@ -63,14 +63,16 @@ def get_year_courses():
                         matching_course['instructor'] = None
                 else:
                     courses[number] = {
-                        'number': number,
-                        'name': course['name'],
+                        'number':
+                        number,
+                        'name':
+                        course['name'],
                         'units': [
-                            course['units_lecture'],
-                            course['units_lab'],
+                            course['units_lecture'], course['units_lab'],
                             course['units_homework']
                         ],
-                        'instructor': instructor,
+                        'instructor':
+                        instructor,
                         'terms': [term]
                     }
     return sorted(courses.values(), key=lambda course: course['number'])
