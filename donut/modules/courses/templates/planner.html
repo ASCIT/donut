@@ -1,6 +1,95 @@
 {% extends 'layout.html' %}
 {% block page %}
-  <div class='col-md-8 col-md-offset-2' style='float: none; padding-bottom: 25px'>
+  <div class='col-md-8 col-md-offset-2' style='float: none'>
     <h1>Course Planner</h1>
+    <div class='row'>
+      <div class='col-md-3'>
+        <input class='form-control' id='search' placeholder='Search...' />
+        <ul class='list-group' id='courses'>
+          <li class='list-group-item'>Loading...</li>
+        </ul>
+      </div>
+      <div class='col-md-9'></div>
+    </div>
   </div>
+{% endblock %}
+{% block styles %}
+  {{ super() }}
+  <style>
+    #courses {
+      height: 600px;
+      overflow-y: auto;
+      margin-bottom: 0;
+    }
+    .units {
+      font-weight: bold;
+    }
+    .instructor {
+      font-style: italic;
+    }
+  </style>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script>
+    var courses = []
+    var coursesList
+    function displayCourses(matchingCourses) {
+      coursesList.children().remove()
+      matchingCourses.forEach(function(course) {
+        var courseItem = $('<li>').addClass('list-group-item').append(
+          $('<h4>').text(course.number),
+          $('<h5>').text(course.name),
+          $('<h5>').addClass('units').text(course.units.join('-'))
+        )
+        if (course.instructor) {
+          courseItem.append(
+            $('<h5>').addClass('instructor').text(course.instructor)
+          )
+        }
+        coursesList.append(courseItem)
+      })
+    }
+    $.ajax({
+      type: 'GET',
+      url: '{{ url_for("courses.planner_courses") }}',
+      dataType: 'json',
+      success: function(plannerCourses) {
+        courses = plannerCourses
+        displayCourses(courses)
+      },
+      error: function() { alert('Failed to load courses') }
+    })
+    $('input#search').keyup(function() {
+      var query = $(this).val()
+        .trim()
+        .toLowerCase()
+        .split(/[ /]+/)
+      var matches = []
+      courses.forEach(function(course) {
+        var number = course.number.toLowerCase(),
+          name = course.name.toLowerCase()
+        var score = 0
+        query.forEach(function(segment) {
+          var numberIndex = number.indexOf(segment)
+          if (numberIndex > -1) {
+            score += segment.length
+            if (numberIndex === 0 || number[numberIndex - 1] === ' ') score++
+            var matchEnd = numberIndex + segment.length
+            if (matchEnd === number.length || number[matchEnd] === ' ') score++
+          }
+          else if (name.indexOf(segment) > -1) score += segment.length * 0.1
+        })
+        if (score) matches.push({course: course, score: score})
+      })
+      displayCourses(
+        matches
+          .sort(function(a, b) { return b.score - a.score })
+          .map(function(courseScore) { return courseScore.course })
+      )
+    })
+    $(document).ready(function() {
+      coursesList = $('ul#courses')
+    })
+  </script>
 {% endblock %}

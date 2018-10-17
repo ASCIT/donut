@@ -12,3 +12,8 @@ def planner():
 def scheduler():
     return flask.render_template(
         'scheduler.html', TERMS=helpers.TERM_NAMES, terms=helpers.get_terms())
+
+
+@blueprint.route('/1/planner/courses')
+def planner_courses():
+    return flask.jsonify(helpers.get_year_courses())
