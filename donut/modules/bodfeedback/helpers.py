@@ -4,27 +4,17 @@ import flask
 import pymysql.cursors
 
 
-def send_confirmation_email(email, complaint_id):
-    """
-    Sends a confirmation email to [address] which should be an
-    email address of a user as a string
-    """
-    msg = email_templates.received_feedback.format(get_link(complaint_id))
-    subject = "Received BoD Feedback"
-    email_utils.send_email(email, msg, subject)
-
-
-def send_added_message_email(email, complaint_id):
+def send_update_email(email, complaint_id):
     """
     Sends a confirmation email to [address] which should be an
     email address of a user as a string
     """
     msg = email_templates.added_message.format(get_link(complaint_id))
-    subject = "Message Added to BoD Feedback"
+    subject = "Received BoD Feedback"
     email_utils.send_email(email, msg, subject)
 
 
-def register_complaint(data, testing=False):
+def register_complaint(data, notification=True):
     """
     Inputs a complaint into the database and returns the complaint id
     associated with this complaint
@@ -40,23 +30,18 @@ def register_complaint(data, testing=False):
     status = 'new_msg'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (data['subject'], status))
-    # grab the complaint id that we just inserted
-    query = 'SELECT LAST_INSERT_ID()'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
-        res = cursor.fetchone()
-        complaint_id = res['LAST_INSERT_ID()']
-    # add message to database
-    add_msg(complaint_id, data['msg'], data['name'], testing)
+    complaint_id = cursor.lastrowid
     # add email to db if applicable
     if data['email'] != "":
         emails = [x.strip() for x in data['email'].split(',')]
         for e in emails:
-            add_email(complaint_id, e, testing)
+            add_email(complaint_id, e, False)
+    # add message to database
+    add_msg(complaint_id, data['msg'], data['name'], notification)
     return complaint_id
 
 
-def add_email(complaint_id, email, testing=False):
+def add_email(complaint_id, email, notification=True):
     """
     Adds an email to list of addresses subscribed to this complaint
     returns false if complaint_id is invalid
@@ -68,8 +53,8 @@ def add_email(complaint_id, email, testing=False):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
-    if not testing:
-        send_confirmation_email(email, complaint_id)
+    if notification:
+        send_update_email(email, complaint_id)
     return True
 
 
@@ -87,7 +72,7 @@ def remove_email(complaint_id, email):
     return True
 
 
-def add_msg(complaint_id, message, poster, testing=False):
+def add_msg(complaint_id, message, poster, notification=True):
     '''
     Adds a message to a complaint in the database
     and updates status of complaint to 'new_msg'
@@ -110,7 +95,7 @@ def add_msg(complaint_id, message, poster, testing=False):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
-    if not testing:
+    if notification:
         query = """
         SELECT email FROM bod_complaint_emails WHERE complaint_id = %s
         """
@@ -118,7 +103,7 @@ def add_msg(complaint_id, message, poster, testing=False):
             cursor.execute(query, complaint_id)
             res = cursor.fetchall()
         for row in res:
-            send_added_message_email(row['email'], complaint_id)
+            send_update_email(row['email'], complaint_id)
 
 
 def get_link(complaint_id):
@@ -129,13 +114,11 @@ def get_link(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
-        if res and 'uuid' in res:
-            uuid = res['uuid']
-        else:
-            uuid = None
+        if not res:
+            return None
+        uuid = res['uuid']
     return flask.url_for(
-        'bodfeedback.bodfeedback_view_complaint', id=uuid,
-        _external=True) if uuid else None
+        'bodfeedback.bodfeedback_view_complaint', id=uuid, _external=True)
 
 
 def get_id(uuid):
@@ -179,7 +162,7 @@ def get_summary(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
-    return res if res else None
+    return res
 
 
 def get_subject(complaint_id):
@@ -236,10 +219,7 @@ def get_emails(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
-    emails = []
-    for row in res:
-        emails.append(row['email'])
-    return emails
+    return [row['email'] for row in res]
 
 
 def get_all_fields(complaint_id):
@@ -247,11 +227,12 @@ def get_all_fields(complaint_id):
     Returns a dict with emails, messages, subject, status
     Returns None if complaint_id is invalid
     '''
-    data = {}
-    data['emails'] = get_emails(complaint_id)
-    data['messages'] = get_messages(complaint_id)
-    data['subject'] = get_subject(complaint_id)
-    data['status'] = get_status(complaint_id)
+    data = {
+        'emails': get_emails(complaint_id),
+        'messages': get_messages(complaint_id),
+        'subject': get_subject(complaint_id),
+        'status': get_status(complaint_id)
+    }
     return data if data['subject'] else None
 
 

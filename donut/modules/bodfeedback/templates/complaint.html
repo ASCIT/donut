@@ -32,7 +32,7 @@
 		    <h4>Add an email</h4>
 		</div>
 		<div class="panel-body">
-			<form method="POST" id="add-email" action="/">
+			<form id="add-email">
 			<div class="form-group">
 			    <p>Email: </p>
 			    <input class="form-control" type="text" name="email" />
@@ -94,7 +94,7 @@
      {% else %}
      $('#markRead').hide();
      {% endif %} 
-     $('#add-email').on('submit', function(e) {
+     $('#add-email').submit(function(e) {
 	 e.preventDefault();
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid']) }}",
@@ -107,7 +107,7 @@
 	 }); 
      });
 
-     $("#remove-email").on("submit", function(e) {
+     $("#remove-email").submit(function(e) {
 	 e.preventDefault();
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}",
@@ -120,7 +120,7 @@
      });
 
 	
-     $('#addMessage').on('submit', function(e) {
+     $('#addMessage').submit(function(e) {
 	 e.preventDefault();
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}",
@@ -132,7 +132,7 @@
 	     }
 	 }); 
      });
-     $('#markRead').on('click', function() {
+     $('#markRead').click(function() {
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_mark_read', id=complaint['uuid']) }}",
 	     type: 'GET',
@@ -145,7 +145,7 @@
 	     }
 	 });
      });
-     $('#markUnread').on('click', function() {
+     $('#markUnread').click(function() {
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_mark_unread', id=complaint['uuid']) }}",
 	     type: 'GET',

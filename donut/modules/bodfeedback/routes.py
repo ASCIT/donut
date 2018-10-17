@@ -18,13 +18,11 @@ def bodfeedback_submit():
     for field in fields:
         data[field] = flask.request.form.get(field)
     for field in required:
-        if (data[field] == ""):
+        if data[field] == "":
             flask.flash('Please fill in all required fields (marked with *)',
                         'error')
             return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
     complaint_id = helpers.register_complaint(data)
-    if data['email'] != "":
-        helpers.send_confirmation_email(data['email'], complaint_id)
     flask.flash('Success. Link: ' + helpers.get_link(complaint_id))
     return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
 
@@ -32,7 +30,7 @@ def bodfeedback_submit():
 # api endpoint with all visible data
 @blueprint.route('/1/bodfeedback/view/<uuid:id>')
 def bodfeedback_api_view_complaint(id):
-    if not (helpers.get_id(id)):
+    if not helpers.get_id(id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     #pack all the data we need into a dict
@@ -42,7 +40,7 @@ def bodfeedback_api_view_complaint(id):
 # view a complaint
 @blueprint.route('/bodfeedback/view/<uuid:id>')
 def bodfeedback_view_complaint(id):
-    if not (helpers.get_id(id)):
+    if not helpers.get_id(id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     complaint = helpers.get_all_fields(complaint_id)
@@ -130,7 +128,6 @@ def bodfeedback_remove_email(id):
     if not complaint_id:
         flask.abort(400)
         return
-    data = []
     data = flask.request.form.getlist('emails')
     if data == []:
         flask.abort(400)
