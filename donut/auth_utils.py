@@ -320,39 +320,24 @@ def login_redirect():
 
 def get_permissions(username):
     """
-  Returns a list with all of the permissions available to the user.
-  A list is returned because Python sets cannot be stored in cookie data.
-  """
-    return []
-    query = """
-    (SELECT permission_id
-      FROM users
-        NATURAL JOIN offices
-        NATURAL JOIN office_assignments
-        NATURAL JOIN office_assignments_current
-        NATURAL JOIN office_permissions
-      WHERE username=%s)
-    UNION
-    (SELECT permission_id
-      FROM users
-        NATURAL JOIN user_permissions
-      WHERE username=%s)
+    Returns a list with all of the permissions available to the user.
     """
+    user_id = get_user_id(username)
+    positions = [] # TODO: get a list of all position_id's held by a user
+    query = """
+    SELECT permission_id FROM postion_permissions WHERE position_id in 
+    (%s)""" % (', '.join(['%s'] * len(positions)))
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, username)
+        cursor.execute(query, (positions))
         result = cursor.fetchall()
     return list(row['permission_id'] for row in result)
 
 
-def check_permission(permission):
-    """Returns true if the user has the given permission."""
-    if 'permissions' not in flask.session:
-        return False
-    # Admins always have access to everything.
-    if Permissions.ADMIN in flask.session['permissions']:
-        return True
-    # Otherwise check if the permission is present in their permission list.
-    return permission in flask.session['permissions']
+def check_permission(username, permission_id):
+    """
+    Returns True if the user has this permission, otherwise False
+    """
+    return permission_id in get_permissions(username)
 
 
 class AdminLink:
@@ -366,18 +351,19 @@ class AdminLink:
 def generate_admin_links():
     """Generates a list of links for the admin page."""
     links = []
-    if check_permission(Permissions.USERS):
+    if not check_login() return links
+    if check_permission(flask.session['username'], Permissions.USERS):
         links.append(
             AdminLink('Add members',
                       flask.url_for('admin.add_members', _external=True)))
         links.append(
             AdminLink('Manage positions',
                       flask.url_for('admin.manage_positions', _external=True)))
-    if check_permission(Permissions.ROTATION):
+    if check_permission(flask.session['username'], Permissions.ROTATION):
         links.append(
             AdminLink('Rotation',
                       flask.url_for('rotation.show_portal', _external=True)))
-    if check_permission(Permissions.EMAIL):
+    if check_permission(flask.session['username'], Permissions.EMAIL):
         links.append(
             AdminLink(
                 'Mailing lists',
