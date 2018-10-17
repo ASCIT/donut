@@ -88,7 +88,7 @@ def get_position_holders(pos_id):
 def get_positions_held(user_id):
     ''' Returns a list of all position id's held (directly) 
     by the given user. If no positions are found, [] is returned. '''
-    query ='SELECT pos_id FROM position_holders WHERE user_id = %s'
+    query = 'SELECT pos_id FROM position_holders WHERE user_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id))
         res = cursor.fetchall()
