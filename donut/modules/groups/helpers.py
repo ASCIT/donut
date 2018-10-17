@@ -85,6 +85,27 @@ def get_position_holders(pos_id):
         return cursor.fetchall()
 
 
+def get_positions_held(user_id):
+    ''' Returns a list of all position id's held (directly) 
+    by the given user. If no positions are found, [] is returned. '''
+    query ='SELECT pos_id FROM position_holders WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id))
+        res = cursor.fetchall()
+    return [row['pos_id'] for row in res]
+
+
+def get_position_id(group_name, position_name):
+    ''' Returns the position id associated with the given group name and 
+    position name '''
+    query = '''SELECT pos_id FROM positions WHERE pos_name = %s
+    AND group_id = (SELECT min(group_id) FROM groups WHERE group_name = %s)'''
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (position_name, group_name))
+        res = cursor.fetchone()
+    return res['pos_id'] if res is not None else None
+
+
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.

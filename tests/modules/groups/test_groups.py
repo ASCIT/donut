@@ -67,6 +67,21 @@ def test_get_position_holders(client):
     assert res[2]["first_name"] == "Sean"
 
 
+def test_get_positions_held(client):
+    res = helpers.get_positions_held(4)
+    assert len(res) == 2
+    assert 4 in res and 5 in res
+    res = helpers.get_positions_held(-1)
+    assert res == []
+
+
+def test_get_position_id(client):
+    res = helpers.get_position_id('Donut Devteam', 'Head')
+    assert res == 1
+    res = helpers.get_position_id('Not a real group', 'Not a real position')
+    assert res is None
+
+
 def test_get_position_data(client):
     res = helpers.get_position_data()
     assert res[0]["first_name"] == "David"
