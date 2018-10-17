@@ -27,6 +27,21 @@
     .instructor {
       font-style: italic;
     }
+    .terms {
+      width: 100%;
+    }
+    .terms td {
+      text-align: center;
+    }
+    .terms:not(.fall) td:nth-child(1) {
+      visibility: hidden;
+    }
+    .terms:not(.winter) td:nth-child(2) {
+      visibility: hidden;
+    }
+    .terms:not(.spring) td:nth-child(3) {
+      visibility: hidden;
+    }
   </style>
 {% endblock %}
 {% block scripts %}
@@ -34,6 +49,13 @@
   <script>
     var courses = []
     var coursesList
+    var terms = $('<table>').addClass('terms').append(
+      $('<tr>').append(
+        $('<td>').text('FA'),
+        $('<td>').text('WI'),
+        $('<td>').text('SP')
+      )
+    )
     function displayCourses(matchingCourses) {
       coursesList.children().remove()
       matchingCourses.forEach(function(course) {
@@ -47,6 +69,20 @@
             $('<h5>').addClass('instructor').text(course.instructor)
           )
         }
+        var termsList = terms.clone()
+        course.terms.forEach(function(term) {
+          switch (term) {
+            case 1:
+              termsList.addClass('fall')
+              break
+            case 2:
+              termsList.addClass('winter')
+              break
+            case 3:
+              termsList.addClass('spring')
+          }
+        })
+        courseItem.append(termsList)
         coursesList.append(courseItem)
       })
     }
