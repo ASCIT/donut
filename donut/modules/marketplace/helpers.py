@@ -980,7 +980,6 @@ def create_new_listing(stored):
             ])
             item_id = cursor.lastrowid
 
-
     if item_id == -1:
         return -1
 
