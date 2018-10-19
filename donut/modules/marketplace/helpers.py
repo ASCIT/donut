@@ -956,6 +956,7 @@ def create_new_listing(stored):
     item_images = []
     item_images = stored['item_images']
     result = []
+    item_id = -1
     if cat_title == 'Textbooks':
         textbook_id = int(stored['textbook_id'])
         textbook_edition = stored['textbook_edition']
@@ -968,6 +969,7 @@ def create_new_listing(stored):
                 user_id, cat_id, item_condition, item_details, item_price,
                 textbook_id, textbook_edition, textbook_isbn
             ])
+            item_id = cursor.lastrowid
     else:
         item_title = stored['item_title']
         s = '''INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (%s, %s, %s, %s, %s, %s)'''
@@ -976,15 +978,10 @@ def create_new_listing(stored):
                 user_id, cat_id, item_title, item_condition, item_details,
                 item_price
             ])
+            item_id = cursor.lastrowid
 
-    s = 'SELECT LAST_INSERT_ID()'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
-        result = cursor.fetchone()['LAST_INSERT_ID()']
-    item_id = -1
-    if result != 0:
-        item_id = result
-    else:
+
+    if item_id == -1:
         return -1
 
     s = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'

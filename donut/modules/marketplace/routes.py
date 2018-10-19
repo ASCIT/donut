@@ -71,8 +71,8 @@ def query():
         'textbook_title'
     ]
     attrs = {
-        tup: flask.request.args[tup]
-        for tup in flask.request.args if tup in filterable_attrs
+        attr_name: flask.request.args[attr_name]
+        for attr_name in flask.request.args if attr_name in filterable_attrs
     }
     if category_id == 'all':
         category_id = 0
