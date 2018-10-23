@@ -103,7 +103,7 @@ def get_position_id(group_name, position_name):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (position_name, group_name))
         res = cursor.fetchone()
-    return res['pos_id'] if res is not None else None
+    return res and res['pos_id']
 
 
 def get_group_data(group_id, fields=None):
