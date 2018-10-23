@@ -63,12 +63,11 @@ button {
             drop-shadow(1px -1px 0 white)
             drop-shadow(-1px -1px 0 white);
 
-  font-size: 95px;
+  font-size: 94px;
   text-align: center;
   font-family: 'donutfont';
-  color: #d9661c; 
+  color: #f5903b; 
   z-index: 9999;
-  padding-top: 100px;
   margin: auto; 
   display: block;
 }
@@ -93,6 +92,7 @@ td {
   background-color: #FFF;
   color: #333;
   margin-bottom: 5%;
+  z-index: 9999;
 }
 
 .btn:hover {
@@ -244,6 +244,46 @@ td {
   padding-bottom: 100px;
 }
 
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+#background-donut {
+  -webkit-animation: rotating 10s linear infinite;
+  -moz-animation: rotating 10s linear infinite;
+  -ms-animation: rotating 10s linear infinite;
+  -o-animation: rotating 10s linear infinite;
+  animation: rotating 10s linear infinite; 
+
+  width: 150px;
+  margin-bottom: 10px;
+}
+
 #content {
   width: 100%;
 }
@@ -253,10 +293,10 @@ td {
 }
 
 #footer {
-  width: 100%;
-  text-align: right;
+  width: 50%;
   z-index: 9999;
   bottom: 0;
+  left: 5px;
   position: absolute;
 }
 
@@ -271,7 +311,11 @@ label.required:after {
   color:red;
 }
 
-@media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
+@media only screen and (min-device-width: 200px) and (max-device-width: 800px) {
+  .jumbotron h1 {
+    font-size: 300%;
+  }
+
   .half-float-left {
     width: 100%;
   }
@@ -280,7 +324,7 @@ label.required:after {
     width: 100%;
   }
 
-  .background-video {
-    display: none;
+  #copyright {
+    color: #222;
   }
 }
