@@ -321,7 +321,7 @@ def get_permissions(username):
     Returns a list with all of the permissions available to the user.
     """
     user_id = get_user_id(username)
-    positions = [] # TODO: get a list of all position_id's held by a user
+    positions = groups.get_positions_held(user_id)
     query = """
     SELECT permission_id FROM postion_permissions WHERE position_id in 
     (%s)""" % (', '.join(['%s'] * len(positions)))
