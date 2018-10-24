@@ -2,7 +2,7 @@ import flask
 import json
 from flask import jsonify, redirect
 
-import donut.auth_utils
+from donut import auth_utils
 from donut.modules.core import blueprint, helpers
 
 VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
