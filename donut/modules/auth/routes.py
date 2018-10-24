@@ -33,13 +33,14 @@ def login_submit():
 
     if username is not None and password is not None:
         user_id = helpers.authenticate(username, password)
-        if user_id is not None:            
+        if user_id is not None:
+            permissions = auth_utils.get_permissions(username)
+
             if mask is not None and permissions['mask']:
                 flask.session['username'] = mask
                 permissions = auth_utils.get_permissions(mask)
             else:
                 flask.session['username'] = username
-                permissions = auth_utils.get_permissions(username)
 
             flask.session['permissions'] = permissions
             # True if there's any reason to show a link to the admin interface.
