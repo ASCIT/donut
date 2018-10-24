@@ -9,7 +9,30 @@
           <li class='list-group-item'>Loading...</li>
         </ul>
       </div>
-      <div class='col-md-9'></div>
+      <div class='col-md-9'>
+        <table class='table table-bordered courses'>
+          <thead>
+            <tr>
+              <th></th>
+              {% for term_name in TERMS.values() %}
+                <th class='term-title'>{{ term_name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for year in YEARS %}
+              <tr>
+                <td>{{ YEARS[year] }}</td>
+                {% for term in TERMS %}
+                  <td class='term-courses'>
+                    <ul class='list-group term-courses-list' year={{ year }} term={{ term }}></ul>
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 {% endblock %}
@@ -33,14 +56,28 @@
     .terms td {
       text-align: center;
     }
-    .terms:not(.fall) td:nth-child(1) {
-      visibility: hidden;
+    {% for term, name in TERMS.items() %}
+      .terms:not(.{{ name }}) td:nth-child({{ term }}) {
+        visibility: hidden;
+      }
+    {% endfor %}
+    table.courses {
+      height: 600px;
     }
-    .terms:not(.winter) td:nth-child(2) {
-      visibility: hidden;
+    .term-title {
+      text-align: center;
     }
-    .terms:not(.spring) td:nth-child(3) {
-      visibility: hidden;
+    .term-courses {
+      width: {{ 100 / TERMS|length }}%;
+    }
+    .term-courses-list {
+      width: 100%;
+      height: 100%;
+    }
+    .term-courses-list .list-group-item {
+      display: flex;
+      justify-content: space-around;
+      padding: 0;
     }
   </style>
 {% endblock %}
@@ -51,11 +88,44 @@
     var coursesList
     var terms = $('<table>').addClass('terms').append(
       $('<tr>').append(
-        $('<td>').text('FA'),
-        $('<td>').text('WI'),
-        $('<td>').text('SP')
+        {% for term_name in TERMS.values() %}
+          $('<td>').text('{{ term_name }}'),
+        {% endfor %}
       )
     )
+    function courseUnits(course) {
+      return course.units.reduce(function(a, b) { return a + b })
+    }
+    function getYearTerm(courseList) {
+      return ['year', 'term'].map(function(attr) {
+        return Number(courseList.attr(attr))
+      })
+    }
+    var draggedCourse = null
+    function addCourse(courseList) {
+      var yearTerm = getYearTerm(courseList)
+      if (draggedCourse.terms.indexOf(yearTerm[1]) < 0) {
+        return alert('Class is not offered that term')
+      }
+      var units = courseUnits(draggedCourse)
+      var courseItem = $('<li>').addClass('list-group-item').append(
+        $('<span>').text(
+          draggedCourse.number + ' (' + units + ' unit' + (units === 1 ? '': 's') + ')'
+        ),
+        $('<button>').addClass('btn btn-danger btn-xs')
+          .click((function(course) {
+            return function() {
+              courseItem.remove()
+              // TODO: make API call
+            }
+          })(draggedCourse))
+          .append(
+            $('<span>').addClass('glyphicon glyphicon-trash')
+          )
+      )
+      courseList.append(courseItem)
+      // TODO: make API call
+    }
     function displayCourses(matchingCourses) {
       coursesList.children().remove()
       matchingCourses.forEach(function(course) {
@@ -72,17 +142,19 @@
         var termsList = terms.clone()
         course.terms.forEach(function(term) {
           switch (term) {
-            case 1:
-              termsList.addClass('fall')
-              break
-            case 2:
-              termsList.addClass('winter')
-              break
-            case 3:
-              termsList.addClass('spring')
+            {% for term, name in TERMS.items() %}
+              case {{ term }}:
+                termsList.addClass('{{ name }}')
+                break
+            {% endfor %}
           }
         })
-        courseItem.append(termsList)
+        courseItem
+          .attr('draggable', 'true')
+          .on('dragstart', (function(course) {
+            return function() { draggedCourse = course }
+          })(course))
+          .append(termsList)
         coursesList.append(courseItem)
       })
     }
@@ -126,6 +198,15 @@
     })
     $(document).ready(function() {
       coursesList = $('ul#courses')
+      $('.term-courses-list')
+        .on('dragover', function(e) {
+          e.preventDefault()
+        })
+        .on('drop', function(e) {
+          e.stopPropagation() // Stops some browsers from redirecting.
+          addCourse($(this))
+          draggedCourse = null
+        })
     })
   </script>
 {% endblock %}
