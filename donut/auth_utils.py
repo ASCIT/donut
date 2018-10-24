@@ -319,10 +319,10 @@ def login_redirect():
 
 def get_permissions(username):
     """
-    Returns a list with all of the permissions available to the user.
+    Returns a set with all of the permissions available to the user.
     """
     user_id = get_user_id(username)
-    if not user_id: return []
+    if not user_id: return set()
     positions = groups.get_positions_held(user_id)
     query = """
     SELECT permission_id FROM position_permissions WHERE pos_id in 
@@ -330,7 +330,7 @@ def get_permissions(username):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (positions))
         result = cursor.fetchall()
-    return list(row['permission_id'] for row in result)
+    return set(row['permission_id'] for row in result)
 
 
 def check_permission(username, permission_id):

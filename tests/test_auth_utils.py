@@ -82,13 +82,13 @@ def test_compare_secure_strings():
 
 def test_get_permissions(client):
     res = auth_utils.get_permissions('dqu')
-    assert set(res) == set([1, 3])
+    assert res == set([1, 3])
 
     res = auth_utils.get_permissions('reng')
-    assert set(res) == set([1, 2, 3])
+    assert res == set([1, 2, 3])
 
     res = auth_utils.get_permissions('notreal_user')
-    assert res == []
+    assert res == set()
 
 
 def test_check_permission(client):
