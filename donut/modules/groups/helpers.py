@@ -77,20 +77,26 @@ def get_position_holders(pos_id):
     query += """FROM positions p LEFT JOIN position_relations pr
              ON p.pos_id=pr.pos_id_to INNER JOIN position_holders ph
              ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
-             NATURAL JOIN members WHERE p.pos_id in (%s) OR pr.pos_id_to in (%s)""" % (
-        format_string, format_string)
+             NATURAL JOIN members WHERE p.pos_id in (%s)""" % (format_string)
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, pos_id * 2)
+        cursor.execute(query, pos_id)
         return cursor.fetchall()
 
 
 def get_positions_held(user_id):
-    ''' Returns a list of all position id's held (directly) 
+    ''' Returns a list of all position id's held (directly or indirectly) 
     by the given user. If no positions are found, [] is returned. '''
-    query = 'SELECT pos_id FROM position_holders WHERE user_id = %s'
+    query = '''SELECT pos_id FROM position_holders ph 
+               WHERE user_id = %s
+               UNION 
+               SELECT pos_id FROM (
+               SELECT pos_id_to as pos_id FROM position_holders ph 
+               JOIN position_relations pr
+               ON ph.pos_id = pr.pos_id_from WHERE user_id = %s
+               ) sub'''
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (user_id))
+        cursor.execute(query, (user_id, user_id))
         res = cursor.fetchall()
     return [row['pos_id'] for row in res]
 
