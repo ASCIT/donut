@@ -80,4 +80,8 @@ def test_compare_secure_strings():
 
 
 def test_get_permissions():
-    res = auth_utils.get_permissions()
+    #TODO
+
+
+def test_check_permission():
+    #TODO
