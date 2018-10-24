@@ -170,10 +170,6 @@ function populateListOfPositions(groupIndex, posSelectId) {
     });
 }
 
-var MIN_SEARCH_LENGTH = 3
-var SEARCH_TIMEOUT = 100 //ms
-var searchToken
-
 $(document).ready(function() {
     // Setting up triggers for administration tasks
     $('#submitPosBtn').click(function(e) {
