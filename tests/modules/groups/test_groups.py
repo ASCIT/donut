@@ -54,23 +54,25 @@ def test_get_group_positions_data(client):
 def test_get_position_holders(client):
     res = helpers.get_position_holders(5)
     assert len(res) == 2
-    assert res[0]["first_name"] == "Sean"
-    assert res[1]["first_name"] == "Robert"
+    res = [res[0]['first_name'], res[1]['first_name']]
+    assert 'Robert' in res and 'Sean' in res
     res = helpers.get_position_holders(1)
     assert len(res) == 2
-    assert res[0]["first_name"] == "David"
-    assert res[1]["first_name"] == "Robert"
+    res = [res[0]['first_name'], res[1]['first_name']]
+    assert 'David' in res and 'Robert' in res
     res = helpers.get_position_holders([1, 5])
     assert len(res) == 3
-    assert res[0]["first_name"] == "David"
-    assert res[1]["first_name"] == "Robert"
-    assert res[2]["first_name"] == "Sean"
+    res = [res[0]['first_name'], res[1]['first_name'], res[2]['first_name']]
+    assert 'David' in res and 'Sean' in res and 'Robert' in res
 
 
 def test_get_positions_held(client):
     res = helpers.get_positions_held(4)
     assert len(res) == 2
     assert 4 in res and 5 in res
+    res = helpers.get_positions_held(2)
+    assert len(res) == 3
+    assert 1 in res and 4 in res and 5 in res
     res = helpers.get_positions_held(-1)
     assert res == []
 
