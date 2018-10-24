@@ -337,34 +337,3 @@ def check_permission(username, permission_id):
     """
     return permission_id in get_permissions(username)
 
-
-class AdminLink:
-    """Simple class to hold link information."""
-
-    def __init__(self, name, link):
-        self.name = name
-        self.link = link
-
-
-def generate_admin_links():
-    """Generates a list of links for the admin page."""
-    links = []
-    if not check_login() return links
-    if check_permission(flask.session['username'], Permissions.USERS):
-        links.append(
-            AdminLink('Add members',
-                      flask.url_for('admin.add_members', _external=True)))
-        links.append(
-            AdminLink('Manage positions',
-                      flask.url_for('admin.manage_positions', _external=True)))
-    if check_permission(flask.session['username'], Permissions.ROTATION):
-        links.append(
-            AdminLink('Rotation',
-                      flask.url_for('rotation.show_portal', _external=True)))
-    if check_permission(flask.session['username'], Permissions.EMAIL):
-        links.append(
-            AdminLink(
-                'Mailing lists',
-                # This one needs to be hard coded.
-                "https://donut.caltech.edu/mailman/admin"))
-    return links

@@ -77,3 +77,7 @@ def test_compare_secure_strings():
     # Make sure compare_secure_strings returns True and False when expected.
     assert misc_utils.compare_secure_strings(string1, string1) == True
     assert misc_utils.compare_secure_strings(string1, string2) == False
+
+
+def test_get_permissions():
+    res = auth_utils.get_permissions()
