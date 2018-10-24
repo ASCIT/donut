@@ -93,8 +93,10 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
 INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
     (1, 'Admin', 'Masquerade', 'Permission to use masquerades'),
-    (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information');
+    (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information'),
+    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
     (1, 1),
-    (5, 2);
+    (5, 2),
+    (1, 3);

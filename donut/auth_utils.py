@@ -321,9 +321,10 @@ def get_permissions(username):
     Returns a list with all of the permissions available to the user.
     """
     user_id = get_user_id(username)
+    if not user_id: return []
     positions = groups.get_positions_held(user_id)
     query = """
-    SELECT permission_id FROM position_permissions WHERE position_id in 
+    SELECT permission_id FROM position_permissions WHERE pos_id in 
     (%s)""" % (', '.join(['%s'] * len(positions)))
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (positions))
