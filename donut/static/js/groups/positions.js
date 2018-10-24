@@ -52,7 +52,7 @@ function getGroupList() {
         var id = allPositions[i].group_id
         if (groupDict[id] === undefined) {
             groupDict[id] = allPositions[i].group_name;
-            var newOption = '<option value="' + id + '">' 
+            var newOption = '<option value="' + id + '">'
                                 + allPositions[i].group_name + '</option>';
             $('#groupSelect option:last').after(newOption);
 
@@ -68,7 +68,7 @@ function collectPositions() {
         var id = allPositions[j].pos_id;
         if (positionsDict[id] === undefined) {
             positionsDict[id] = allPositions[j].pos_name;
-            var newOption = '<option value=' + id + '>' 
+            var newOption = '<option value=' + id + '>'
                         + allPositions[j].pos_name + '</option>';
             $('#positionSelect option:last').after(newOption);
         }
@@ -80,12 +80,12 @@ function collectPositions() {
  */
 function populateTables() {
     for (var i = 0; i < allPositions.length; i++) {
-        addRowToTable(allPositions[i]);        
+        addRowToTable(allPositions[i]);
     }
 }
 
 /*
- * adds specified position as a row on the position table 
+ * adds specified position as a row on the position table
  * @param {JSON} json specfiying a position
  */
 function addRowToTable(pos) {
@@ -93,12 +93,12 @@ function addRowToTable(pos) {
     var posId =  pos.pos_id;
     var studentName = pos.first_name + " " + pos.last_name;
     var userId = pos.user_id;
-    var newRow = '<tr>'  
-        + '<td> <a onclick=changeGroup(' + groupId + ')>' 
+    var newRow = '<tr>'
+        + '<td> <a onclick=changeGroup(' + groupId + ')>'
                             + groupDict[groupId] + '</a> </td>'
-        + '<td> <a onclick=changePosition(' + posId + ')>' 
+        + '<td> <a onclick=changePosition(' + posId + ')>'
                             + positionsDict[posId] + '</a> </td>'
-        + '<td> <a href=/1/users/' + userId + ">" + studentName + '</a> </td>' 
+        + '<td> <a href=/1/users/' + userId + ">" + studentName + '</a> </td>'
                 + '</tr>';
     $('#positionsTable tbody').append(newRow);
 }
@@ -162,7 +162,7 @@ function populateListOfPositions(groupIndex, posSelectId) {
         url: url,
         success: function(data){
             for (var i = 0; i < data.length; i++) {
-                var newOption = '<option value=' + data[i].pos_id + '>' + 
+                var newOption = '<option value=' + data[i].pos_id + '>' +
                     data[i].pos_name + '</option>';
                 $(posSelectId).append(newOption);
             }
@@ -213,52 +213,12 @@ $(document).ready(function() {
             success: function(data) {
                 if(data.success) {
                     setUpForms();
-                    alert("Assigned Position!") 
+                    alert("Assigned Position!")
                 }
             }
         });
     });
-
-    // script for updating the seach bar for looking up people
-    // taken from csanders directory search code
-    var nameInput = $('input#name'), nameSearch = $('ul#name-search')
-    nameInput.keyup(function() {
-        var name = nameInput.val()
-        if (name.length < MIN_SEARCH_LENGTH) return nameSearch.children().remove()
-        var token = {}
-        searchToken = token
-        setTimeout(function() {
-            if (searchToken !== token) return //new request issued
-            $.ajax({
-                url: '/1/users/search/' + encodeURIComponent(name),
-                dataType: 'json',
-                success: function(users) {
-                    if (searchToken !== token) return // newer request issued
-                    nameSearch.children().remove()
-                    for (var i = 0; i < users.length; i++) {
-                        var user = users[i];
-                        nameSearch.append(
-                            $('<li>').addClass('list-group-item').append($('<a>')
-                                .text(user.full_name + ", " + user.graduation_year)
-                                .click({name: user.full_name, userId: user.user_id}, 
-                                    function(event){
-                                        nameInput.val(event.data.name);
-                                        nameSearch.children().remove(); 
-                                        $('input#userId').val(event.data.userId); 
-                                })
-                            )
-                        );
-                    }         
-                    if (!users.length) {
-                        nameSearch.append($('<li>')
-                                  .addClass('list-group-item')
-                                  .text('No users found'));
-                    }
-                }
-            }) 
-        }, SEARCH_TIMEOUT)
-    })
-}); 
+});
 
 /*
  * Function to be called to reset forms to default
@@ -272,7 +232,7 @@ function setUpForms() {
                   .append('<option>Select a Position</option>');
     $('#posIdHold').find('option')
                     .remove()
-                    .end() 
+                    .end()
                     .append('<option>Select a Position</option>');
 
 }
