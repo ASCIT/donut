@@ -92,9 +92,9 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
 
 INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
-    (1, 'View', 'Ruddock Rotation Info', 'Ruddock members may view Ruddock rotation information'),
+    (1, 'Admin', 'Masquerade', 'Permission to use masquerades'),
     (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
-    (3, 1),
+    (1, 1),
     (5, 2);

@@ -80,8 +80,18 @@ def test_compare_secure_strings():
 
 
 def test_get_permissions():
-    #TODO
+    res = auth_utils.get_permissions('dqu')
+    assert res == [1]
+
+    res = auth_utils.get_permissions('reng')
+    assert set(res) == set([1,2])
+
+    res = auth_utils.get_permissions('notreal_user')
+    assert res == []
 
 
 def test_check_permission():
-    #TODO
+    assert auth_utils.check_permission('dqu', 1)
+    assert auth_utils.check_permission('reng', 2)
+    assert not auth_utils.check_permission('reng', -1)
+    
