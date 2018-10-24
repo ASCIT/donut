@@ -2,7 +2,7 @@ import flask
 import json
 from flask import jsonify, redirect
 
-from donut.auth_utils import get_user_id
+import donut.auth_utils
 from donut.modules.core import blueprint, helpers
 
 VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -62,12 +62,12 @@ def my_directory_page():
     return redirect(
         flask.url_for(
             'directory_search.view_user',
-            user_id=get_user_id(flask.session['username'])))
+            user_id=auth_utils.get_user_id(flask.session['username'])))
 
 
 @blueprint.route('/1/users/me/edit')
 def edit_user():
-    user_id = get_user_id(flask.session['username'])
+    user_id = auth_utils.get_user_id(flask.session['username'])
     name = helpers.get_preferred_name(user_id)
     gender = helpers.get_gender(user_id)
     return flask.render_template('edit_user.html', name=name, gender=gender)
@@ -75,7 +75,7 @@ def edit_user():
 
 @blueprint.route('/1/users/me/image', methods=['POST'])
 def set_image():
-    user_id = get_user_id(flask.session['username'])
+    user_id = auth_utils.get_user_id(flask.session['username'])
 
     def flash_error(message):
         flask.flash(message)
@@ -97,7 +97,7 @@ def set_image():
 
 @blueprint.route('/1/users/me/name', methods=['POST'])
 def set_name():
-    user_id = get_user_id(flask.session['username'])
+    user_id = auth_utils.get_user_id(flask.session['username'])
     helpers.set_member_field(user_id, 'preferred_name',
                              flask.request.form['name'])
     return redirect(
@@ -106,7 +106,7 @@ def set_name():
 
 @blueprint.route('/1/users/me/gender', methods=['POST'])
 def set_gender():
-    user_id = get_user_id(flask.session['username'])
+    user_id = auth_utils.get_user_id(flask.session['username'])
     helpers.set_member_field(user_id, 'gender_custom',
                              flask.request.form['gender'])
     return redirect(
