@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS marketplace_textbooks;
 
 CREATE TABLE marketplace_textbooks (
 	textbook_id INT NOT NULL AUTO_INCREMENT,
-	textbook_title VARCHAR(255) NOT NULL,
-	textbook_author VARCHAR(255) NOT NULL,
+	textbook_title VARCHAR(191) NOT NULL,
+	textbook_author VARCHAR(191) NOT NULL,
 PRIMARY KEY(textbook_id),
 UNIQUE KEY (textbook_title, textbook_author)
 );
