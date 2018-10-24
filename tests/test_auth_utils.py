@@ -11,6 +11,7 @@ from donut import misc_utils
 from donut import constants
 from donut.testing.fixtures import client
 
+
 def test_hash_password():
     """
   Tests each hash algorithm implemented by hash_password().
@@ -84,7 +85,7 @@ def test_get_permissions(client):
     assert set(res) == set([1, 3])
 
     res = auth_utils.get_permissions('reng')
-    assert set(res) == set([1,2,3])
+    assert set(res) == set([1, 2, 3])
 
     res = auth_utils.get_permissions('notreal_user')
     assert res == []
@@ -94,4 +95,3 @@ def test_check_permission(client):
     assert auth_utils.check_permission('dqu', 1)
     assert auth_utils.check_permission('reng', 2)
     assert not auth_utils.check_permission('reng', -1)
-    
