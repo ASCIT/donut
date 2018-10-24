@@ -328,7 +328,7 @@ def get_permissions(username):
     SELECT permission_id FROM position_permissions WHERE pos_id in 
     (%s)""" % (', '.join(['%s'] * len(positions)))
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (positions))
+        cursor.execute(query, positions)
         result = cursor.fetchall()
     return set(row['permission_id'] for row in result)
 
