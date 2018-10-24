@@ -25,7 +25,7 @@ def login_submit():
             split = mask_and_user.split(':')
             username, mask = split[0], split[1]
 
-            if not helpers.masked_person_exists(mask):
+            if not auth_utils.get_user_id(mask):
                 flask.flash('That person does not exist to mask.')
                 flask.redirect(flask.url_for('auth.login'))
         else:
