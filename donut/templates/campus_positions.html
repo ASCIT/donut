@@ -144,11 +144,10 @@ init({{approved_group_ids}},{{approved_group_names|safe}},
             attachDirectorySearch(nameInput, nameSearch, function(user){
                 return $('<li>').addClass('list-group-item').append($('<a>')
                         .text(user.full_name + ", " + user.graduation_year)
-                        .click({name: user.full_name, user_id: user.user_id},
-                            function(event){
-                                nameInput.val(event.data.name);
+                        .click(function(){
+                                nameInput.val(user.full_name);
                                 nameSearch.children().remove();
-                                $('input#user_id').val(event.data.user_id);
+                                $('input#user_id').val(user.user_id);
                         })
                     );
             })
