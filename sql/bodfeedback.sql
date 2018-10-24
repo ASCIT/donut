@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS bod_complaint_emails;
+DROP TABLE IF EXISTS bod_complaint_messages;
 DROP TABLE IF EXISTS bod_complaint_info;
 
 CREATE TABLE bod_complaint_info (
@@ -9,8 +11,6 @@ CREATE TABLE bod_complaint_info (
   UNIQUE KEY (uuid)
 );
 
-DROP TABLE IF EXISTS bod_complaint_messages;
-
 CREATE TABLE bod_complaint_messages (
   complaint_id int(11) DEFAULT NULL,
   time timestamp,
@@ -20,8 +20,6 @@ CREATE TABLE bod_complaint_messages (
   PRIMARY KEY (message_id),
   FOREIGN KEY (complaint_id) REFERENCES bod_complaint_info (complaint_id) ON DELETE CASCADE
 );
-
-DROP TABLE IF EXISTS bod_complaint_emails;
 
 CREATE TABLE bod_complaint_emails (
   complaint_id int(11) NOT NULL,

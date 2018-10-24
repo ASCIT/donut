@@ -68,16 +68,30 @@ def test_get_emails(client):
 
 def test_get_all_fields(client):
     fields = helpers.get_all_fields(1)
-    assert fields['emails'] == ['test@example.com', 'test2@example.com']
-    assert fields['messages'][0]['message'] == 'Sample Message'
-    assert fields['subject'] == 'Sub1'
-    assert fields['status'] == 'new_msg'
+    expected = {
+        'emails': ['test@example.com', 'test2@example.com'],
+        'messages': [{
+            'message': 'Sample Message',
+            'message_id': 1,
+            'poster': 'Davis',
+            'time': datetime(2018, 1, 1, 0, 0)
+        }, {
+            'message': 'Sample Message 2',
+            'message_id': 2,
+            'poster': 'Davis',
+            'time': datetime(2018, 1, 2, 0, 0)
+        }],
+        'subject':
+        'Sub1',
+        'status':
+        'new_msg'
+    }
+    assert fields == expected
     assert helpers.get_all_fields(500) is None
 
 
 def test_get_new_posts(client):
     posts = helpers.get_new_posts()
-    assert len(posts) == 1
     assert posts == [{
         'complaint_id': 1,
         'subject': 'Sub1',
@@ -98,15 +112,22 @@ def test_register_complaint(client):
     }
     complaint_id = helpers.register_complaint(data, False)
     res = helpers.get_all_fields(complaint_id)
-    expected = {
+    expected_without_messages = {
         'subject': 'Sub1',
         'status': 'new_msg',
         'emails': ['joe@example.com', 'joey@example.com']
     }
-    for key in expected:
-        assert expected[key] == res[key]
-    assert res['messages'][0]['message'] == 'Sample Message 3'
-    assert res['messages'][0]['poster'] == 'Joe Schmo'
+    expected_messages = [{
+        'message': 'Sample Message 3',
+        'poster': 'Joe Schmo',
+        'message_id': 4
+    }]
+    res_without_messages = {k: v for k, v in res.items() if k != 'messages'}
+    res_messages = [{k: v
+                     for (k, v) in r.items() if k != 'time'}
+                    for r in res['messages']]
+    assert res_without_messages == expected_without_messages
+    assert res_messages == expected_messages
     assert helpers.register_complaint(None) == False
 
 
@@ -121,6 +142,10 @@ def test_add_email(client):
 def test_add_msg(client):
     helpers.add_msg(2, 'Test message', 'Test user', False)
     messages = helpers.get_messages(2)
+    messages_without = [{
+        k: v
+        for (k, v) in message.items() if k == 'message' or k == 'poster'
+    } for message in messages]
     expected_messages = [{
         'message': 'This course is fun',
         'poster': 'Davis',
@@ -128,12 +153,19 @@ def test_add_msg(client):
         'message': 'Test message',
         'poster': 'Test user',
     }]
-    for i in range(len(expected_messages)):
-        for key in expected_messages[i]:
-            assert expected_messages[i][key] == messages[i][key]
+    assert messages_without == expected_messages
     helpers.add_msg(2, 'Anonymous message', '', False)
     messages = helpers.get_messages(2)
+    messages_without = [{
+        k: v
+        for (k, v) in message.items() if k == 'message' or k == 'poster'
+    } for message in messages]
     assert len(messages) == 3
-    assert messages[2]['poster'] == '(anonymous)'
+    assert messages_without == expected_messages + [{
+        'message':
+        'Anonymous message',
+        'poster':
+        '(anonymous)'
+    }]
     assert helpers.get_status(2) == 'new_msg'
     assert helpers.add_msg(500, '', '') == False

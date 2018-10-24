@@ -5,24 +5,24 @@ import pymysql.cursors
 
 
 def send_update_email(email, complaint_id):
-    """
-    Sends a confirmation email to [address] which should be an
+    '''
+    Sends an email to [email] which should be an
     email address of a user as a string
-    """
+    '''
     msg = email_templates.added_message.format(get_link(complaint_id))
     subject = "Received BoD Feedback"
     email_utils.send_email(email, msg, subject)
 
 
 def register_complaint(data, notification=True):
-    """
+    '''
     Inputs a complaint into the database and returns the complaint id
     associated with this complaint
     data should be a dict with keys 'course', 'msg' and optionally 'name', 'email'
     if required fields are missing, returns false
-    """
+    '''
     if not data or not data['subject'] or not data['msg']: return False
-    # register complaint
+    # Register complaint
     query = """
     INSERT INTO bod_complaint_info (subject, status, uuid)
     VALUES (%s, %s, UUID())
@@ -31,21 +31,21 @@ def register_complaint(data, notification=True):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (data['subject'], status))
     complaint_id = cursor.lastrowid
-    # add email to db if applicable
+    # Add email to db if applicable
     if data['email'] != "":
         emails = [x.strip() for x in data['email'].split(',')]
         for e in emails:
             add_email(complaint_id, e, False)
-    # add message to database
+    # Add message to database
     add_msg(complaint_id, data['msg'], data['name'], notification)
     return complaint_id
 
 
 def add_email(complaint_id, email, notification=True):
-    """
+    '''
     Adds an email to list of addresses subscribed to this complaint
     returns false if complaint_id is invalid
-    """
+    '''
     if not get_subject(complaint_id): return False
     query = """
     INSERT INTO bod_complaint_emails (complaint_id, email)
@@ -81,24 +81,20 @@ def add_msg(complaint_id, message, poster, notification=True):
     If complaint_id is invalid, returns False
     '''
     if not get_subject(complaint_id): return False
-    #add the message
+    # Add the message
     query = """
     INSERT INTO bod_complaint_messages (complaint_id, message, poster, time)
     VALUES (%s, %s, %s, NOW())
     """
-    # update the status to new_msg
-    query2 = """
-    UPDATE bod_complaint_info SET status = 'new_msg' WHERE complaint_id = %s
-    """
-    if poster == "" or poster is None:
+    # Update the status to new_msg
+    query2 = 'UPDATE bod_complaint_info SET status = "new_msg" WHERE complaint_id = %s'
+    if poster == '' or poster is None:
         poster = '(anonymous)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
     if notification:
-        query = """
-        SELECT email FROM bod_complaint_emails WHERE complaint_id = %s
-        """
+        query = 'SELECT email FROM bod_complaint_emails WHERE complaint_id = %s'
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(query, complaint_id)
             res = cursor.fetchall()
@@ -107,9 +103,9 @@ def add_msg(complaint_id, message, poster, notification=True):
 
 
 def get_link(complaint_id):
-    """
+    '''
     Gets a (fully qualified) link to the view page for this complaint id
-    """
+    '''
     query = 'SELECT uuid FROM bod_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -122,10 +118,10 @@ def get_link(complaint_id):
 
 
 def get_id(uuid):
-    """
+    '''
     Returns the complaint_id associated with a uuid
     or false if the uuid is not found
-    """
+    '''
     query = 'SELECT complaint_id FROM bod_complaint_info WHERE uuid = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, str(uuid))
@@ -137,10 +133,10 @@ def get_id(uuid):
 
 
 def get_messages(complaint_id):
-    """
+    '''
     Returns timestamps, posters, messages, and message_id's on this complaint
     in ascending order of timestamp
-    """
+    '''
     query = """
     SELECT time, poster, message, message_id FROM bod_complaint_messages WHERE complaint_id = %s ORDER BY time
     """
@@ -153,12 +149,10 @@ def get_messages(complaint_id):
 
 
 def get_summary(complaint_id):
-    """
-    Returns a dict with the following fields: course, status
-    """
-    fields = ['subject', 'status']
-    query = 'SELECT ' + ', '.join(
-        fields) + ' FROM bod_complaint_info WHERE complaint_id = %s'
+    '''
+    Returns a dict with the following fields: subject, status
+    '''
+    query = 'SELECT subject, status FROM bod_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
@@ -207,14 +201,15 @@ def mark_unread(complaint_id):
         return False
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        cursor.execute("COMMIT;")  #not sure why this doesn't autocommit
+        # Not sure why this doesn't autocommit
+        cursor.execute("COMMIT;")
 
 
 def get_emails(complaint_id):
-    """
+    '''
     Returns a list of subscribed emails for this complaint (which may be empty)
     or an empty list if complaint_id is invalid
-    """
+    '''
     query = 'SELECT email FROM bod_complaint_emails WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -244,7 +239,8 @@ def get_new_posts():
     Note that message and poster refer to the latest comment on this complaint
     '''
     query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject, post.status AS status,
-    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time FROM bod_complaint_info post
+    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time 
+    FROM bod_complaint_info post
     INNER JOIN bod_complaint_messages comment
     ON comment.complaint_id = post.complaint_id
     INNER JOIN (

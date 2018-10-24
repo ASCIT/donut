@@ -10,11 +10,11 @@
 		<div class="panel-body" id="summary-panel">
 		    <p>Subject: {{complaint['subject']}} </p>
 		    <p>Status: {{complaint['status']}} </p>
-		    {% if complaint['emails']|length == 0 %}
+		    {% if not complaint['emails'] %}
 		    <p>No emails subscribed to this complaint </p>
 		    {% else %}
 		    <p>Subscribed emails: </p>
-	            <form method="POST" id="remove-email" action="/">
+	            <form method="POST" id="remove-email" action="{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}">
 		    {% for email in complaint['emails'] %}
 		    <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
 		    {% endfor %}
@@ -32,7 +32,7 @@
 		    <h4>Add an email</h4>
 		</div>
 		<div class="panel-body">
-			<form id="add-email">
+			<form method="POST" id="add-email" action="{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid']) }}">
 			<div class="form-group">
 			    <p>Email: </p>
 			    <input class="form-control" type="text" name="email" />
@@ -65,7 +65,7 @@
 			<p>Add a comment<p>
 		    </div>
 		    <div class="panel-body">
-			<form method="POST" id="addMessage" action="/">
+			<form method="POST" id="addMessage" action="{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}">
 			    <div class="form-group">
 				<p>Name: </p>
 				<input class="form-control" type="text" name="poster" />
@@ -94,44 +94,6 @@
      {% else %}
      $('#markRead').hide();
      {% endif %} 
-     $('#add-email').submit(function(e) {
-	 e.preventDefault();
-	 $.ajax({
-	     url: "{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid']) }}",
-             data: $('#add-email').serialize(),
-	     type: 'POST', 
-	     success: function(){
-		 $('#add-email')[0].reset();
-	         location.reload();
-	     }     	 
-	 }); 
-     });
-
-     $("#remove-email").submit(function(e) {
-	 e.preventDefault();
-	 $.ajax({
-	     url: "{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}",
-             data: $('#remove-email').serialize(),
-	     type: 'POST', 
-	     success: function(){
-	         location.reload();
-	     }     	 
-	 }); 
-     });
-
-	
-     $('#addMessage').submit(function(e) {
-	 e.preventDefault();
-	 $.ajax({
-	     url: "{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}",
-	     data: $('#addMessage').serialize(),
-	     type: 'POST', 
-	     success: function(){
-		 $('#addMessage')[0].reset();
-	         location.reload();
-	     }
-	 }); 
-     });
      $('#markRead').click(function() {
 	 $.ajax({
 	     url: "{{ url_for('bodfeedback.bodfeedback_mark_read', id=complaint['uuid']) }}",

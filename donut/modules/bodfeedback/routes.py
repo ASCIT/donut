@@ -33,11 +33,11 @@ def bodfeedback_api_view_complaint(id):
     if not helpers.get_id(id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
-    #pack all the data we need into a dict
+    # Pack all the data we need into a dict
     return flask.jsonify(helpers.get_all_fields(complaint_id))
 
 
-# view a complaint
+# View a complaint
 @blueprint.route('/bodfeedback/view/<uuid:id>')
 def bodfeedback_view_complaint(id):
     if not helpers.get_id(id):
@@ -48,7 +48,7 @@ def bodfeedback_view_complaint(id):
     return flask.render_template('complaint.html', complaint=complaint)
 
 
-# add a message to this post
+# Add a message to this post
 @blueprint.route('/1/bodfeedback/add/<uuid:id>', methods=['POST'])
 def bodfeedback_add_msg(id):
     complaint_id = helpers.get_id(id)
@@ -63,27 +63,24 @@ def bodfeedback_add_msg(id):
         flask.abort(400)
         return
     helpers.add_msg(complaint_id, data['message'], data['poster'])
-    return flask.jsonify({
-        'poster': data['poster'],
-        'message': data['message']
-    })
+    return flask.redirect('/bodfeedback/view/' + str(id))
 
 
-# allow bod members to see a summary
+# Allow bod members to see a summary
 @blueprint.route('/bodfeedback/view/summary')
 def bodfeedback_view_summary():
-    #get a list containing data for each post
+    # Get a list containing data for each post
     complaints = helpers.get_new_posts()
-    #add links to each complaint
+    # Add links to each complaint
     for complaint in complaints:
         complaint['link'] = helpers.get_link(complaint['complaint_id'])
     return flask.render_template('summary.html', complaints=complaints)
 
 
-# mark a complaint read
+# Mark a complaint read
 @blueprint.route('/1/bodfeedback/markRead/<uuid:id>')
 def bodfeedback_mark_read(id):
-    #authenticate
+    # Authenticate
     complaint_id = helpers.get_id(id)
     if helpers.mark_read(complaint_id) == False:
         flask.abort(400)
@@ -103,25 +100,23 @@ def bodfeedback_mark_unread(id):
     return 'Success'
 
 
-# add an email to this complaint
+# Add an email to this complaint
 @blueprint.route('/1/bodfeedback/addEmail/<uuid:id>', methods=['POST'])
 def bodfeedback_add_email(id):
     complaint_id = helpers.get_id(id)
     if not complaint_id:
         flask.abort(400)
         return
-    fields = ['email']
     data = {}
-    for field in fields:
-        data[field] = flask.request.form.get(field)
+    data['email'] = flask.request.form.get('email')
     if data['email'] == "":
         flask.abort(400)
         return
     helpers.add_email(complaint_id, data['email'])
-    return flask.jsonify({'email': data['email']})
+    return flask.redirect('/bodfeedback/view/' + str(id))
 
 
-# remove an email from this complaint
+# Remove an email from this complaint
 @blueprint.route('/1/bodfeedback/removeEmail/<uuid:id>', methods=['POST'])
 def bodfeedback_remove_email(id):
     complaint_id = helpers.get_id(id)
@@ -134,4 +129,4 @@ def bodfeedback_remove_email(id):
         return
     for em in data:
         helpers.remove_email(complaint_id, em)
-    return flask.jsonify({'email': data[0]})
+    return flask.redirect('/bodfeedback/view/' + str(id))
