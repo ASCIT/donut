@@ -132,8 +132,8 @@ def handle_password_reset(username, new_password, new_password2):
 
 
 def masked_person_exists(mask):
-    query = "SELECT * FROM members WHERE user_id = %s" % mask
+    query = "SELECT user_id FROM users WHERE username=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        exists = cursor.fetchone() is None
-    return exists
+        cursor.execute(query, [mask])
+        result = cursor.fetchone()
+    return result is None

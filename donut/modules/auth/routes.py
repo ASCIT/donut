@@ -26,7 +26,8 @@ def login_submit():
             username, mask = split[0], split[1]
 
             if not helpers.masked_person_exists(mask):
-                raise Exception("No such person exists to mask.")
+                flask.flash('That person does not exist to mask.')
+                flask.redirect(flask.url_for('auth.login'))
         else:
             username = mask_and_user
 
@@ -39,7 +40,7 @@ def login_submit():
             else:
                 flask.session['username'] = username
                 permissions = auth_utils.get_permissions(username)
-            
+
             flask.session['permissions'] = permissions
             # True if there's any reason to show a link to the admin interface.
             flask.session[
