@@ -4,21 +4,61 @@
 <div class="container theme-showcase" role="main">
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron" style="padding-bottom: 0">
-        <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
-        <p>Welcome to Donut, the official website of the Associated Students of the California Institute of Technology. We provide unique services on behalf of the student body in an effort to better communication and make services accessible to all students.<p>
-
-        <p>If you're a guest or prospective student, you might consider looking into our publications or ASCIT documents in the left-hand sidebar to get a better idea of who we are. You can also email the board of directors from the suggestions page if you'd like more information.
-            If you're a student or on campus, you can explore more features, such as the undergraduate directory search or course review system.<p>
-
-        <p>And of course, if you have any questions/comments/concerns/jokes you'd like the site admins to know, don't hesitate to contact us below.<p>
-
-            Sincerely,
-            <br>Donut Devteam
-
-        </p>
+    <div class="jumbotron" style="background-color: transparent; padding-bottom: 0">
+	<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+        <video class="background-video" id="background-video" data-dashjs-player src="./static/videos/stream.mpd" autoplay loop muted></video>
+	    <div class="container pos-center">
+		<!--<canvas id="canvas" style="position: absolute; z-index: 0; width: 100%; top: 0; left: 0;"></canvas>-->
+		<img id="background-donut" src="../static/images/Donut.png"/>
+		<h1>Caltech Donut</h1>
+		<br>
+		<p class="large-text light-text"><button class="btn btn-primary pos-center">Learn More</button></p>
+	    <div>
     </div>
-
 </div>
 
+<script>
+setInterval(function(){ 
+    if (window.outerWidth < 800 && document.getElementById("background-video")) {
+	document.getElementById("background-video").outerHTML = "";
+    }
+}, 1000 / 60);
+</script>
+
+<!--<script>
+var cn = document.getElementById("canvas");
+var c = cn.getContext("2d");
+c.canvas.width  = window.innerWidth;
+c.canvas.height = window.innerHeight;
+
+var mouse = {x:0, y:0};
+
+function getTouchPos(canvasDom, touchEvent) {
+  var rect = canvasDom.getBoundingClientRect();
+  return {
+    x: touchEvent.touches[0].clientX - rect.left,
+    y: touchEvent.touches[0].clientY - rect.top
+  };
+}
+
+canvas.addEventListener("touchstart", function (e) {
+  var touch = e.touches[0];
+  mouse.x = touch.clientX;
+  mouse.y = touch.clientY;
+}, false);
+
+function main() {
+  var img = new Image();
+  img.src = '../static/images/Donut.png';
+
+  img.onload = function() { c.drawImage(img, mouse.x, mouse.y, 40, 40); };
+};
+
+$(window).on('resize', function(){
+      var win = $(this);
+      if (win.width() <= 700) { $( "div" ).remove( ".background-video" ); }
+});
+
+setInterval(main, 1000 / 60);
+</script>-->
 {% endblock %}
