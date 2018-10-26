@@ -107,7 +107,7 @@ def test_register_complaint(client):
     assert helpers.register_complaint(None) == False
 
 
-def test_add_email(client):
+def test_add_remove_email(client):
     helpers.add_email(1, 'sample_text@example.com')
     assert set(helpers.get_emails(1)) == set(
         ['test@example.com', 'test2@example.com', 'sample_text@example.com'])
@@ -121,6 +121,13 @@ def test_add_email(client):
         'test3@example.com', 'test4@example.com'
     ])
     assert helpers.add_email(500, 'text') == False
+    # test removing emails
+    helpers.remove_email(1, 'sample_text@example.com')
+    helpers.remove_email(1, 'test3@example.com')
+    helpers.remove_email(1, 'test4@example.com')
+    assert set(helpers.get_emails(1)) == set(
+        ['test@example.com', 'test2@example.com'])
+    assert not helpers.remove_email(-1, '')
 
 
 def test_add_msg(client):
