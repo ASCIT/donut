@@ -202,6 +202,11 @@ table {
   width: 60%;
 }
 
+/* For better mobile and desktop positioning of lists. */
+.jumbotron ul {
+  padding: 10px;
+}
+
 /* Class for making paragraph text large. */
 .large-text p {
   font-size: 150%;
@@ -492,6 +497,6 @@ table {
   #copyright {
     font-size: 1vh;
     text-align: left;
-  }
+ } 
 }
 
