@@ -27,7 +27,7 @@ def login_submit():
 
             if not auth_utils.get_user_id(mask):
                 flask.flash('That person does not exist to mask.')
-                flask.redirect(flask.url_for('auth.login'))
+                return flask.redirect(flask.url_for('auth.login'))
         else:
             username = mask_and_user
 
