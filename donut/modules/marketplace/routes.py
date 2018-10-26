@@ -38,7 +38,8 @@ def category():
         fields = ['item_title', 'item_price', 'user_id', 'item_timestamp']
 
     (datalist, headers, links) = helpers.generate_search_table(
-        fields=fields, attrs={'cat_id': category_id})
+        fields=fields, attrs={'cat_id': category_id,
+                              'item_active': True})
 
     return helpers.render_with_top_marketplace_bar(
         'search.html',
@@ -74,6 +75,7 @@ def query():
         attr_name: flask.request.args[attr_name]
         for attr_name in flask.request.args if attr_name in filterable_attrs
     }
+    attrs['item_active'] = True
     if category_id == 'all':
         category_id = 0
     else:
