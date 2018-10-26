@@ -46,8 +46,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # Pass the category array, urls array, and width string, along with the
     # arguments passed in to this function, on to Flask in order to render the
     # top bar and the rest of the content.
-    return flask.render_template(
-        template_url, cats=categories, **kwargs)
+    return flask.render_template(template_url, cats=categories, **kwargs)
 
 
 ###############
