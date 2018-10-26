@@ -12,23 +12,11 @@
                 <a href={{ url_for(".sell", state='new') }} method='post'>Sell an item</a>
             </div>
             <div class="row mp-nav-div" style="border-top: 2px solid black;border-bottom: 2px solid black;margin:5px 0px;font-size: 17px">
-                <table class="mp-nav" style="width:100%">
-                    <!-- links to various categories -->
-                    <tbody>
-                        {% for row in cats %}
-                            {% set i = loop.index0 %}
-                            <tr>
-                                {% for cat in row %}
-                                    {% set j = loop.index0 %}
-                                    <td style="width: {{ width }}%">
-                                        <a href={{ url_for(".category", cat=i*row|length+j+1) }}>{{ cat }}</a>
-                                        <!-- i*cats[0]|length+j+1 converts 2d array to 1-indexed 1d array -->
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="mp-nav" style="display:flex; flex-wrap: wrap; text-align: center;">
+                    {% for cat in cats %}
+                        <a href={{ url_for(".category", cat=loop.index0) }} style="margin: auto;">{{ cat }}</a>
+                    {% endfor %}
+                </div>
             </div>
             <br>
             <div>

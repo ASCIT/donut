@@ -10,14 +10,14 @@ from . import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
-SKIP_WORDS = [
+SKIP_WORDS = set([
     'a', 'all', 'am', 'an', 'and', 'are', 'as', 'at', 'be', 'been', 'but',
     'by', 'did', 'do', 'for', 'from', 'had', 'has', 'have', 'he', 'her',
     'hers', 'him', 'his', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'me',
     'my', 'not', 'of', 'on', 'or', 'so', 'that', 'the', 'their', 'them',
     'they', 'this', 'to', 'up', 'us', 'was', 'we', 'what', 'who', 'why',
     'will', 'with', 'you', 'your'
-]
+])
 
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
@@ -39,38 +39,15 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     # Get category titles.
     categories = table_fetch_all('marketplace_categories', ['cat_title'])
 
-    # Get number of rows and columns to display categories nicely. This is a
-    # little tricky - we want to aim for a table with either 4 categories or 5
-    # categories per row, with the last row catching the remainder. However, we
-    # want to avoid having exactly 1 category in the remainder row if possible.
-    # Thus we do our best to prevent num_cats % num_cols from being 1.
-    num_cats = len(categories)
-    if num_cats <= 5:
-        num_cols = num_cats
-    elif num_cats % 5 != 1:
-        num_cols = 5
-    elif num_cats % 4 != 1:
-        num_cols = 4
-    else:
-        num_cols = 5
-
     # If there's nothing in categories, 404; something's borked.
-    if num_cols == 0:
+    if len(categories) == 0:
         return flask.render_template('404.html'), 404
 
-    num_rows = ceil(num_cats / num_cols)
-
-    # Break categories into a 2d array so that it's easy to arrange in rows
-    # in the html file.
-    cats2d = [[]] * num_rows
-    for cat_index in range(len(categories)):
-        cats2d[cat_index // num_cols].append(categories[cat_index])
-
-    # Pass the 2d category array, urls array, and width string, along with the
+    # Pass the category array, urls array, and width string, along with the
     # arguments passed in to this function, on to Flask in order to render the
     # top bar and the rest of the content.
     return flask.render_template(
-        template_url, cats=cats2d, width=str(100.0 / num_cols), **kwargs)
+        template_url, cats=categories, **kwargs)
 
 
 ###############
