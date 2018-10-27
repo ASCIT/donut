@@ -20,37 +20,34 @@ $(function() {
           $.ajax({
             url: $SCRIPT_ROOT+'/_upload_file',
             type: 'POST',
-  	        data:form_data,
-  		      processData: false,
+  	    data:form_data,
+            processData: false,
             contentType: false,
-  	        success: function(data) {
-  			      window.location.href = data.url;
-  		      },
+  	    success: function(data) {
+              window.location.href = data.url;
+            },
             error: function(data){
               window.alert("Please enter a valid title");
             }
           });
-        }
-        else if (data.error === 'Duplicate title')
-  	    {
-  		    var res = confirm("You are replacing an existing file!");
-  			  if (res) {
+        } else if (data.error === 'Duplicate title') {
+          var res = confirm("You are replacing an existing file!");
+          if (res) {
             $.ajax({
               url: $SCRIPT_ROOT+'/_upload_file',
               type: 'POST',
               data:form_data,
               processData: false,
               contentType: false,
-  	          success: function(data) {
-  		          window.location.href = data.url;
-  	          },
+  	      success: function(data) {
+                window.location.href = data.url;
+  	      },
               error: function(data) {
                 window.alert("Please enter a valid title");
               }
             });
-  		    }
-  	    }
-        else {
+          }
+        } else {
           window.alert(data.error);
         }
       },

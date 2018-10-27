@@ -7,20 +7,20 @@
     <div class="jumbotron">
       <h1 id = "title" class="text-center">List of User Created Pages</h1>
       <div id = "content" style = "font-size:21px;font-weight:200; margin-bottom:15px;">
-	<table class = "table">
-        <tr>
-          <th>Page name</th>
-          <th></th>
-        </tr>
-        {% for link, name in links %}
-        <tr>
-	  <td><a href= "{{ link }}">{{name}}</a></td>
-	  {% if permissions%}
-   	    <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
-       	  {% endif %}
-	</tr>
-        {% endfor %}
-	</table>
+        <table class = "table">
+          <tr>
+            <th>Page name</th>
+            <th></th>
+          </tr>
+          {% for link, name in links %}
+            <tr>
+              <td><a href= "{{ link }}">{{name}}</a></td>
+              {% if permissions %}
+                <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </table>
       </div>
     </div>
   </div>

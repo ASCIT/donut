@@ -37,9 +37,12 @@ def change_title():
     '''
     title = flask.request.form['title']
     old_title = flask.request.form['old_title']
-    if check_permission(Permissions.ADMIN) and 'username' in flask.session:
-        helper.rename_title(old_title, title)
-
+    input_text = flask.request.form['input_text']
+    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
+    if title_res != None and check_permission(Permissions.ADMIN) and 'username' in flask.session:
+        helpers.rename_title(old_title, title)
+        return flask.render_template('editor_page.html', input_text=input_text, title=title)
+    return flask.abort(403)
 
 @blueprint.route('/pages/_save', methods=['POST'])
 def save():
@@ -49,8 +52,8 @@ def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and check_permission(
-            Permission.ADMIN) and 'username' in flask.session:
+    if title_res != None and len(title) <= 30 and check_permission(
+            Permissions.ADMIN) and 'username' in flask.session:
         helpers.write_markdown(markdown, title)
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
 

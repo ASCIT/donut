@@ -13,11 +13,14 @@ def display(url):
     Displays the webpages that have been created by users.
     '''
     page = helpers.read_page(url.replace(' ', '_'))
-    return flask.render_template(
-        'page.html',
-        page=page,
-        title=url.replace('_', ' '),
-        permission=check_permission(Permissions.ADMIN))
+    if page == -1:
+        return flask.abort(404)
+    else:
+        return flask.render_template(
+            'page.html',
+            page=page,
+            title=url.replace('_', ' '),
+            permissions=check_permission(Permissions.ADMIN))
 
 
 @blueprint.route('/_send_page', methods=['GET'])
@@ -52,8 +55,9 @@ def upload_file():
     filename = secure_filename(file.filename)
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
-    file.save(os.path.join(uploads, filename))
     if 'username' in flask.session and check_permission(Permissions.ADMIN):
+        helpers.remove_link(filename)
+        file.save(os.path.join(uploads, filename))
         return flask.jsonify({
             'url':
             flask.url_for('uploads.uploaded_file', filename=filename)
@@ -86,8 +90,7 @@ def uploaded_file(filename):
                            flask.current_app.config['UPLOAD_FOLDER'])
     return flask.send_from_directory(uploads, filename, as_attachment=False)
 
-
-@blueprint.route('/uploaded_list')
+@blueprint.route('/uploaded_list', methods=['GET'])
 def uploaded_list():
     '''
     Shows the list of uploaded files

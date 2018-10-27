@@ -11,8 +11,11 @@ def read_page(url):
     root = os.path.join(current_app.root_path,
                         current_app.config["UPLOAD_WEBPAGES"])
     path = os.path.join(root, url + '.md')
-    with open(path, 'r') as f:
-        return f.read()
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            return f.read()
+    else:
+        return -1
 
 
 def allowed_file(filename):
@@ -31,7 +34,7 @@ def remove_link(filename):
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
     for link in links:
-        name = link.replace(path + '/', '').rsplit('.', 1)[0]
+        name = link.replace(path + '/', '')
         if filename == name:
             os.remove(link)
 

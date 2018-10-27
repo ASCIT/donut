@@ -9,19 +9,28 @@
       <div id="info">
         <p>
           See a list of all created pages
-          <a href="{{ url_for('editor.created_list') }}">here</a>. See the
-          exact syntax for markdown pages
-          <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax">here</a>
-          You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>
-        </p>
+          <a href="{{ url_for('editor.created_list') }}">here</a>. 
+	</p>
+	<p>
+	  See the exact syntax for markdown pages
+          <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax">here</a>.
+	</p>
+	<p>
+	  You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>.
+	</p>
+	<p>
+	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 30 characters.
+	  Titles with underscores are interchangeable with titles with spaces (IE, "This title" and "This_title"
+	  are the same page). 
+	</p>
       </div>
 
       <div id='sucesss'>
       </div>
-
+      <p id="old_title" hidden>{{title}}</p>
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
       <br/>
-      <button id="change_title" onClick="change_title()">Change Title</button>
+      <button id="change_title" onClick="change_title('{{title}}')">Change Title</button>
 
       <br/>
       <div class="btn-group">
@@ -30,8 +39,8 @@
             <button class="btn btn-outline-primary btn-sm" type="button">Styles
             <span class="caret"></span></button>
               <ul class="dropdown-menu">
-		            <li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
-		            <li><a type="button" onClick="insert_bold()" class="btn btn-outline-secondary btn-sm">bold</a></li>
+               <li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
+               <li><a type="button" onClick="insert_bold()" class="btn btn-outline-secondary btn-sm">bold</a></li>
               </ul>
           </div>
         </div>
@@ -40,10 +49,9 @@
             <button class="btn btn-outline-primary btn-sm" type="button">Headings
             <span class="caret"></span></button>
             <ul class="dropdown-menu">
-
-       		 {% for i in range(1,7) %}
-		 <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_heading({{i}})" style="font-size:{{26 - i*2}}px">Heading</a></li>
-        	{% endfor %}
+            {% for i in range(1,7) %}
+              <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_heading({{i}})" style="font-size:{{26 - i*2}}px">Heading</a></li>
+            {% endfor %}
 	    </ul>
           </div>
         </div>

@@ -11,25 +11,19 @@ function run() {
 
 // Changes the title of a file
 function change_title(oldTitle){
-  var title = document.getElementById('title').value;
-  var valid = /^[0-9a-zA-Z.\/_\- ]*$/.test(title);
-  if (valid)
-  {
-    $.ajax({
-      url: $SCRIPT_ROOT+'/_change_title',
-      type: 'POST',
-      data:{title:title, old_title:oldTitle},
-      success: function(data) {
-        window.alert("Title Change Sucessfully");
-      },
-      error: function(data){
-        window.alert("Please enter a valid title!");
-      }
-    });
-  }
-  else {
-    window.alert("Please enter a valid title!");
-  }
+  var title = document.getElementById('text_title').value;
+  var input_text = document.getElementById('source').value;
+  $.ajax({
+    url: $SCRIPT_ROOT+'/_change_title',
+    type: 'POST',
+    data:{title:title, old_title:oldTitle, input_text:input_text},
+    success: function(data) {
+      window.alert("Title Change Sucessfully");
+    },
+    error: function(data) {
+      window.alert("Please enter a valid title!");
+    }
+  });
 }
 
 //###########
@@ -69,7 +63,7 @@ function insert_link(){
 }
 
 function insert_image(){
-  insert("![Alt text](url/to/image", false);
+  insert("![Alt text](url/to/image)", false);
 }
 
 function insert_ulist(){
@@ -83,17 +77,31 @@ function insert_olist(){
 
 function insert(string, selected){
   var ta = document.getElementById('source');
+  var begin = ta.selectionStart;
+  var end = ta.selectionEnd;
   if(selected)
   {
-    var txt2 = ta.value.substring(0, ta.selectionStart)
-  + string + ta.value.substring(ta.selectionStart, ta.selectionEnd) + string
-  + ta.value.substring(ta.selectionEnd);
+    if (document.queryCommandSupported('insertText')) {
+      ta.setSelectionRange(begin, begin);
+      ta.focus();
+      document.execCommand('insertText', false, string);
+      ta.setSelectionRange(end+string.length, end+string.length);
+      ta.focus();
+      document.execCommand('insertText', false, string);
+    } else{
+      ta.value = ta.value.substring(0, ta.selectionStart)
+      + string + ta.value.substring(ta.selectionStart, ta.selectionEnd) + string
+      + ta.value.substring(ta.selectionEnd);
+    }
   }
   else {
-    var txt2 = ta.value.substring(0, ta.selectionStart)
-  + string + ta.value.substring(ta.selectionStart);
+    if (document.queryCommandSupported('insertText')) {
+      document.execCommand('insertText', false, string);
+    } else{
+      ta.value = ta.value.substring(0, ta.selectionStart)
+      + string + ta.value.substring(ta.selectionStart);
+    }
   }
-  ta.value = txt2;
 }
 
 // Saves the page created
@@ -115,7 +123,7 @@ function save(){
       data:{markdown:text, title:title},
       success: function(data) {
         if (data.error === "")
-	{
+        {
           $.ajax({
             url: $SCRIPT_ROOT+'/pages/_save',
             type: 'POST',
@@ -127,11 +135,10 @@ function save(){
               window.alert("Please enter a valid title");
             }
           });
-        }
-	else if (data.error === "Duplicate title") {
-	  var res = confirm("You are overriding an existing file!");
+        } else if (data.error === "Duplicate title") {
+          var res = confirm("You are overriding an existing file!");
           if (res){
-	    $.ajax({
+            $.ajax({
               url: $SCRIPT_ROOT+'/pages/_save',
               type: 'POST',
               data:{markdown:text, title:title},
@@ -142,11 +149,10 @@ function save(){
                 window.alert("Please enter a valid title");
               }
             });
-	  }
-	}
-	else {
-	  window.alert(data.error)
-	}
+          }
+        } else {
+          window.alert(data.error)
+        }
       },
       error: function(data){
         window.alert("Please enter a valid title");
