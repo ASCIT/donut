@@ -61,7 +61,8 @@ INSERT INTO images(user_id, extension, image) VALUES
 INSERT INTO users(user_id, username) VALUES
     (1, "dqu"),
     (2, "reng"),
-    (3, "csander");
+    (3, "csander"),
+    (4, "ruddock_pres");
 
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
@@ -92,7 +93,7 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
 
 INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
-    (1, 'Admin', 'Masquerade', 'Permission to use masquerades'),
+    (1, 'Admin', 'ALL', 'Grants all other permissions -- FOR DEV ONLY'),
     (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information'),
     (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search');
 

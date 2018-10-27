@@ -10,7 +10,7 @@ import pymysql.cursors
 import flask
 
 from donut import constants
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 from donut import misc_utils
 from donut.modules.groups import helpers as groups
 
@@ -337,4 +337,5 @@ def check_permission(username, permission_id):
     """
     Returns True if the user has this permission, otherwise False
     """
-    return permission_id in get_permissions(username)
+    permissions = get_permissions(username)
+    return permission_id in permissions or Permissions.ADMIN in permissions

@@ -93,5 +93,7 @@ def test_get_permissions(client):
 
 def test_check_permission(client):
     assert auth_utils.check_permission('dqu', 1)
-    assert auth_utils.check_permission('reng', 2)
-    assert not auth_utils.check_permission('reng', -1)
+    # always returns true for admins
+    assert auth_utils.check_permission('dqu', -1)
+    assert auth_utils.check_permission('ruddock_pres', 2)
+    assert not auth_utils.check_permission('csander', -1)
