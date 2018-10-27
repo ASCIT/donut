@@ -8,6 +8,17 @@
   box-sizing: inherit;
 }
 
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+  cursor: move;
+}
+
 /* It should span the height of the page, using border-box box-sizing
  * to include padding in that height.
  */
@@ -161,6 +172,16 @@ table {
   width: 50%;
 }
 
+input[type=checkbox], input[type=radio] {
+  position: relative;
+  top: 2px;
+  left: 3px;
+}
+
+.candidate {
+  width: 100%;
+}
+
 /* The main container should only span 90% of the width of the page. */
 .container {
   width: 90%;
@@ -186,6 +207,38 @@ table {
 .white-border {
   border: 1px solid #FFF;
 }
+
+/* BEGIN FORM ELEMENTS */
+
+.element {
+  padding-bottom: 5px;
+  padding-top: 5px;
+  text-align: center;
+}
+
+.element.over {
+  border-top: 2px dashed #000;
+}
+
+.element:before, .element:after {
+  content: " ";
+  display: table;
+}
+
+.element:after {
+  clear: both;
+}
+
+.element .col-md-1, .col-md-11 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.input-group input {
+  margin-top: 0 !important;
+}
+
+/* END FORM ELEMENTS */
 
 /* Main wrapper class for all elements in the body. */
 .jumbotron {
@@ -346,6 +399,10 @@ table {
   font-size: 10px;
 }
 
+#question_container {
+  list-style-type: none;
+}
+
 /*****************************************************************************/
 /* Below is all the formatting for mobile devices. Basically, it just takes  *
  * the classes you love and augments them a bit to make sure they look great *
@@ -353,13 +410,9 @@ table {
  * is already taken care of for you.                                         *
 /*****************************************************************************/
 
-@media only screen and (min-device-width: 200px) and 
-		       (max-device-width: 600px) and 
-		       (orientation: portrait) {
-  /* Get rid of this so that it doesn't overlap anything. */
-  .caret {
-    display: none;
-  }
+/* BEGIN MOBILE CSS */
+
+@media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
 
   /* Any split column pages need to be treated as though they are blocked such
    * that they are on top of one another.
@@ -499,4 +552,6 @@ table {
     text-align: left;
  } 
 }
+
+/* END MOBILE CSS */
 

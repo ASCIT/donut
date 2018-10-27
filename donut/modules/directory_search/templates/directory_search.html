@@ -74,38 +74,14 @@
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
+	<script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
 	<script>
-		var MIN_SEARCH_LENGTH = 3
-		var SEARCH_TIMEOUT = 200 //ms
-		var searchToken
-
 		$(document).ready(function() {
 			var nameInput = $('input#name'), nameSearch = $('ul#name-search')
-			nameInput.keyup(function() {
-				var name = nameInput.val()
-				if (name.length < MIN_SEARCH_LENGTH) return nameSearch.children().remove()
-				var token = {}
-				searchToken = token
-				setTimeout(function() {
-					if (searchToken !== token) return //newer request issued
-					$.ajax({
-						url: '/1/users/search/' + encodeURIComponent(name),
-						dataType: 'json',
-						success: function(users) {
-							if (searchToken !== token) return //newer request issued
-							nameSearch.children().remove()
-							for (var i = 0; i < users.length; i++) {
-								var user = users[i]
-								nameSearch.append(
-									$('<li>').addClass('list-group-item').append(
-										$('<a>').attr('href', '/1/users/' + String(user.user_id)).text(user.full_name)
-									)
-								)
-							}
-							if (!users.length) nameSearch.append($('<li>').addClass('list-group-item').text('No users found'))
-						}
-					})
-				}, SEARCH_TIMEOUT)
+			attachDirectorySearch(nameInput, nameSearch, function(user) {
+				return $('<li>').addClass('list-group-item').append(
+					$('<a>').attr('href', '/1/users/' + String(user.user_id)).text(user.full_name)
+				)
 			})
 		})
 	</script>

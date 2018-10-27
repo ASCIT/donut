@@ -13,6 +13,7 @@ SOURCE sql/directory.sql
 SOURCE sql/marketplace.sql
 SOURCE sql/arcfeedback.sql
 SOURCE sql/rooms.sql
+SOURCE sql/voting.sql
 
 -- Populate with test data.
 SOURCE sql/test_data.sql
