@@ -4,7 +4,7 @@
 <div class="container theme-showcase" role="main">
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron" style="background-color: transparent; padding-bottom: 0">
+    <div id="homepage-jumbotron" class="jumbotron" style="background-color: transparent; padding-bottom: 0">
 	<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
         <video class="background-video" id="background-video" data-dashjs-player src="./static/videos/stream.mpd" autoplay loop muted></video>
 	    <div class="container pos-center">
@@ -21,6 +21,10 @@
 setInterval(function(){ 
     if (window.outerWidth < 800 && document.getElementById("background-video")) {
 	document.getElementById("background-video").outerHTML = "";
+    }
+    if (window.outerWidth > 800 && document.getElementById("background-donut")) {
+        document.getElementById("background-donut").outerHTML = "";
+	document.getElementById("homepage-jumbotron").style.paddingTop = "15%";
     }
 }, 1000 / 60);
 </script>
