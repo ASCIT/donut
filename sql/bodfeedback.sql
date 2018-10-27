@@ -26,6 +26,7 @@ CREATE TABLE bod_complaint_emails (
   email varchar(50) DEFAULT NULL,
   email_id int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (email_id),
-  FOREIGN KEY (complaint_id) REFERENCES bod_complaint_info (complaint_id) ON DELETE CASCADE
+  FOREIGN KEY (complaint_id) REFERENCES bod_complaint_info (complaint_id) ON DELETE CASCADE,
+  CONSTRAINT complaint_email UNIQUE (complaint_id, email)
 ); 
 

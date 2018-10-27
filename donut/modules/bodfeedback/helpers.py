@@ -51,10 +51,13 @@ def add_email(complaint_id, email, notification=True):
     INSERT INTO bod_complaint_emails (complaint_id, email)
     VALUES (%s, %s)
     """
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (complaint_id, email))
-    if notification:
-        send_update_email(email, complaint_id)
+    try:
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query, (complaint_id, email))
+        if notification:
+            send_update_email(email, complaint_id)
+    except pymysql.err.IntegrityError:
+        return False
     return True
 
 

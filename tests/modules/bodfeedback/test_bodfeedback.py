@@ -61,7 +61,7 @@ def test_mark_read(client):
 
 
 def test_get_emails(client):
-    assert helpers.get_emails(1) == ['test@example.com', 'test2@example.com']
+    assert helpers.get_emails(1) == ['test2@example.com', 'test@example.com']
     assert helpers.get_emails(2) == []
     assert helpers.get_emails(500) == []
 
@@ -69,7 +69,7 @@ def test_get_emails(client):
 def test_get_all_fields(client):
     fields = helpers.get_all_fields(1)
     expected = {
-        'emails': ['test@example.com', 'test2@example.com'],
+        'emails': ['test2@example.com', 'test@example.com'],
         'messages': [{
             'message': 'Sample Message',
             'message_id': 1,
@@ -134,9 +134,10 @@ def test_register_complaint(client):
 def test_add_email(client):
     helpers.add_email(1, 'sample_text@example.com', False)
     assert helpers.get_emails(1) == [
-        'test@example.com', 'test2@example.com', 'sample_text@example.com'
+        'sample_text@example.com', 'test2@example.com', 'test@example.com'
     ]
     assert helpers.add_email(500, 'text', False) == False
+    assert helpers.add_email(1, 'test@example.com', False) == False
 
 
 def test_add_msg(client):

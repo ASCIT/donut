@@ -9,7 +9,7 @@ def bodfeedback():
     return flask.render_template('bodfeedback.html')
 
 
-# submit feedback form
+# Submit feedback form
 @blueprint.route('/bodfeedback/submit', methods=['POST'])
 def bodfeedback_submit():
     fields = ['name', 'email', 'subject', 'msg']
@@ -27,7 +27,7 @@ def bodfeedback_submit():
     return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
 
 
-# api endpoint with all visible data
+# API endpoint with all visible data
 @blueprint.route('/1/bodfeedback/view/<uuid:id>')
 def bodfeedback_api_view_complaint(id):
     if not helpers.get_id(id):
@@ -63,7 +63,8 @@ def bodfeedback_add_msg(id):
         flask.abort(400)
         return
     helpers.add_msg(complaint_id, data['message'], data['poster'])
-    return flask.redirect('/bodfeedback/view/' + str(id))
+    return flask.redirect(
+        flask.url_for('bodfeedback.bodfeedback_view_complaint', id=id))
 
 
 # Allow bod members to see a summary
@@ -88,11 +89,10 @@ def bodfeedback_mark_read(id):
     return 'Success'
 
 
-# mark a complaint unread
+# Mark a complaint unread
 @blueprint.route('/1/bodfeedback/markUnread/<uuid:id>')
 def bodfeedback_mark_unread(id):
-    #authenticate
-
+    # Authenticate
     complaint_id = helpers.get_id(id)
     if helpers.mark_unread(complaint_id) == False:
         flask.abort(400)
@@ -109,11 +109,10 @@ def bodfeedback_add_email(id):
         return
     data = {}
     data['email'] = flask.request.form.get('email')
-    if data['email'] == "":
-        flask.abort(400)
-        return
-    helpers.add_email(complaint_id, data['email'])
-    return flask.redirect('/bodfeedback/view/' + str(id))
+    if data['email']:
+        helpers.add_email(complaint_id, data['email'])
+    return flask.redirect(
+        flask.url_for('bodfeedback.bodfeedback_view_complaint', id=id))
 
 
 # Remove an email from this complaint
@@ -124,9 +123,8 @@ def bodfeedback_remove_email(id):
         flask.abort(400)
         return
     data = flask.request.form.getlist('emails')
-    if data == []:
-        flask.abort(400)
-        return
-    for em in data:
-        helpers.remove_email(complaint_id, em)
-    return flask.redirect('/bodfeedback/view/' + str(id))
+    if data:
+        for em in data:
+            helpers.remove_email(complaint_id, em)
+    return flask.redirect(
+        flask.url_for('bodfeedback.bodfeedback_view_complaint', id=id))
