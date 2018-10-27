@@ -129,11 +129,3 @@ def handle_password_reset(username, new_password, new_password2):
     subject = "Password reset successful"
     email_utils.send_email(email, msg, subject)
     return True
-
-
-def masked_person_exists(mask):
-    query = 'SELECT * FROM members WHERE user_id = %s' % mask
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        exists = cursor.fetchone() is None
-    return exists

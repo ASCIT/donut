@@ -25,8 +25,9 @@ def login_submit():
             split = mask_and_user.split(':')
             username, mask = split[0], split[1]
 
-            if not helpers.masked_person_exists(mask):
-                raise Exception("No such person exists to mask.")
+            if not auth_utils.get_user_id(mask):
+                flask.flash('That person does not exist to mask.')
+                flask.redirect(flask.url_for('auth.login'))
         else:
             username = mask_and_user
 
@@ -35,14 +36,19 @@ def login_submit():
         if user_id is not None:
             permissions = auth_utils.get_permissions(username)
 
-            # If a mask was specified and the user can masquerade.
-            if mask is not None and permissions['mask']:
-                flask.session['username'] = mask
-                permissions = auth_utils.get_permissions(mask)
+            mask_perm = auth_utils.check_permission('mask')
+
+            if mask is not None:
+                if mask_perm:
+                    flask.session['username'] = mask
+                    permissions = auth_utils.get_permissions(mask)
+                else:
+                    flask.flash('You do not have permission to masquerade.')
+                    return flask.redirect(flask.url_for('auth.login'))
             else:
                 flask.session['username'] = username
-                flask.session['permissions'] = permissions
-            
+
+            flask.session['permissions'] = permissions
             # True if there's any reason to show a link to the admin interface.
             flask.session[
                 'show_admin'] = len(auth_utils.generate_admin_links()) > 0
