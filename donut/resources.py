@@ -8,6 +8,7 @@ Note: DO NOT re-use enum values unless you know exactly what you are doing!
 
 import enum
 
+
 # Enum for search modes.
 class MemberSearchMode(enum.IntEnum):
     # Everyone
