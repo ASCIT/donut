@@ -22,9 +22,11 @@ def login_submit():
     if mask_and_user is not None:
         # Check for the character to split.
         if ':' in mask_and_user:
+            # If it's there, we assume the second part is a mask name.
             split = mask_and_user.split(':')
             username, mask = split[0], split[1]
 
+            # But check to make sure the mask exists.
             if not auth_utils.get_user_id(mask):
                 flask.flash('That person does not exist to mask.')
                 return flask.redirect(flask.url_for('auth.login'))
@@ -36,13 +38,16 @@ def login_submit():
         if user_id is not None:
             permissions = auth_utils.get_permissions(username)
 
+            # We need to check if the user has masking permissions.
             mask_perm = auth_utils.check_permission('mask')
 
             if mask is not None:
                 if mask_perm:
+                    # If the user has mask permissions, give them the mask.
                     flask.session['username'] = mask
                     permissions = auth_utils.get_permissions(mask)
                 else:
+                    # Else, refuse the attempt to masquerade.
                     flask.flash('You do not have permission to masquerade.')
                     return flask.redirect(flask.url_for('auth.login'))
             else:
