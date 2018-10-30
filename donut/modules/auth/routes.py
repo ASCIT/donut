@@ -39,7 +39,7 @@ def login_submit():
             permissions = auth_utils.get_permissions(username)
 
             # We need to check if the user has masking permissions.
-            mask_perm = auth_utils.check_permission('mask')
+            #mask_perm = auth_utils.check_permission('mask')
 
             if mask is not None:
                 if mask_perm:
