@@ -118,7 +118,6 @@ td {
   background-color: #FFF;
   color: #333;
   margin-bottom: 5%;
-  z-index: 9999;
 }
 
 .btn:hover {
@@ -366,9 +365,6 @@ td {
 #footer {
   width: 50%;
   z-index: 9999;
-  bottom: 0;
-  left: 5px;
-  position: absolute;
 }
 
 #copyright {
@@ -378,8 +374,8 @@ td {
 }
 
 label.required:after {
-  content:"*";
-  color:red;
+  content: "*";
+  color: red;
 }
 
 @media only screen and (min-device-width: 200px) and (max-device-width: 800px) {
@@ -396,7 +392,7 @@ label.required:after {
   }
 
   #copyright {
-    color: #222;
+    color: #EEE;
   }
 }
 
