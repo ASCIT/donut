@@ -9,6 +9,7 @@ import hashlib
 from donut import auth_utils
 from donut import misc_utils
 from donut import constants
+from donut.testing.fixtures import client
 
 
 def test_hash_password():
@@ -77,3 +78,22 @@ def test_compare_secure_strings():
     # Make sure compare_secure_strings returns True and False when expected.
     assert misc_utils.compare_secure_strings(string1, string1) == True
     assert misc_utils.compare_secure_strings(string1, string2) == False
+
+
+def test_get_permissions(client):
+    res = auth_utils.get_permissions('dqu')
+    assert res == set([1, 3])
+
+    res = auth_utils.get_permissions('reng')
+    assert res == set([1, 2, 3])
+
+    res = auth_utils.get_permissions('notreal_user')
+    assert res == set()
+
+
+def test_check_permission(client):
+    assert auth_utils.check_permission('dqu', 1)
+    # always returns true for admins
+    assert auth_utils.check_permission('dqu', -1)
+    assert auth_utils.check_permission('ruddock_pres', 2)
+    assert not auth_utils.check_permission('csander', -1)

@@ -6,12 +6,13 @@ authentication and authorization, including logins and permissions.
 import hashlib
 import binascii
 import string
-import sqlalchemy
+import pymysql.cursors
 import flask
 
 from donut import constants
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 from donut import misc_utils
+from donut.modules.groups import helpers as groups
 
 
 class PasswordHashParser:
@@ -207,13 +208,13 @@ def set_password(username, password):
     # Sanity check
     if full_hash is None:
         raise ValueError
-    query = sqlalchemy.text("""
+    query = """
     UPDATE users
-    SET password_hash=:ph
-    WHERE username=:u
-    """)
-    flask.g.db.execute(query, ph=full_hash, u=username)
-    return
+    SET password_hash=%s
+    WHERE username=%s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (full_hash, username))
 
 
 def generate_salt():
@@ -234,12 +235,14 @@ def generate_reset_key():
 
 def check_reset_key(reset_key):
     """Returns the username if the reset key is valid, otherwise None."""
-    query = sqlalchemy.text("""
+    query = """
     SELECT username
     FROM users
-    WHERE password_reset_key = :rk AND NOW() < password_reset_expiration
-    """)
-    result = flask.g.db.execute(query, rk=reset_key).first()
+    WHERE password_reset_key = %s AND NOW() < password_reset_expiration
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, reset_key)
+        result = cursor.fetchone()
     if result is not None:
         return result['username']
     else:
@@ -252,19 +255,18 @@ def get_user_id(username):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [username])
         user = cursor.fetchone()
-    if user is None:
-        return None
-    return user['user_id']
+    return user and user['user_id']
 
 
 def update_last_login(username):
     """Updates the last login time for the user."""
-    query = sqlalchemy.text("""
+    query = """
     UPDATE users
     SET last_login=NOW()
-    WHERE username=:u
-    """)
-    flask.g.db.execute(query, u=username)
+    WHERE username=%s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, username)
 
 
 def generate_create_account_key():
@@ -282,13 +284,15 @@ def check_create_account_key(key):
   Returns the user_id if the reset key is valid (matches a user_id and that
   user does not already have an account). Otherwise returns None.
   """
-    query = sqlalchemy.text("""
+    query = """
     SELECT user_id
     FROM members
-    WHERE create_account_key = :k
+    WHERE create_account_key = %s
       AND user_id NOT IN (SELECT user_id FROM users)
-    """)
-    result = flask.g.db.execute(query, k=key).first()
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, key)
+        result = cursor.fetchone()
     if result is not None:
         return result['user_id']
     else:
@@ -315,65 +319,23 @@ def login_redirect():
 
 def get_permissions(username):
     """
-  Returns a list with all of the permissions available to the user.
-  A list is returned because Python sets cannot be stored in cookie data.
-  """
-    return []
-    query = sqlalchemy.text("""
-    (SELECT permission_id
-      FROM users
-        NATURAL JOIN offices
-        NATURAL JOIN office_assignments
-        NATURAL JOIN office_assignments_current
-        NATURAL JOIN office_permissions
-      WHERE username=:u)
-    UNION
-    (SELECT permission_id
-      FROM users
-        NATURAL JOIN user_permissions
-      WHERE username=:u)
-    """)
-    result = flask.g.db.execute(query, u=username)
-    return list(row['permission_id'] for row in result)
+    Returns a set with all of the permissions available to the user.
+    """
+    user_id = get_user_id(username)
+    if not user_id: return set()
+    positions = groups.get_positions_held(user_id)
+    query = """
+    SELECT permission_id FROM position_permissions WHERE pos_id in 
+    (%s)""" % (', '.join(['%s'] * len(positions)))
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, positions)
+        result = cursor.fetchall()
+    return set(row['permission_id'] for row in result)
 
 
-def check_permission(permission):
-    """Returns true if the user has the given permission."""
-    if 'permissions' not in flask.session:
-        return False
-    # Admins always have access to everything.
-    if Permissions.ADMIN in flask.session['permissions']:
-        return True
-    # Otherwise check if the permission is present in their permission list.
-    return permission in flask.session['permissions']
-
-
-class AdminLink:
-    """Simple class to hold link information."""
-
-    def __init__(self, name, link):
-        self.name = name
-        self.link = link
-
-
-def generate_admin_links():
-    """Generates a list of links for the admin page."""
-    links = []
-    if check_permission(Permissions.USERS):
-        links.append(
-            AdminLink('Add members',
-                      flask.url_for('admin.add_members', _external=True)))
-        links.append(
-            AdminLink('Manage positions',
-                      flask.url_for('admin.manage_positions', _external=True)))
-    if check_permission(Permissions.ROTATION):
-        links.append(
-            AdminLink('Rotation',
-                      flask.url_for('rotation.show_portal', _external=True)))
-    if check_permission(Permissions.EMAIL):
-        links.append(
-            AdminLink(
-                'Mailing lists',
-                # This one needs to be hard coded.
-                "https://donut.caltech.edu/mailman/admin"))
-    return links
+def check_permission(username, permission_id):
+    """
+    Returns True if the user has this permission, otherwise False
+    """
+    permissions = get_permissions(username)
+    return permission_id in permissions or Permissions.ADMIN in permissions

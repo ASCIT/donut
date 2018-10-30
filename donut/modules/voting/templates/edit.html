@@ -1,0 +1,303 @@
+{% extends "layout.html" %}
+{% block scripts %}
+  {{ super() }}
+  <script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
+  <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
+  <script>
+    var PREVIOUS_RESPONSE_WARNING = 'Previous responses will be deleted if you edit the questions. Are you sure you want to continue?'
+    var description = {{ survey['description']|tojson }}
+    var QUESTION_TYPES = {{ question_types|safe }}
+    var questionData = {{ questions_json|safe }}
+    var someResponses = {% if some_responses %}true{% else %}false{% endif %}
+
+    var dragSrcEl = null
+    var questionContainer, typeSelect, saveButton
+
+    function handleDragStart(e) {
+      dragSrcEl = this
+      e.originalEvent.dataTransfer.effectAllowed = 'move'
+      $(this).addClass('dragElem')
+    }
+    function handleDragOver(e) {
+      e.preventDefault() // Necessary. Allows us to drop.
+      $(this).addClass('over')
+      e.originalEvent.dataTransfer.dropEffect = 'move'
+      return false
+    }
+
+    function handleDragEnter(e) {}
+
+    function handleDragLeave(e) {
+      $(this).removeClass('over')
+    }
+
+    function handleDrop(e) {
+      e.stopPropagation() // Stops some browsers from redirecting.
+      var $this = $(this)
+
+      // Don't do anything if dropping the same column we're dragging.
+      if (dragSrcEl != this) {
+        $(dragSrcEl).insertBefore($this)
+        var dropElem = $this.prev()
+        addDnDHandlers(dropElem)
+      }
+      $this.removeClass('over')
+      return false
+    }
+
+    function handleDragEnd(e) {
+      $(this).removeClass('over')
+    }
+
+    function addDnDHandlers(question) {
+      question
+        .on('dragstart', handleDragStart)
+        .on('dragenter', handleDragEnter)
+        .on('dragover', handleDragOver)
+        .on('dragleave', handleDragLeave)
+        .on('drop', handleDrop)
+        .on('dragend', handleDragEnd)
+    }
+
+    function addChoice(makeChoiceElement) {
+      return function() {
+        var parent = $(this).closest('.element')
+        var choiceInput = parent.find('input.choice')
+        var choiceText = choiceInput.val()
+        if (choiceText) {
+          parent.find('.choices').append(makeChoiceElement(choiceText))
+          choiceInput.val('')
+        }
+        else alert('Please enter the name of the option')
+        choiceInput.focus()
+      }
+    }
+
+    function makeChoice(inputType) {
+      return function(choice) {
+        var choiceDiv = $('<div>').attr('choice', choice).append(
+          $('<label>').text(choice).append($('<input>').attr('type', inputType)),
+          $('<button>').addClass('btn btn-danger remove-choice')
+            .click(function() { choiceDiv.remove() })
+            .append($('<span>').addClass('glyphicon glyphicon-remove'))
+        )
+        return choiceDiv
+      }
+    }
+
+    function addElement(questionType, title, description, choices) {
+      title = title || ''
+      description = description || ''
+      choices = choices || []
+      var inputs = $('<div>').addClass('col-md-11').append(
+        $('<div>').addClass('input-group').append(
+          $('<input>').addClass('form-control title').attr('placeholder', 'Question title').val(title),
+          $('<span>').addClass('input-group-btn').append(
+            $('<button>').addClass('btn btn-danger').text('Remove').click(function() {
+              li.remove()
+            })
+          )
+        ),
+        $('<textarea>').addClass('form-control description').attr('placeholder', 'Question description').text(description)
+      )
+      var li = $('<li>').addClass('element').attr('question_type', questionType).attr('draggable', 'true').append(
+        $('<div>').addClass('col-md-1').append(
+          $('<span>').addClass('glyphicon glyphicon-menu-hamburger').css('font-size', '30px')
+        ),
+        inputs
+      )
+      var choiceName = $('<input>')
+        .addClass('form-control choice')
+        .attr('placeholder', 'Option name')
+        .keydown(function(e) {
+          if (e.which === '\r'.charCodeAt(0)) {
+            $(this).closest('.input-group').find('.btn-success').click()
+          }
+        })
+      switch (questionType) {
+        case QUESTION_TYPES.Dropdown:
+        case QUESTION_TYPES.Checkboxes:
+        case QUESTION_TYPES['Elected position']:
+          var makeChoiceFunction = makeChoice(
+            questionType === QUESTION_TYPES.Checkboxes ? 'checkbox' : 'radio'
+          )
+          var choicesDiv = $('<div>').addClass('choices')
+          choices.forEach(function(choice) { choicesDiv.append(makeChoiceFunction(choice)) })
+          inputs.append(
+            $('<div>').addClass('input-group').append(
+              choiceName,
+              $('<span>').addClass('input-group-btn').append(
+                $('<button>').addClass('btn btn-success').click(addChoice(makeChoiceFunction)).text('Add option')
+              )
+            )
+          )
+          if (questionType === QUESTION_TYPES['Elected position']) {
+            var nameInput = $('<input>').addClass('form-control').attr('placeholder', 'Candidate name')
+            var searchResults = $('<ul>').addClass('list-group')
+            attachDirectorySearch(nameInput, searchResults, function(user) {
+              return $('<button>').addClass('list-group-item')
+                .click(function() {
+                  var val = choiceName.val().trim()
+                  if (val) val += ', '
+                  choiceName.val(val + user.full_name)
+                  nameInput.val('').keyup() //clear directory search results
+                })
+                .append($('<p>').text(user.full_name))
+            })
+            inputs.append(nameInput, searchResults)
+          }
+          inputs.append(choicesDiv)
+          if (questionType === QUESTION_TYPES['Elected position']) {
+            inputs.append($('<label>').text('({{ NO }})'))
+          }
+          break
+        case QUESTION_TYPES['Short text']:
+          inputs.append($('<input>').addClass('form-control'))
+          break
+        case QUESTION_TYPES['Long text']:
+          inputs.append($('<textarea>').addClass('form-control'))
+      }
+      questionContainer.append(li)
+      addDnDHandlers(li)
+    }
+
+    function generateJSON() {
+      var questions = []
+      questionContainer.children().each(function() {
+        var $question = $(this)
+        var question = {
+          type: Number($question.attr('question_type')),
+          description: $question.find('textarea.description').val(),
+          title: $question.find('input.title').val()
+        }
+        var choicesDiv = $question.find('.choices')
+        if (choicesDiv.length) {
+          var choices = []
+          choicesDiv.children().each(function() {
+            choices.push($(this).attr('choice'))
+          })
+          question.choices = choices
+        }
+        questions.push(question)
+      })
+      return questions
+    }
+    function saveChanges() {
+      if (!saveButton.hasClass('btn-primary')) return //submission already in progress
+      if (someResponses && !confirm(PREVIOUS_RESPONSE_WARNING)) return
+
+      var newQuestionData = generateJSON()
+      saveButton.removeClass('btn-primary').addClass('btn-warning')
+      $.ajax({
+        url: '{{ url_for("voting.save_questions", access_key=access_key) }}',
+        type: 'POST',
+        data: JSON.stringify(newQuestionData),
+        dataType: 'json',
+        success: function(response) {
+          saveButton.removeClass('btn-warning')
+          saveButton.addClass(response.success ? 'btn-success' : 'btn-danger')
+          setTimeout(function() {
+            saveButton.removeClass('btn-success btn-danger').addClass('btn-primary')
+          }, 2e3)
+          questionData = newQuestionData
+        },
+        error: function(jqXHR, status, error) {
+          console.error(jqXHR, status, error)
+          saveButton.removeClass('btn-warning')
+          saveButton.addClass('btn-danger')
+          setTimeout(function() {
+            saveButton.removeClass('btn-danger').addClass('btn-primary')
+          }, 2e3)
+        }
+      })
+    }
+    function deepEquals(a, b) {
+      switch (a.constructor) {
+        case Array:
+          if (a.length !== b.length) return false
+          for (var i = 0; i < a.length; i++) {
+            if (!deepEquals(a[i], b[i])) return false
+          }
+          return true
+        case Object:
+          if (Object.keys(a).length !== Object.keys(b).length) return false
+          for (var key in a) {
+            if (!deepEquals(a[key], b[key])) return false
+          }
+          return true
+        default:
+          return a === b
+      }
+    }
+
+    $(document).ready(function() {
+      if (description) $('#description').append(formatText(description, 'h3'))
+      questionContainer = $('#question_container')
+      questionData.forEach(function(question) {
+        addElement(question.type, question.title, question.description, question.choices)
+      })
+
+      typeSelect = $('select#question_type')
+      for (var questionType in QUESTION_TYPES) {
+        typeSelect.append($('<option>').val(QUESTION_TYPES[questionType]).text(questionType))
+      }
+
+      $('button#add_question').click(function() { addElement(Number(typeSelect.val())) })
+      saveButton = $('button#save_survey').click(saveChanges)
+
+      $('input#take-link').val(
+        location.origin +
+        '{{ url_for("voting.take_survey", access_key=access_key) }}'
+      )
+    })
+    window.onbeforeunload = function(e) {
+      if (!deepEquals(generateJSON(), questionData)) {
+        return e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
+      }
+    }
+  </script>
+{% endblock %}
+{% block styles %}
+  {{ super() }}
+  <style>
+    .choices > * {
+      padding-top: 5px;
+    }
+    button.remove-choice {
+      position: relative;
+      left: 5px;
+    }
+  </style>
+{% endblock %}
+{% block page %}
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <h1>Editing survey questions for {{ survey['title'] }}</h1>
+      {% if survey['description'] %}
+        <div id='description'></div>
+      {% endif %}
+      <label for="take-link">Link to take survey:</label>
+      <input class="form-control" id="take-link" disabled/>
+      <a href="{{ url_for('voting.edit_params', access_key=access_key) }}">
+        Edit survey settings
+      </a>
+      <ul id="question_container"></ul>
+      <div class="form-group">
+        <div class="input-group">
+          <select class="form-control" id="question_type"></select>
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="add_question">Add question</button>
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" id="save_survey">Save</button>
+        {% if opened %}
+          <a href='{{ url_for("voting.take_survey", access_key=access_key) }}' class='btn btn-default'>
+            View
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

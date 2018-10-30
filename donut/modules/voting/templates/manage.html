@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block page %}
+  <div class='row'>
+    <div class='col-md-6 col-md-offset-3'>
+      {% if logged_in %}
+        <h3>My surveys</h3>
+        <div class='list-group'>
+          {% for survey in my_surveys %}
+            <a
+              class='list-group-item'
+              accesskey='{{ survey["access_key"] }}'
+              href='{{ url_for("voting.edit_questions", access_key=survey["access_key"]) }}'
+            >
+              <h4 class='list-group-item-heading'>
+                {{ survey['title'] }}
+              </h4>
+              {% if survey['description'] %}
+                <p class='list-group-item-text'>{{ survey['description'] }}</p>
+              {% endif %}
+              <p class='list-group-item-text'>
+                {% if survey['unopened'] %}
+                  Opens on
+                  {{ survey['start_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                  <br />
+                {% endif %}
+                {% if survey['closed'] %}Closed on{% else %}Open until{% endif %}
+                {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+              </p>
+              {% if not (survey['closed'] or survey['unopened']) %}
+                <button class='btn btn-warning close-survey'>Close survey</button>
+              {% endif %}
+              <button class='btn btn-danger delete'>Delete survey</button>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <h2>Please log in to manage your surveys</h2>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script>
+    $(document).ready(function() {
+      $('button.delete').click(function(e) {
+        e.preventDefault() //avoid being redirected to survey edit page
+        var $this = $(this)
+        var listItem = $this.closest('.list-group-item')
+        var title = listItem.children('.list-group-item-heading').text().trim()
+        if (!confirm('Are you sure you want to delete "' + title + '"?')) return
+        $.ajax({
+          url: '/1/surveys/' + listItem.attr('accesskey'),
+          type: 'DELETE',
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) listItem.remove()
+            else alert('Deletion failed: ' + response.message)
+          },
+          error: function(jqXHR, error, status) {
+            console.error(jqXHR, error, status)
+            alert('Deletion failed')
+          }
+        })
+      })
+      $('button.close-survey').click(function(e) {
+        e.preventDefault() //avoid being redirected to survey edit page
+        var $this = $(this)
+        var listItem = $this.closest('.list-group-item')
+        var title = listItem.children('.list-group-item-heading').text().trim()
+        if (!confirm('Are you sure you want to close "' + title + '"?')) return
+        $.ajax({
+          url: '/1/surveys/' + listItem.attr('accesskey') + '/close',
+          type: 'GET',
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) location.reload()
+            else alert('Close failed: ' + response.message)
+          },
+          error: function(jqXHR, error, status) {
+            console.error(jqXHR, error, status)
+            alert('Close failed')
+          }
+        })
+      })
+    })
+  </script>
+{% endblock %}
