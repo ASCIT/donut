@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block page %}
 
-{% block styles %}
-<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+{% block scripts %}
+    {{ super() }}
+    <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
 {% endblock %}
 
 <div class="container theme-showcase jumbotron">
