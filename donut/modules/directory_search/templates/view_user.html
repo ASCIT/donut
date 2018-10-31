@@ -1,10 +1,10 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='col-md-6 col-md-offset-3' id='dir-info' style='float: none; padding-bottom: 25px'>
+	<div class='container theme-showcase jumbotron' id='dir-info' style='float: none; width: 75%; margin-left: 15%; margin-right: 15%; padding-bottom: 25px'>
 		{% if user is none %}
 			No such user!
 		{% else %}
-			<h2>
+			<h2 class="pos-left">
 				{{ user['preferred_name'] or user['first_name'] }}
 				{{ user['middle_name'] or '' }}
 				{{ user['last_name'] }}
@@ -13,7 +13,7 @@
 				{% endif %}
 			</h2>
 			{% if user['image'] %}
-			<div class='col-md-8'>
+			<div style="margin-left: -15px;" class='pos-left col-md-8'>
 			{% else %}
 			<div>
 			{% endif %}
