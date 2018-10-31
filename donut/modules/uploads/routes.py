@@ -1,6 +1,7 @@
 import flask
 import json
 import os
+import time
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
 from donut.resources import Permissions
@@ -58,6 +59,7 @@ def upload_file():
     if 'username' in flask.session and check_permission(Permissions.ADMIN):
         helpers.remove_link(filename)
         file.save(os.path.join(uploads, filename))
+        time.sleep(5)
         return flask.jsonify({
             'url':
             flask.url_for('uploads.uploaded_file', filename=filename)
@@ -81,7 +83,7 @@ def check_file():
         return flask.abort(403)
 
 
-@blueprint.route('/uploaded_file/<filename>', methods=['GET'])
+@blueprint.route('/lib/uploaded_file/<filename>', methods=['GET'])
 def uploaded_file(filename):
     '''
     Serves the actual uploaded file.
@@ -89,6 +91,7 @@ def uploaded_file(filename):
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
     return flask.send_from_directory(uploads, filename, as_attachment=False)
+
 
 @blueprint.route('/uploaded_list', methods=['GET'])
 def uploaded_list():

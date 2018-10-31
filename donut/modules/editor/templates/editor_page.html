@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 {% block page %}
+<head>
 <link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
-
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+  <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+  <script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
+</head>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron" style="text-align: center">
@@ -19,7 +25,7 @@
 	  You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>.
 	</p>
 	<p>
-	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 30 characters.
+	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 35 characters.
 	  Titles with underscores are interchangeable with titles with spaces (IE, "This title" and "This_title"
 	  are the same page). 
 	</p>
@@ -79,14 +85,12 @@
       <hr/>
       <button id="runBtn" onClick="run()">preview</button>
       <button id="save" onClick="save()">Save Changes</button>
-      <div id="preview">
+      <header>
+        <h1 id = "preview_title" class="text-center"></h1>
+      </header>
+      <div id="preview" style="text-align: left">
       </div>
     </div>
   </div>
 </div>
-  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-  <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
-  <script type="text/javascript">
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
 {% endblock %}

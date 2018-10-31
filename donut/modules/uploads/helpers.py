@@ -2,6 +2,7 @@ import flask
 import os
 from flask import current_app
 import glob
+import time
 
 ALLOWED_EXTENSIONS = set(
     ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -36,7 +37,8 @@ def remove_link(filename):
     for link in links:
         name = link.replace(path + '/', '')
         if filename == name:
-            os.remove(link)
+            print(os.remove(link))
+            time.sleep(1)
 
 
 def check_valid_file(file):

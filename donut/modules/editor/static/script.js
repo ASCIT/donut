@@ -3,10 +3,14 @@ var TITLE_CUTOFF = 20;
 // Creates html
 function run() {
   var text = document.getElementById('source').value,
+      title = document.getElementById('text_title').value,
       target = document.getElementById('preview'),
+      target_title = document.getElementById('preview_title'),
       converter = new showdown.Converter({strikethrough: true}),
       html = converter.makeHtml(text);
   target.innerHTML = html;
+  target_title.innerHTML = title;
+
 }
 
 // Changes the title of a file

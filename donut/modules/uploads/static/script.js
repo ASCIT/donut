@@ -31,7 +31,7 @@ $(function() {
             }
           });
         } else if (data.error === 'Duplicate title') {
-          var res = confirm("You are replacing an existing file!");
+          var res = confirm("You are replacing an existing file! If you choose to override, you may need to refresh the page");
           if (res) {
             $.ajax({
               url: $SCRIPT_ROOT+'/_upload_file',
