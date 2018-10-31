@@ -20,6 +20,9 @@ def test_get_group_list_data(client):
     assert helpers.get_group_list_data(["not_a_real_field"]) == "Invalid field"
     assert helpers.get_group_list_data(["group_name"]) == [{
         "group_name":
+        "ARC"
+    },  {
+        "group_name":
         "Donut Devteam"
     }, {
         "group_name": "IHC"
@@ -29,7 +32,7 @@ def test_get_group_list_data(client):
     }]
     assert helpers.get_group_list_data()[0] == group
     assert helpers.get_group_list_data(None, {"group_id": 1})[0] == group
-    assert helpers.get_group_list_data(None, {"group_id": 4}) == []
+    assert helpers.get_group_list_data(None, {"group_id": -1}) == []
 
 
 def test_get_members_by_group(client):
@@ -48,7 +51,7 @@ def test_get_group_positions_data(client):
         "pos_id": 2,
         "pos_name": "Secretary"
     }]
-    assert helpers.get_group_positions(4) == []
+    assert helpers.get_group_positions(-1) == []
 
 
 def test_get_position_holders(client):
@@ -129,7 +132,7 @@ def test_delete_position(client):
 
 
 def test_get_group_data(client):
-    assert helpers.get_group_data(4) == {}
+    assert helpers.get_group_data(-1) == {}
     assert helpers.get_group_data(1, ["not_a_real_field"]) == "Invalid field"
     assert helpers.get_group_data(1) == group
     assert helpers.get_group_data(1, ["group_name"]) == {
