@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block page %}
-{% include "topbar.html" %}
 
-<div class="text-center">
+<div class="container theme-showcase jumbotron">
     <h3>
         Viewing item:
         {% if cat_title=="Textbooks" %}
@@ -15,7 +14,7 @@
     <!-- TODO: when logins and privs are implemented, put "edit this item" here -->
 
     <br>
-    <table style="margin-left: auto;margin-right: auto;text-align:left">
+    <table>
         <thead>
             <tr style="hidden">
                 <td style="width:90px"></td>

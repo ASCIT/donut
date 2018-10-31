@@ -2,7 +2,7 @@ import flask
 import pymysql.cursors
 from donut.auth_utils import get_permissions, get_user_id
 from donut.constants import Gender
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 
 
 def get_hidden_fields(viewer_name, viewee_id):
