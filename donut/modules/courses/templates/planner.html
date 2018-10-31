@@ -2,6 +2,7 @@
 {% block page %}
   <div class='col-md-8 col-md-offset-2' style='float: none'>
     <h1>Course Planner</h1>
+    <h3 id='warning' style='display: none'></h3>
     <div class='row'>
       <div class='col-md-3'>
         <input class='form-control' id='search' placeholder='Search...' />
@@ -102,29 +103,41 @@
       })
     }
     var draggedCourse = null
-    function addCourse(courseList) {
+    function addCourse(course, courseList, skipAPIAdd) {
       var yearTerm = getYearTerm(courseList)
-      if (draggedCourse.terms.indexOf(yearTerm[1]) < 0) {
+      var year = yearTerm[0], term = yearTerm[1]
+      var termIndex = course.terms.indexOf(term)
+      if (termIndex < 0) {
         return alert('Class is not offered that term')
       }
-      var units = courseUnits(draggedCourse)
+      var units = courseUnits(course)
       var courseItem = $('<li>').addClass('list-group-item').append(
         $('<span>').text(
-          draggedCourse.number + ' (' + units + ' unit' + (units === 1 ? '': 's') + ')'
+          course.number + ' (' + units + ' unit' + (units === 1 ? '': 's') + ')'
         ),
         $('<button>').addClass('btn btn-danger btn-xs')
-          .click((function(course) {
-            return function() {
-              courseItem.remove()
-              // TODO: make API call
-            }
-          })(draggedCourse))
+          .click(function() {
+            courseItem.remove()
+            // TODO: make API call
+          })
           .append(
             $('<span>').addClass('glyphicon glyphicon-trash')
           )
       )
       courseList.append(courseItem)
-      // TODO: make API call
+      if (skipAPIAdd) return
+
+      $.ajax({
+        type: 'GET',
+        url: '/1/planner/course/' + String(course.ids[termIndex]) + '/add/' + String(year),
+        dataType: 'json',
+        success: function(response) {
+          if (!response.success) displayWarning(response.message)
+        },
+        error: function() {
+          displayWarning('Failed to add course ' + course.number)
+        }
+      })
     }
     function displayCourses(matchingCourses) {
       coursesList.children().remove()
@@ -151,12 +164,13 @@
         })
         courseItem
           .attr('draggable', 'true')
-          .on('dragstart', (function(course) {
-            return function() { draggedCourse = course }
-          })(course))
+          .on('dragstart', function() { draggedCourse = course })
           .append(termsList)
         coursesList.append(courseItem)
       })
+    }
+    function displayWarning(message) {
+      $('#warning').text(message).show()
     }
     $.ajax({
       type: 'GET',
@@ -167,6 +181,18 @@
         displayCourses(courses)
       },
       error: function() { alert('Failed to load courses') }
+    })
+    $.ajax({
+      type: 'GET',
+      url: '{{ url_for("courses.planner_mine") }}',
+      dataType: 'json',
+      success: function(courses) {
+        myCourses = courses
+        courses.forEach(function(course) {
+          var courseList = $('.term-courses-list[year=' + course.year + '][term=' + course.terms[0] + ']')
+          addCourse(course, courseList, true)
+        })
+      }
     })
     $('input#search').keyup(function() {
       var query = $(this).val()
@@ -204,7 +230,7 @@
         })
         .on('drop', function(e) {
           e.stopPropagation() // Stops some browsers from redirecting.
-          addCourse($(this))
+          addCourse(draggedCourse, $(this))
           draggedCourse = null
         })
     })
