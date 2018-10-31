@@ -67,14 +67,16 @@ INSERT INTO users(user_id, username) VALUES
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
     (2, 'Ruddock House', 'house'),
-    (3, 'IHC', 'committee');
+    (3, 'IHC', 'committee'),
+    (4, 'ARC', 'committee');
 
 INSERT INTO positions(group_id, pos_id, pos_name) VALUES
     (1, 1, 'Head'),
     (1, 2, 'Secretary'),
     (2, 3, 'Full Member'),
     (2, 4, 'President'),
-    (3, 5, 'Member');
+    (3, 5, 'Member'),
+    (4, 6, 'Member');
 
 INSERT INTO position_holders(pos_id, user_id) VALUES
     (1, 1),
@@ -111,10 +113,18 @@ INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
     (1, 'Admin', 'ALL', 'Grants all other permissions -- FOR DEV ONLY'),
     (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information'),
-    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search');
+    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search'),
+    (4, 'View', 'Arcfeedback summary', 'View a summary page of all arcfeedback'),
+    (5, 'Edit', 'Arcfeedback', 'Mark a complaint read/unread'),
+    (6, 'Edit', 'Arcfeedback emails', 'Add or remove subscribed emails from arcfeedback'),
+    (7, 'View', 'Arcfeedback emails', 'View the list of subscribed emails on arcfeedback');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
     (1, 1),
     (5, 2),
-    (1, 3);
+    (1, 3),
+    (6, 4),
+    (6, 5),
+    (6, 6),
+    (6, 7);
 

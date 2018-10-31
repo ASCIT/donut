@@ -3,7 +3,8 @@ from donut.modules.arcfeedback import blueprint
 from donut.modules.arcfeedback import helpers
 from donut import auth_utils
 from datetime import datetime
-
+from donut.modules.arcfeedback.permissions import arc_permissions
+from donut.default_permissions import Permissions as default_permissions
 
 @blueprint.route('/arcfeedback')
 def arcfeedback():
@@ -55,7 +56,14 @@ def arcfeedback_view_complaint(id):
     complaint_id = helpers.get_id(id)
     complaint = helpers.get_all_fields(complaint_id)
     complaint['uuid'] = id
-    return flask.render_template('complaint.html', complaint=complaint)
+    perms = auth_utils.get_permissions(flask.session['username'])
+    arcperms = set()
+    if default_permissions.ADMIN in perms:
+        arcperms = set(arc_permissions)
+    else:
+        arcperms = perms.intersect(set(arc_permissions))
+    namedperms = [perm.name for perm in arcperms]
+    return flask.render_template('complaint.html', complaint=complaint, perms=namedperms)
 
 
 # add a message to this post
@@ -86,7 +94,9 @@ def arcfeedback_add_msg(id):
 @blueprint.route('/arcfeedback/view/summary')
 def arcfeedback_view_summary():
     #authenticate
-
+    if not auth_utils.check_permission(flask.session['username'], arc_permissions.SUMMARY):
+        flask.abort(403)
+        return
     #get a list containing data for each post
     complaints = helpers.get_new_posts()
     #add links to each complaint
@@ -99,7 +109,9 @@ def arcfeedback_view_summary():
 @blueprint.route('/1/arcfeedback/markRead/<uuid:id>')
 def arcfeedback_mark_read(id):
     #authenticate
-
+    if not auth_utils.check_permission(flask.session['username'], arc_permissions.TOGGLE_READ):
+        flask.abort(403)
+        return
     complaint_id = helpers.get_id(id)
     if helpers.mark_read(complaint_id) == False:
         flask.abort(400)
@@ -112,7 +124,9 @@ def arcfeedback_mark_read(id):
 @blueprint.route('/1/arcfeedback/markUnread/<uuid:id>')
 def arcfeedback_mark_unread(id):
     #authenticate
-
+    if not auth_utils.check_permission(flask.session['username'], arc_permissions.TOGGLE_READ):
+        flask.abort(403)
+        return
     complaint_id = helpers.get_id(id)
     if helpers.mark_unread(complaint_id) == False:
         flask.abort(400)
@@ -124,6 +138,9 @@ def arcfeedback_mark_unread(id):
 # add an email to this complaint
 @blueprint.route('/1/arcfeedback/<uuid:id>/addEmail', methods=['POST'])
 def arcfeedback_add_email(id):
+    if not auth_utils.check_permission(flask.session['username'], arc_permissions.ADD_REMOVE_EMAIL):
+        flask.abort(403)
+        return
     complaint_id = helpers.get_id(id)
     emails = flask.request.form.get('email')
     emails = emails.split(',')
@@ -142,9 +159,22 @@ def arcfeedback_add_email(id):
 
 # remove an email from this complaint
 # TODO: make this work from the front end / maybe rename it
-@blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail/<email>')
-def arfeedback_remove_email(id, email):
+@blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail', methods=['POST'])
+def arfeedback_remove_email(id):
+    if not auth_utils.check_permission(flask.session['username'], arc_permissions.ADD_REMOVE_EMAIL):
+        flask.abort(403)
+        return
     complaint_id = helpers.get_id(id)
-    success = helpers.remove_email(complaint_id, email)
-    if not success: return "Failed to remove email"
-    return "Success!"
+    emails = flask.request.form.get('email')
+    emails = emails.split(',')
+    emails = [email.strip() for email in emails]
+    for email in emails:
+        if len(email) > 50:
+            flask.flash("An email exceeded the character limit")
+            return arcfeedback_view_complaint(id)
+    for email in emails:
+        if not helpers.remove_email(complaint_id, email):
+            flask.flash('Failed to remove email: %s'%(email))
+            return arcfeedback_view_complaint(id)
+    flask.flash('Success!')
+    return arcfeedback_view_complaint(id)
