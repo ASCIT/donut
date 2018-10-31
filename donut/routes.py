@@ -18,7 +18,7 @@ def contact():
 
 @app.route('/campus_positions')
 def campus_positions():
-    '''Renders the campus positions template. We collect a list of 
+    '''Renders the campus positions template. We collect a list of
     groups that the currently loged in user is the admin of. We
     also collect the total list of positions and pass it in'''
     approved_group_ids = []
