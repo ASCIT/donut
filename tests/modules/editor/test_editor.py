@@ -25,8 +25,8 @@ def test_text_editor_page(client):
 
 
 def test_path_related_funciton(client):
-    helpers.remove_link("TEST_TITLE")
-    helpers.remove_link("ANOTHER_TITLE")
+    helpers.remove_link("TEST TITLE")
+    helpers.remove_link("ANOTHER TITLE")
     links = helpers.get_links()
     titles = []
     for (discard, title) in links:

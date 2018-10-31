@@ -5,7 +5,7 @@ import re
 
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 from donut.auth_utils import check_permission
 
 
@@ -23,7 +23,8 @@ def editor():
         input_text = helpers.read_markdown(inputt)
         title = flask.request.args.get('title')
 
-    if check_permission(Permissions.ADMIN) and 'username' in flask.session:
+    if 'username' in flask.session and check_permission(
+            flask.session['username'], Permissions.EDIT):
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
     else:
@@ -39,8 +40,8 @@ def change_title():
     old_title = flask.request.form['old_title']
     input_text = flask.request.form['input_text']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and check_permission(
-            Permissions.ADMIN) and 'username' in flask.session:
+    if title_res != None and 'username' in flask.session and check_permission(
+            flask.session['username'], Permissions.EDIT):
         helpers.rename_title(old_title, title)
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
@@ -55,8 +56,9 @@ def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and len(title) <= 35 and check_permission(
-            Permissions.ADMIN) and 'username' in flask.session:
+    if title_res != None and len(
+            title) <= 35 and 'username' in flask.session and check_permission(
+                flask.session['username'], Permissions.EDIT):
         helpers.write_markdown(markdown, title)
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
 
@@ -77,13 +79,17 @@ def created_list():
     '''
 
     filename = flask.request.args.get('filename')
-    if filename != None and check_permission(
-            Permissions.ADMIN) and 'username' in flask.session:
+    if filename != None and 'username' in flask.session and check_permission(
+            flask.session['username'], Permissions.EDIT):
         helpers.remove_link(filename)
 
     links = helpers.get_links()
-
-    return flask.render_template(
-        'created_list.html',
-        links=links,
-        permissions=check_permission(Permissions.ADMIN))
+    if 'username' not in flask.session:
+        return flask.render_template(
+            'created_list.html', links=links, permissions=False)
+    else:
+        return flask.render_template(
+            'created_list.html',
+            links=links,
+            permissions=check_permission(flask.session['username'],
+                                         Permissions.EDIT))

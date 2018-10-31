@@ -34,10 +34,13 @@ def remove_link(filename):
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
+    print(links)
     for link in links:
         name = link.replace(path + '/', '')
+        print(name)
+        print(filename)
         if filename == name:
-            print(os.remove(link))
+            os.remove(link)
             time.sleep(1)
 
 

@@ -65,6 +65,8 @@ def remove_link(filename):
     links = glob.glob(path + '/*')
     for i in links:
         name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
+        print(name)
+        print(filename)
         if filename == name:
             os.remove(i)
 

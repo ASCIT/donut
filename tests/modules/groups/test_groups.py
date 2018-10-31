@@ -77,11 +77,11 @@ def test_get_positions_held(client):
     assert 4 in res and 5 in res
 
     res = helpers.get_positions_held(2)
-    assert len(res) == 3
+    assert len(res) == 5
     assert 1 in res and 4 in res and 5 in res
 
     res = helpers.get_positions_held(1)
-    assert len(res) == 1
+    assert len(res) == 2
     assert 1 in res
 
     res = helpers.get_positions_held(-1)

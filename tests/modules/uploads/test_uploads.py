@@ -41,7 +41,7 @@ def test_get_links(client):
     editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
     assert "BLEH" == helpers.read_page("ANOTHER_TITLE")
 
-    helpers.remove_link("SOME.TITLE")
+    helpers.remove_link("SOME.TITLE.jpg")
     links = helpers.get_links()
     titles = []
     for (discard, title) in links:
