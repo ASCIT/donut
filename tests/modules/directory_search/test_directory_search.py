@@ -15,7 +15,9 @@ from donut.modules.directory_search import routes
 def test_hidden_fields(client):
     user_id = helpers.get_user_id('csander')
     assert not helpers.get_hidden_fields('csander', user_id)
-    assert helpers.get_hidden_fields('dqu', user_id)
+    #dqu should see all fields via admin priviledges
+    assert not helpers.get_hidden_fields('dqu', user_id)
+    assert helpers.get_hidden_fields('dtardif', user_id)
     assert helpers.get_hidden_fields(None, user_id)
 
 

@@ -9,20 +9,6 @@ Note: DO NOT re-use enum values unless you know exactly what you are doing!
 import enum
 
 
-# Enum for permissions available to users.
-class Permissions(enum.IntEnum):
-    # Site admins: always has access to everything
-    ADMIN = 1
-    # Add, edit, or delete user data
-    USERS = 2
-    # Run the room hassle
-    HASSLE = 3
-    # Manage mailing lists
-    EMAIL = 4
-    # Input rotation data
-    ROTATION = 5
-
-
 # Enum for search modes.
 class MemberSearchMode(enum.IntEnum):
     # Everyone
