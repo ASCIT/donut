@@ -112,6 +112,39 @@ def get_position_id(group_name, position_name):
     return res and res['pos_id']
 
 
+def create_group(group_name,
+                 group_desc="",
+                 group_type="",
+                 newsgroups=False,
+                 anyone_can_send=False,
+                 members_can_send=False,
+                 visible=False,
+                 admin_control_members=True):
+    """
+    Creates a group with the given group_id, group name and other specifications
+
+    Arguments:
+        group_name: The group name
+        group_desc: Description of group (if there is any)
+        group_type: Type of group
+        newgroups: Toggles if group is a news group
+        anyone_can_send: Toggles if anyone can send emails to this group
+        memberse_can_send: Toggles if members can send emails to this group
+        visible: Toggles if the group is visible
+        admin_control_members: toggles if administrator can control membership
+    """
+    fields = [
+        "group_name", "group_desc", "type", "newsgroups", "anyone_can_send",
+        "members_can_send", "visible", "admin_control_members"
+    ]
+    query = "INSERT INTO groups (" + ','.join(fields) + ")"\
+        "VALUES (%s, %s, %s, %r, %r, %r, %r, %r)"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
+                               anyone_can_send, members_can_send, visible,
+                               admin_control_members))
+
+
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.

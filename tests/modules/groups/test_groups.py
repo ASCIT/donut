@@ -159,6 +159,25 @@ def test_create_pos_holders(client):
     }]
 
 
+def test_create_group(client):
+    helpers.create_group("Page House", "May the work be light", "House", False,
+                         False, True, True, True)
+    assert helpers.get_group_data(4, [
+        "group_id", "group_name", "group_desc", "type", "anyone_can_send",
+        "members_can_send", "newsgroups", "visible", "admin_control_members"
+    ]) == {
+        "group_name": "Page House",
+        "group_desc": "May the work be light",
+        "type": "House",
+        "newsgroups": 0,
+        "anyone_can_send": 0,
+        "members_can_send": 1,
+        "visible": 1,
+        "admin_control_members": 1,
+        "group_id": 4
+    }
+
+
 # Test Routes
 # Difficult to test because query arguments are undefined outside Flask context
 # def test_get_groups_list(client):
