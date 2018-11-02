@@ -90,6 +90,16 @@ def add_planner_course(username, course_id, year):
         cursor.execute(query, (user_id, course_id, year))
 
 
+def drop_planner_course(username, course_id, year):
+    user_id = get_user_id(username)
+    query = """
+        DELETE FROM planner_courses
+        WHERE user_id = %s AND course_id = %s AND year = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course_id, year))
+
+
 def get_user_planner_courses(username):
     query = """
         SELECT

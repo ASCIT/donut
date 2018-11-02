@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 {% block page %}
   <div class='col-md-8 col-md-offset-2' style='float: none'>
+    <h3 id='warning'></h3>
     <h1>Course Planner</h1>
-    <h3 id='warning' style='display: none'></h3>
     <div class='row'>
       <div class='col-md-3'>
         <input class='form-control' id='search' placeholder='Search...' />
@@ -40,6 +40,9 @@
 {% block styles %}
   {{ super() }}
   <style>
+    #warning {
+      float: right;
+    }
     #courses {
       height: 600px;
       overflow-y: auto;
@@ -110,6 +113,7 @@
       if (termIndex < 0) {
         return alert('Class is not offered that term')
       }
+      var id = String(course.ids[termIndex])
       var units = courseUnits(course)
       var courseItem = $('<li>').addClass('list-group-item').append(
         $('<span>').text(
@@ -118,7 +122,18 @@
         $('<button>').addClass('btn btn-danger btn-xs')
           .click(function() {
             courseItem.remove()
-            // TODO: make API call
+            displayWarning('Saving...')
+            $.ajax({
+              type: 'GET',
+              url: '/1/planner/course/' + id + '/drop/' + String(year),
+              dataType: 'json',
+              success: function(response) {
+                displayWarning(response.success ? '' : response.message)
+              },
+              error: function() {
+                displayWarning('Failed to drop course ' + course.number)
+              }
+            })
           })
           .append(
             $('<span>').addClass('glyphicon glyphicon-trash')
@@ -127,12 +142,13 @@
       courseList.append(courseItem)
       if (skipAPIAdd) return
 
+      displayWarning('Saving...')
       $.ajax({
         type: 'GET',
-        url: '/1/planner/course/' + String(course.ids[termIndex]) + '/add/' + String(year),
+        url: '/1/planner/course/' + id + '/add/' + String(year),
         dataType: 'json',
         success: function(response) {
-          if (!response.success) displayWarning(response.message)
+          displayWarning(response.success ? '' : response.message)
         },
         error: function() {
           displayWarning('Failed to add course ' + course.number)

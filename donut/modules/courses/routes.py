@@ -1,4 +1,5 @@
 import flask
+import pymysql
 
 from donut.modules.courses import blueprint, helpers
 
@@ -31,7 +32,26 @@ def planner_add_course(course_id, year):
             'message': 'Must be logged in'
         })
 
-    helpers.add_planner_course(username, course_id, year)
+    try:
+        helpers.add_planner_course(username, course_id, year)
+        return flask.jsonify({'success': True})
+    except pymysql.err.IntegrityError:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Cannot schedule class twice in a term'
+        })
+
+
+@blueprint.route('/1/planner/course/<int:course_id>/drop/<int:year>')
+def planner_drop_course(course_id, year):
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in'
+        })
+
+    helpers.drop_planner_course(username, course_id, year)
     return flask.jsonify({'success': True})
 
 
