@@ -54,7 +54,8 @@ def login_submit():
                 flask.session['username'] = username
 
             # True if there's any reason to show a link to the admin interface.
-            flask.session['show_admin'] = len(auth_utils.generate_admin_links()) > 0
+            flask.session[
+                    'show_admin'] = len(auth_utils.generate_admin_links()) > 0
             # Update last login time
             auth_utils.update_last_login(username)
 
