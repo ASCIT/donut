@@ -11,6 +11,11 @@ def home():
     return flask.render_template('donut.html')
 
 
+@app.route('/gpa_calculator')
+def gpa_calculator():
+    return flask.render_template('gpa_calculator.html')
+
+
 @app.route('/contact')
 def contact():
     return flask.render_template('contact.html')
