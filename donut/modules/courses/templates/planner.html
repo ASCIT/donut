@@ -45,6 +45,8 @@
       <div class='panel-title'>Core Requirements</div>
     </div>
     <div class='panel-body'>
+      <!-- TODO: total units -->
+
       Ma 1abc
       <div class='progress'>
         <div class='progress-bar progress-bar-success' id='ma1'></div>
@@ -165,6 +167,8 @@
 {% block scripts %}
   {{ super() }}
   <script>
+    var SHOW_COURSES = 50
+
     var courses = []
     var coursesList, termLists, requirementsModal
     var terms = $('<table>').addClass('terms').append(
@@ -234,7 +238,7 @@
     }
     function displayCourses(matchingCourses) {
       coursesList.children().remove()
-      matchingCourses.forEach(function(course) {
+      matchingCourses.slice(0, SHOW_COURSES).forEach(function(course) {
         var courseItem = $('<li>').addClass('list-group-item').append(
           $('<h4>').text(course.number),
           $('<h5>').text(course.name),
