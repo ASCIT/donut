@@ -10,23 +10,32 @@
 		<div class="panel-body" id="summary-panel">
 		    <p>Subject: {{complaint['subject']}} </p>
 		    <p>Status: {{complaint['status']}} </p>
-		    {% if not complaint['emails'] %}
-		    <p>No emails subscribed to this complaint </p>
-		    {% else %}
-		    <p>Subscribed emails: </p>
-	            <form method="POST" id="remove-email" action="{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}">
-		    {% for email in complaint['emails'] %}
-		    <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
-		    {% endfor %}
-		    <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" />
-		    </form>
+		    {% if 'VIEW_EMAILS' in perms %}
+		      {% if not complaint['emails'] %}
+		        <p>No emails subscribed to this complaint </p>
+		      {% else %}
+		        <p>Subscribed emails: </p>
+	                <form method="POST" id="remove-email" action="{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}">
+		          {% for email in complaint['emails'] %}
+		            <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
+		          {% endfor %}
+			  {% if 'ADD_REMOVE_EMAIL' in perms %}
+		            <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" />
+		          {% else %}
+			    <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" disabled/>
+			  {% endif %}
+			</form>
+		      {% endif %}
 		    {% endif %}
 		</div>
+		{% if 'TOGGLE_READ' in perms %}
 		<button class="btn btn-primary" id="markRead">Mark as read</button>
 		<button class="btn btn-primary" id="markUnread">Mark as unread</button>
+	        {% endif %}
 	    </div>
 	</div>
 	<div class="col-md-4">
+	    {% if 'ADD_REMOVE_EMAIL' in perms %}
 	    <div class="panel panel-default">
 		<div class="panel-heading">
 		    <h4>Add an email</h4>
@@ -43,6 +52,7 @@
 		<div class="row">
 		</div>
 	    </div> 
+	    {% endif %}
 	</div>
 	<div class="row">
 	    <div class="col-md-8 col-md-offset-2">

@@ -102,3 +102,13 @@ INSERT INTO bod_complaint_messages(complaint_id, time, message, poster, message_
 INSERT INTO bod_complaint_emails(complaint_id, email, email_id) VALUES
     (1, 'test@example.com', 1),
     (1, 'test2@example.com', 2);
+
+INSERT INTO permissions(permission_id, permission_type, resource_name,
+       	    	        description) VALUES
+    (1, 'Admin', 'ALL', 'Grants all other permissions -- FOR DEV ONLY'),
+    (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information'),
+    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search'),
+    (8, 'View', 'Bodfeedback summary', 'View a summary page of all bodfeedback'),
+    (9, 'Edit', 'Bodfeedback', 'Mark a complaint read/unread'),
+    (10, 'Edit', 'Bodfeedback emails', 'Add or remove subscribed emails from bodfeedback'),
+    (11, 'View', 'Bodfeedback emails', 'View the list of subscribed emails on bodfeedback');
