@@ -105,13 +105,17 @@ def test_name_query(client):
         'full_name':
         'Robert Eng',
         'user_id':
-        2
+        2,
+        'graduation_year':
+        None
     }]
     assert helpers.get_users_by_name_query('eb cl san r') == [{
         'full_name':
         'Cleb Sander',
         'user_id':
-        3
+        3,
+        'graduation_year':
+        2021
     }]
     assert helpers.get_users_by_name_query('x') == ()
 
