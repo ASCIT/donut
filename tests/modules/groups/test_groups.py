@@ -183,13 +183,12 @@ def test_create_group(client):
         "pos_name": "Member"
     }]
 
+
 def test_delete_group(client):
     assert helpers.get_group_data(4) != {}
     helpers.delete_group(4)
     assert helpers.get_group_data(4) == {}
     assert helpers.get_group_positions(4) == []
-
-
 
 
 # Test Routes
