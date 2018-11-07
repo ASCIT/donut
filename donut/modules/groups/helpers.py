@@ -242,6 +242,7 @@ def create_position_holder(pos_id, user_id, start_date, end_date):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (pos_id, user_id, start_date, end_date))
 
+
 def create_group(group_name,
                  group_desc="",
                  group_type="",
@@ -273,7 +274,8 @@ def create_group(group_name,
         cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
                                anyone_can_send, members_can_send, visible,
                                admin_control_members))
-        add_position(cursor.lastrowid, "Member");
+        add_position(cursor.lastrowid, "Member")
+
 
 def delete_group(group_id):
     '''
@@ -290,6 +292,7 @@ def delete_group(group_id):
     s = s % group_id
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s)
+
 
 def get_members_by_group(group_id):
     '''
