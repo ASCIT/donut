@@ -61,7 +61,8 @@ INSERT INTO images(user_id, extension, image) VALUES
 INSERT INTO users(user_id, username) VALUES
     (1, "dqu"),
     (2, "reng"),
-    (3, "csander");
+    (3, "csander"),
+    (4, "ruddock_pres");
 
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),
@@ -82,6 +83,7 @@ INSERT INTO position_holders(pos_id, user_id) VALUES
     (4, 4),
     (4, 2),
     (5, 4);
+
 
 INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
     (4, 5);
@@ -112,3 +114,8 @@ INSERT INTO permissions(permission_id, permission_type, resource_name,
     (9, 'Edit', 'Bodfeedback', 'Mark a complaint read/unread'),
     (10, 'Edit', 'Bodfeedback emails', 'Add or remove subscribed emails from bodfeedback'),
     (11, 'View', 'Bodfeedback emails', 'View the list of subscribed emails on bodfeedback');
+
+INSERT INTO position_permissions(pos_id, permission_id) VALUES
+    (1, 1),
+    (5, 2),
+    (1, 3);
