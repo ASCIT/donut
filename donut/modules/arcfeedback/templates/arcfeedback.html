@@ -3,7 +3,6 @@
 
 <div class="container theme-showcase" role="main">
 
-    <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
         <p>This is the ARC anonymous course feedback form.</p>
@@ -23,7 +22,12 @@
   confidential. </p>
 
 	<p>After you submit your feedback, you'll be given a URL
-	 where you can follow up on what the ARC is doing in response.</p>
+	    where you can follow up on what the ARC is doing in response.</p>
+	{% if summary %}
+	<br>
+	<p><a href="{{ url_for('arcfeedback.arcfeedback_view_summary') }}">
+	    View summary page</a></p>
+	{% endif %}
 	<div class="col-md-8 col-md-offset-2">
 	  <div class="row">
 	    <form method="POST" action="{{  url_for('arcfeedback.arcfeedback_submit')  }}">

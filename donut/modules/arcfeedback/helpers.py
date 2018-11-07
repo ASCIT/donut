@@ -74,6 +74,7 @@ def remove_email(complaint_id, email):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
+    return True
 
 
 def add_msg(complaint_id, message, poster):

@@ -9,7 +9,10 @@ from donut.default_permissions import Permissions as default_permissions
 
 @blueprint.route('/arcfeedback')
 def arcfeedback():
-    return flask.render_template('arcfeedback.html')
+    summary = auth_utils.check_login() and \
+              auth_utils.check_permission(flask.session['username'],
+                                          arc_permissions.SUMMARY)
+    return flask.render_template('arcfeedback.html', summary=summary)
 
 
 # submit feedback form
@@ -57,12 +60,13 @@ def arcfeedback_view_complaint(id):
     complaint_id = helpers.get_id(id)
     complaint = helpers.get_all_fields(complaint_id)
     complaint['uuid'] = id
-    perms = auth_utils.get_permissions(flask.session['username'])
-    arcperms = set()
+    perms = set()
+    if auth_utils.check_login():
+        perms = auth_utils.get_permissions(flask.session['username'])
     if default_permissions.ADMIN in perms:
         arcperms = set(arc_permissions)
     else:
-        arcperms = perms.intersect(set(arc_permissions))
+        arcperms = perms & (set(arc_permissions))
     namedperms = [perm.name for perm in arcperms]
     return flask.render_template(
         'complaint.html', complaint=complaint, perms=namedperms)
@@ -164,9 +168,8 @@ def arcfeedback_add_email(id):
 
 
 # remove an email from this complaint
-# TODO: make this work from the front end / maybe rename it
 @blueprint.route('/1/arcfeedback/<uuid:id>/removeEmail', methods=['POST'])
-def arfeedback_remove_email(id):
+def arcfeedback_remove_email(id):
     if not auth_utils.check_permission(flask.session['username'],
                                        arc_permissions.ADD_REMOVE_EMAIL):
         flask.abort(403)

@@ -3,7 +3,12 @@
 <div class="container theme-showcase" role="main">
     <div class="jumbotron">
 	<div class="row">
+	    {% if 'ADD_REMOVE_EMAIL' in perms %}
+	    {# Leave space for the add/remove email panel #}
 	    <div class="col-md-8">
+	    {% else %}
+	    <div class="col-md-12">
+            {% endif %}
 		<div class="panel panel-default">
 		    <div class="panel-heading">
 			<h3>Feedback Summary</h3>
@@ -26,17 +31,17 @@
 		    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
 		</div>
 	    </div>
+	    {% if 'ADD_REMOVE_EMAIL' in perms %}
 	    <div class="col-md-4">
-		{% if 'ADD_REMOVE_EMAIL' in perms %}
 		<div class="panel panel-default">
 		    <div class="panel-heading">
-			<h4>Add an email</h4>
+			<h4>Manage Subscribed Emails</h4>
 		    </div>
 		    <div class="panel-body">
 			<form method="POST" id="add-email" action="{{url_for('arcfeedback.arcfeedback_add_email', id=complaint['uuid'])}}">
 			    <div class="form-group">
-				<p>Email (or comma separated list of emails): </p>
-				<input class="form-control" type="email" name="email" />
+				<p>Add Email (or comma separated list of emails): </p>
+				<input class="form-control" type="text" name="email" />
 			    </div>
 			    <input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
 			</form>
@@ -44,15 +49,15 @@
 		    <div class="panel-body">
 			<form method="POST" id="remove-email" action="{{url_for('arcfeedback.arcfeedback_remove_email', id=complaint['uuid'])}}">
 			    <div class="form-group">
-				<p>Email (or comma separated list of emails): </p>
-				<input class="form-control" type="email" name="email" />
+				<p>Remove Email (or comma separated list of emails): </p>
+				<input class="form-control" type="text" name="email" />
 			    </div>
-			    <input class="btn btn-primary" type="submit" value="Add" id="remove-email-btn">
+			    <input class="btn btn-primary" type="submit" value="Remove" id="remove-email-btn">
 			</form>
 		    </div>
 		</div>
-		{% endif %}
 	    </div>
+	    {% endif %}
 	    <div class="row">
 		<div class="col-md-8 col-md-offset-2">
 		    <div>
