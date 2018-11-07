@@ -14,7 +14,11 @@
         <table class='table table-bordered courses'>
           <thead>
             <tr>
-              <th></th>
+              <th>
+                <button class='btn btn-default btn-sm' id='show-requirements'>
+                  Core requirements
+                </button>
+              </th>
               {% for term_name in TERMS.values() %}
                 <th class='term-title'>{{ term_name }}</th>
               {% endfor %}
@@ -34,6 +38,69 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+  <div class='panel panel-primary' id='requirements-modal'>
+    <div class='panel-heading'>
+      <div class='panel-title'>Core Requirements</div>
+    </div>
+    <div class='panel-body'>
+      Ma 1abc
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='ma1'></div>
+      </div>
+
+      Ph 1abc
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='ph1'></div>
+      </div>
+
+      Ch 1ab
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='ch1'></div>
+      </div>
+
+      Bi 1 or 1x
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='bi1'></div>
+      </div>
+
+      Menu class
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='menu'></div>
+      </div>
+
+      Ch 3a or 3x
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='ch3'></div>
+      </div>
+
+      Additional intro lab
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='add-lab'></div>
+      </div>
+
+      Scientific writing <!-- TODO -->
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='writing'></div>
+      </div>
+
+      Freshman humanities
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='frosh-hums'></div>
+      </div>
+
+      <!-- TODO: hums + SS, advanced hums, advanced SS, writing intensive -->
+
+      PE
+      <div class='progress'>
+        <div class='progress-bar progress-bar-success' id='pe'></div>
+      </div>
+    </div>
+    <div class='panel-footer'>
+      <button class='btn btn-danger' id='close-requirements'>
+        Close
+      </button>
     </div>
   </div>
 {% endblock %}
@@ -83,13 +150,23 @@
       justify-content: space-around;
       padding: 0;
     }
+    #requirements-modal {
+      position: fixed;
+      top: 15%;
+      left: 30%;
+      right: 30%;
+      display: none;
+    }
+    #requirements-modal .progress {
+      margin-bottom: 10px;
+    }
   </style>
 {% endblock %}
 {% block scripts %}
   {{ super() }}
   <script>
     var courses = []
-    var coursesList
+    var coursesList, termLists, requirementsModal
     var terms = $('<table>').addClass('terms').append(
       $('<tr>').append(
         {% for term_name in TERMS.values() %}
@@ -115,7 +192,7 @@
       }
       var id = String(course.ids[termIndex])
       var units = courseUnits(course)
-      var courseItem = $('<li>').addClass('list-group-item').append(
+      var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
         $('<span>').text(
           course.number + ' (' + units + ' unit' + (units === 1 ? '': 's') + ')'
         ),
@@ -210,37 +287,78 @@
         })
       }
     })
-    $('input#search').keyup(function() {
-      var query = $(this).val()
-        .trim()
-        .toLowerCase()
-        .split(/[ /]+/)
-      var matches = []
-      courses.forEach(function(course) {
-        var number = course.number.toLowerCase(),
-          name = course.name.toLowerCase()
-        var score = 0
-        query.forEach(function(segment) {
-          var numberIndex = number.indexOf(segment)
-          if (numberIndex > -1) {
-            score += segment.length
-            if (numberIndex === 0 || number[numberIndex - 1] === ' ') score++
-            var matchEnd = numberIndex + segment.length
-            if (matchEnd === number.length || number[matchEnd] === ' ') score++
+    function setRequirementsProgress() {
+      var Ma1a = false, Ma1b = false, Ma1c = false,
+          Ph1a = false, Ph1b = false, Ph1c = false,
+          Ch1a = false, Ch1b = false,
+          Bi1 = false,
+          menu = false,
+          Ch3 = false, labUnits = 0,
+          PE = 0,
+          froshHums = 0
+      termLists.each(function(_, termList) {
+        $(termList).find('.list-group-item').each(function(_, course) {
+          var courseName = $(course).attr('course')
+          switch (courseName) {
+            case 'Ma 1a': Ma1a = true; break
+            case 'Ma 1b': Ma1b = true; break
+            case 'Ma 1c': Ma1c = true; break
+            case 'Ph 1a': Ph1a = true; break
+            case 'Ph 1b': Ph1b = true; break
+            case 'Ph 1c': Ph1c = true; break
+            case 'Ch 1a': Ch1a = true; break
+            case 'Ch 1b': Ch1b = true; break
+            case 'Bi 1':
+            case 'Bi 1x':
+            case 'Bi 8':
+            case 'Bi 9':
+              Bi1 = true; break
+            case 'Ay 1':
+            case 'EE 1':
+            case 'ESE 1':
+            case 'Ge 1':
+            case 'IST 4':
+              menu = true; break
+            case 'Ch 3a':
+            case 'Ch 3x':
+              Ch3 = true; break
+            case 'APh/EE 9a':
+            case 'APh/EE 9b':
+            case 'APh 24':
+            case 'Bi 10':
+            case 'Ch 4a':
+            case 'Ch 4b':
+            case 'Ch 8':
+            case 'Ch/ChE 9':
+            case 'EE/ME 7':
+            case 'Ge 116':
+            case 'Ph 3':
+            case 'Ph 5':
+            case 'Ph 8b':
+            case 'Ph 8c':
+              labUnits += Number($(course).attr('units'))
+              break
+            default:
+              if (courseName.startsWith('PE ')) PE++;
+              else if (courseName.startsWith('Hum/')) froshHums++;
           }
-          else if (name.indexOf(segment) > -1) score += segment.length * 0.1
         })
-        if (score) matches.push({course: course, score: score})
       })
-      displayCourses(
-        matches
-          .sort(function(a, b) { return b.score - a.score })
-          .map(function(courseScore) { return courseScore.course })
-      )
-    })
+      $('.progress-bar#ma1').css('width', (Ma1a + Ma1b + Ma1c) / 3 * 100 + '%')
+      $('.progress-bar#ph1').css('width', (Ph1a + Ph1b + Ph1c) / 3 * 100 + '%')
+      $('.progress-bar#ch1').css('width', (Ch1a * 6 + Ch1b * 9) / 15 * 100 + '%')
+      $('.progress-bar#bi1').css('width', Bi1 * 100 + '%')
+      $('.progress-bar#menu').css('width', menu * 100 + '%')
+      $('.progress-bar#ch3').css('width', Ch3 * 100 + '%')
+      $('.progress-bar#add-lab').css('width', Math.min(labUnits / 6, 1) * 100 + '%')
+      $('.progress-bar#frosh-hums').css('width', Math.min(froshHums / 2, 1) * 100 + '%')
+      $('.progress-bar#pe').css('width', Math.min(PE / 3, 1) * 100 + '%')
+    }
     $(document).ready(function() {
       coursesList = $('ul#courses')
-      $('.term-courses-list')
+      termLists = $('.term-courses-list')
+      requirementsModal = $('#requirements-modal')
+      termLists
         .on('dragover', function(e) {
           e.preventDefault()
         })
@@ -249,6 +367,41 @@
           addCourse(draggedCourse, $(this))
           draggedCourse = null
         })
+      $('#show-requirements').click(function() {
+        setRequirementsProgress()
+        requirementsModal.show()
+      })
+      $('#close-requirements').click(function() {
+        requirementsModal.hide()
+      })
+      $('input#search').keyup(function() {
+        var query = $(this).val()
+          .trim()
+          .toLowerCase()
+          .split(/[ /]+/)
+        var matches = []
+        courses.forEach(function(course) {
+          var number = course.number.toLowerCase(),
+            name = course.name.toLowerCase()
+          var score = 0
+          query.forEach(function(segment) {
+            var numberIndex = number.indexOf(segment)
+            if (numberIndex > -1) {
+              score += segment.length
+              if (numberIndex === 0 || number[numberIndex - 1] === ' ') score++
+              var matchEnd = numberIndex + segment.length
+              if (matchEnd === number.length || number[matchEnd] === ' ') score++
+            }
+            else if (name.indexOf(segment) > -1) score += segment.length * 0.1
+          })
+          if (score) matches.push({course: course, score: score})
+        })
+        displayCourses(
+          matches
+            .sort(function(a, b) { return b.score - a.score })
+            .map(function(courseScore) { return courseScore.course })
+        )
+      })
     })
   </script>
 {% endblock %}
