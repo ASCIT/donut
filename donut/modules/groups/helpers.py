@@ -112,40 +112,6 @@ def get_position_id(group_name, position_name):
     return res and res['pos_id']
 
 
-def create_group(group_name,
-                 group_desc="",
-                 group_type="",
-                 newsgroups=False,
-                 anyone_can_send=False,
-                 members_can_send=False,
-                 visible=False,
-                 admin_control_members=True):
-    """
-    Creates a group with the given group_id, group name and other specifications
-
-    Arguments:
-        group_name: The group name
-        group_desc: Description of group (if there is any)
-        group_type: Type of group
-        newgroups: Toggles if group is a news group
-        anyone_can_send: Toggles if anyone can send emails to this group
-        memberse_can_send: Toggles if members can send emails to this group
-        visible: Toggles if the group is visible
-        admin_control_members: toggles if administrator can control membership
-    """
-    fields = [
-        "group_name", "group_desc", "type", "newsgroups", "anyone_can_send",
-        "members_can_send", "visible", "admin_control_members"
-    ]
-    query = "INSERT INTO groups (" + ','.join(fields) + ")"\
-        "VALUES (%s, %s, %s, %r, %r, %r, %r, %r)"
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
-                               anyone_can_send, members_can_send, visible,
-                               admin_control_members))
-        add_position(cursor.lastrowid, "Member");
-
-
 def get_group_data(group_id, fields=None):
     """
     Queries the databse and returns member data for the specified group_id.
@@ -276,6 +242,54 @@ def create_position_holder(pos_id, user_id, start_date, end_date):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (pos_id, user_id, start_date, end_date))
 
+def create_group(group_name,
+                 group_desc="",
+                 group_type="",
+                 newsgroups=False,
+                 anyone_can_send=False,
+                 members_can_send=False,
+                 visible=False,
+                 admin_control_members=True):
+    """
+    Creates a group with the given group_id, group name and other specifications
+
+    Arguments:
+        group_name: The group name
+        group_desc: Description of group (if there is any)
+        group_type: Type of group
+        newgroups: Toggles if group is a news group
+        anyone_can_send: Toggles if anyone can send emails to this group
+        memberse_can_send: Toggles if members can send emails to this group
+        visible: Toggles if the group is visible
+        admin_control_members: toggles if administrator can control membership
+    """
+    fields = [
+        "group_name", "group_desc", "type", "newsgroups", "anyone_can_send",
+        "members_can_send", "visible", "admin_control_members"
+    ]
+    query = "INSERT INTO groups (" + ','.join(fields) + ")"\
+        "VALUES (%s, %s, %s, %r, %r, %r, %r, %r)"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
+                               anyone_can_send, members_can_send, visible,
+                               admin_control_members))
+        add_position(cursor.lastrowid, "Member");
+
+def delete_group(group_id):
+    '''
+    Deletes the group specified with the group_id and all assocaited
+    position holders entries and positions
+
+    Arguments:
+        group_id: id of the group to be deleted
+    '''
+    group_positions = get_group_positions(group_id)
+    for pos in group_positions:
+        delete_position(pos["pos_id"])
+    s = "DELETE FROM groups WHERE group_id=%d"
+    s = s % group_id
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s)
 
 def get_members_by_group(group_id):
     '''
