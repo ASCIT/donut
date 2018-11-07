@@ -177,6 +177,12 @@ def test_create_group(client):
         "group_id": 4
     }
 
+    # check that a new position with name "Member" was created
+    assert helpers.get_group_positions(4) == [{
+        "pos_id": 6,
+        "pos_name": "Member"
+    }]
+
 
 # Test Routes
 # Difficult to test because query arguments are undefined outside Flask context

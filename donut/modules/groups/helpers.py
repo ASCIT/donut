@@ -143,6 +143,7 @@ def create_group(group_name,
         cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
                                anyone_can_send, members_can_send, visible,
                                admin_control_members))
+        add_position(cursor.lastrowid, "Member");
 
 
 def get_group_data(group_id, fields=None):
