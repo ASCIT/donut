@@ -2,6 +2,7 @@
 Tests donut/modules/rooms/
 """
 from datetime import date, datetime, timedelta
+import json
 import re
 import flask
 import pytest
@@ -659,7 +660,7 @@ def test_edit_questions(client):
         '[{"title":"Added question","description":"","type":1,"choices":["choice A","choice B"]}]'
     )
     assert rv.status_code == 200
-    assert rv.data == b'{"success":true}\n'
+    assert json.loads(rv.data) == {'success': True}
     rv = client.get(
         flask.url_for('voting.edit_questions', access_key=access_key2))
     assert rv.status_code == 200
@@ -749,17 +750,26 @@ def test_close(client):
     # Test error cases
     rv = client.get(flask.url_for('voting.close_survey', access_key=past))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Cannot modify a survey after it has closed"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Cannot modify a survey after it has closed'
+    }
     rv = client.get(flask.url_for('voting.close_survey', access_key=future))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Survey has not opened yet"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Survey has not opened yet'
+    }
     # Test successful case
     rv = client.get(flask.url_for('voting.close_survey', access_key=present))
     assert rv.status_code == 200
-    assert rv.data == b'{"success":true}\n'
+    assert json.loads(rv.data) == {'success': True}
     rv = client.get(flask.url_for('voting.close_survey', access_key=present))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Cannot modify a survey after it has closed"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Cannot modify a survey after it has closed'
+    }
 
 
 def test_delete(client):
@@ -767,25 +777,34 @@ def test_delete(client):
     rv = client.delete(
         flask.url_for('voting.delete_survey', access_key='invalid-access-key'))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid access key"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid access key'
+    }
     access_key = helpers.get_closed_surveys(
         helpers.get_user_id('csander'))[0]['access_key']
     rv = client.delete(
         flask.url_for('voting.delete_survey', access_key=access_key))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"You are not the creator of this survey"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'You are not the creator of this survey'
+    }
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     # Test successful case
     rv = client.delete(
         flask.url_for('voting.delete_survey', access_key=access_key))
     assert rv.status_code == 200
-    assert rv.data == b'{"success":true}\n'
+    assert json.loads(rv.data) == {'success': True}
     # Test that it was deleted
     rv = client.delete(
         flask.url_for('voting.delete_survey', access_key=access_key))
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid access key"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid access key'
+    }
 
 
 def test_submit(client):
@@ -847,12 +866,14 @@ def test_submit(client):
         'type': question_types['Elected position'],
         'choices': ['do', 're', 'me'] # choices 18, 19, 20
     }])
-    print(helpers.get_questions_json(survey_id, True))
     # Test (some) restriction
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key), data='')
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Must be logged in to take survey"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Must be logged in to take survey'
+    }
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     # Test authorization
@@ -860,12 +881,18 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data='{"uid":"","birthday":"1999-05-08"}')
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Incorrect UID or birthday"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Incorrect UID or birthday'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data='{"uid":"2078141","birthday":""}')
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Incorrect UID or birthday"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Incorrect UID or birthday'
+    }
     # Test questions match
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
@@ -873,7 +900,10 @@ def test_submit(client):
         '{"uid":"2078141","birthday":"1999-05-08","responses":[{"question":1}]}'
     )
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Survey questions have changed"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Survey questions have changed'
+    }
     # Test response value errors
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
@@ -891,7 +921,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to dropdown"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to dropdown'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -908,7 +941,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid choice for dropdown"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid choice for dropdown'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -925,7 +961,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid text response"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid text response'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -942,7 +981,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to checkboxes"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to checkboxes'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -959,7 +1001,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to checkboxes"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to checkboxes'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -976,7 +1021,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid choice for checkboxes"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid choice for checkboxes'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -993,7 +1041,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid text response"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid text response'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1010,7 +1061,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to elected position'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1027,7 +1081,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to elected position'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1044,7 +1101,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid response to elected position"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid response to elected position'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1061,7 +1121,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid choice for elected position"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid choice for elected position'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1078,7 +1141,10 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert b'"success":false' in rv.data and b'"message":"Invalid write-in for elected position"' in rv.data
+    assert json.loads(rv.data) == {
+        'success': False,
+        'message': 'Invalid write-in for elected position'
+    }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1095,7 +1161,7 @@ def test_submit(client):
             }
         """)
     assert rv.status_code == 200
-    assert rv.data == b'{"success":true}\n'
+    assert json.loads(rv.data) == {'success': True}
     assert helpers.get_responses(
         survey_id, helpers.get_user_id('csander')) == [{
             'question_id': 8,
