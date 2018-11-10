@@ -6,7 +6,10 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
-        <p>This is the BoD anonymous course feedback form.</p>
+        {% if summary %}
+	<a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
+        {% endif %}
+	<p>This is the BoD anonymous course feedback form.</p>
 	
 	<p>Ever wanted to suggest something to the Board of Director's, but didn't want to say it directly / didn't know when BoD meetings were? Ever wanted to comment about how an event was run, or are curious about how to get involved?
 

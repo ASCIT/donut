@@ -1,4 +1,5 @@
 import flask
+from flask import Markup
 from donut.modules.bodfeedback import blueprint
 from donut.modules.bodfeedback import helpers
 from donut import auth_utils
@@ -8,7 +9,12 @@ from donut.default_permissions import Permissions as default_permissions
 
 @blueprint.route('/bodfeedback')
 def bodfeedback():
-    return flask.render_template('bodfeedback.html')
+    summary = False
+    if auth_utils.check_login():
+        perms = auth_utils.get_permissions(flask.session['username'])
+        if default_permissions.ADMIN in perms or bod_permissions.SUMMARY in perms:
+            summary = True
+    return flask.render_template('bodfeedback.html', summary=summary)
 
 
 # Submit feedback form
@@ -25,7 +31,9 @@ def bodfeedback_submit():
                         'error')
             return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
     complaint_id = helpers.register_complaint(data)
-    flask.flash('Success. Link: ' + helpers.get_link(complaint_id))
+    flask.flash(
+        Markup('Success: <a href="' + helpers.get_link(complaint_id) +
+               '">View Complaint</a>'))
     return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
 
 
@@ -47,7 +55,16 @@ def bodfeedback_view_complaint(id):
     complaint_id = helpers.get_id(id)
     complaint = helpers.get_all_fields(complaint_id)
     complaint['uuid'] = id
-    return flask.render_template('complaint.html', complaint=complaint)
+    perms = set()
+    if auth_utils.check_login():
+        perms = auth_utils.get_permissions(flask.session['username'])
+    if default_permissions.ADMIN in perms:
+        bodperms = set(bod_permissions)
+    else:
+        bodperms = perms & (set(bod_permissions))
+    namedperms = [perm.name for perm in bodperms]
+    return flask.render_template(
+        'complaint.html', complaint=complaint, perms=namedperms)
 
 
 # Add a message to this post
@@ -72,7 +89,8 @@ def bodfeedback_add_msg(id):
 # Allow bod members to see a summary
 @blueprint.route('/bodfeedback/view/summary')
 def bodfeedback_view_summary():
-    if 'username' not in flask.session or not auth_utils.check_permission(flask.session['username'], bod_permissions.SUMMARY):
+    if 'username' not in flask.session or not auth_utils.check_permission(
+            flask.session['username'], bod_permissions.SUMMARY):
         flask.abort(403)
         return
     # Get a list containing data for each post
@@ -87,7 +105,8 @@ def bodfeedback_view_summary():
 @blueprint.route('/1/bodfeedback/markRead/<uuid:id>')
 def bodfeedback_mark_read(id):
     # Authenticate
-    if 'username' not in flask.session or not auth_utils.check_permission(flask.session['username'], bod_permissions.TOGGLE_READ):
+    if 'username' not in flask.session or not auth_utils.check_permission(
+            flask.session['username'], bod_permissions.TOGGLE_READ):
         flask.abort(403)
         return
     complaint_id = helpers.get_id(id)
@@ -101,7 +120,8 @@ def bodfeedback_mark_read(id):
 @blueprint.route('/1/bodfeedback/markUnread/<uuid:id>')
 def bodfeedback_mark_unread(id):
     # Authenticate
-    if 'username' not in flask.session or not auth_utils.check_permission(flask.session['username'], bod_permissions.TOGGLE_READ):
+    if 'username' not in flask.session or not auth_utils.check_permission(
+            flask.session['username'], bod_permissions.TOGGLE_READ):
         flask.abort(403)
         return
     complaint_id = helpers.get_id(id)
@@ -114,7 +134,8 @@ def bodfeedback_mark_unread(id):
 # Add an email to this complaint
 @blueprint.route('/1/bodfeedback/addEmail/<uuid:id>', methods=['POST'])
 def bodfeedback_add_email(id):
-    if 'username' not in flask.session or not auth_utils.check_permission(flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
+    if 'username' not in flask.session or not auth_utils.check_permission(
+            flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
         flask.abort(403)
         return
     complaint_id = helpers.get_id(id)
@@ -132,7 +153,8 @@ def bodfeedback_add_email(id):
 # Remove an email from this complaint
 @blueprint.route('/1/bodfeedback/removeEmail/<uuid:id>', methods=['POST'])
 def bodfeedback_remove_email(id):
-    if 'username' not in flask.session or not auth_utils.check_permission(flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
+    if 'username' not in flask.session or not auth_utils.check_permission(
+            flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
         flask.abort(403)
         return
     complaint_id = helpers.get_id(id)

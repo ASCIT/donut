@@ -3,6 +3,9 @@
 <div class="jumbotron">
     <div class="row">
 	<div class="col-md-8">
+		{% if 'SUMMARY' in perms or 'ADMIN' in perms %}
+                <a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
+              {% endif %}
 	    <div class="panel panel-default">
 		<div class="panel-heading">
 		    <h3>Feedback Summary</h3>
@@ -10,7 +13,7 @@
 		<div class="panel-body" id="summary-panel">
 		    <p>Subject: {{complaint['subject']}} </p>
 		    <p>Status: {{complaint['status']}} </p>
-		    {% if 'VIEW_EMAILS' in perms %}
+		    {% if 'ADMIN' in perms or 'VIEW_EMAILS' in perms %}
 		      {% if not complaint['emails'] %}
 		        <p>No emails subscribed to this complaint </p>
 		      {% else %}
@@ -28,14 +31,14 @@
 		      {% endif %}
 		    {% endif %}
 		</div>
-		{% if 'TOGGLE_READ' in perms %}
+		{% if 'ADMIN' in perms or 'TOGGLE_READ' in perms %}
 		<button class="btn btn-primary" id="markRead">Mark as read</button>
 		<button class="btn btn-primary" id="markUnread">Mark as unread</button>
 	        {% endif %}
 	    </div>
 	</div>
 	<div class="col-md-4">
-	    {% if 'ADD_REMOVE_EMAIL' in perms %}
+	    {% if 'ADMIN' in perms or 'ADD_REMOVE_EMAIL' in perms %}
 	    <div class="panel panel-default">
 		<div class="panel-heading">
 		    <h4>Add an email</h4>
