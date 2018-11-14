@@ -69,6 +69,12 @@ def get_group_members(group_id):
     return jsonify(helpers.get_members_by_group(group_id))
 
 
+@blueprint.route("/1/positions/<int:pos_id>/direct/", methods=["GET"])
+def get_direct_pos_holders(pos_id):
+    """GET /1/positions/<int:pos_id>/direct"""
+    return jsonify(helpers.get_direct_position_holders(pos_id))
+
+
 @blueprint.route("/1/positions/<int:pos_id>/", methods=["GET"])
 def get_pos_holders(pos_id):
     """GET /1/positions/<int:pos_id>/"""

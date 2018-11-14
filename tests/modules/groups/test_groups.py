@@ -50,6 +50,7 @@ def test_get_group_positions_data(client):
     }]
     assert helpers.get_group_positions(4) == []
 
+
 def test_get_direct_position_holders(client):
     res = helpers.get_direct_position_holders(5)
     assert len(res) == 1
@@ -73,7 +74,6 @@ def test_get_position_holders(client):
     assert len(res) == 3
     assert set(row['first_name']
                for row in res) == set(['Robert', 'Sean', 'David'])
-
 
 
 def test_get_positions_held(client):

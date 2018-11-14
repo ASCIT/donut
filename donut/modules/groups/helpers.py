@@ -54,6 +54,7 @@ def get_group_positions(group_id):
         cursor.execute(query, [group_id])
         return list(cursor.fetchall())
 
+
 def get_direct_position_holders(pos_id):
     """
     Queries the database and returns a list of all members and their names

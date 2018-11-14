@@ -26,6 +26,7 @@ function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
         $('#groupCreate option:last').after(newOption);
         $('#groupDel option:last').after(newOption);
         $('#groupPosHold option:last').after(newOption);
+        $('#groupDelPosHold option:last').after(newOption);
     }
 }
 
@@ -152,6 +153,42 @@ function groupPosHoldChange() {
 }
 
 /*
+ * Called when a group is selected for the "delete position holder" tab.
+ * Queries for all positions associated with the group
+ */
+function groupDelPosHoldChange() {
+    var groupIndex = $('#groupDelPosHold').val();
+    $('#posIdDelHold').find('option').remove();
+    $('#posIdDelHold').append('<option> Pick a position </option>');
+    populateListOfPositions(groupIndex, '#posIdDelHold');
+}
+
+/*
+ * Called when a position is selected for the "delete position holder" tab.
+ * Queries for all holders of that position and fills in the name list
+ */
+function posIdDelHoldChange() {
+    var positionIndex = $('#posIdDelHold').val();
+    var url = '/1/positions/' + positionIndex + '/direct/';
+    console.log("HERE");
+    debugger;
+    $.ajax({
+        url: url,
+        success: function(data){
+            console.log(data);
+            $('#delName').find('option').remove();
+            for (var i = 0; i < data.length; i++) {
+                var newOption = '<option value=' + data[i].user_id + '>' +
+                    data[i].first_name + ' ' + data[i].last_name +
+                    '(' + data[i].start_date + " to " + data[i].end_date +
+                    ')</option>';
+                $('#delName').append(newOption);
+            }
+        }
+    });
+}
+
+/*
  * This method takes in a group id and a select element id and populates
  * the select element with a list of options representing all positions
  * associated with the group
@@ -169,6 +206,7 @@ function populateListOfPositions(groupIndex, posSelectId) {
         }
     });
 }
+
 
 $(document).ready(function() {
     // Setting up triggers for administration tasks
