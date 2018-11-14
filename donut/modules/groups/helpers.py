@@ -279,6 +279,7 @@ def create_group(group_name,
     add_position(new_group_id, "Member")
     return new_group_id
 
+
 def delete_group(group_id):
     '''
     Deletes the group specified with the group_id and all assocaited
