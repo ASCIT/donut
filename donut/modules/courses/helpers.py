@@ -103,29 +103,22 @@ def drop_planner_course(username, course_id, year):
 def get_user_planner_courses(username):
     query = """
         SELECT
-            courses.course_id,
+            course_id,
             CONCAT(department, ' ', course_number) AS number,
             term,
-            units_lecture, units_lab, units_homework,
-            planner_courses.year AS year
-        FROM
-            users
-            NATURAL JOIN planner_courses
-            JOIN courses ON planner_courses.course_id = courses.course_id
+            units,
+            planner_year
+        FROM users NATURAL JOIN planner_courses NATURAL JOIN courses
         WHERE username = %s
+        ORDER BY units DESC, number
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, username)
         courses = cursor.fetchall()
     return [{
         'ids': [course['course_id']],
-        'number':
-        course['number'],
-        'units': [
-            course['units_lecture'], course['units_lab'],
-            course['units_homework']
-        ],
+        'number': course['number'],
+        'units': course['units'],
         'terms': [course['term']],
-        'year':
-        course['year']
+        'year': course['planner_year']
     } for course in courses]

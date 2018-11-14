@@ -29,7 +29,7 @@ def planner_add_course(course_id, year):
     if not username:
         return flask.jsonify({
             'success': False,
-            'message': 'Must be logged in'
+            'message': 'Must be logged in to save'
         })
 
     try:
@@ -48,7 +48,7 @@ def planner_drop_course(course_id, year):
     if not username:
         return flask.jsonify({
             'success': False,
-            'message': 'Must be logged in'
+            'message': 'Must be logged in to save'
         })
 
     helpers.drop_planner_course(username, course_id, year)

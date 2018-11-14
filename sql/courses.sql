@@ -50,9 +50,9 @@ CREATE TABLE sections (
 );
 
 CREATE TABLE planner_courses (
-    user_id    INT      NOT NULL,
-    course_id  INT      NOT NULL,
-    year       TINYINT  NOT NULL, -- Frosh: 1, ..., Senior: 4
+    user_id       INT      NOT NULL,
+    course_id     INT      NOT NULL,
+    planner_year  TINYINT  NOT NULL, -- Frosh: 1, ..., Senior: 4
     PRIMARY KEY (user_id, course_id, year),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id)

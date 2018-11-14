@@ -192,7 +192,9 @@
       )
     )
     function courseUnits(course) {
-      return course.units.reduce(function(a, b) { return a + b })
+      return typeof course.units === 'number'
+        ? course.units
+        : course.units.reduce(function(a, b) { return a + b })
     }
     function getYearTerm(courseList) {
       return ['year', 'term'].map(function(attr) {
@@ -374,9 +376,7 @@
           }
         })
       })
-      $('.progress-bar#units')
-        .text(totalUnits + ' / 486')
-        .css('width', totalUnits / 486 * 100 + '%')
+      $('.progress-bar#units').text(totalUnits).css('width', totalUnits / 486 * 100 + '%')
       $('.progress-bar#ma1').css('width', (Ma1a + Ma1b + Ma1c) / 3 * 100 + '%')
       $('.progress-bar#ph1').css('width', (Ph1a + Ph1b + Ph1c) / 3 * 100 + '%')
       $('.progress-bar#ch1').css('width', (Ch1a * 6 + Ch1b * 9) / 15 * 100 + '%')
