@@ -54,6 +54,29 @@ def get_group_positions(group_id):
         cursor.execute(query, [group_id])
         return list(cursor.fetchall())
 
+def get_direct_position_holders(pos_id):
+    """
+    Queries the database and returns a list of all members and their names
+    that currently hold the position specified by the pos_id. This only
+    includes people that are directly holding the position as specified
+    by the position_holders table
+
+    Arguments:
+        pos_id: the position id to be queried
+    Returns:
+        results:    A list where each element describes a user who holds the
+                    position. Each element is a dict with key:value of
+                    columnname:columnvalue
+    """
+    fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
+    query = "SELECT " + ', '.join(fields) + " "
+    query += """FROM position_holders NATURAL JOIN members
+                WHERE pos_id =%s"""
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [pos_id])
+        return cursor.fetchall()
+
 
 def get_position_holders(pos_id):
     """
