@@ -164,24 +164,34 @@ function groupDelPosHoldChange() {
 }
 
 /*
+ * Converts a dateString to a more readable format
+ */
+function formatDate(dateString) {
+    if (dateString == null) {
+        return null;
+    }
+    var d = new Date(dateString);
+    var options = { weekday: 'long', year: 'numeric', month: 'long',
+        day: 'numeric' };
+    return d.toLocaleDateString('en-US', options);
+}
+/*
  * Called when a position is selected for the "delete position holder" tab.
  * Queries for all holders of that position and fills in the name list
  */
 function posIdDelHoldChange() {
     var positionIndex = $('#posIdDelHold').val();
     var url = '/1/positions/' + positionIndex + '/direct/';
-    console.log("HERE");
     debugger;
     $.ajax({
         url: url,
         success: function(data){
-            console.log(data);
             $('#delName').find('option').remove();
             for (var i = 0; i < data.length; i++) {
                 var newOption = '<option value=' + data[i].user_id + '>' +
                     data[i].first_name + ' ' + data[i].last_name +
-                    '(' + data[i].start_date + " to " + data[i].end_date +
-                    ')</option>';
+                    ' (' + formatDate(data[i].start_date) + " to " +
+                    formatDate(data[i].end_date) + ')</option>';
                 $('#delName').append(newOption);
             }
         }
