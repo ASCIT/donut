@@ -269,13 +269,15 @@ def create_group(group_name,
         "members_can_send", "visible", "admin_control_members"
     ]
     query = "INSERT INTO groups (" + ','.join(fields) + ")"\
-        "VALUES (%s, %s, %s, %r, %r, %r, %r, %r)"
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    new_group_id = -1
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
                                anyone_can_send, members_can_send, visible,
                                admin_control_members))
-        add_position(cursor.lastrowid, "Member")
-
+        new_group_id = cursor.lastrowid
+    add_position(new_group_id, "Member")
+    return new_group_id
 
 def delete_group(group_id):
     '''
@@ -285,13 +287,9 @@ def delete_group(group_id):
     Arguments:
         group_id: id of the group to be deleted
     '''
-    group_positions = get_group_positions(group_id)
-    for pos in group_positions:
-        delete_position(pos["pos_id"])
-    s = "DELETE FROM groups WHERE group_id=%d"
-    s = s % group_id
+    s = "DELETE FROM groups WHERE group_id=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(s, (group_id))
 
 
 def get_members_by_group(group_id):

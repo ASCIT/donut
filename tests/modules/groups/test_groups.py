@@ -160,9 +160,9 @@ def test_create_pos_holders(client):
 
 
 def test_create_group(client):
-    helpers.create_group("Page House", "May the work be light", "House", False,
-                         False, True, True, True)
-    assert helpers.get_group_data(4, [
+    group_id = helpers.create_group("Page House", "May the work be light",
+            "House", False, False, True, True, True)
+    assert helpers.get_group_data(group_id, [
         "group_id", "group_name", "group_desc", "type", "anyone_can_send",
         "members_can_send", "newsgroups", "visible", "admin_control_members"
     ]) == {
@@ -174,21 +174,17 @@ def test_create_group(client):
         "members_can_send": 1,
         "visible": 1,
         "admin_control_members": 1,
-        "group_id": 4
+        "group_id": group_id
     }
 
     # check that a new position with name "Member" was created
-    assert helpers.get_group_positions(4) == [{
+    assert helpers.get_group_positions(group_id) == [{
         "pos_id": 6,
         "pos_name": "Member"
     }]
-
-
-def test_delete_group(client):
-    assert helpers.get_group_data(4) != {}
-    helpers.delete_group(4)
-    assert helpers.get_group_data(4) == {}
-    assert helpers.get_group_positions(4) == []
+    helpers.delete_group(group_id)
+    assert helpers.get_group_data(group_id) == {}
+    assert helpers.get_group_positions(group_id) == []
 
 
 # Test Routes
