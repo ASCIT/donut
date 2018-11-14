@@ -2,7 +2,6 @@ import flask
 import os
 from flask import current_app
 import glob
-import time
 
 ALLOWED_EXTENSIONS = set(
     ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -34,14 +33,10 @@ def remove_link(filename):
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
-    print(links)
     for link in links:
         name = link.replace(path + '/', '')
-        print(name)
-        print(filename)
         if filename == name:
             os.remove(link)
-            time.sleep(1)
 
 
 def check_valid_file(file):

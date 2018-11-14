@@ -1,13 +1,19 @@
 {% extends "layout.html" %}
+{% block head %}
+  {% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
+  {% endblock %}
+  {% block scripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+    <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+    <script type="text/javascript">
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+  {% endblock %}
+{% endblock %}
 {% block page %}
-<head>
-<link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
-  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-  <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
-  <script type="text/javascript">
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
-</head>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron" style="text-align: center">
@@ -33,7 +39,6 @@
 
       <div id='sucesss'>
       </div>
-      <p id="old_title" hidden>{{title}}</p>
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
       <br/>
       <button id="change_title" onClick="change_title('{{title}}')">Change Title</button>
@@ -64,8 +69,7 @@
 
         <div class="btn-group" role="group">
           <div class="dropdown">
-            <butt
-            on class="btn btn-outline-primary btn-sm" type="button">Lists
+            <button class="btn btn-outline-primary btn-sm" type="button">Lists
             <span class="caret"></span></button>
             <ul class="dropdown-menu">
               <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_ulist()">Unordered</a></li>

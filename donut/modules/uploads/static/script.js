@@ -4,7 +4,14 @@ function convert(input) {
       html = converter.makeHtml(input);
   target.innerHTML = html;
 }
-
+function load(url) {
+  $.getJSON($SCRIPT_ROOT + '/_send_page', {
+    url: url
+  },
+  function(data) {
+    convert(data.result)
+  });
+}
 $(function() {
   $('#submit_btn').on('click', function(){
     var form_data = new FormData($('#upload-file')[0]);
@@ -59,11 +66,3 @@ $(function() {
   })
 })
 
-function load(url) {
-  $.getJSON($SCRIPT_ROOT + '/_send_page', {
-    url: url
-  },
-  function(data) {
-    convert(data.result)
-  });
-}

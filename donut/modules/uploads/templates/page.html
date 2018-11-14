@@ -1,24 +1,30 @@
 {% extends "layout.html" %}
+{% block head %}
+  {% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href={{ url_for('uploads.static', filename='style.css')}}>
+
+  {% endblock %}
+  {% block scripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+    <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+    <script type="text/javascript">
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+  {% endblock %}
+{% endblock %}
 {% block page %}
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-<script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
-<script type="text/javascript">
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-</head>
 <div class="container">
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">{{title}}</h1>
-      <div id = "content">
-
-	    <script>load('{{title}}')</script>
-    </div>
-    {% if permissions%}
-      <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
-    {% endif %}
+      <div id = "content" onload="load('{{title}}')">
+        <script> load('{{title}}');</script>
+      </div>
+      {% if permissions %}
+        <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
+      {% endif %}
     </div>
   </div>
 </div>
