@@ -1,6 +1,7 @@
 import flask
 from donut import auth_utils, constants
 from donut.modules.auth import blueprint, helpers
+from donut.modules.auth.permissions import Permissions
 
 
 @blueprint.route('/login')
@@ -39,7 +40,7 @@ def login_submit():
             permissions = auth_utils.get_permissions(username)
 
             # We need to check if the user has masking permissions.
-            mask_perm = auth_utils.check_permission('mask')
+            mask_perm = auth_utils.check_permission(username, Permissions.MASK)
 
             if mask is not None:
                 if mask_perm:
@@ -53,8 +54,6 @@ def login_submit():
             else:
                 flask.session['username'] = username
 
-            # True if there's any reason to show a link to the admin interface.
-            flask.session['show_admin'] = len(auth_utils.generate_admin_links()) > 0
             # Update last login time
             auth_utils.update_last_login(username)
 
