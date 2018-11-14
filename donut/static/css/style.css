@@ -30,6 +30,7 @@ body {
   padding-top: 3%;
   font-family: 'Open Sans', 'sans-serif';
   font-weight: 400;
+  height: 100%;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -107,6 +108,14 @@ table {
 
 td {
   text-align: left;
+}
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 .btn {
@@ -199,6 +208,11 @@ td {
   font-family: 'Open Sans', 'sans-serif';
 }
 
+#homepage-jumbotron {
+  padding-top: 25%;
+  background-color: transparent;
+}
+
 .jumbotron embed {
   padding-bottom: 30px;
   width: 60%;
@@ -243,6 +257,7 @@ td {
   z-index: -100;
   background-size: cover;
   overflow: hidden;
+  transform: translate(25%, 15%);
 }
 
 .jumbotron .light-text p {
@@ -350,7 +365,7 @@ td {
   -o-animation: rotating 10s linear infinite;
   animation: rotating 10s linear infinite; 
 
-  width: 150px;
+  width: 15vw;
   margin-bottom: 10px;
 }
 
