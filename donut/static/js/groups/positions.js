@@ -25,6 +25,7 @@ function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
             approvedGroupNames[i] + '</option>'
         $('#groupCreate option:last').after(newOption);
         $('#groupDel option:last').after(newOption);
+        $('#groupPosHold option:last').after(newOption);
     }
 }
 
@@ -51,7 +52,7 @@ function getGroupList() {
         var id = allPositions[i].group_id
         if (groupDict[id] === undefined) {
             groupDict[id] = allPositions[i].group_name;
-            var newOption = '<option value="' + id + '">' 
+            var newOption = '<option value="' + id + '">'
                                 + allPositions[i].group_name + '</option>';
             $('#groupSelect option:last').after(newOption);
 
@@ -67,7 +68,7 @@ function collectPositions() {
         var id = allPositions[j].pos_id;
         if (positionsDict[id] === undefined) {
             positionsDict[id] = allPositions[j].pos_name;
-            var newOption = '<option value=' + id + '>' 
+            var newOption = '<option value=' + id + '>'
                         + allPositions[j].pos_name + '</option>';
             $('#positionSelect option:last').after(newOption);
         }
@@ -79,24 +80,25 @@ function collectPositions() {
  */
 function populateTables() {
     for (var i = 0; i < allPositions.length; i++) {
-        addRowToTable(allPositions[i]);        
+        addRowToTable(allPositions[i]);
     }
 }
 
 /*
- * adds specified position as a row on the position table 
+ * adds specified position as a row on the position table
  * @param {JSON} json specfiying a position
  */
 function addRowToTable(pos) {
     var groupId = pos.group_id;
     var posId =  pos.pos_id;
     var studentName = pos.first_name + " " + pos.last_name;
-    var newRow = '<tr>'  
-        + '<td> <a onclick=changeGroup(' + groupId + ')>' 
+    var userId = pos.user_id;
+    var newRow = '<tr>'
+        + '<td> <a onclick=changeGroup(' + groupId + ')>'
                             + groupDict[groupId] + '</a> </td>'
-        + '<td> <a onclick=changePosition(' + posId + ')>' 
+        + '<td> <a onclick=changePosition(' + posId + ')>'
                             + positionsDict[posId] + '</a> </td>'
-        + '<td>' + studentName + '</td>' 
+        + '<td> <a href=/1/users/' + userId + ">" + studentName + '</a> </td>'
                 + '</tr>';
     $('#positionsTable tbody').append(newRow);
 }
@@ -130,27 +132,46 @@ function changePosition(posName) {
 }
 
 /*
- * Called a group is selected for the "delete position" tab.
+ * Called when a group is selected for the "delete position" tab.
  * Queries for all positions associated with the group
  */
 function groupDelChange() {
     var groupIndex = $('#groupDel').val();
     $('#position').find('option').remove();
+    populateListOfPositions(groupIndex, '#position');
+}
+
+/*
+ * Called when a group is selected for the "assign position holder" tab.
+ * Queries for all positions associated with the group
+ */
+function groupPosHoldChange() {
+    var groupIndex = $('#groupPosHold').val();
+    $('#posIdHold').find('option').remove();
+    populateListOfPositions(groupIndex, '#posIdHold');
+}
+
+/*
+ * This method takes in a group id and a select element id and populates
+ * the select element with a list of options representing all positions
+ * associated with the group
+ */
+function populateListOfPositions(groupIndex, posSelectId) {
     var url = '/1/groups/' + groupIndex + '/positions/';
     $.ajax({
         url: url,
         success: function(data){
             for (var i = 0; i < data.length; i++) {
-                var newOption = '<option value=' + data[i].pos_id + '>' + 
+                var newOption = '<option value=' + data[i].pos_id + '>' +
                     data[i].pos_name + '</option>';
-                $('#position').append(newOption);
+                $(posSelectId).append(newOption);
             }
         }
-    })
+    });
 }
 
-// Setting up triggers for administration tasks
 $(document).ready(function() {
+    // Setting up triggers for administration tasks
     $('#submitPosBtn').click(function(e) {
         e.preventDefault();
         $.ajax({
@@ -179,16 +200,35 @@ $(document).ready(function() {
             }
         });
     });
-}); 
+    $('#submitPosHoldBtn').click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/1/positions/' + $("#posIdHold").val() + '/',
+            data: $("#holdForm").serialize(),
+            success: function(data) {
+                if(data.success) {
+                    setUpForms();
+                    alert("Assigned Position!")
+                }
+            }
+        });
+    });
+});
 
 /*
  * Function to be called to reset forms to default
  */
 function setUpForms() {
     $('#posDelete').trigger("reset");
+    $('#holdForm').trigger("reset")
     $('#position').find('option')
                   .remove()
                   .end()
                   .append('<option>Select a Position</option>');
+    $('#posIdHold').find('option')
+                    .remove()
+                    .end()
+                    .append('<option>Select a Position</option>');
 
 }

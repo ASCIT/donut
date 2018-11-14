@@ -36,22 +36,10 @@ def login_submit():
         if user_id is not None:
             permissions = auth_utils.get_permissions(username)
 
-            mask_perm = auth_utils.check_permission('mask')
-
-            if mask is not None:
-                if mask_perm:
-                    flask.session['username'] = mask
-                    permissions = auth_utils.get_permissions(mask)
-                else:
-                    flask.flash('You do not have permission to masquerade.')
-                    return flask.redirect(flask.url_for('auth.login'))
-            else:
-                flask.session['username'] = username
-
             flask.session['permissions'] = permissions
-            # True if there's any reason to show a link to the admin interface.
-            flask.session[
-                'show_admin'] = len(auth_utils.generate_admin_links()) > 0
+
+            flask.session['username'] = username
+
             # Update last login time
             auth_utils.update_last_login(username)
 

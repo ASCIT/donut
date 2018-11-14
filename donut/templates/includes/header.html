@@ -63,7 +63,7 @@
                     {% if 'username' not in session %}
                     <li>
                         <form action="{{ url_for('auth.login') }}">
-                            <button class="btn pull-right navbar-btn">Log In</button>
+                            <button class="btn no-border pull-right navbar-btn">Log In</button>
                         </form>
                     </li>
                     {% else %}
@@ -74,7 +74,7 @@
                     </li>
                     <li>
                         <form action="{{ url_for('auth.logout') }}">
-                            <button class="btn pull-right navbar-btn">Logout</button>
+                            <button class="btn no-border pull-right navbar-btn">Logout</button>
                         </form>
                     </li>
                     {% endif %}

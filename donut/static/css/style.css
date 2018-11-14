@@ -1,6 +1,10 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');    
 @font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
 
+/* Include Open Sans, courtesy of Google. */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
+
+
+/* Make sure that widths and heights are all done the same way.  */
 *,
 *:before,
 *:after {
@@ -18,6 +22,9 @@
   cursor: move;
 }
 
+/* It should span the height of the page, using border-box box-sizing
+ * to include padding in that height.
+ */
 html {
   height: 100%;
   margin: 0;
@@ -25,6 +32,11 @@ html {
   box-sizing: border-box;
 }
 
+/* Give it slight padding on top and bottom to avoid overlap. The font
+ * by default should be normal weight in Open Sans, antialiased. Keep
+ * position to its default, relative, and make sure it spans the page
+ * height.
+ */
 body {
   padding-bottom: 3%;
   padding-top: 3%;
@@ -34,16 +46,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Creates a dark orange hover effect on links. */
 a:hover {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
   -o-transition: all 0.5s;
   transition: all 0.5s;
 
+  transition: opacity 0.5s;
+
   opacity: 1;
   color: #CD6600;
 }
 
+/* Default color for links. Transition included for smooth fade back. */
 a {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
@@ -55,10 +71,12 @@ a {
   color: #FF8C00;
 }
 
+/* Make sure the button is completely visible when hovered. */
 button:hover {
   opacity: 1;
 }
 
+/* Fade buttons slightly when not hovered. */
 button {
   transition: opacity 0.5s;
   opacity: 0.9;
@@ -99,6 +117,51 @@ input[type=checkbox], input[type=radio] {
   display: block;
 }
 
+/* All inputs should have an orange border with light spacing around
+ * the element.
+ */
+input {
+  padding: 0.5%;
+  margin-top: 1%;
+  border: 1px orange solid;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* Removes blue coloring when focusing. */
+input:focus {
+  border: 1px orange solid;
+}
+
+/* All textareas should have an orange border. */
+textarea {
+  border: 1px orange solid;
+}
+
+/* Removes blue coloring when focusing. */
+textarea:focus {
+  border: 1px orange solid;
+}
+
+/* All dropdowns should have an orange border. */
+select {
+  border: 1px orange solid;
+}
+
+/* Removes blue coloring when focusing. */
+select:focus {
+  border: 1px orange solid;
+}
+
+/* Anything that has a required tag should have a red star next to it to
+ * indicate that.
+ */
+label.required:after {
+  content:"*";
+  color:red;
+}
+
+/* Tables should have separated borders. */
 table {
   border-collapse: separate;
   border: 0px;
@@ -118,6 +181,16 @@ td {
   transform: translate(-50%, -50%);
 }
 
+/*****************************************************************************/
+/* Below are the classes for Donut. These are what you should use when you   *
+ * want to style your elements and so forth. Most are intended to apply for  *
+ * divs, unless otherwise specified in the commentary.                       */
+/*****************************************************************************/
+
+
+/* This is the primary button class. Gives the button a white background
+ * with an orange border and a slight bottom margin for spacing
+ */
 .btn {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
@@ -126,9 +199,11 @@ td {
 
   background-color: #FFF;
   color: #333;
+  border-color: orange;
   margin-bottom: 5%;
 }
 
+/* When the primary button class is hovered, give it an orange background. */
 .btn:hover {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
@@ -137,18 +212,56 @@ td {
 
   background-color: orange;
   color: #FFF;
-}
-
-.btn-primary {
   border-color: orange;
+  margin-bottom: 5%;
 }
 
 .btn-primary:hover {
   border-color: orange;
 }
 
+/* A centering class for divs in larger divs. */
+.center {
+  margin-left: 25%;
+  margin-right: 25%;
+  margin: auto;
+  width: 50%;
+}
+
+input[type=checkbox], input[type=radio] {
+  position: relative;
+  top: 2px;
+  left: 3px;
+}
+
+.candidate {
+  width: 100%;
+}
+
+/* The main container should only span 90% of the width of the page. */
 .container {
   width: 90%;
+}
+
+/* Right-half class for a div of a split, two-column page. */
+.half-float-right {
+  width: 50%;
+  float: right;
+  display: inline-block;
+  margin: 0;
+}
+
+/* Left-half class for a div of a split, two-column page. */
+.half-float-left {
+  width: 45%;
+  float: left;
+  display: inline-block;
+  margin: 0;
+}
+
+/* A class for giving an element a thin white border. */
+.white-border {
+  border: 1px solid #FFF;
 }
 
 /* BEGIN FORM ELEMENTS */
@@ -201,6 +314,8 @@ td {
   display: flex;
 }
 
+
+/* Main wrapper class for all elements in the body. */
 .jumbotron {
   background-color: #FFF;
   text-align: justify;
@@ -213,6 +328,9 @@ td {
   background-color: transparent;
 }
 
+/* In case we transition to an SVG for the title, this will make
+ * certain that it is formatted correctly.
+ */
 .jumbotron embed {
   padding-bottom: 30px;
   width: 60%;
@@ -284,8 +402,28 @@ td {
   font-size: 1em;
 }
 
+/* Class for large line spacing between paragraph lines. */
+.large-spacing {
+  line-height: 200%;
+}
+
+/* Class for medium line spacing between paragraph lines. */
+.medium-spacing {
+  line-height: 150%;
+}
+
+/* Class for small line spacing between paragraph lines. */
+.small-spacing {
+  line-height: 100%;
+}
+
+/* Class for adding a thin, grey border to an element. */
+.light-border {
+  border: 1px solid #9d9d9d;
+}
+
+/* Make sure that the navbar has a nice gradient top border. */
 .navbar:before {
-  /*border-top: 5px orange solid;*/
   content: "";
   position: relative;
   width: 100%;
@@ -304,19 +442,28 @@ td {
 }
 
 /* BEGIN MOBILE CSS */
+/* In case an element doesn't need a border. This will remove it. */
+.no-border {
+  border: none;
+}
+
+/* Bold and center any errors and messages to the user. */
 .message {
   text-align: center;
   font-weight: 600;
 }
 
+/* Class for centering text. */
 .pos-center {
   text-align: center;
 }
 
+/* Class for left-aligning text. */
 .pos-left {
   text-align: left;
 }
 
+/* Class for right-aligning text. */
 .pos-right {
   text-align: right;
 }
@@ -369,19 +516,66 @@ td {
   margin-bottom: 10px;
 }
 
+/* Creates a row-like element. These are intended to stack atop one another 
+ * vertically.
+ */
+.row {
+  width: 100%;
+  height: 5%;
+  display: block;
+}
+
+/* For the right-hand div of a three-column page. */
+.triple-split-right {
+  width: 30%;
+  float: right;
+  display: inline-block;
+  margin: 0;
+}
+
+/* For the left-hand div of a three-column page. */
+.triple-split-left {
+  float: left;
+  width: 30%;
+  display: inline-block;
+  margin: 0;
+}
+
+/* For the center div of a three-column page. */
+.triple-split-center {
+  width: 30%;
+  display: inline-block;
+  margin: 0;
+}
+
+/*****************************************************************************/
+/* Below are specific IDs for elements that needed individual styling. These *
+ * should not be used for general styling or anything of the like. Odds are, *
+ * you won't need them for anything!                                         */
+/*****************************************************************************/
+ 
+
+/* Content needs to span the width of its parent. */
 #content {
   width: 100%;
 }
 
+/* Give the header some spacing to avoid overlap with other elements. */
 #header {
   margin-bottom: 50px;
 }
 
+/* The footer should always be at the bottom with right-aligned text for the
+ * copyright notice.
+ */
 #footer {
   width: 50%;
   z-index: 9999;
 }
 
+/* The copyright should be small and pretty much invisible. We don't want it
+ * to distract the user.
+ */
 #copyright {
   padding: 15px;
   color: #EEE;
@@ -393,22 +587,162 @@ label.required:after {
   color: red;
 }
 
-@media only screen and (min-device-width: 200px) and (max-device-width: 800px) {
-  .jumbotron h1 {
-    font-size: 300%;
-  }
+#question_container {
+  list-style-type: none;
+}
 
+/*****************************************************************************/
+/* Below is all the formatting for mobile devices. Basically, it just takes  *
+ * the classes you love and augments them a bit to make sure they look great *
+ * on small screens. No need to worry about including anything special -- it *
+ * is already taken care of for you.                                         *
+/*****************************************************************************/
+
+/* BEGIN MOBILE CSS */
+
+@media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
+
+  /* Any split column pages need to be treated as though they are blocked such
+   * that they are on top of one another.
+   */
   .half-float-left {
     width: 100%;
+    display: block;
   }
 
+  /* Any split column pages need to be treated as though they are blocked such
+   * that they are on top of one another.
+   */
   .half-float-right {
     width: 100%;
+    display: block;
   }
 
   #copyright {
     color: #EEE;
   }
+
+  /* Buttons should have their font-size be visible on mobile. */
+  .jumbotron button {
+    font-size: 2vh;
+  }
+
+  /* Just more formatting in the event the logo becomes an SVG. */
+  .jumbotron embed {
+    padding-bottom: 5%;
+    width: 100%;
+  }
+
+  /* Make sure unformatted paragraphs are visible on mobile. */
+  .jumbotron p {
+    font-size: 2vh;
+  }
+
+  /* Make sure text in forms is visible on mobile. */
+  .jumbotron form {
+    margin-top: 10%;
+    font-size: 2vh;
+  }
+
+  /* Keep the border and change spacing to avoid overlap. */
+  .jumbotron form input {
+    padding: 1%;
+    margin-top: 5%;
+    border: 1px orange solid;
+    border-radius: 5px;
+  }
+
+  /* Get rid of this to avoid overlap with other elements. */
+  .navbar-brand {
+    display: none;
+  }
+
+  /* Make sure the hamburger menu is always accessible at the top left. */
+  .navbar-toggle {
+    float: left;
+    margin-left: 5%;
+  }
+
+  /* Make sure all messages to the user are centered and large enough to not
+   * not be missed.
+   */
+  .message {
+    width: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 9999;
+    font-size: 2vh;
+  }
+
+  /* Make sure the main container spans the whole page. */
+  .container {
+    width: 100%;
+    height: 100%;
+  }
+
+    /* Any split column pages need to be treated as though they are blocked such
+   * that they are on top of one another.
+   */
+  .triple-split-right {
+    width: 100%;
+    display: block;
+  }
+
+  /* Any split column pages need to be treated as though they are blocked such
+   * that they are on top of one another.
+   */
+  .triple-split-left {
+    width: 100%;
+    display: block;
+  }
+
+  /* Any split column pages need to be treated as though they are blocked such
+   * that they are on top of one another.
+   */
+  .triple-split-center {
+    width: 100%;
+    display: block;
+  }
+
+  /* Make sure the login button is positioned well and is easily accessed. */
+  #navbar button {
+    font-size: 2vh;
+    position: absolute;
+    left: 7%;
+  }
+
+  /* Space list elements in the navbar such that they don't overlap. */
+  #navbar li a {
+    line-height: 3.5vh;
+  }
+
+  /* Make sure that there is good spacing and a visible font size for the list
+   * elements.
+   */
+  #navbar li {
+    width: 100%;
+    margin-bottom: 10%;
+    margin-top: 5%;
+    font-size: 2vh;
+  }
+
+  /* Make sure content spans the width of the page. */
+  #content {
+    width: 100%;
+  }
+
+  /* Make sure the footer is fixed and at the bottom of the page. */
+  #footer {
+    position: fixed;
+    bottom: 0;
+  }
+
+  /* The copyright should still be small, but left-aligned not right. */
+  #copyright {
+    font-size: 1vh;
+    text-align: left;
+ } 
 }
 
 /* END MOBILE CSS */

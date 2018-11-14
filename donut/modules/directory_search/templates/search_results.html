@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='col-md-6 col-md-offset-3' style='float: none; padding-bottom: 25px'>
-		<button class='btn btn-info' onclick='history.back()'>
+	<div class='container theme-showcase jumbotron' style='float: none; padding-bottom: 25px'>
+		<button class='btn' onclick='history.back()'>
 			&lt; Back
 		</button>
 		<div>Your search returned {{ users|length or 'no' }} results</div>

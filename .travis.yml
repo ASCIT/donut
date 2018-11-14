@@ -2,8 +2,6 @@ language: python
 python:
   - "3.6"
 services: mysql
-env:
-  - FLASK=0.10.1
 before_install:
     sudo apt-get install libmariadbclient-dev
 install: "pip install -r requirements.txt"
