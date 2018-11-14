@@ -238,11 +238,6 @@ input[type=checkbox], input[type=radio] {
   width: 100%;
 }
 
-/* The main container should only span 90% of the width of the page. */
-.container {
-  width: 90%;
-}
-
 /* Right-half class for a div of a split, two-column page. */
 .half-float-right {
   width: 50%;
@@ -375,7 +370,7 @@ input[type=checkbox], input[type=radio] {
   z-index: -100;
   background-size: cover;
   overflow: hidden;
-  transform: translate(25%, 15%);
+  transform: translate(0%, 15%);
 }
 
 .jumbotron .light-text p {
@@ -633,6 +628,10 @@ label.required:after {
     width: 100%;
   }
 
+  .jumbotron h1 {
+    font-size: 400%;
+  }
+
   /* Make sure unformatted paragraphs are visible on mobile. */
   .jumbotron p {
     font-size: 2vh;
@@ -726,23 +725,6 @@ label.required:after {
     margin-top: 5%;
     font-size: 2vh;
   }
-
-  /* Make sure content spans the width of the page. */
-  #content {
-    width: 100%;
-  }
-
-  /* Make sure the footer is fixed and at the bottom of the page. */
-  #footer {
-    position: fixed;
-    bottom: 0;
-  }
-
-  /* The copyright should still be small, but left-aligned not right. */
-  #copyright {
-    font-size: 1vh;
-    text-align: left;
- } 
 }
 
 /* END MOBILE CSS */

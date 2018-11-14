@@ -12,34 +12,13 @@ def login():
 @blueprint.route('/login/submit', methods=['POST'])
 def login_submit():
     """Handle authentication."""
-    mask_and_user = flask.request.form.get('username', None)
+    username = flask.request.form.get('username', None)
     password = flask.request.form.get('password', None)
-
-    # Need to take care of the case when masquerading occurs.
-    username = None
-    mask = None
-
-    if mask_and_user is not None:
-        # Check for the character to split.
-        if ':' in mask_and_user:
-            split = mask_and_user.split(':')
-            username, mask = split[0], split[1]
-
-            if not auth_utils.get_user_id(mask):
-                flask.flash('That person does not exist to mask.')
-                flask.redirect(flask.url_for('auth.login'))
-        else:
-            username = mask_and_user
 
     if username is not None and password is not None:
         user_id = helpers.authenticate(username, password)
         if user_id is not None:
-            permissions = auth_utils.get_permissions(username)
-
-            flask.session['permissions'] = permissions
-
             flask.session['username'] = username
-
             # Update last login time
             auth_utils.update_last_login(username)
 
