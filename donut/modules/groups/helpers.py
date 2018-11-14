@@ -270,7 +270,6 @@ def create_group(group_name,
     ]
     query = "INSERT INTO groups (" + ','.join(fields) + ")"\
         "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-    new_group_id = -1
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
                                anyone_can_send, members_can_send, visible,
