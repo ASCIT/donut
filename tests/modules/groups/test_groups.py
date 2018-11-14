@@ -159,6 +159,24 @@ def test_create_pos_holders(client):
     }]
 
 
+def test_delete_pos_holders(client):
+    helpers.create_position_holder(2, 1, "2018-02-22", "2019-02-22")
+    assert helpers.get_position_holders(2) == [{
+        "user_id":
+        1,
+        "first_name":
+        "David",
+        "last_name":
+        "Qu",
+        "start_date":
+        datetime.date(2018, 2, 22),
+        "end_date":
+        datetime.date(2019, 2, 22)
+    }]
+    helpers.delete_position_holder(2, 1)
+    assert helpers.get_position_holders(2) == ()
+
+
 # Test Routes
 # Difficult to test because query arguments are undefined outside Flask context
 # def test_get_groups_list(client):
