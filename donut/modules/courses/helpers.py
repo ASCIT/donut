@@ -72,10 +72,8 @@ def get_year_courses():
                         number,
                         'name':
                         course['name'],
-                        'units': (
-                            course['units_lecture'], course['units_lab'],
-                            course['units_homework']
-                        ),
+                        'units': (course['units_lecture'], course['units_lab'],
+                                  course['units_homework']),
                         'instructor':
                         instructor,
                         'terms': [term]
@@ -116,10 +114,10 @@ def get_user_planner_courses(username):
         cursor.execute(query, username)
         courses = cursor.fetchall()
     return [{
-        'ids': (course['course_id'],),
+        'ids': (course['course_id'], ),
         'number': course['number'],
         'units': course['units'],
-        'terms': (course['term'],),
+        'terms': (course['term'], ),
         'year': course['planner_year']
     } for course in courses]
 
@@ -151,10 +149,14 @@ def get_scheduler_courses(year, term):
         course = course_sections.get(course_id)
         if not course:
             course = {
-                'id': course_id,
-                'number': section['number'],
-                'name': section['name'],
-                'units': (section['units_lecture'], section['units_lab'], section['units_homework']),
+                'id':
+                course_id,
+                'number':
+                section['number'],
+                'name':
+                section['name'],
+                'units': (section['units_lecture'], section['units_lab'],
+                          section['units_homework']),
                 'sections': []
             }
             course_sections[course_id] = course
