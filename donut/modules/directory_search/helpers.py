@@ -2,7 +2,7 @@ import flask
 import pymysql.cursors
 from donut.auth_utils import get_permissions, get_user_id
 from donut.constants import Gender
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 
 
 def get_hidden_fields(viewer_name, viewee_id):
@@ -102,7 +102,7 @@ def get_users_by_name_query(search):
     Finds users whose names match the given query.
     Max 10 users returned, in alphabetical order.
     """
-    query = 'SELECT user_id, full_name FROM members NATURAL JOIN members_full_name WHERE '
+    query = 'SELECT user_id, full_name, graduation_year FROM members NATURAL JOIN members_full_name WHERE '
     search, name_query = make_name_query(search)
     query += name_query
     query += ' ORDER BY LOWER(full_name) LIMIT 10'
