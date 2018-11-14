@@ -61,3 +61,8 @@ def planner_mine():
     if not username: return flask.jsonify([])
 
     return flask.jsonify(helpers.get_user_planner_courses(username))
+
+
+@blueprint.route('/1/scheduler/courses/<int:term>/<int:year>')
+def scheduler_courses(term, year):
+    return flask.jsonify(helpers.get_scheduler_courses(term, year))

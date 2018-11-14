@@ -16,3 +16,30 @@
     </form>
   </div>
 {% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script>
+    var termSelect
+    var termLoadToken
+
+    function loadTerm() {
+      var yearTerm = termSelect.val().split('-')
+      var loadToken = {}
+      termLoadToken = loadToken
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/courses/' + yearTerm.join('/'),
+        success: function(courses) {
+          if (termLoadToken !== loadToken) return
+
+          // TODO
+        }
+      })
+    }
+
+    $(document).ready(function() {
+      termSelect = $('#term').change(loadTerm)
+      loadTerm()
+    })
+  </script>
+{% endblock %}

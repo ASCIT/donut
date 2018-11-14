@@ -12,14 +12,14 @@ def get_terms():
     Returns {'year', 'term'} structs for each year with courses,
     sorted from most to least recent.
     """
-    query = 'SELECT DISTINCT year, term FROM courses'
+    query = """
+        SELECT DISTINCT year, term FROM courses
+        ORDER BY year DESC, (term + 1) % 3 DESC
+    """
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        return sorted(
-            cursor.fetchall(),
-            key=lambda term: (term['year'], term['term']),
-            reverse=True)
+        return cursor.fetchall()
 
 
 def get_year_courses():
@@ -72,10 +72,10 @@ def get_year_courses():
                         number,
                         'name':
                         course['name'],
-                        'units': [
+                        'units': (
                             course['units_lecture'], course['units_lab'],
                             course['units_homework']
-                        ],
+                        ),
                         'instructor':
                         instructor,
                         'terms': [term]
@@ -85,7 +85,7 @@ def get_year_courses():
 
 def add_planner_course(username, course_id, year):
     user_id = get_user_id(username)
-    query = 'INSERT INTO planner_courses (user_id, course_id, year) VALUES (%s, %s, %s)'
+    query = 'INSERT INTO planner_courses (user_id, course_id, planner_year) VALUES (%s, %s, %s)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, course_id, year))
 
@@ -94,7 +94,7 @@ def drop_planner_course(username, course_id, year):
     user_id = get_user_id(username)
     query = """
         DELETE FROM planner_courses
-        WHERE user_id = %s AND course_id = %s AND year = %s
+        WHERE user_id = %s AND course_id = %s AND planner_year = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, course_id, year))
@@ -116,9 +116,55 @@ def get_user_planner_courses(username):
         cursor.execute(query, username)
         courses = cursor.fetchall()
     return [{
-        'ids': [course['course_id']],
+        'ids': (course['course_id'],),
         'number': course['number'],
         'units': course['units'],
-        'terms': [course['term']],
+        'terms': (course['term'],),
         'year': course['planner_year']
     } for course in courses]
+
+
+def get_scheduler_courses(year, term):
+    query = """
+        SELECT
+            course_id,
+            CONCAT(department, ' ', course_number) AS number,
+            name,
+            units_lecture, units_lab, units_homework,
+            section_number,
+            instructor,
+            grades_type,
+            times
+        FROM
+            courses
+            NATURAL JOIN sections
+            NATURAL JOIN instructors
+            NATURAL JOIN grades_types
+        WHERE year = %s AND term = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (year, term))
+        sections = cursor.fetchall()
+    course_sections = {}
+    for section in sections:
+        course_id = section['course_id']
+        course = course_sections.get(course_id)
+        if not course:
+            course = {
+                'id': course_id,
+                'number': section['number'],
+                'name': section['name'],
+                'units': (section['units_lecture'], section['units_lab'], section['units_homework']),
+                'sections': []
+            }
+            course_sections[course_id] = course
+        course['sections'].append({
+            'number': section['section_number'],
+            'instructor': section['instructor'],
+            'grades': section['grades_type'],
+            'times': section['times']
+        })
+    courses = course_sections.values()
+    for course in courses:
+        course['sections'].sort(key=lambda section: section['number'])
+    return sorted(courses, key=lambda course: course['number'])
