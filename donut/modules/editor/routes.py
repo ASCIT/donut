@@ -5,7 +5,7 @@ import re
 
 from donut.modules.editor import blueprint, helpers
 from flask import current_app, redirect, url_for
-from donut.modules.editor.edit_permission import Edit_permission
+from donut.modules.editor.edit_permission import EditPermission
 from donut.auth_utils import check_permission, check_login
 
 
@@ -23,7 +23,7 @@ def editor():
         title = flask.request.args.get('title')
 
     if check_login() and check_permission(flask.session['username'],
-                                          Edit_permission.ABLE):
+                                          EditPermission.ABLE):
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
     else:
@@ -40,7 +40,7 @@ def change_title():
     input_text = flask.request.form['input_text']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
     if title_res != None and check_login() and check_permission(
-            flask.session['username'], Edit_permission.ABLE):
+            flask.session['username'], EditPermission.ABLE):
         helpers.rename_title(old_title, title)
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
@@ -57,7 +57,7 @@ def save():
     # Allows all numbers and characters. Allows ".", "_", "-"
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
     if title_res != None and len(title) <= 35 and check_login(
-    ) and check_permission(flask.session['username'], Edit_permission.ABLE):
+    ) and check_permission(flask.session['username'], EditPermission.ABLE):
         helpers.write_markdown(markdown, title)
         return flask.jsonify({'url': url_for('uploads.display', url=title)})
 
@@ -79,7 +79,7 @@ def created_list():
 
     filename = flask.request.args.get('filename')
     if filename != None and check_login() and check_permission(
-            flask.session['username'], Edit_permission.ABLE):
+            flask.session['username'], EditPermission.ABLE):
         helpers.remove_link(filename)
 
     links = helpers.get_links()
@@ -87,4 +87,4 @@ def created_list():
         'created_list.html',
         links=links,
         permissions=(check_login() and check_permission(
-            flask.session['username'], Edit_permission.ABLE)))
+            flask.session['username'], EditPermission.ABLE)))

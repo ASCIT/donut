@@ -1,5 +1,5 @@
 import enum
 
 
-class Upload_permissions(enum.IntEnum):
+class UploadPermissions(enum.IntEnum):
     ABLE = 3

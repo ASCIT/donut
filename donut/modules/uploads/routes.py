@@ -4,7 +4,7 @@ import os
 import time
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
-from donut.modules.uploads.upload_permission import Upload_permissions
+from donut.modules.uploads.upload_permission import UploadPermissions
 from donut.auth_utils import check_permission, check_login
 
 
@@ -14,7 +14,7 @@ def display(url):
     Displays the webpages that have been created by users.
     '''
     page = helpers.read_page(url.replace(' ', '_'))
-    if page == -1:
+    if page == None:
         return flask.abort(404)
     else:
         return flask.render_template(
@@ -22,7 +22,7 @@ def display(url):
             page=page,
             title=url.replace('_', ' '),
             permissions=(check_login() and check_permission(
-                flask.session['username'], Upload_permissions.ABLE)))
+                flask.session['username'], UploadPermissions.ABLE)))
 
 
 @blueprint.route('/_send_page', methods=['GET'])
@@ -41,7 +41,7 @@ def uploads():
     Serves the webpage that allows a user to upload a file.
     '''
     if check_login() and check_permission(flask.session['username'],
-                                          Upload_permissions.ABLE):
+                                          UploadPermissions.ABLE):
         return flask.render_template('uploads.html')
     else:
         flask.abort(403)
@@ -59,7 +59,7 @@ def upload_file():
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
     if check_login() and check_permission(flask.session['username'],
-                                          Upload_permissions.ABLE):
+                                          UploadPermissions.ABLE):
         helpers.remove_link(filename)
         file.save(os.path.join(uploads, filename))
         return flask.jsonify({
@@ -80,7 +80,7 @@ def check_file():
         return flask.jsonify({'error': 'No file selected'})
     file = flask.request.files['file']
     if check_login() and check_permission(flask.session['username'],
-                                          Upload_permissions.ABLE):
+                                          UploadPermissions.ABLE):
         return flask.jsonify({'error': helpers.check_valid_file(file)})
     else:
         return flask.abort(403)
@@ -104,7 +104,7 @@ def uploaded_list():
 
     filename = flask.request.args.get('filename')
     if filename != None and check_login() and check_permission(
-            flask.session['username'], Upload_permissions.ABLE):
+            flask.session['username'], UploadPermissions.ABLE):
         helpers.remove_link(filename)
 
     links = helpers.get_links()
@@ -112,4 +112,4 @@ def uploaded_list():
         'uploaded_list.html',
         links=links,
         permissions=(check_login() and check_permission(
-            flask.session['username'], Upload_permissions.ABLE)))
+            flask.session['username'], UploadPermissions.ABLE)))

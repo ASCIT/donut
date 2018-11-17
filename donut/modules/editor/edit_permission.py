@@ -1,5 +1,5 @@
 import enum
 
 
-class Edit_permission(enum.IntEnum):
+class EditPermission(enum.IntEnum):
     ABLE = 2

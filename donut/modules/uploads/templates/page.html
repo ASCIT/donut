@@ -6,7 +6,7 @@
 
   {% endblock %}
   {% block scripts %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {{super()}}
     <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
     <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
     <script type="text/javascript">
@@ -19,7 +19,7 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">{{title}}</h1>
-      <div id = "content" onload="load('{{title}}')">
+      <div id = "content">
         <script> load('{{title}}');</script>
       </div>
       {% if permissions %}

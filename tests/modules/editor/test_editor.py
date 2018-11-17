@@ -39,6 +39,9 @@ def test_path_related_funciton(client):
                         flask.current_app.config["UPLOAD_WEBPAGES"])
     assert helpers.get_links() != []
 
+    assert helpers.check_duplicate("TEST TITLE") == "Duplicate title"
+    assert helpers.check_duplicate("doesnt exist") == ""
+
     links = helpers.get_links()
     titles = [title for _, title in links]
     assert "TEST TITLE" in ' '.join(titles)
@@ -57,3 +60,5 @@ def test_path_related_funciton(client):
     client.get(flask.url_for('uploads.display',
                              url="ANOTHER TITLE")).status_code == 403
     assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_TITLE')
+
+    helpers.remove_link("ANOTHER_TITLE")

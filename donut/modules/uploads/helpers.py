@@ -8,6 +8,9 @@ ALLOWED_EXTENSIONS = set(
 
 
 def read_page(url):
+    '''
+    Reads in content from a markdown file
+    '''
     root = os.path.join(current_app.root_path,
                         current_app.config["UPLOAD_WEBPAGES"])
     path = os.path.join(root, url + '.md')
@@ -15,7 +18,7 @@ def read_page(url):
         with open(path, 'r') as f:
             return f.read()
     else:
-        return -1
+        return None
 
 
 def allowed_file(filename):
@@ -54,6 +57,7 @@ def check_valid_file(file):
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
     filename = file.filename.replace(' ', '_')
+    filename = os.path.basename(filename)
     for link in links:
         cur_filename = os.path.basename(link)
         if cur_filename == filename:

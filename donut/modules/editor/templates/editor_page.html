@@ -5,7 +5,7 @@
     <link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
   {% endblock %}
   {% block scripts %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {{super()}}
     <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
     <script src={{ url_for('editor.static', filename='script.js', _external = True)}} type="text/javascript"></script>
     <script type="text/javascript">
@@ -47,8 +47,7 @@
       <div class="btn-group">
         <div class="btn-group" role="group">
           <div class="dropdown">
-            <button class="btn btn-outline-primary btn-sm" type="button">Styles
-            <span class="caret"></span></button>
+            <button class="btn btn-outline-primary btn-sm" type="button">Styles<span class="caret"></span></button>
               <ul class="dropdown-menu">
                <li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
                <li><a type="button" onClick="insert_bold()" class="btn btn-outline-secondary btn-sm">bold</a></li>

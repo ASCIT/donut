@@ -1,14 +1,3 @@
-#targetDiv {
-  border: 1px dashed #333333;
-  width: 900px;
-  height: 400px;
-}
-
-textarea{
-  margin: 30px;
-  width: 80%;
-
-}
 .btn{
   margin: 5px;
 }
