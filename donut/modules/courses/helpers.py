@@ -170,6 +170,6 @@ def get_scheduler_courses(year, term):
     for course in courses:
         course['sections'].sort(key=lambda section: section['number'])
         course['units'] = tuple(
-            int(unit) if int(unit) == unit else unit for unit in course['units']
-        )
+            int(unit) if int(unit) == unit else unit
+            for unit in course['units'])
     return sorted(courses, key=lambda course: course['number'])

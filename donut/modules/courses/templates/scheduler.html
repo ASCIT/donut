@@ -15,9 +15,7 @@
           </select>
         </div>
         <input class='form-control' id='search' placeholder='Search...' />
-        <ul class='list-group' id='courses'>
-          <li class='list-group-item'>Loading...</li>
-        </ul>
+        <ul class='list-group' id='courses'></ul>
       </div>
       <div class='col-md-9'>
         <div class='row' id='scheduler'>
@@ -70,6 +68,7 @@
 {% endblock %}
 {% block scripts %}
   {{ super() }}
+  <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
 
@@ -81,6 +80,10 @@
       var yearTerm = termSelect.val().split('-')
       var loadToken = {}
       termLoadToken = loadToken
+      coursesList.children().remove()
+      coursesList.append(
+        $('<li>').addClass('list-group-item').text('Loading...')
+      )
       $.ajax({
         type: 'GET',
         url: '/1/scheduler/courses/' + yearTerm.join('/'),
@@ -140,6 +143,10 @@
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
       coursesList = $('#courses')
+      $('#search').keyup(function() {
+        displayCourses(searchCourses(termCourses, $(this).val()))
+      })
+
       loadTerm()
     })
   </script>

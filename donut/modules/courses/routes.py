@@ -5,9 +5,9 @@ from donut.modules.courses import blueprint, helpers
 
 YEARS = {1: 'Freshman', 2: 'Sophomore', 3: 'Junior', 4: 'Senior'}
 WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-SCHEDULER_START_HOUR = 8 # 8 AM
-SCHEDULER_END_HOUR = 23 # 11 PM
-SCHEDULER_HOUR_HEIGHT = 50 # px
+SCHEDULER_START_HOUR = 8  # 8 AM
+SCHEDULER_END_HOUR = 23  # 11 PM
+SCHEDULER_HOUR_HEIGHT = 50  # px
 
 
 @blueprint.route('/planner')

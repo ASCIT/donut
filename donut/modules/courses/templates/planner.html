@@ -162,6 +162,7 @@
 {% endblock %}
 {% block scripts %}
   {{ super() }}
+  <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
     var HSS_DEPARTMENTS = {
@@ -180,11 +181,6 @@
       Psy: true,
       SS: true,
       Wr: true
-    }
-    var BOUNDARY_CHARS = {
-      ' ': true,
-      '/': true,
-      undefined: true
     }
 
     var courses = []
@@ -412,32 +408,8 @@
       $('#close-requirements').click(function() {
         requirementsModal.hide()
       })
-      $('input#search').keyup(function() {
-        var query = $(this).val()
-          .trim()
-          .toLowerCase()
-          .split(/[ /]+/)
-        var matches = []
-        courses.forEach(function(course) {
-          var number = course.number.toLowerCase(),
-            name = course.name.toLowerCase()
-          var score = 0
-          query.forEach(function(segment) {
-            var numberIndex = number.indexOf(segment)
-            if (numberIndex > -1) {
-              score += segment.length
-              if (BOUNDARY_CHARS[number[numberIndex - 1]]) score++
-              if (BOUNDARY_CHARS[number[numberIndex + segment.length]]) score++
-            }
-            else if (name.indexOf(segment) > -1) score += segment.length * 0.1
-          })
-          if (score) matches.push({course: course, score: score})
-        })
-        displayCourses(
-          matches
-            .sort(function(a, b) { return b.score - a.score })
-            .map(function(courseScore) { return courseScore.course })
-        )
+      $('#search').keyup(function() {
+        displayCourses(searchCourses(courses, $(this).val()))
       })
     })
   </script>
