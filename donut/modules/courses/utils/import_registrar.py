@@ -127,7 +127,7 @@ with db.cursor() as cursor:
             %s,
             %s, %s,
             %s, %s
-        ) ON DUPLICATE KEY UPDATE section_id = section_id
+        ) ON DUPLICATE KEY UPDATE section_number = section_number
     """
     for section in sections.values():
         course = courses[section['course']]
