@@ -181,6 +181,11 @@
       SS: true,
       Wr: true
     }
+    var BOUNDARY_CHARS = {
+      ' ': true,
+      '/': true,
+      undefined: true
+    }
 
     var courses = []
     var coursesList, termLists, requirementsModal
@@ -421,9 +426,8 @@
             var numberIndex = number.indexOf(segment)
             if (numberIndex > -1) {
               score += segment.length
-              if (numberIndex === 0 || number[numberIndex - 1] === ' ') score++
-              var matchEnd = numberIndex + segment.length
-              if (matchEnd === number.length || number[matchEnd] === ' ') score++
+              if (BOUNDARY_CHARS[number[numberIndex - 1]]) score++
+              if (BOUNDARY_CHARS[number[numberIndex + segment.length]]) score++
             }
             else if (name.indexOf(segment) > -1) score += segment.length * 0.1
           })
