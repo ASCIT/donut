@@ -1,26 +1,81 @@
 {% extends 'layout.html' %}
 {% block page %}
-  <div class='col-md-8 col-md-offset-2' style='float: none; padding-bottom: 25px'>
+  <div class='col-md-8 col-md-offset-2' style='float: none'>
     <h1>Course Scheduler</h1>
-    <form>
-      <div class='form-group'>
-        <label for='term'>Term</label>
-        <select class='form-control' id='term'>
-          {% for term in terms %}
-            <option value='{{ term["year"] }}-{{ term["term"] }}'>
-              {{ TERMS[term["term"]] }} {{ term["year"] }}
-            </option>
-          {% endfor %}
-        </select>
+    <div class='row'>
+      <div class='col-md-3'>
+        <div class='form-group'>
+          <label for='term'>Term</label>
+          <select class='form-control' id='term'>
+            {% for term in terms %}
+              <option value='{{ term["year"] }}-{{ term["term"] }}'>
+                {{ TERMS[term["term"]] }} {{ term["year"] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <input class='form-control' id='search' placeholder='Search...' />
+        <ul class='list-group' id='courses'>
+          <li class='list-group-item'>Loading...</li>
+        </ul>
       </div>
-    </form>
+      <div class='col-md-9'>
+        <div class='row' id='scheduler'>
+          <div class='col-md-1'>
+            {% for hour in range(START_HOUR, END_HOUR + 1) %}
+              <div class='hour' style='top: {{ (hour - START_HOUR + 1) * HOUR_HEIGHT }}px'>
+                {{ (hour + 11) % 12 + 1 }} {{ 'AM' if hour < 12 else 'PM' }}
+              </div>
+            {% endfor %}
+          </div>
+          {% for day in WEEK_DAYS %}
+            <div class='col-md-2 day'>
+              {{ day }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
+{% endblock %}
+{% block styles %}
+  {{ super() }}
+  <style>
+    #scheduler {
+      height: 600px;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    #courses {
+      height: 500px;
+      overflow-y: auto;
+    }
+    .day {
+      font-weight: bold;
+    }
+    .hour {
+      position: absolute;
+      width: 1200%; /* fill all 5 other columns */
+      border-top: 1px solid orange;
+    }
+    .dropdown-menu.list-group {
+      padding: 0;
+      border: none;
+    }
+    .list-group-item.section {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  </style>
 {% endblock %}
 {% block scripts %}
   {{ super() }}
   <script>
-    var termSelect
+    var SHOW_COURSES = 50
+
+    var termSelect, coursesList
     var termLoadToken
+    var termCourses = []
 
     function loadTerm() {
       var yearTerm = termSelect.val().split('-')
@@ -32,13 +87,59 @@
         success: function(courses) {
           if (termLoadToken !== loadToken) return
 
-          // TODO
+          termCourses = courses
+          displayCourses(courses)
         }
       })
+    }
+    function displayCourses(courses) {
+      coursesList.children().remove()
+      courses.slice(0, SHOW_COURSES).forEach(function(course) {
+        var courseItem = $('<li>')
+          .addClass('list-group-item')
+          .attr('course', course.id)
+          .append(
+            $('<h4>').text(course.number),
+            $('<h5>').text(course.name),
+            $('<h5>').addClass('units').text(course.units.join('-'))
+          )
+        var sections = course.sections.map(function(section) {
+          var sectionItem = $('<div>').append(
+            $('<h5>').text(String(section.number) + ' - ' + section.instructor)
+          )
+          if (section.grades) sectionItem.append($('<h6>').text(section.grades))
+          sectionItem.append($('<h6>').text(section.times))
+          return sectionItem
+        })
+        if (sections.length > 1) {
+          var dropdownMenu = $('<ul>').addClass('dropdown-menu list-group')
+          sections.forEach(function(section) {
+            dropdownMenu.append(
+              $('<li>').addClass('list-group-item section').append(section)
+            )
+          })
+          courseItem.append(
+            $('<div>').addClass('dropdown').append(
+              $('<button>')
+                .addClass('btn btn-default dropdown-toggle')
+                .attr({type: 'button', 'data-toggle': 'dropdown'})
+                .append(
+                  'Sections',
+                  $('<span>').addClass('caret')
+                ),
+              dropdownMenu
+            )
+          )
+        }
+        else courseItem.append(sections[0])
+        coursesList.append(courseItem)
+      })
+      $('.dropdown-toggle').dropdown()
     }
 
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
+      coursesList = $('#courses')
       loadTerm()
     })
   </script>

@@ -4,6 +4,10 @@ import pymysql
 from donut.modules.courses import blueprint, helpers
 
 YEARS = {1: 'Freshman', 2: 'Sophomore', 3: 'Junior', 4: 'Senior'}
+WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+SCHEDULER_START_HOUR = 8 # 8 AM
+SCHEDULER_END_HOUR = 23 # 11 PM
+SCHEDULER_HOUR_HEIGHT = 50 # px
 
 
 @blueprint.route('/planner')
@@ -15,7 +19,13 @@ def planner():
 @blueprint.route('/scheduler')
 def scheduler():
     return flask.render_template(
-        'scheduler.html', TERMS=helpers.TERM_NAMES, terms=helpers.get_terms())
+        'scheduler.html',
+        TERMS=helpers.TERM_NAMES,
+        WEEK_DAYS=WEEK_DAYS,
+        START_HOUR=SCHEDULER_START_HOUR,
+        END_HOUR=SCHEDULER_END_HOUR,
+        HOUR_HEIGHT=SCHEDULER_HOUR_HEIGHT,
+        terms=helpers.get_terms())
 
 
 @blueprint.route('/1/planner/courses')
