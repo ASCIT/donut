@@ -95,6 +95,7 @@
     var termSelect, coursesList, search, dayLists
     var termLoadToken
     var termCourses = []
+    var scheduledCourses = {}
 
     function loadTerm() {
       var yearTerm = termSelect.val().split('-')
@@ -117,6 +118,7 @@
       })
     }
     function addSection(course, sectionNumber) {
+      scheduledCourses[[course.id, sectionNumber]] = true
       var sections = course.sections
       var section
       for (var i = 0; i < sections.length; i++) {
@@ -125,6 +127,7 @@
           break
         }
       }
+      var intervals = []
       section.times.split('\n').forEach(function(time) {
         var daysStart = time.slice(0, OM.length) === OM ? OM.length : 0
         var space = time.indexOf(' ')
@@ -137,19 +140,29 @@
         })
         for (var day = 0; day < days.length; day++) {
           var weekday = DAYS[days[day]]
-          dayLists.eq(weekday).append(
-            $('<div>')
-              .addClass('interval')
-              .attr('start', heights[0]).attr('end', heights[1])
-              .css({
-                top: String(heights[0] + HOUR_HEIGHT) + 'px',
-                height: String(heights[1] - heights[0]) + 'px'
-              })
-              .append(
-                $('<div>').addClass('interval-number').text(course.number),
-                String(sectionNumber)
-              )
-          )
+          var intervalItem = $('<div>')
+            .addClass('interval')
+            .attr('start', heights[0]).attr('end', heights[1])
+            .css({
+              top: String(heights[0] + HOUR_HEIGHT) + 'px',
+              height: String(heights[1] - heights[0]) + 'px'
+            })
+            .append(
+              $('<div>').addClass('interval-number').text(course.number),
+              String(sectionNumber),
+              $('<button>')
+                .attr('type', 'button')
+                .addClass('btn btn-danger btn-xs')
+                .append($('<span>').addClass('glyphicon glyphicon-remove'))
+                .click(function() {
+                  intervals.forEach(function(element) { element.remove() })
+                  intervals = null // allow GC
+                  uncheckSection(course.id, sectionNumber)
+                  scheduledCourses[[course.id, sectionNumber]] = false
+                })
+            )
+          dayLists.eq(weekday).append(intervalItem)
+          intervals.push(intervalItem)
         }
       })
       // TODO: resize to fit
@@ -157,13 +170,23 @@
     function removeSection(course, sectionNumber) {
       console.log('Remove', course, sectionNumber)
     }
-    function uncheckSection(courseId, sectionNumber) {}
+    function uncheckSection(courseId, sectionNumber) {
+      console.log(courseId, sectionNumber)
+      $(
+        '[course=' +
+        String(courseId) +
+        '] input[type=checkbox][section=' +
+        String(sectionNumber) +
+        ']'
+      ).prop('checked', false)
+    }
     function displayCourses(courses) {
       coursesList.children().remove()
       courses.slice(0, SHOW_COURSES).forEach(function(course) {
+        var courseId = course.id
         var courseItem = $('<li>')
           .addClass('list-group-item')
-          .attr('course', course.id)
+          .attr('course', courseId)
           .append(
             $('<h4>').text(course.number),
             $('<h5>').text(course.name),
@@ -174,9 +197,10 @@
           var sectionItem = $('<div>').append(
             $('<h5>').append(
               $('<input>')
-                .attr({type: 'checkbox', number: number})
+                .attr({type: 'checkbox', section: number})
+                .prop('checked', !!scheduledCourses[[courseId, number]])
                 .change(function() {
-                  (this.checked ? addSection : removeSection)
+                  ($(this).prop('checked') ? addSection : removeSection)
                     (course, number)
                 }),
               String(number) + ' - ' + section.instructor
