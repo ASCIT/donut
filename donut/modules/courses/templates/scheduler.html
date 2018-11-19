@@ -28,7 +28,7 @@
           </div>
           {% for day in WEEK_DAYS %}
             <div class='col-md-2 day'>
-              {{ day }}
+              <span class='day-title'>{{ day }}</span>
             </div>
           {% endfor %}
         </div>
@@ -39,6 +39,9 @@
 {% block styles %}
   {{ super() }}
   <style>
+    input[type=checkbox] {
+      left: 0;
+    }
     #scheduler {
       height: 600px;
       overflow-x: hidden;
@@ -48,13 +51,20 @@
       height: 500px;
       overflow-y: auto;
     }
-    .day {
+    .day-title, .interval-number {
       font-weight: bold;
     }
     .hour {
       position: absolute;
       width: 1200%; /* fill all 5 other columns */
       border-top: 1px solid orange;
+    }
+    .interval {
+      position: absolute;
+      border: 1px solid #999;
+      border-radius: 5px;
+      background: #fff;
+      font-size: 12px;
     }
     .dropdown-menu.list-group {
       padding: 0;
@@ -71,8 +81,18 @@
   <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
+    var OM = 'OM,'
+    var START_HOUR = {{ START_HOUR }}
+    var HOUR_HEIGHT = {{ HOUR_HEIGHT }}
+    var DAYS = {
+      'M': 0,
+      'T': 1,
+      'W': 2,
+      'R': 3,
+      'F': 4
+    }
 
-    var termSelect, coursesList
+    var termSelect, coursesList, search, dayLists
     var termLoadToken
     var termCourses = []
 
@@ -84,6 +104,7 @@
       coursesList.append(
         $('<li>').addClass('list-group-item').text('Loading...')
       )
+      search.val('')
       $.ajax({
         type: 'GET',
         url: '/1/scheduler/courses/' + yearTerm.join('/'),
@@ -95,6 +116,48 @@
         }
       })
     }
+    function addSection(course, sectionNumber) {
+      var sections = course.sections
+      var section
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].number === sectionNumber) {
+          section = sections[i]
+          break
+        }
+      }
+      section.times.split('\n').forEach(function(time) {
+        var daysStart = time.slice(0, OM.length) === OM ? OM.length : 0
+        var space = time.indexOf(' ')
+        var days = time.slice(daysStart, space)
+        var interval = time.slice(space + 1)
+        var heights = interval.split(' - ').map(function(time) {
+          var hoursMinutes = time.split(':').map(Number)
+          hour = hoursMinutes[0] + hoursMinutes[1] / 60
+          return (hour - START_HOUR) * HOUR_HEIGHT
+        })
+        for (var day = 0; day < days.length; day++) {
+          var weekday = DAYS[days[day]]
+          dayLists.eq(weekday).append(
+            $('<div>')
+              .addClass('interval')
+              .attr('start', heights[0]).attr('end', heights[1])
+              .css({
+                top: String(heights[0] + HOUR_HEIGHT) + 'px',
+                height: String(heights[1] - heights[0]) + 'px'
+              })
+              .append(
+                $('<div>').addClass('interval-number').text(course.number),
+                String(sectionNumber)
+              )
+          )
+        }
+      })
+      // TODO: resize to fit
+    }
+    function removeSection(course, sectionNumber) {
+      console.log('Remove', course, sectionNumber)
+    }
+    function uncheckSection(courseId, sectionNumber) {}
     function displayCourses(courses) {
       coursesList.children().remove()
       courses.slice(0, SHOW_COURSES).forEach(function(course) {
@@ -107,11 +170,22 @@
             $('<h5>').addClass('units').text(course.units.join('-'))
           )
         var sections = course.sections.map(function(section) {
+          var number = section.number
           var sectionItem = $('<div>').append(
-            $('<h5>').text(String(section.number) + ' - ' + section.instructor)
+            $('<h5>').append(
+              $('<input>')
+                .attr({type: 'checkbox', number: number})
+                .change(function() {
+                  (this.checked ? addSection : removeSection)
+                    (course, number)
+                }),
+              String(number) + ' - ' + section.instructor
+            )
           )
           if (section.grades) sectionItem.append($('<h6>').text(section.grades))
-          sectionItem.append($('<h6>').text(section.times))
+          section.times.split('\n').forEach(function(time) {
+            sectionItem.append($('<h6>').text(time))
+          })
           return sectionItem
         })
         if (sections.length > 1) {
@@ -143,9 +217,10 @@
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
       coursesList = $('#courses')
-      $('#search').keyup(function() {
+      search = $('#search').keyup(function() {
         displayCourses(searchCourses(termCourses, $(this).val()))
       })
+      dayLists = $('.day')
 
       loadTerm()
     })
