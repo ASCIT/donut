@@ -11,4 +11,3 @@ import enum
 class Permissions(enum.IntEnum):
     #Site admins -- always have permission to everything -- Use with caution
     ADMIN = 1
-    EDIT = 2
