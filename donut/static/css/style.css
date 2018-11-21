@@ -507,7 +507,7 @@ input[type=checkbox], input[type=radio] {
   -o-animation: rotating 10s linear infinite;
   animation: rotating 10s linear infinite; 
 
-  width: 15vw;
+  width: 12vw;
   margin-bottom: 10px;
 }
 
@@ -594,6 +594,14 @@ label.required:after {
 /*****************************************************************************/
 
 /* BEGIN MOBILE CSS */
+
+@media only screen and (orientation: portrait) {
+
+  #background-donut {
+    width: 40vw;
+    margin-bottom: 30px;
+  }
+}
 
 @media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
 
