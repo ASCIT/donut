@@ -19,7 +19,7 @@
       </div>
       <div class='col-md-9'>
         <div class='row' id='scheduler'>
-          <div class='col-md-1'>
+          <div class='col-md-2'>
             {% for hour in range(START_HOUR, END_HOUR + 1) %}
               <div class='hour' style='top: {{ (hour - START_HOUR + 1) * HOUR_HEIGHT }}px'>
                 {{ (hour + 11) % 12 + 1 }} {{ 'AM' if hour < 12 else 'PM' }}
@@ -28,7 +28,7 @@
           </div>
           {% for day in WEEK_DAYS %}
             <div class='col-md-2 day'>
-              <span class='day-title'>{{ day }}</span>
+              <strong>{{ day }}</strong>
             </div>
           {% endfor %}
         </div>
@@ -51,20 +51,36 @@
       height: 500px;
       overflow-y: auto;
     }
-    .day-title, .interval-number {
-      font-weight: bold;
+    .day {
+      display: flex;
+      justify-content: center;
+      border-left: 2px solid orange;
+      height: {{ (END_HOUR - START_HOUR + 1) * HOUR_HEIGHT }}px;
     }
     .hour {
       position: absolute;
-      width: 1200%; /* fill all 5 other columns */
+      width: 600%; /* fill all 5 other columns */
       border-top: 1px solid orange;
     }
     .interval {
       position: absolute;
       border: 1px solid #999;
       border-radius: 5px;
-      background: #fff;
       font-size: 12px;
+    }
+    .interval .btn.remove {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .interval:hover .interval-label {
+      display: none;
+    }
+    .interval:hover .btn.remove {
+      display: inline-block;
+    }
+    .interval-label {
+      word-break: break-all;
     }
     .dropdown-menu.list-group {
       padding: 0;
@@ -78,6 +94,7 @@
 {% endblock %}
 {% block scripts %}
   {{ super() }}
+  <script src='{{ url_for("static", filename="js/hash.js") }}'></script>
   <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
@@ -91,6 +108,7 @@
       'R': 3,
       'F': 4
     }
+    var HASH_RANGE = Math.pow(2, 32)
 
     var termSelect, coursesList, search, dayLists
     var termLoadToken
@@ -117,6 +135,10 @@
         }
       })
     }
+    function backgroundColor(course) {
+      var nameHash = hashString(course.number) ^ hashString(course.name)
+      return 'hsl(' + String(360 * nameHash / HASH_RANGE) + ', 100%, 80%)'
+    }
     function addSection(course, sectionNumber) {
       scheduledCourses[[course.id, sectionNumber]] = true
       var sections = course.sections
@@ -127,6 +149,7 @@
           break
         }
       }
+      var background = backgroundColor(course)
       var intervals = []
       section.times.split('\n').forEach(function(time) {
         var daysStart = time.slice(0, OM.length) === OM ? OM.length : 0
@@ -147,14 +170,17 @@
             .attr('start', heights[0]).attr('end', heights[1])
             .css({
               top: String(heights[0] + HOUR_HEIGHT) + 'px',
-              height: String(heights[1] - heights[0]) + 'px'
+              height: String(heights[1] - heights[0]) + 'px',
+              background: background
             })
             .append(
-              $('<div>').addClass('interval-number').text(course.number),
-              String(sectionNumber),
+              $('<div>').addClass('interval-label').append(
+                $('<strong>').text(course.number),
+                $('<div>').text(sectionNumber)
+              ),
               $('<button>')
                 .attr('type', 'button')
-                .addClass('btn btn-danger btn-xs')
+                .addClass('btn btn-danger remove')
                 .append($('<span>').addClass('glyphicon glyphicon-remove'))
                 .click(function() {
                   intervals.forEach(function(element) { element.remove() })
@@ -223,6 +249,7 @@
         var courseItem = $('<li>')
           .addClass('list-group-item')
           .attr('course', courseId)
+          .css('background', backgroundColor(course))
           .append(
             $('<h4>').text(course.number),
             $('<h5>').text(course.name),
@@ -239,7 +266,7 @@
                   ($(this).prop('checked') ? addSection : removeSection)
                     (course, number)
                 }),
-              String(number) + ' - ' + section.instructor
+              $('<span>').text(String(number) + ' - ' + section.instructor)
             )
           )
           if (section.grades) sectionItem.append($('<h6>').text(section.grades))
