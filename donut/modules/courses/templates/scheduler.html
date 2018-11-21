@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block page %}
-  <div class='col-md-8 col-md-offset-2' style='float: none'>
+  <div class='col-md-10 col-md-offset-1' style='float: none'>
     <h1>Course Scheduler</h1>
     <div class='row'>
       <div class='col-md-3'>
@@ -131,6 +131,8 @@
       section.times.split('\n').forEach(function(time) {
         var daysStart = time.slice(0, OM.length) === OM ? OM.length : 0
         var space = time.indexOf(' ')
+        if (space < 0) return // time is either "A" or "OM, A"
+
         var days = time.slice(daysStart, space)
         var interval = time.slice(space + 1)
         var heights = interval.split(' - ').map(function(time) {
@@ -159,19 +161,19 @@
                   intervals = null // allow GC
                   uncheckSection(course.id, sectionNumber)
                   scheduledCourses[[course.id, sectionNumber]] = false
+                  fitIntervals()
                 })
             )
           dayLists.eq(weekday).append(intervalItem)
           intervals.push(intervalItem)
         }
       })
-      // TODO: resize to fit
+      fitIntervals()
     }
     function removeSection(course, sectionNumber) {
       console.log('Remove', course, sectionNumber)
     }
     function uncheckSection(courseId, sectionNumber) {
-      console.log(courseId, sectionNumber)
       $(
         '[course=' +
         String(courseId) +
@@ -179,6 +181,40 @@
         String(sectionNumber) +
         ']'
       ).prop('checked', false)
+    }
+    function fitIntervals() {
+      dayLists.each(function(_, day) {
+        var intervals = []
+        $(day).children('.interval').each(function(_, element) {
+          var $element = $(element)
+          intervals.push({
+            element: $element,
+            start: Number($element.attr('start')),
+            end: Number($element.attr('end'))
+          })
+        })
+        intervals.sort(function(a, b) { return a.end - b.end })
+        var intervalsToSchedule = intervals, remainingIntervals
+        var lastEnd
+        for (var indent = 0; intervalsToSchedule.length; indent++) {
+          lastEnd = -Infinity
+          remainingIntervals = []
+          intervalsToSchedule.forEach(function(interval) {
+            if (interval.start >= lastEnd) { // schedulable
+              interval.indent = indent
+              lastEnd = interval.end
+            }
+            else remainingIntervals.push(interval)
+          })
+          intervalsToSchedule = remainingIntervals
+        }
+        intervals.forEach(function(interval) {
+          interval.element.css({
+            width: 100 / indent + '%',
+            left: 100 * interval.indent / indent + '%'
+          })
+        })
+      })
     }
     function displayCourses(courses) {
       coursesList.children().remove()
