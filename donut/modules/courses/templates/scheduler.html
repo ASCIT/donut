@@ -62,6 +62,9 @@
       width: 600%; /* fill all 5 other columns */
       border-top: 1px solid orange;
     }
+    .section label {
+      font-weight: normal;
+    }
     .interval {
       position: absolute;
       border: 1px solid #999;
@@ -179,7 +182,11 @@
                 $('<div>').text(sectionNumber)
               ),
               $('<button>')
-                .attr('type', 'button')
+                .attr({
+                  type: 'button',
+                  course: course.id,
+                  section: sectionNumber
+                })
                 .addClass('btn btn-danger remove')
                 .append($('<span>').addClass('glyphicon glyphicon-remove'))
                 .click(function() {
@@ -197,7 +204,14 @@
       fitIntervals()
     }
     function removeSection(course, sectionNumber) {
-      console.log('Remove', course, sectionNumber)
+      var removeButtons = $(
+        'button[course=' +
+        String(course.id) +
+        '][section=' +
+        String(sectionNumber) +
+        ']'
+      )
+      if (removeButtons.length) $(removeButtons.eq(0)).click()
     }
     function uncheckSection(courseId, sectionNumber) {
       $(
@@ -236,8 +250,8 @@
         }
         intervals.forEach(function(interval) {
           interval.element.css({
-            width: 100 / indent + '%',
-            left: 100 * interval.indent / indent + '%'
+            width: String(100 / indent) + '%',
+            left: String(100 * interval.indent / indent) + '%'
           })
         })
       })
@@ -257,16 +271,18 @@
           )
         var sections = course.sections.map(function(section) {
           var number = section.number
-          var sectionItem = $('<div>').append(
+          var sectionItem = $('<div>').addClass('section').append(
             $('<h5>').append(
-              $('<input>')
-                .attr({type: 'checkbox', section: number})
-                .prop('checked', !!scheduledCourses[[courseId, number]])
-                .change(function() {
-                  ($(this).prop('checked') ? addSection : removeSection)
-                    (course, number)
-                }),
-              $('<span>').text(String(number) + ' - ' + section.instructor)
+              $('<label>').append(
+                $('<input>')
+                  .attr({type: 'checkbox', section: number})
+                  .prop('checked', !!scheduledCourses[[courseId, number]])
+                  .change(function() {
+                    ($(this).prop('checked') ? addSection : removeSection)
+                      (course, number)
+                  }),
+                $('<span>').text(String(number) + ' - ' + section.instructor)
+              )
             )
           )
           if (section.grades) sectionItem.append($('<h6>').text(section.grades))
