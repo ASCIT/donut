@@ -264,12 +264,9 @@ def create_group(group_name,
         visible: Toggles if the group is visible
         admin_control_members: toggles if administrator can control membership
     """
-    fields = [
-        "group_name", "group_desc", "type", "newsgroups", "anyone_can_send",
-        "members_can_send", "visible", "admin_control_members"
-    ]
-    query = "INSERT INTO groups (" + ','.join(fields) + ")"\
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    query = """INSERT INTO groups (group_name, group_desc, type,
+        newsgroups, anyone_can_send, members_can_send, visible,
+        admin_control_members) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
                                anyone_can_send, members_can_send, visible,
@@ -289,7 +286,7 @@ def delete_group(group_id):
     '''
     s = "DELETE FROM groups WHERE group_id=%s"
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (group_id))
+        cursor.execute(s, group_id)
 
 
 def get_members_by_group(group_id):

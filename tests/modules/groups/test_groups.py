@@ -169,11 +169,11 @@ def test_create_group(client):
         "group_name": "Page House",
         "group_desc": "May the work be light",
         "type": "House",
-        "newsgroups": 0,
-        "anyone_can_send": 0,
-        "members_can_send": 1,
-        "visible": 1,
-        "admin_control_members": 1,
+        "newsgroups": False,
+        "anyone_can_send": False,
+        "members_can_send": True,
+        "visible": True,
+        "admin_control_members": True,
         "group_id": group_id
     }
 
