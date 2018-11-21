@@ -4,6 +4,7 @@
 DROP TABLE IF EXISTS position_relations;
 DROP VIEW IF EXISTS group_house_membership;
 DROP VIEW IF EXISTS group_houses;
+DROP VIEW IF EXISTS curren_position_holders;
 DROP TABLE IF EXISTS position_holders;
 DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS groups;
@@ -176,6 +177,14 @@ CREATE VIEW group_house_membership AS (
     FROM group_houses NATURAL JOIN positions NATURAL JOIN position_holders
     WHERE UPPER(pos_name) = UPPER('Full Member')
         OR UPPER(pos_name) = UPPER('Social Member')
+);
+
+-- Current Position Holders View
+-- This view only contains position holders that are currently valid
+CREATE VIEW current_position_holders AS (
+    SELECT hold_id, pos_id, user_id, start_date, end_date
+    FROM position_holders 
+    WHERE CURDATE() between start_date and end_date
 );
 
 -- Position to position table
