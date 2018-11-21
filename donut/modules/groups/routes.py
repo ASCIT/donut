@@ -96,3 +96,15 @@ def create_pos_holder(pos_id):
                                    int(form["user_id"]), form["start_date"],
                                    form["end_date"])
     return jsonify({'success': True})
+
+
+@blueprint.route("/1/positions/<int:pos_id>/delete/", methods=["POST"])
+def delete_pos_holder(pos_id):
+    form = flask.request.form
+    validations = [
+        validate_exists(form, "user_id") and validate_int(form["user_id"]),
+    ]
+    if not all(validations):
+        return jsonify({'success': False})
+    helpers.delete_position_holder(pos_id, form["user_id"])
+    return jsonify({'success': True})

@@ -182,7 +182,6 @@ function formatDate(dateString) {
 function posIdDelHoldChange() {
     var positionIndex = $('#posIdDelHold').val();
     var url = '/1/positions/' + positionIndex + '/direct/';
-    debugger;
     $.ajax({
         url: url,
         success: function(data){
@@ -262,6 +261,22 @@ $(document).ready(function() {
             }
         });
     });
+    $('#submitDelPosHoldBtn').click(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/1/positions/' + $("#posIdDelHold").val() + '/delete/',
+            data: $("#deleteHoldForm").serialize(),
+            success: function(data) {
+                if(data.success) {
+                    setUpForms();
+                    alert("Deleted Position!");
+                } else {
+                    alert("Something went Wrong");
+                }
+            }
+        });
+    });
 });
 
 /*
@@ -269,7 +284,8 @@ $(document).ready(function() {
  */
 function setUpForms() {
     $('#posDelete').trigger("reset");
-    $('#holdForm').trigger("reset")
+    $('#holdForm').trigger("reset");
+    $('#deleteHoldForm').trigger("reset");
     $('#position').find('option')
                   .remove()
                   .end()
@@ -278,5 +294,14 @@ function setUpForms() {
                     .remove()
                     .end()
                     .append('<option>Select a Position</option>');
+    $('#posIdDelHold').find('option')
+                    .remove()
+                    .end()
+                    .append('<option>Pick a Position</option>');
+    $('#delName').find('option')
+                    .remove()
+                    .end()
+                    .append('<option>Pick a Holder</option>');
+
 
 }
