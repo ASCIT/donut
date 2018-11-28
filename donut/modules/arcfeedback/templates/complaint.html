@@ -5,13 +5,13 @@
 	<div class="row">
 	    {% if 'ADD_REMOVE_EMAIL' in perms %}
 	    {# Leave space for the add/remove email panel #}
-	    <div class="col-md-8">
+	    <div class="col-md-6">
 	    {% else %}
-	    <div class="col-md-12">
+	    <div class="col-md-8 col-md-offset-2">
             {% endif %}
 		<div class="panel panel-default">
 		    <div class="panel-heading">
-			<h3>Feedback Summary</h3>
+			<h4>Feedback Summary</h4>
 		    </div>
 		    <div class="panel-body" id="summary-panel">
 			<p>Course: {{complaint['course']}} </p>
@@ -26,13 +26,14 @@
 			        {% endfor %}
 			    {% endif %}
 			{% endif %}
+		    
+		    <button class="btn" id="markRead">Mark as read</button>
+		    <button class="btn" id="markUnread">Mark as unread</button>
 		    </div>
-		    <button class="btn btn-primary" id="markRead">Mark as read</button>
-		    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
 		</div>
 	    </div>
 	    {% if 'ADD_REMOVE_EMAIL' in perms %}
-	    <div class="col-md-4">
+	    <div class="col-md-6">
 		<div class="panel panel-default">
 		    <div class="panel-heading">
 			<h4>Manage Subscribed Emails</h4>
@@ -43,7 +44,7 @@
 				<p>Add Email (or comma separated list of emails): </p>
 				<input class="form-control" type="text" name="email" />
 			    </div>
-			    <input class="btn btn-primary" type="submit" value="Add" id="add-email-btn">
+			    <input class="btn" type="submit" value="Add" id="add-email-btn">
 			</form>
 		    </div>
 		    <div class="panel-body">
@@ -52,7 +53,7 @@
 				<p>Remove Email (or comma separated list of emails): </p>
 				<input class="form-control" type="text" name="email" />
 			    </div>
-			    <input class="btn btn-primary" type="submit" value="Remove" id="remove-email-btn">
+			    <input class="btn" type="submit" value="Remove" id="remove-email-btn">
 			</form>
 		    </div>
 		</div>
@@ -88,7 +89,7 @@
 				    <p>Message: </p>
 				    <textarea class="form-control" name="message" rows="10" required maxlength="5000"></textarea>
 				</div>
-				<input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+				<input class="btn" id="submitBtn" type="submit" value="Submit" />
 			    </form>
 			</div>
 		    </div>
