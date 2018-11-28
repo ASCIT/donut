@@ -1,21 +1,17 @@
 {% extends "layout.html" %}
 {% block head %}
-  {% block styles %}
-    {{super()}}
-    <link rel="stylesheet" href={{ url_for('uploads.static', filename='style.css')}}>
-
-  {% endblock %}
-  {% block scripts %}
-    {{super()}}
-    <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-    <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
-    <script type="text/javascript">
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
-  {% endblock %}
+  {{super()}}
+  <!-- Jquery is here because this page requires jqery and my js file to load-->
+  <!-- Putting this in a script block here screws up the bootstrap -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+  <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+  <script type="text/javascript">
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
 {% endblock %}
 {% block page %}
-<div class="container">
+<div class="container theme-showcase" role="main">
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">{{title}}</h1>
