@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% block page %}
+{% set admin = 'ADMIN' in perms %}
 <div class="jumbotron">
     <div class="row">
 	<div class="col-md-8">
-		{% if 'SUMMARY' in perms or 'ADMIN' in perms %}
+	      {% if admin or 'SUMMARY' in perms%}
                 <a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
               {% endif %}
 	    <div class="panel panel-default">
@@ -11,9 +12,9 @@
 		    <h3>Feedback Summary</h3>
 		</div>
 		<div class="panel-body" id="summary-panel">
-		    <p>Subject: {{complaint['subject']}} </p>
-		    <p>Status: {{complaint['status']}} </p>
-		    {% if 'ADMIN' in perms or 'VIEW_EMAILS' in perms %}
+		    <p>Subject: {{ complaint['subject'] }} </p>
+		    <p>Status: {{ complaint['status'] }} </p>
+		    {% if admin or 'VIEW_EMAILS' in perms or 'ADD_REMOVE_EMAIL' in perms %}
 		      {% if not complaint['emails'] %}
 		        <p>No emails subscribed to this complaint </p>
 		      {% else %}
@@ -22,24 +23,20 @@
 		          {% for email in complaint['emails'] %}
 		            <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
 		          {% endfor %}
-			  {% if 'ADD_REMOVE_EMAIL' in perms %}
-		            <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" />
-		          {% else %}
-			    <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" disabled/>
-			  {% endif %}
+		          <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" {% if not admin and 'ADD_REMOVE_EMAIL' not in perms %}disabled{% endif %}/>
 			</form>
 		      {% endif %}
 		    {% endif %}
 		</div>
-		{% if 'ADMIN' in perms or 'TOGGLE_READ' in perms %}
-		<button class="btn btn-primary" id="markRead">Mark as read</button>
-		<button class="btn btn-primary" id="markUnread">Mark as unread</button>
+		{% if admin or 'TOGGLE_READ' in perms %}
+	       	  <button class="btn btn-primary" id="markRead">Mark as read</button>
+		  <button class="btn btn-primary" id="markUnread">Mark as unread</button>
 	        {% endif %}
 	    </div>
 	</div>
 	<div class="col-md-4">
-	    {% if 'ADMIN' in perms or 'ADD_REMOVE_EMAIL' in perms %}
-	    <div class="panel panel-default">
+	    {% if admin or 'ADD_REMOVE_EMAIL' in perms %}
+	      <div class="panel panel-default">
 		<div class="panel-heading">
 		    <h4>Add an email</h4>
 		</div>
@@ -54,7 +51,7 @@
 		</div>
 		<div class="row">
 		</div>
-	    </div> 
+	      </div> 
 	    {% endif %}
 	</div>
 	<div class="row">
@@ -66,7 +63,7 @@
 			</thead>
 			{% for message in complaint['messages'] %}
 			<tr> 
-			    <th>{{message['time'].strftime('%b %d %Y %-I:%M%p')}}</th> 
+			    <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th> 
 			    <th>{{ message['poster'] }}</th> 
 			    <td>{{ message['message'] }}</td>
 			</tr>
@@ -114,6 +111,7 @@
 	     success: function(){
 		 $('#markRead').hide();
 		 $('#markUnread').show();
+		 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
 	     },
 	     error: function(response){
 		 $('#summary-panel').append(response)
@@ -127,6 +125,7 @@
 	     success: function(){
 		 $('#markUnread').hide();
 		 $('#markRead').show();
+		 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
 	     },
 	     error: function(response){
 		 $('#summary-panel').append(response)
@@ -138,5 +137,3 @@
 </script>
 
 {% endblock %}
- 
-

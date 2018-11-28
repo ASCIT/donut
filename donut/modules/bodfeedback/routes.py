@@ -58,11 +58,10 @@ def bodfeedback_view_complaint(id):
     perms = set()
     if auth_utils.check_login():
         perms = auth_utils.get_permissions(flask.session['username'])
-    if default_permissions.ADMIN in perms:
-        bodperms = set(bod_permissions)
-    else:
-        bodperms = perms & (set(bod_permissions))
-    namedperms = [perm.name for perm in bodperms]
+    bodperms = set([b.value for b in bod_permissions])
+    if default_permissions.ADMIN not in perms:
+        bodperms &= perms
+    namedperms = [bod_permissions(perm).name for perm in bodperms]
     return flask.render_template(
         'complaint.html', complaint=complaint, perms=namedperms)
 
