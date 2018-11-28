@@ -49,6 +49,8 @@ def init(environment_name):
         environment = config.TEST
     else:
         raise ValueError("Illegal environment name.")
+    app.config["ENV"] = "production" if environment_name == "prod" \
+        else "development"
     # Initialize configuration variables.
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
