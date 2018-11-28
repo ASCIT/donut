@@ -3,12 +3,13 @@
 <link rel="stylesheet" href="{{url_for('static', filename='css/groups/groups.css')}}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="{{ url_for('static', filename='js/groups/positions.js') }}"></script>
-<div class="container" style="background-color: #eee">
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
     <div id="page-header">
-        <h1 id="pagetitle" > The Ascit Position Service </h1>
+        <h2 id="pagetitle">The Ascit Position Service</h2>
     </div>
     <ul class="nav nav-tabs nav-justified tabs">
-        <li class="active"><a data-toggle="tab" href="#viewAll">View All </a> </li>
+        <li class="active"><a data-toggle="tab" href="#viewAll">View All</a></li>
         <li><a data-toggle="tab" href="#admin">Administrate</a></li>
     </ul>
     <div class="tab-content">
@@ -41,6 +42,9 @@
                 <li>
                     <a data-toggle="pill" href="#deletePos">Delete a Position</a>
                 </li>
+                <li>
+                    <a data-toggle="pill" href="#assignHold">Assign a Position Holder</a>
+                </li>
             </ul>
             <div class="tab-content">
                 <div id="createPos" class="tab-pane fade in active">
@@ -59,7 +63,7 @@
                             <input class="form-control" id="posName" 
                                                             name="pos_name">
                         </div>
-                        <button id="submitPosBtn" class="btn btn-default">
+                        <button id="submitPosBtn" class="btn">
                             Submit
                         </button>
                     </form>
@@ -81,15 +85,74 @@
                                 <option> Pick a position </option>
                             </select>
                         </div>
-                        <button id="delPosBtn" class="btn btn-default">Submit</button>
+                        <button id="delPosBtn" class="btn">Submit</button>
                     </form>     
+                </div>
+                <div id="assignHold" class="tab-pane fade in">
+                    <form id="holdForm">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="groupPosHold">
+                                Group Name:</label>
+                            <select class="form-control" id="groupPosHold" 
+                                    onchange="groupPosHoldChange()" name="group_id"> 
+                                <option> Select a Group </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="posIdHold">
+                                Position: </label>
+                            <select class="form-control" id="posIdHold" 
+                                                            name="pos_id">
+                                <option> Pick a position </option>
+                            </select>
+                        </div>
+                        <div class='form-group'>
+                            <label class="control-label col-sm-2" for='name'>
+                                Name: </label>
+                            <input class='form-control' id='name' name='name' 
+                                autocomplete="off" placeholder='Name' autofocus />
+                            <ul class='list-group' id='name-search'></ul>
+                        </div>
+                        <input type="hidden" id="user_id" name="user_id">
+                        <div class='form-group'>
+                            <label for='start_date'> Start Date: </label>
+                            <input id='start_date' type='date' name='start_date'/>
+                        </div>
+                        <div class='form-group'>
+                            <label for='end_date'> End Date: </label>
+                            <input id='end_date' type='date' name='end_date'/>
+                        </div>
+                        <button id="submitPosHoldBtn" class="btn btn-default">
+                            Submit
+                        </button>
+                    </form>
                 </div>
             </div> 
         </div>
     </div>
+  </div>
 </div>
 <script type="text/javascript">
 init({{approved_group_ids}},{{approved_group_names|safe}},
     {{all_positions|safe}});
 </script>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
+    <script>
+        $(document).ready(function() {
+            var nameInput = $('input#name'), nameSearch = $('ul#name-search')
+            attachDirectorySearch(nameInput, nameSearch, function(user){
+                return $('<li>').addClass('list-group-item').append($('<a>')
+                        .text(user.full_name + ", " + user.graduation_year)
+                        .click(function(){
+                                nameInput.val(user.full_name);
+                                nameSearch.children().remove();
+                                $('input#user_id').val(user.user_id);
+                        })
+                    );
+            })
+        })
+    </script>
 {% endblock %}

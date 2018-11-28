@@ -11,10 +11,10 @@ USE donut_test;
 SOURCE sql/donut.sql
 SOURCE sql/directory.sql
 SOURCE sql/marketplace.sql
-SOURCE sql/arcfeedback.sql
 SOURCE sql/rooms.sql
 SOURCE sql/permissions.sql
 SOURCE sql/voting.sql
+SOURCE sql/arcfeedback.sql
 
 -- Populate with test data.
 SOURCE sql/test_data.sql

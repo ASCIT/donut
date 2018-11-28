@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block page %}
-{% include "topbar.html" %}
 
+<div class="container theme-showcase jumbotron">
 <h4>
     Found {{ datalist|length }} results.
 </h4>
 {% if datalist %}
-    <div>
-        <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
+    <div class="pos-left">
+        <table class="table table-condensed table-hover sortable" frame=void rules=rows>
             <thead>
                 <tr>
                     {% for i in headers %}
@@ -34,5 +34,6 @@
         </table>
     </div>
 {% endif %}
+</div>
 
 {% endblock %}

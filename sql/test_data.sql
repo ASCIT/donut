@@ -93,7 +93,6 @@ INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
-
 /* For arcfeedback module */
 INSERT INTO arc_complaint_info(complaint_id, course, status, uuid) VALUES
     (1, 'Math 1a', 'new_msg', 'sample_uuid'),

@@ -13,6 +13,7 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
+
 from donut.modules import account, auth, marketplace, core, directory_search, groups, rooms, voting, arcfeedback
 
 app = flask.Flask(__name__)
@@ -25,10 +26,9 @@ app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
 app.register_blueprint(directory_search.blueprint)
 app.register_blueprint(groups.blueprint)
-app.register_blueprint(arcfeedback.blueprint)
 app.register_blueprint(rooms.blueprint)
 app.register_blueprint(voting.blueprint)
-
+app.register_blueprint(arcfeedback.blueprint)
 
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
@@ -49,6 +49,8 @@ def init(environment_name):
         environment = config.TEST
     else:
         raise ValueError("Illegal environment name.")
+    app.config["ENV"] = "production" if environment_name == "prod" \
+        else "development"
     # Initialize configuration variables.
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
