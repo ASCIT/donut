@@ -232,12 +232,14 @@ def get_all_fields(complaint_id):
     Returns a dict with emails, messages, course, status
     Returns None if complaint_id is invalid
     '''
-    data = {}
-    data['emails'] = get_emails(complaint_id)
-    data['messages'] = get_messages(complaint_id)
-    data['course'] = get_course(complaint_id)
-    data['status'] = get_status(complaint_id)
-    return data if data['course'] else None
+    summary = get_summary(complaint_id)
+    if not summary: return None
+    return {
+        'emails': get_emails(complaint_id),
+        'messages': get_messages(complaint_id),
+        'course': summary['course'],
+        'status': summary['status']
+    }
 
 
 def get_new_posts():

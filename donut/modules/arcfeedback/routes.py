@@ -45,10 +45,10 @@ def arcfeedback_submit():
 # api endpoint with all visible data
 @blueprint.route('/1/arcfeedback/view/<uuid:id>')
 def arcfeedback_api_view_complaint(id):
-    if not (helpers.get_id(id)):
-        return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
-    #pack all the data we need into a dict
+    if not complaint_id:
+        return flask.render_template("404.html")
+    # pack all the data we need into a dict
     return flask.jsonify(helpers.get_all_fields(complaint_id))
 
 
