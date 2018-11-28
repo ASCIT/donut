@@ -30,6 +30,7 @@ app.register_blueprint(rooms.blueprint)
 app.register_blueprint(voting.blueprint)
 app.register_blueprint(arcfeedback.blueprint)
 
+
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
 
