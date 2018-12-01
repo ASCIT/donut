@@ -20,6 +20,7 @@
       <div class='col-md-9'>
         <div class='row' id='scheduler'>
           <div class='col-md-2'>
+            <div id='units'></div>
             {% for hour in range(START_HOUR, END_HOUR + 1) %}
               <div class='hour' style='top: {{ (hour - START_HOUR + 1) * HOUR_HEIGHT }}px'>
                 {{ (hour + 11) % 12 + 1 }} {{ 'AM' if hour < 12 else 'PM' }}
@@ -113,10 +114,11 @@
     }
     var HASH_RANGE = Math.pow(2, 32)
 
-    var termSelect, coursesList, search, dayLists
+    var termSelect, coursesList, search, dayLists, units
     var termLoadToken
     var termCourses = []
     var scheduledCourses = {}
+    var coursesUnits = 0
 
     function loadTerm() {
       var yearTerm = termSelect.val().split('-')
@@ -152,6 +154,9 @@
           break
         }
       }
+      var courseUnits = course.units.reduce((a, b) => a + b)
+      coursesUnits += courseUnits
+      displayUnits()
       var background = backgroundColor(course)
       var intervals = []
       section.times.split('\n').forEach(function(time) {
@@ -195,6 +200,8 @@
                   uncheckSection(course.id, sectionNumber)
                   scheduledCourses[[course.id, sectionNumber]] = false
                   fitIntervals()
+                  coursesUnits -= courseUnits
+                  displayUnits()
                 })
             )
           dayLists.eq(weekday).append(intervalItem)
@@ -316,6 +323,9 @@
       })
       $('.dropdown-toggle').dropdown()
     }
+    function displayUnits() {
+      units.text('Units: ' + String(coursesUnits))
+    }
 
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
@@ -324,6 +334,8 @@
         displayCourses(searchCourses(termCourses, $(this).val()))
       })
       dayLists = $('.day')
+      units = $('#units')
+      displayUnits()
 
       loadTerm()
     })
