@@ -21,7 +21,7 @@ def register_complaint(data, notification=True):
     data should be a dict with keys 'course', 'msg' and optionally 'name', 'email'
     if required fields are missing, returns false
     '''
-    if not data or not data['subject'] or not data['msg']: return False
+    if not (data and data['subject'] and data['msg']): return False
     # Register complaint
     query = """
     INSERT INTO bod_complaint_info (subject, status, uuid)
@@ -32,7 +32,7 @@ def register_complaint(data, notification=True):
         cursor.execute(query, (data['subject'], status))
     complaint_id = cursor.lastrowid
     # Add email to db if applicable
-    if data['email'] != "":
+    if data['email']:
         emails = [x.strip() for x in data['email'].split(',')]
         for e in emails:
             add_email(complaint_id, e, False)
@@ -91,7 +91,7 @@ def add_msg(complaint_id, message, poster, notification=True):
     """
     # Update the status to new_msg
     query2 = 'UPDATE bod_complaint_info SET status = "new_msg" WHERE complaint_id = %s'
-    if poster == '' or poster is None:
+    if not poster:
         poster = '(anonymous)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
@@ -130,9 +130,7 @@ def get_id(uuid):
         cursor.execute(query, str(uuid))
         if not cursor.rowcount:
             return False
-        res = cursor.fetchone()
-        res = res['complaint_id']
-    return res
+    return cursor.fetchone()['complaint_id']
 
 
 def get_messages(complaint_id):
@@ -146,7 +144,7 @@ def get_messages(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
-    if not res or 'message_id' not in res[0]:
+    if not (res and 'message_id' in res[0]):
         return None
     return res
 
@@ -254,5 +252,4 @@ def get_new_posts():
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()

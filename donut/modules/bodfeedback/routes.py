@@ -26,7 +26,7 @@ def bodfeedback_submit():
     for field in fields:
         data[field] = flask.request.form.get(field)
     for field in required:
-        if data[field] == "":
+        if not data[field]:
             flask.flash('Please fill in all required fields (marked with *)',
                         'error')
             return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
@@ -58,7 +58,7 @@ def bodfeedback_view_complaint(id):
     perms = set()
     if auth_utils.check_login():
         perms = auth_utils.get_permissions(flask.session['username'])
-    bodperms = set([b.value for b in bod_permissions])
+    bodperms = set(bod_permissions)
     if default_permissions.ADMIN not in perms:
         bodperms &= perms
     namedperms = [bod_permissions(perm).name for perm in bodperms]
@@ -77,7 +77,7 @@ def bodfeedback_add_msg(id):
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
-    if data['message'] == "":
+    if not data['message']:
         flask.abort(400)
         return
     helpers.add_msg(complaint_id, data['message'], data['poster'])
