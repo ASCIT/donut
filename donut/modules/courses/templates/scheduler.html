@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block page %}
   <div class='col-md-10 col-md-offset-1' style='float: none'>
+    <h3 id='warning'></h3>
     <h1>Course Scheduler</h1>
     <div class='row'>
       <div class='col-md-3'>
@@ -42,6 +43,10 @@
   <style>
     input[type=checkbox] {
       left: 0;
+    }
+    #warning {
+      float: right;
+      margin: 0;
     }
     #scheduler {
       height: 600px;
@@ -118,10 +123,13 @@
     var termLoadToken
     var termCourses = []
     var scheduledCourses = {}
-    var coursesUnits = 0
+    var coursesUnits
 
+    function displayWarning(message) {
+      $('#warning').text(message).show()
+    }
     function loadTerm() {
-      var yearTerm = termSelect.val().split('-')
+      var yearTerm = termSelect.val().replace('-', '/')
       var loadToken = {}
       termLoadToken = loadToken
       coursesList.children().remove()
@@ -129,22 +137,65 @@
         $('<li>').addClass('list-group-item').text('Loading...')
       )
       search.val('')
+      $('.interval').remove()
+      coursesUnits = 0
+      displayUnits()
+      var coursesLoaded = false, myCoursesLoaded = false
+      var mySections
       $.ajax({
         type: 'GET',
-        url: '/1/scheduler/courses/' + yearTerm.join('/'),
+        url: '/1/scheduler/courses/' + yearTerm,
         success: function(courses) {
           if (termLoadToken !== loadToken) return
 
           termCourses = courses
           displayCourses(courses)
+          if (myCoursesLoaded) showMyCourses()
+          else coursesLoaded = true
+        },
+        error: function() {
+          displayWarning('Failed to load courses')
         }
       })
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/courses/' + yearTerm + '/mine',
+        success: function(sections) {
+          mySections = sections
+          if (coursesLoaded) showMyCourses()
+          else myCoursesLoaded = true
+        },
+        error: function() {
+          displayWarning('Failed to load your courses')
+        }
+      })
+      function showMyCourses() {
+        var courseIds = {}
+        mySections.forEach(function(section) {
+          var courseId = section.id
+          ;(courseIds[courseId] || (courseIds[courseId] = []))
+            .push(section.section)
+        })
+        var course, courseId, sections
+        for (var i = 0; i < termCourses.length; i++) {
+          course = termCourses[i]
+          courseId = course.id
+          sections = courseIds[courseId]
+          if (!sections) continue
+          var courseDisplay = $('[course=' + String(courseId) + ']')
+          sections.forEach(function(section) {
+            addSection(course, section, true)
+            courseDisplay.find('input[type=checkbox][section=' + String(section) + ']')
+              .prop('checked', true)
+          })
+        }
+      }
     }
     function backgroundColor(course) {
       var nameHash = hashString(course.number) ^ hashString(course.name)
       return 'hsl(' + String(360 * nameHash / HASH_RANGE) + ', 100%, 80%)'
     }
-    function addSection(course, sectionNumber) {
+    function addSection(course, sectionNumber, skipAPIAdd) {
       scheduledCourses[[course.id, sectionNumber]] = true
       var sections = course.sections
       var section
@@ -154,8 +205,7 @@
           break
         }
       }
-      var courseUnits = course.units.reduce((a, b) => a + b)
-      coursesUnits += courseUnits
+      coursesUnits += course.units.reduce(function(a, b) { return a + b })
       displayUnits()
       var background = backgroundColor(course)
       var intervals = []
@@ -198,10 +248,8 @@
                   intervals.forEach(function(element) { element.remove() })
                   intervals = null // allow GC
                   uncheckSection(course.id, sectionNumber)
-                  scheduledCourses[[course.id, sectionNumber]] = false
                   fitIntervals()
-                  coursesUnits -= courseUnits
-                  displayUnits()
+                  dropSection(course, sectionNumber)
                 })
             )
           dayLists.eq(weekday).append(intervalItem)
@@ -209,6 +257,43 @@
         }
       })
       fitIntervals()
+      if (skipAPIAdd) return
+
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/course/' + String(course.id) +
+          '/section/' + String(sectionNumber) + '/add',
+        success: function(response) {
+          displayWarning(response.success ? '' : response.message)
+        },
+        error: function() {
+          displayWarning(
+            'Failed to drop course ' + course.number +
+            ' - section ' + String(sectionNumber)
+          )
+        }
+      })
+    }
+    function dropSection(course, sectionNumber) {
+      scheduledCourses[[course.id, sectionNumber]] = false
+      coursesUnits -= course.units.reduce(function(a, b) { return a + b })
+      displayUnits()
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/course/' + String(course.id) +
+          '/section/' + String(sectionNumber) + '/drop',
+        success: function(response) {
+          displayWarning(response.success ? '' : response.message)
+        },
+        error: function() {
+          displayWarning(
+            'Failed to drop course ' + course.number +
+            ' - section ' + String(sectionNumber)
+          )
+        }
+      })
     }
     function removeSection(course, sectionNumber) {
       var removeButtons = $(
@@ -219,6 +304,7 @@
         ']'
       )
       if (removeButtons.length) $(removeButtons.eq(0)).click()
+      else dropSection(course, sectionNumber)
     }
     function uncheckSection(courseId, sectionNumber) {
       $(
@@ -335,7 +421,6 @@
       })
       dayLists = $('.day')
       units = $('#units')
-      displayUnits()
 
       loadTerm()
     })

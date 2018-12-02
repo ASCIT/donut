@@ -173,3 +173,41 @@ def get_scheduler_courses(year, term):
             int(unit) if int(unit) == unit else unit
             for unit in course['units'])
     return sorted(courses, key=lambda course: course['number'])
+
+
+def add_scheduler_section(username, course, section):
+    user_id = get_user_id(username)
+    query = """
+        INSERT INTO scheduler_sections(user_id, course_id, section_number)
+        VALUES (%s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course, section))
+
+
+def drop_scheduler_section(username, course, section):
+    user_id = get_user_id(username)
+    query = """
+        DELETE FROM scheduler_sections
+        WHERE user_id = %s AND course_id = %s AND section_number = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course, section))
+
+
+def get_user_scheduler_courses(username, year, term):
+    query = """
+        SELECT course_id, section_number
+        FROM
+            users
+            NATURAL JOIN scheduler_sections
+            NATURAL JOIN courses
+        WHERE username = %s AND year = %s AND term = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (username, year, term))
+        sections = cursor.fetchall()
+    return [{
+        'id': section['course_id'],
+        'section': section['section_number']
+    } for section in sections]

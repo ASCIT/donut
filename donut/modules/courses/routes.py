@@ -44,12 +44,12 @@ def planner_add_course(course_id, year):
 
     try:
         helpers.add_planner_course(username, course_id, year)
-        return flask.jsonify({'success': True})
     except pymysql.err.IntegrityError:
         return flask.jsonify({
             'success': False,
             'message': 'Cannot schedule class twice in a term'
         })
+    return flask.jsonify({'success': True})
 
 
 @blueprint.route('/1/planner/course/<int:course_id>/drop/<int:year>')
@@ -68,11 +68,46 @@ def planner_drop_course(course_id, year):
 @blueprint.route('/1/planner/courses/mine')
 def planner_mine():
     username = flask.session.get('username')
-    if not username: return flask.jsonify([])
+    if not username: return flask.jsonify(())
 
     return flask.jsonify(helpers.get_user_planner_courses(username))
 
 
-@blueprint.route('/1/scheduler/courses/<int:term>/<int:year>')
-def scheduler_courses(term, year):
-    return flask.jsonify(helpers.get_scheduler_courses(term, year))
+@blueprint.route('/1/scheduler/courses/<int:year>/<int:term>')
+def scheduler_courses(year, term):
+    return flask.jsonify(helpers.get_scheduler_courses(year, term))
+
+
+@blueprint.route('/1/scheduler/course/<int:course>/section/<int:section>/add')
+def scheduler_add_section(course, section):
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in to save'
+        })
+
+    helpers.add_scheduler_section(username, course, section)
+    return flask.jsonify({'success': True})
+
+
+@blueprint.route('/1/scheduler/course/<int:course>/section/<int:section>/drop')
+def scheduler_drop_section(course, section):
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in to save'
+        })
+
+    helpers.drop_scheduler_section(username, course, section)
+    return flask.jsonify({'success': True})
+
+
+@blueprint.route('/1/scheduler/courses/<int:year>/<int:term>/mine')
+def scheduler_mine(year, term):
+    username = flask.session.get('username')
+    if not username: return flask.jsonify(())
+
+    return flask.jsonify(
+        helpers.get_user_scheduler_courses(username, year, term))

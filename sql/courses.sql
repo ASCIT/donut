@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS planner_courses;
-DROP TABLE IF EXISTS planner_sections;
+DROP TABLE IF EXISTS scheduler_sections;
 DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS instructors;
@@ -56,11 +56,12 @@ CREATE TABLE planner_courses (
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
 );
 
-CREATE TABLE planner_sections (
-    user_id    INT      NOT NULL,
-    course_id  INT      NOT NULL,
-    section    TINYINT  NOT NULL,
-    PRIMARY KEY (user_id, course_id, section),
+CREATE TABLE scheduler_sections (
+    user_id         INT      NOT NULL,
+    course_id       INT      NOT NULL,
+    section_number  TINYINT  NOT NULL,
+    PRIMARY KEY (user_id, course_id, section_number),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
-    FOREIGN KEY (course_id, section) REFERENCES sections(course_id, section_number)
+    FOREIGN KEY (course_id, section_number)
+        REFERENCES sections(course_id, section_number)
 );

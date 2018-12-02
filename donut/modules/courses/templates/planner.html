@@ -293,7 +293,9 @@
         courses = plannerCourses
         displayCourses(courses)
       },
-      error: function() { alert('Failed to load courses') }
+      error: function() {
+        displayWarning('Failed to load courses')
+      }
     })
     $.ajax({
       type: 'GET',
@@ -305,6 +307,9 @@
           var courseList = $('.term-courses-list[year=' + course.year + '][term=' + course.terms[0] + ']')
           addCourse(course, courseList, true)
         })
+      },
+      error: function() {
+        displayWarning('Failed to load your courses')
       }
     })
     function setRequirementsProgress() {
