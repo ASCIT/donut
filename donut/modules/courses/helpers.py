@@ -7,6 +7,11 @@ TERMS = {'FA': 1, 'WI': 2, 'SP': 3}
 TERM_NAMES = {v: k for k, v in TERMS.items()}
 
 
+def try_int(x):
+    as_int = int(x)
+    return as_int if as_int == x else x
+
+
 def get_terms():
     """
     Returns {'year', 'term'} structs for each year with courses,
@@ -31,7 +36,8 @@ def get_year_courses():
     term_years = {}
     for term_year in get_terms():
         term = term_year['term']
-        if term not in term_years: term_years[term] = term_year['year']
+        if term not in term_years:
+            term_years[term] = term_year['year']
     query = """
         SELECT
             course_id,
@@ -54,10 +60,8 @@ def get_year_courses():
                 number = course['number']
                 cursor.execute(instructor_query, course['course_id'])
                 instructors = cursor.fetchall()
-                if len(instructors) == 1:
-                    instructor = instructors[0]['instructor']
-                else:
-                    instructor = None
+                instructor = instructors[0]['instructor'] \
+                    if len(instructors) == 1 else None
                 matching_course = courses.get(number)
                 if matching_course:
                     matching_course['terms'].append(term)
@@ -82,6 +86,10 @@ def get_year_courses():
 
 
 def add_planner_course(username, course_id, year):
+    """
+    Adds a certain course to a certain user's planner for a given year.
+    Year 1 is frosh year, year 2 is smore year, etc.
+    """
     user_id = get_user_id(username)
     query = 'INSERT INTO planner_courses (user_id, course_id, planner_year) VALUES (%s, %s, %s)'
     with flask.g.pymysql_db.cursor() as cursor:
@@ -89,6 +97,10 @@ def add_planner_course(username, course_id, year):
 
 
 def drop_planner_course(username, course_id, year):
+    """
+    Removes a certain course from a certain user's planner for a given year.
+    Year 1 is frosh year, year 2 is smore year, etc.
+    """
     user_id = get_user_id(username)
     query = """
         DELETE FROM planner_courses
@@ -99,6 +111,10 @@ def drop_planner_course(username, course_id, year):
 
 
 def get_user_planner_courses(username):
+    """
+    Returns {'ids', 'number', 'units', 'terms', 'year'} structs for each course
+    on a certain user's planner.
+    """
     query = """
         SELECT
             course_id,
@@ -116,13 +132,18 @@ def get_user_planner_courses(username):
     return [{
         'ids': (course['course_id'], ),
         'number': course['number'],
-        'units': course['units'],
+        'units': try_int(course['units']),
         'terms': (course['term'], ),
         'year': course['planner_year']
     } for course in courses]
 
 
 def get_scheduler_courses(year, term):
+    """
+    Returns {'id', 'number', 'name', 'units'[3], 'sections'[]} structs for each
+    course in a certain term of a certain year.
+    'sections' is a list of {'number', 'instructor', 'grades', 'times'} structs.
+    """
     query = """
         SELECT
             course_id,
@@ -147,8 +168,11 @@ def get_scheduler_courses(year, term):
     for section in sections:
         course_id = section['course_id']
         course = course_sections.get(course_id)
-        if not course:
-            course = {
+        if course:
+            sections = course['sections']
+        else:
+            sections = []
+            course_sections[course_id] = {
                 'id':
                 course_id,
                 'number':
@@ -157,10 +181,10 @@ def get_scheduler_courses(year, term):
                 section['name'],
                 'units': (section['units_lecture'], section['units_lab'],
                           section['units_homework']),
-                'sections': []
+                'sections':
+                sections
             }
-            course_sections[course_id] = course
-        course['sections'].append({
+        sections.append({
             'number': section['section_number'],
             'instructor': section['instructor'],
             'grades': section['grades_type'],
@@ -169,16 +193,18 @@ def get_scheduler_courses(year, term):
     courses = course_sections.values()
     for course in courses:
         course['sections'].sort(key=lambda section: section['number'])
-        course['units'] = tuple(
-            int(unit) if int(unit) == unit else unit
-            for unit in course['units'])
+        course['units'] = tuple(map(try_int, course['units']))
     return sorted(courses, key=lambda course: course['number'])
 
 
 def add_scheduler_section(username, course, section):
+    """
+    Adds a certain section number of a certain course
+    to a certain user's schedule for the course's term.
+    """
     user_id = get_user_id(username)
     query = """
-        INSERT INTO scheduler_sections(user_id, course_id, section_number)
+        INSERT INTO scheduler_sections (user_id, course_id, section_number)
         VALUES (%s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -186,6 +212,10 @@ def add_scheduler_section(username, course, section):
 
 
 def drop_scheduler_section(username, course, section):
+    """
+    Removes a certain section number of a certain course
+    from a certain user's schedule for the course's term.
+    """
     user_id = get_user_id(username)
     query = """
         DELETE FROM scheduler_sections
@@ -195,7 +225,11 @@ def drop_scheduler_section(username, course, section):
         cursor.execute(query, (user_id, course, section))
 
 
-def get_user_scheduler_courses(username, year, term):
+def get_user_scheduler_sections(username, year, term):
+    """
+    Returns {'id' (course_id), 'section' (section_number)} structs for each
+    section on a certain user's schedule for a certain term of a certain year.
+    """
     query = """
         SELECT course_id, section_number
         FROM

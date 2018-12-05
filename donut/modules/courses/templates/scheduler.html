@@ -159,8 +159,10 @@
       })
       $.ajax({
         type: 'GET',
-        url: '/1/scheduler/courses/' + yearTerm + '/mine',
+        url: '/1/scheduler/sections/' + yearTerm + '/mine',
         success: function(sections) {
+          if (termLoadToken !== loadToken) return
+
           mySections = sections
           if (coursesLoaded) showMyCourses()
           else myCoursesLoaded = true
@@ -297,22 +299,16 @@
     }
     function removeSection(course, sectionNumber) {
       var removeButtons = $(
-        'button[course=' +
-        String(course.id) +
-        '][section=' +
-        String(sectionNumber) +
-        ']'
+        'button[course=' + String(course.id) +
+        '][section=' + String(sectionNumber) + ']'
       )
       if (removeButtons.length) $(removeButtons.eq(0)).click()
       else dropSection(course, sectionNumber)
     }
     function uncheckSection(courseId, sectionNumber) {
       $(
-        '[course=' +
-        String(courseId) +
-        '] input[type=checkbox][section=' +
-        String(sectionNumber) +
-        ']'
+        '[course=' + String(courseId) +
+        '] input[type=checkbox][section=' + String(sectionNumber) + ']'
       ).prop('checked', false)
     }
     function fitIntervals() {

@@ -104,10 +104,10 @@ def scheduler_drop_section(course, section):
     return flask.jsonify({'success': True})
 
 
-@blueprint.route('/1/scheduler/courses/<int:year>/<int:term>/mine')
+@blueprint.route('/1/scheduler/sections/<int:year>/<int:term>/mine')
 def scheduler_mine(year, term):
     username = flask.session.get('username')
     if not username: return flask.jsonify(())
 
     return flask.jsonify(
-        helpers.get_user_scheduler_courses(username, year, term))
+        helpers.get_user_scheduler_sections(username, year, term))

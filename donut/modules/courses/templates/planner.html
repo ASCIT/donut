@@ -11,7 +11,7 @@
         </ul>
       </div>
       <div class='col-md-9'>
-        <table class='table table-bordered courses'>
+        <table class='table table-bordered' id='courses'>
           <thead>
             <tr>
               <th>
@@ -125,12 +125,13 @@
     .terms td {
       text-align: center;
     }
+    {# Hide term in "FA WI SP" if course is not offered in that term #}
     {% for term, name in TERMS.items() %}
       .terms:not(.{{ name }}) td:nth-child({{ term }}) {
         visibility: hidden;
       }
     {% endfor %}
-    table.courses {
+    #courses {
       height: 600px;
     }
     .term-title {
@@ -214,7 +215,7 @@
       var units = courseUnits(course)
       var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
         $('<span>').text(
-          course.number + ' (' + units + ' unit' + (units === 1 ? '': 's') + ')'
+          course.number + ' (' + String(units) + ' unit' + (units === 1 ? '': 's') + ')'
         ),
         $('<button>').addClass('btn btn-danger btn-xs')
           .click(function() {
@@ -232,9 +233,7 @@
               }
             })
           })
-          .append(
-            $('<span>').addClass('glyphicon glyphicon-trash')
-          )
+          .append($('<span>').addClass('glyphicon glyphicon-trash'))
       )
       courseList.append(courseItem)
       if (skipAPIAdd) return
