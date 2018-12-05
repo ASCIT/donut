@@ -22,14 +22,23 @@ def editor():
         input_text = helpers.read_markdown(inputt)
         title = flask.request.args.get('title')
 
-    if check_login() and check_permission(flask.session['username'],
+    if not helpers.get_lock_status(title) and check_login() and check_permission(flask.session['username'],
                                           EditPermission.ABLE):
+        helpers.change_lock_status(title, True)
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
     else:
         return flask.abort(403)
 
 
+@blueprint.route('/pages/_close_page', methods=['POST'])
+def close_page():
+    """
+    Call to change the status of the locks when one exits a page
+    """
+    title = flask.request.form['title']
+    helpers.change_lock_status(title, False)
+    return "anything"
 @blueprint.route('/_change_title', methods=['POST'])
 def change_title():
     '''

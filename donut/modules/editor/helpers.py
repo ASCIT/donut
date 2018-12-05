@@ -2,7 +2,46 @@ import flask
 import os
 import glob
 from flask import current_app, redirect, url_for
+import pymysql.cursors
 
+def change_lock_status(title, new_lock_status):
+    """
+    This is called when a user starts or stops editing a
+    page
+    """
+    create_page_in_database(title)
+    query = """
+    UPDATE webpage_files_locks SET locked = %r WHERE TITLE = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (new_lock_status, title))
+
+def get_lock_status(title):
+    create_page_in_database(title)
+    query = """
+    SELECT locked, NOW() - last_time_accessed as expired FROM webpage_files_locks WHERE title = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, title)
+        res = cursor.fetchone()
+        print(res['expired'])
+    return res['locked']
+
+def create_page_in_database(title):
+    query = """
+    SELECT locked FROM webpage_files_locks WHERE title = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, title)
+        res = cursor.fetchone()
+    if res == None:
+        query2 = """
+        INSERT INTO webpage_files_locks (title)
+        VALUES (%s)
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query2, title)
+    return
 
 def rename_title(oldfilename, newfilename):
     """

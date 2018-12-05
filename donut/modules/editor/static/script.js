@@ -164,3 +164,12 @@ function save(){
     });
   }
 }
+window.onbeforeunload = function(event) {
+  var title = document.getElementById("text_title").value;
+  $.ajax({
+    url: $SCRIPT_ROOT+'/pages/_close_page',
+    type: 'POST',
+    data:{title:title},
+  });
+  return null;
+}
