@@ -32,8 +32,8 @@ def bodfeedback_submit():
             return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
     complaint_id = helpers.register_complaint(data)
     flask.flash(
-        Markup('Success: <a href="' + helpers.get_link(complaint_id) +
-               '">View Complaint</a>'))
+        Markup('Success (you may want to save this link): <a href="' +
+            helpers.get_link(complaint_id) + '">View Complaint</a>'))
     return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
 
 

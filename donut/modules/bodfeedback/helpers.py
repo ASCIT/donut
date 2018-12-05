@@ -5,12 +5,12 @@ import pymysql.cursors
 
 
 def send_update_email(email, complaint_id):
-    # Sends an email to [email] of poster
+    '''
+    Sends an email to [email] of poster and BoD
+    '''
     msg = email_templates.added_message.format(get_link(complaint_id))
     subject = "Received BoD Feedback"
-    email_utils.send_email(email, msg, subject)
-    # Notifies BoD of new complaint
-    email_utils.send_email("bod@donut.caltech.edu", msg, subject)
+    email_utils.send_email(email + ', bod@donut.caltech.edu', msg, subject)
 
 
 def register_complaint(data, notification=True):
