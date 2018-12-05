@@ -100,9 +100,9 @@
  
  $(document).ready(function() {
      {% if complaint['status'] == 'new_msg' %}
-     $('#markUnread').hide();
+         $('#markUnread').hide();
      {% else %}
-     $('#markRead').hide();
+         $('#markRead').hide();
      {% endif %} 
      $('#markRead').click(function() {
 	 $.ajax({
@@ -114,7 +114,7 @@
 		 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
 	     },
 	     error: function(response){
-		 $('#summary-panel').append(response)
+		 alert("An error occurred");
 	     }
 	 });
      });
@@ -128,7 +128,7 @@
 		 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
 	     },
 	     error: function(response){
-		 $('#summary-panel').append(response)
+	         alert("An error occurred");
 	     }
 	 });
      });

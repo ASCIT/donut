@@ -5,13 +5,12 @@ import pymysql.cursors
 
 
 def send_update_email(email, complaint_id):
-    '''
-    Sends an email to [email] which should be an
-    email address of a user as a string
-    '''
+    # Sends an email to [email] of poster
     msg = email_templates.added_message.format(get_link(complaint_id))
     subject = "Received BoD Feedback"
     email_utils.send_email(email, msg, subject)
+    # Notifies BoD of new complaint
+    email_utils.send_email("bod@donut.caltech.edu", msg, subject)
 
 
 def register_complaint(data, notification=True):
@@ -67,9 +66,7 @@ def remove_email(complaint_id, email):
     returns False if complaint_id is invalid
     '''
     if not get_subject(complaint_id): return False
-    query = """
-    DELETE FROM bod_complaint_emails WHERE complaint_id = %s AND email = %s
-    """
+    query = 'DELETE FROM bod_complaint_emails WHERE complaint_id = %s AND email = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
     return True
@@ -139,7 +136,8 @@ def get_messages(complaint_id):
     in ascending order of timestamp
     '''
     query = """
-    SELECT time, poster, message, message_id FROM bod_complaint_messages WHERE complaint_id = %s ORDER BY time
+    SELECT time, poster, message, message_id FROM bod_complaint_messages 
+    WHERE complaint_id = %s ORDER BY time
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
@@ -156,8 +154,7 @@ def get_summary(complaint_id):
     query = 'SELECT subject, status FROM bod_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        res = cursor.fetchone()
-    return res
+        return cursor.fetchone()
 
 
 def get_subject(complaint_id):
@@ -181,9 +178,7 @@ def mark_read(complaint_id):
     Sets the status of this complaint to 'read'
     returns False if complaint_id is invalid
     '''
-    query = """
-    UPDATE bod_complaint_info SET status = 'read' WHERE complaint_id = %s
-    """
+    query = "UPDATE bod_complaint_info SET status = 'read' WHERE complaint_id = %s"
     if get_status(complaint_id) is None:
         return False
     with flask.g.pymysql_db.cursor() as cursor:
@@ -195,15 +190,11 @@ def mark_unread(complaint_id):
     Sets the status of this complaint to 'new_msg'
     returns False if complaint_id is invalid
     '''
-    query = """
-    UPDATE bod_complaint_info SET status = 'new_msg' WHERE complaint_id = %s
-    """
+    query = "UPDATE bod_complaint_info SET status = 'new_msg' WHERE complaint_id = %s"
     if get_status(complaint_id) is None:
         return False
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        # Not sure why this doesn't autocommit
-        cursor.execute("COMMIT;")
 
 
 def get_emails(complaint_id):
@@ -239,13 +230,15 @@ def get_new_posts():
     status, uuid, message, poster, time
     Note that message and poster refer to the latest comment on this complaint
     '''
-    query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject, post.status AS status,
-    post.uuid AS uuid, comment.message AS message, comment.poster AS poster, comment.time AS time 
+    query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject,
+    post.status AS status, post.uuid AS uuid, comment.message AS message, 
+    comment.poster AS poster, comment.time AS time 
     FROM bod_complaint_info post
     INNER JOIN bod_complaint_messages comment
     ON comment.complaint_id = post.complaint_id
     INNER JOIN (
-    SELECT complaint_id, max(time) AS time FROM bod_complaint_messages GROUP BY complaint_id
+    SELECT complaint_id, max(time) AS time 
+    FROM bod_complaint_messages GROUP BY complaint_id
     ) maxtime
     ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
     WHERE post.status = 'new_msg'

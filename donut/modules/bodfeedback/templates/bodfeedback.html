@@ -5,7 +5,7 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-        <img src="{{  url_for('static', filename='images/newdonut.png')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+        <img src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
         {% if summary %}
 	<a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
         {% endif %}
@@ -20,7 +20,6 @@ Well then, simply fill out the form below. The ASCIT BoD would love to hear all 
   non-anonymous, but we do promise to keep comments strictly
   confidential. </p>
 
-	<p>To: Board of Directors</p>
 	<div class="col-md-8 col-md-offset-2">
 	  <div class="row">
 	    <form method="POST" action="{{  url_for('bodfeedback.bodfeedback_submit')  }}">
