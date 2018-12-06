@@ -8,6 +8,10 @@ TERM_NAMES = {v: k for k, v in TERMS.items()}
 
 
 def try_int(x):
+    """
+    Converts a float to an int if it is already an integral value.
+    Makes the JSON a little smaller.
+    """
     as_int = int(x)
     return as_int if as_int == x else x
 
@@ -28,8 +32,9 @@ def get_terms():
 
 def get_year_courses():
     """
-    Returns {'number', name', 'units'[3], 'instructor', 'terms'} structs
-    for all courses in the most recent FA, WI, and SP terms.
+    Returns {'ids'[], number', name', 'units'[3], 'instructor', 'terms'[]}
+    structs for all courses in the most recent FA, WI, and SP terms.
+    'ids' and 'terms' link the ids of different terms of the same course.
     """
     # Find most recent year for each term that has courses
     term_years = {}
@@ -110,8 +115,9 @@ def drop_planner_course(username, course_id, year):
 
 def get_user_planner_courses(username):
     """
-    Returns {'ids', 'number', 'units', 'terms', 'year'} structs for each course
-    on a certain user's planner.
+    Returns {'ids'[1], 'number', 'units', 'terms'[1], 'year'} structs
+    for each course on a certain user's planner.
+    Unlike in get_planner_courses(), the unit counts are already summed.
     """
     query = """
         SELECT
