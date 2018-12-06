@@ -12,7 +12,7 @@ CREATE TABLE courses (
     department      VARCHAR(30)   NOT NULL, -- e.g. CS
     course_number   VARCHAR(10)   NOT NULL, -- e.g. 124
     name            VARCHAR(150)  NOT NULL, -- e.g. Operating Systems
-    description     TEXT,
+    description     TEXT, -- Currently unused
     units_lecture   FLOAT         NOT NULL, -- e.g. 3
     units_lab       FLOAT         NOT NULL, -- e.g. 6
     units_homework  FLOAT         NOT NULL, -- e.g. 3
@@ -35,12 +35,12 @@ CREATE TABLE grades_types (
 );
 
 CREATE TABLE sections (
-    course_id       INT      NOT NULL,
-    section_number  TINYINT  NOT NULL, -- e.g. 1
-    instructor_id   INT      NOT NULL,
-    grades_type_id  INT      NOT NULL,
-    times           VARCHAR(100), -- e.g. MWF 13:00 - 13:55
-    locations       VARCHAR(100), -- e.g. 213 ANB
+    course_id       INT           NOT NULL,
+    section_number  TINYINT       NOT NULL, -- e.g. 1
+    instructor_id   INT           NOT NULL,
+    grades_type_id  INT           NOT NULL,
+    times           VARCHAR(100)  NOT NULL, -- e.g. MWF 13:00 - 13:55
+    locations       VARCHAR(100)  NOT NULL, -- e.g. 213 ANB; currently unused
     PRIMARY KEY (course_id, section_number),
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
     FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id),

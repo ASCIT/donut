@@ -21,7 +21,6 @@ def get_terms():
         SELECT DISTINCT year, term FROM courses
         ORDER BY year DESC, (term + 1) % 3 DESC
     """
-
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
@@ -69,20 +68,19 @@ def get_year_courses():
                     if instructor != matching_course['instructor']:
                         matching_course['instructor'] = None
                 else:
+                    units = (course['units_lecture'], course['units_lab'],
+                             course['units_homework'])
                     courses[number] = {
                         # Separate course id for each term
                         'ids': [course['course_id']],
-                        'number':
-                        number,
-                        'name':
-                        course['name'],
-                        'units': (course['units_lecture'], course['units_lab'],
-                                  course['units_homework']),
-                        'instructor':
-                        instructor,
+                        'number': number,
+                        'name': course['name'],
+                        'units': tuple(map(try_int, units)),
+                        'instructor': instructor,
                         'terms': [term]
                     }
-    return sorted(courses.values(), key=lambda course: course['number'])
+    return sorted(
+        courses.values(), key=lambda course: course['number'].lower())
 
 
 def add_planner_course(username, course_id, year):
@@ -172,17 +170,14 @@ def get_scheduler_courses(year, term):
             sections = course['sections']
         else:
             sections = []
+            units = (section['units_lecture'], section['units_lab'],
+                     section['units_homework'])
             course_sections[course_id] = {
-                'id':
-                course_id,
-                'number':
-                section['number'],
-                'name':
-                section['name'],
-                'units': (section['units_lecture'], section['units_lab'],
-                          section['units_homework']),
-                'sections':
-                sections
+                'id': course_id,
+                'number': section['number'],
+                'name': section['name'],
+                'units': tuple(map(try_int, units)),
+                'sections': sections
             }
         sections.append({
             'number': section['section_number'],
@@ -193,8 +188,7 @@ def get_scheduler_courses(year, term):
     courses = course_sections.values()
     for course in courses:
         course['sections'].sort(key=lambda section: section['number'])
-        course['units'] = tuple(map(try_int, course['units']))
-    return sorted(courses, key=lambda course: course['number'])
+    return sorted(courses, key=lambda course: course['number'].lower())
 
 
 def add_scheduler_section(username, course, section):

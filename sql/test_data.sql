@@ -112,7 +112,11 @@ INSERT INTO courses(
     (3, 2019, 2, 'CS', '21', 'Decidability and Tractability', 3, 0, 6),
     (4, 2019, 2, 'Ma', '1b', 'Calculus of One and Several Variables and Linear Algebra', 4, 0, 5),
     (5, 2018, 3, 'CS', '38', 'Algorithms', 3, 0, 6),
-    (6, 2018, 3, 'Bi', '1', 'Principles of Biology', 4, 0, 5);
+    (6, 2018, 3, 'Bi', '1', 'Principles of Biology', 4, 0, 5),
+    -- These are just to test courses occuring in multiple terms:
+    (7, 2018, 1, 'Ch', '3x', 'Experimental Methods in Solar Energy Conversion', 1, 3, 2),
+    (8, 2019, 2, 'Ch', '3x', 'Experimental Methods in Solar Energy Conversion', 1, 3, 2),
+    (9, 2018, 3, 'Ch', '3x', 'Experimental Methods in Solar Energy Conversion', 1, 3, 2);
 INSERT INTO instructors(instructor_id, instructor) VALUES
     (1, 'Pinkston, D'),
     (2, 'Cheung, C'),
@@ -120,7 +124,9 @@ INSERT INTO instructors(instructor_id, instructor) VALUES
     (4, 'Kechris, A'),
     (5, 'Rains, E'),
     (6, 'Vidick, T'),
-    (7, 'Meyerowitz, E / Zinn, K');
+    (7, 'Meyerowitz, E / Zinn, K'),
+    (8, 'Mendez, J'),
+    (9, 'Jendez, M');
 INSERT INTO grades_types(grades_type_id, grades_type) VALUES
     (1, ''),
     (2, 'PASS-FAIL'),
@@ -138,4 +144,7 @@ INSERT INTO sections(course_id, section_number, instructor_id, grades_type_id, t
     (5, 1, 6, 1, 'TR 09:00 - 10:25', '105 ANB'),
     (6, 1, 7, 3, 'M 19:00 - 19:55\nTR 13:00 - 14:25', '200 BRD\n119 KRK'),
     (6, 2, 7, 3, 'TR 13:00 - 14:25\nM 20:00 - 20:55', '119 KRK\n200 BRD'),
-    (6, 3, 7, 3, 'TR 13:00 - 14:25\nT 19:00 - 19:55', '119 KRK\n200 BRD');
+    (6, 3, 7, 3, 'TR 13:00 - 14:25\nT 19:00 - 19:55', '119 KRK\n200 BRD'),
+    (7, 1, 8, 2, '151 CRL\n107 MEAD', 'F 09:00 - 09:55\nW 13:00 - 15:55'),
+    (8, 1, 8, 2, '147 NYS\n107 MEAD', 'F 09:00 - 09:55\nW 13:00 - 15:55'),
+    (9, 1, 9, 2, '107 MEAD\n147 NYS', 'W 13:00 - 15:55\nF 09:00 - 09:55');
