@@ -134,6 +134,9 @@
     #courses {
       height: 600px;
     }
+    thead tr {
+      height: 1px; /* shrink header row */
+    }
     .term-title {
       text-align: center;
     }
@@ -141,6 +144,7 @@
       width: {{ 100 / TERMS|length }}%;
     }
     .term-courses-list {
+      display: inline-table;
       width: 100%;
       height: 100%;
     }
@@ -276,7 +280,14 @@
         })
         courseItem
           .attr('draggable', 'true')
-          .on('dragstart', function() { draggedCourse = course })
+          .on('dragstart', function(e) {
+            // Needed for Firefox
+            var event = e.originalEvent
+            event.dataTransfer.setData('text/plain', null)
+            event.dropEffect = 'move'
+
+            draggedCourse = course
+          })
           .append(termsList)
         coursesList.append(courseItem)
       })
@@ -401,7 +412,7 @@
           e.preventDefault()
         })
         .on('drop', function(e) {
-          e.stopPropagation() // Stops some browsers from redirecting.
+          e.preventDefault() // stops some browsers from redirecting
           addCourse(draggedCourse, $(this))
           draggedCourse = null
         })
