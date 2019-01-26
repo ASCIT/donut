@@ -375,8 +375,10 @@
             )
           )
           if (section.grades) sectionItem.append($('<h6>').text(section.grades))
-          section.times.split('\n').forEach(function(time) {
-            sectionItem.append($('<h6>').text(time))
+          var times = section.times.split('\n'),
+              locations = section.locations.split('\n')
+          times.forEach(function(time, i) {
+            sectionItem.append($('<h6>').text(time + ' in ' + locations[i]))
           })
           return sectionItem
         })

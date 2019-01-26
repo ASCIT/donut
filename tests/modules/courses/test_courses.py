@@ -109,7 +109,8 @@ def test_scheduler_courses(client):
             'grades': 'PASS-FAIL',
             'instructor': 'Mendez, J',
             'number': 1,
-            'times': '147 NYS\n107 MEAD'
+            'times': 'F 09:00 - 09:55\nW 13:00 - 15:55',
+            'locations': '147 NYS\n107 MEAD'
         }],
         'units': [1, 3, 2]
     }, {
@@ -123,7 +124,8 @@ def test_scheduler_courses(client):
             'grades': 'LETTER',
             'instructor': 'Umans, C',
             'number': 1,
-            'times': 'MWF 13:00 - 13:55'
+            'times': 'MWF 13:00 - 13:55',
+            'locations': '105 ANB'
         }],
         'units': [3, 0, 6]
     }, {
@@ -136,20 +138,28 @@ def test_scheduler_courses(client):
         'sections': [{
             'grades': 'PASS-FAIL',
             'instructor': 'Kechris, A',
-            'number': section,
-            'times': 'MWF 10:00 - 10:55\nR 09:00 - 09:55'
-        } for section in (1,
-                          2)] + [{
-                              'grades': 'PASS-FAIL',
-                              'instructor': 'Rains, E',
-                              'number': 7,
-                              'times': 'MWF 10:00 - 10:55\nR 09:00 - 09:55'
-                          }, {
-                              'grades': 'PASS-FAIL',
-                              'instructor': 'Rains, E',
-                              'number': 8,
-                              'times': 'R 10:00 - 10:55\nMWF 10:00 - 10:55'
-                          }],
+            'number': 1,
+            'times': 'MWF 10:00 - 10:55\nR 09:00 - 09:55',
+            'locations': '119 KRK\n103 DWN'
+        }, {
+            'grades': 'PASS-FAIL',
+            'instructor': 'Kechris, A',
+            'number': 2,
+            'times': 'MWF 10:00 - 10:55\nR 09:00 - 09:55',
+            'locations': '119 KRK\n119 DWN'
+        }, {
+            'grades': 'PASS-FAIL',
+            'instructor': 'Rains, E',
+            'number': 7,
+            'times': 'MWF 10:00 - 10:55\nR 09:00 - 09:55',
+            'locations': '310 LINDE\nB111 DWN'
+        }, {
+            'grades': 'PASS-FAIL',
+            'instructor': 'Rains, E',
+            'number': 8,
+            'times': 'R 10:00 - 10:55\nMWF 10:00 - 10:55',
+            'locations': '142 KCK\n310 LINDE'
+        }],
         'units': [4, 0, 5]
     }]
 

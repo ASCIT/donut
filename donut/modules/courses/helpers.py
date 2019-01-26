@@ -157,7 +157,8 @@ def get_scheduler_courses(year, term):
             section_number,
             instructor,
             grades_type,
-            times
+            times,
+            locations
         FROM
             courses
             NATURAL JOIN sections
@@ -189,7 +190,8 @@ def get_scheduler_courses(year, term):
             'number': section['section_number'],
             'instructor': section['instructor'],
             'grades': section['grades_type'],
-            'times': section['times']
+            'times': section['times'],
+            'locations': section['locations']
         })
     courses = course_sections.values()
     for course in courses:

@@ -40,7 +40,7 @@ CREATE TABLE sections (
     instructor_id   INT           NOT NULL,
     grades_type_id  INT           NOT NULL,
     times           VARCHAR(100)  NOT NULL, -- e.g. MWF 13:00 - 13:55
-    locations       VARCHAR(100)  NOT NULL, -- e.g. 213 ANB; currently unused
+    locations       VARCHAR(100)  NOT NULL, -- e.g. 213 ANB
     PRIMARY KEY (course_id, section_number),
     FOREIGN KEY (course_id) REFERENCES courses(course_id),
     FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id),
