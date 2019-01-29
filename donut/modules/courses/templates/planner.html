@@ -150,7 +150,7 @@
     }
     .term-courses-list .list-group-item {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       padding: 0;
     }
     #requirements-modal {
@@ -230,10 +230,15 @@
               url: '/1/planner/course/' + id + '/drop/' + String(year),
               dataType: 'json',
               success: function(response) {
-                displayWarning(response.success ? '' : response.message)
+                if (response.success) displayWarning('')
+                else {
+                  displayWarning(response.message)
+                  courseList.append(courseItem)
+                }
               },
               error: function() {
                 displayWarning('Failed to drop course ' + course.number)
+                courseList.append(courseItem)
               }
             })
           })
@@ -248,10 +253,15 @@
         url: '/1/planner/course/' + id + '/add/' + String(year),
         dataType: 'json',
         success: function(response) {
-          displayWarning(response.success ? '' : response.message)
+          if (response.success) displayWarning('')
+          else {
+            displayWarning(response.message)
+            courseItem.remove()
+          }
         },
         error: function() {
           displayWarning('Failed to add course ' + course.number)
+          courseItem.remove()
         }
       })
     }
