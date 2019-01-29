@@ -1,7 +1,7 @@
 import flask
 from donut import auth_utils, constants
 from donut.modules.auth import blueprint, helpers
-from donut.modules.auth.permissions import MaskPermissions
+from donut.modules.auth.permissions import Permissions
 
 
 @blueprint.route('/login')
@@ -45,7 +45,7 @@ def login_submit():
             permissions = auth_utils.get_permissions(username)
 
             # We need to check if the user has masking permissions.
-            mask_perm = auth_utils.check_permission(username, MaskPermissions.MASK)
+            mask_perm = auth_utils.check_permission(username, Permissions.MASK)
 
             if mask is not None:
                 if mask_perm:
