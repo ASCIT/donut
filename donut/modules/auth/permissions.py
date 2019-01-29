@@ -1,5 +1,5 @@
 import enum
 
-class Permissions(enum.IntEnum):
+class MaskPermissions(enum.IntEnum):
     # Defines the permission number for masquerading.
     MASK = 2
