@@ -1,24 +1,61 @@
 #!/usr/bin/env python
+"""
+Imports the Registrar's Office's exports of courses for a given term.
+Never removes courses/sections and will not overwrite existing ones.
+Expects file to be a TSV value with the following columns:
+"Course Number"
+"Course Name"
+"Department"
+"Instructor"
+"Grades"
+"Units"
+"Section Number"
+"Times"
+"Locations"
 
-# Example command: ./import_registrar.py donut_courses_FA2018-19_180515.txt 2018 FA
+Example row:
+"CS 001"	"Introduction to Computer Programming"	"CS"	"Vanier, M"	"PASS-FAIL"	"3-4-2"	"01"	"MWF 14:00 - 14:55"	"Institute Auditorium BCK"
 
+Note that there is a separate row for each time of each section of each course.
+The insertion into our database is straightforward, with a few exceptions:
+- We separate the course number into department and number
+- Leading zeros are removed from the course number and it is lowercased
+- If the units value is "+", we change it to "0-0-0"
+- Units are split into lecture, lab, and homework units
+  (note we use float since some courses have fractional units)
+- Remove whitespace from locations (IDK why some are " YHC")
+- Append locations and times from separate rows for the same section
+- Make lists of all grades types (e.g. "PASS-FAIL") and instructors
+  (e.g. "Vanier, M") and add to grades_types and instructors tables
+"""
+
+import argparse
 import csv
 import re
 import sys
 from donut.pymysql_connection import make_db
-from donut.modules.courses import helpers
+from donut.modules.courses.helpers import TERMS
 
 COURSE_MATCH = r'^(?P<dept>[A-Za-z/]+) *0*(?P<number>[0-9]+[A-Z]*)$'
 
 db = make_db('dev')
 
-_, filename, year, term = sys.argv
-term = helpers.TERMS[term]
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    'file',
+    help='Path to registrar file, e.g. donut_courses_WI2018-19_181113.txt')
+parser.add_argument(
+    'year', type=int, help='Year of the term to import (e.g. 2019)')
+parser.add_argument('term', choices=TERMS, help='Term to import (e.g. WI)')
+args = parser.parse_args()
+
+year = args.year
+term = TERMS[args.term]
 courses = {}  # map of course numbers to courses data
 instructors = set()
 grades_types = set()
 sections = {}  # map of (course number, section) to section data
-with open(filename) as f:
+with open(args.file) as f:
     tsv_reader = csv.reader(f, delimiter='\t')
     headers = None
     for row in tsv_reader:
@@ -55,7 +92,7 @@ with open(filename) as f:
             section = int(row_data['Section Number'])
             times = row_data['Times']
             locations = row_data['Locations'].strip()
-            section_key = (course, section)
+            section_key = course, section
             section_data = sections.get(section_key)
             if section_data:
                 section_data['times'] += '\n' + times
@@ -74,6 +111,7 @@ with open(filename) as f:
             print(e, file=sys.stderr)
 
 with db.cursor() as cursor:
+    course_ids = {}
     query = """
         INSERT INTO courses (
             year, term,
@@ -83,38 +121,31 @@ with db.cursor() as cursor:
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE course_id = course_id
     """
-    for course in courses.values():
+    for number, course in courses.items():
         cursor.execute(
             query, (year, term, course['department'], course['course_number'],
                     course['name'], course['units_lecture'],
                     course['units_lab'], course['units_homework']))
+        if cursor.lastrowid:  # 0 if no insert occured
+            course_ids[number] = cursor.lastrowid
 
-    instructor_ids = {}
-    for instructor in instructors:
-        cursor.execute(
-            'SELECT instructor_id FROM instructors WHERE instructor = %s LIMIT 1',
-            instructor)
-        instructor_id = cursor.fetchone()
-        if instructor_id:
-            instructor_ids[instructor] = instructor_id['instructor_id']
-        else:
-            cursor.execute('INSERT INTO instructors (instructor) VALUES (%s)',
-                           instructor)
-            instructor_ids[instructor] = cursor.lastrowid
+    def add_possibilities(name, values):
+        ids = {}
+        for value in values:
+            cursor.execute('SELECT ' + name + '_id AS id FROM ' + name +
+                           's WHERE ' + name + ' = %s LIMIT 1', value)
+            value_id = cursor.fetchone()
+            if value_id:
+                ids[value] = value_id['id']
+            else:
+                cursor.execute(
+                    'INSERT INTO ' + name + 's (' + name + ') VALUES (%s)',
+                    value)
+                ids[value] = cursor.lastrowid
+        return ids
 
-    grades_types_ids = {}
-    for grades_type in grades_types:
-        cursor.execute(
-            'SELECT grades_type_id FROM grades_types WHERE grades_type = %s',
-            grades_type)
-        grades_type_id = cursor.fetchone()
-        if grades_type_id:
-            grades_types_ids[grades_type] = grades_type_id['grades_type_id']
-        else:
-            cursor.execute(
-                'INSERT INTO grades_types (grades_type) VALUES (%s)',
-                grades_type)
-            grades_types_ids[grades_type] = cursor.lastrowid
+    instructor_ids = add_possibilities('instructor', instructors)
+    grades_types_ids = add_possibilities('grades_type', grades_types)
 
     query = """
         INSERT INTO sections (
@@ -123,17 +154,17 @@ with db.cursor() as cursor:
             instructor_id, grades_type_id,
             times, locations
         ) VALUES (
-            (SELECT course_id FROM courses WHERE year = %s AND term = %s AND department = %s AND course_number = %s LIMIT 1),
+            %s,
             %s,
             %s, %s,
             %s, %s
         ) ON DUPLICATE KEY UPDATE section_number = section_number
     """
     for section in sections.values():
-        course = courses[section['course']]
-        cursor.execute(
-            query,
-            (year, term, course['department'], course['course_number'],
-             section['section_number'], instructor_ids[section['instructor']],
-             grades_types_ids[section['grades_type']], section['times'],
-             section['locations']))
+        course_id = course_ids.get(section['course'])
+        if not course_id: continue
+
+        cursor.execute(query, (course_id, section['section_number'],
+                               instructor_ids[section['instructor']],
+                               grades_types_ids[section['grades_type']],
+                               section['times'], section['locations']))
