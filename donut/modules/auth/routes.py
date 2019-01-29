@@ -48,14 +48,14 @@ def login_submit():
             mask_perm = auth_utils.check_permission(username, Permissions.MASK)
 
             if mask is not None:
-                #if mask_perm:
+                if mask_perm:
                     # If the user has mask permissions, give them the mask.
-                flask.session['username'] = mask
-                permissions = auth_utils.get_permissions(mask)
-                #else:
+                    flask.session['username'] = mask
+                    permissions = auth_utils.get_permissions(mask)
+                else:
                     # Else, refuse the attempt to masquerade.
-                    #flask.flash('You do not have permission to masquerade.')
-                    #return flask.redirect(flask.url_for('auth.login'))
+                    flask.flash('You do not have permission to masquerade.')
+                    return flask.redirect(flask.url_for('auth.login'))
             else:
                 flask.session['username'] = username
 
