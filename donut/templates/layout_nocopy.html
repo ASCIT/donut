@@ -1,0 +1,30 @@
+{% extends "bootstrap/base.html" %}
+
+{% block html_attribs %} lang="en"{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+{% endblock %}
+{% block title %}Donut{% endblock %}
+{% block navbar %}
+    {% include "includes/header.html" %}
+{% endblock %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block page %}
+    {% endblock %}
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/copyright.js') }}"></script>
+{% endblock %}
