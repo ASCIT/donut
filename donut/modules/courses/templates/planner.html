@@ -31,6 +31,9 @@
                 {% for term in TERMS %}
                   <td class='term-courses'>
                     <ul class='list-group term-courses-list' year={{ year }} term={{ term }}></ul>
+                    <span class='term-units' units=0>
+                      (0 units)
+                    </span>
                   </td>
                 {% endfor %}
               </tr>
@@ -153,6 +156,10 @@
       justify-content: space-between;
       padding: 0;
     }
+    .term-units {
+      position: relative;
+      top: -40px;
+    }
     #requirements-modal {
       position: fixed;
       top: 15%;
@@ -207,6 +214,15 @@
         return Number(courseList.attr(attr))
       })
     }
+    function unitString(units) {
+      return '(' + String(units) + ' unit' + (units === 1 ? '' : 's') + ')';
+    }
+    function addUnits(courseList, units) {
+      var unitsSpan = courseList.parent().children('.term-units')
+      var newUnits = Number(unitsSpan.attr('units')) + units
+      unitsSpan.attr('units', newUnits)
+      unitsSpan.text(unitString(newUnits))
+    }
     var draggedCourse = null
     function addCourse(course, courseList, skipAPIAdd) {
       var yearTerm = getYearTerm(courseList)
@@ -219,11 +235,12 @@
       var units = courseUnits(course)
       var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
         $('<span>').text(
-          course.number + ' (' + String(units) + ' unit' + (units === 1 ? '': 's') + ')'
+          course.number + ' ' + unitString(units)
         ),
         $('<button>').addClass('btn btn-danger btn-xs')
           .click(function() {
             courseItem.remove()
+            addUnits(courseList, -units)
             displayWarning('Saving...')
             $.ajax({
               type: 'GET',
@@ -234,17 +251,20 @@
                 else {
                   displayWarning(response.message)
                   courseList.append(courseItem)
+                  addUnits(courseList, units)
                 }
               },
               error: function() {
                 displayWarning('Failed to drop course ' + course.number)
                 courseList.append(courseItem)
+                addUnits(courseList, units)
               }
             })
           })
           .append($('<span>').addClass('glyphicon glyphicon-trash'))
       )
       courseList.append(courseItem)
+      addUnits(courseList, units)
       if (skipAPIAdd) return
 
       displayWarning('Saving...')
@@ -257,11 +277,13 @@
           else {
             displayWarning(response.message)
             courseItem.remove()
+            addUnits(courseList, -units)
           }
         },
         error: function() {
           displayWarning('Failed to add course ' + course.number)
           courseItem.remove()
+          addUnits(courseList, -units)
         }
       })
     }
