@@ -21,9 +21,17 @@ function searchCourses(courses, query) {
 			var numberIndex = number.indexOf(segment)
 			if (numberIndex > -1) {
 				score += segment.length
+				// 1 point if occurs at the start of a word in the course number
 				if (BOUNDARY_CHARS[number[numberIndex - 1]]) score++
-				if (BOUNDARY_CHARS[number[numberIndex + segment.length]]) score++
+				var nextChar = number[numberIndex + segment.length]
+				// 1 point if occurs at the end of a word in the course number,
+				// or is followed by a course's term letter (e.g. Ma 1a)
+				if (
+					BOUNDARY_CHARS[nextChar] ||
+					/[a-z]/.test(nextChar) && /\d/.test(number[numberIndex + segment.length - 1])
+				) score++
 			}
+			// 0.1 points per matched letter in course title
 			else if (name.indexOf(segment) > -1) score += segment.length * 0.1
 		})
 		if (score) matches.push({course: course, score: score})
