@@ -69,14 +69,12 @@ def get_direct_position_holders(pos_id):
                     position. Each element is a dict with key:value of
                     columnname:columnvalue
     """
-    fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
-    query = "SELECT " + ', '.join(fields) + " "
-    query += """FROM position_holders NATURAL JOIN members
-                WHERE pos_id =%s"""
+    query = """SELECT user_id, first_name, last_name, start_date, end_date
+            FROM position_holders NATURAL JOIN members WHERE pos_id = %s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [pos_id])
-        return cursor.fetchall()
+        return list(cursor.fetchall())
 
 
 def get_position_holders(pos_id):
@@ -265,7 +263,6 @@ def create_position_holder(pos_id, user_id, start_date, end_date):
     end_date) VALUES (%s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (pos_id, user_id, start_date, end_date))
-        cursor.close()
 
 
 def delete_position_holder(pos_id, user_id):

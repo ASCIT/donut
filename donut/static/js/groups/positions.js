@@ -23,6 +23,8 @@ function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
     for (var i = 0; i < approvedGroupIds.length; i++) {
         var newOption = '<option value=' + approvedGroupIds[i] + '>' +
             approvedGroupNames[i] + '</option>'
+        // TODO: create a new class .group-select and put all of these
+        // elements in them.
         $('#groupCreate option:last').after(newOption);
         $('#groupDel option:last').after(newOption);
         $('#groupPosHold option:last').after(newOption);
@@ -189,7 +191,7 @@ function posIdDelHoldChange() {
             for (var i = 0; i < data.length; i++) {
                 var newOption = '<option value=' + data[i].user_id + '>' +
                     data[i].first_name + ' ' + data[i].last_name +
-                    ' (' + formatDate(data[i].start_date) + " to " +
+                    ' (' + formatDate(data[i].start_date) + ' to ' +
                     formatDate(data[i].end_date) + ')</option>';
                 $('#delName').append(newOption);
             }
@@ -220,7 +222,6 @@ function populateListOfPositions(groupIndex, posSelectId) {
 $(document).ready(function() {
     // Setting up triggers for administration tasks
     $('#submitPosBtn').click(function(e) {
-        e.preventDefault();
         $.ajax({
             type: 'POST',
             url: '/1/positions/',
@@ -234,7 +235,6 @@ $(document).ready(function() {
         });
     });
     $('#delPosBtn').click(function(e) {
-        e.preventDefault();
         $.ajax({
             type: 'POST',
             url: '/1/positions/delete/',
@@ -248,7 +248,6 @@ $(document).ready(function() {
         });
     });
     $('#submitPosHoldBtn').click(function(e) {
-        e.preventDefault();
         $.ajax({
             type: 'POST',
             url: '/1/positions/' + $("#posIdHold").val() + '/',
@@ -262,7 +261,6 @@ $(document).ready(function() {
         });
     });
     $('#submitDelPosHoldBtn').click(function(e) {
-        e.preventDefault();
         $.ajax({
             type: 'POST',
             url: '/1/positions/' + $("#posIdDelHold").val() + '/delete/',

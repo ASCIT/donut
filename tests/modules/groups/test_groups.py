@@ -53,7 +53,6 @@ def test_get_group_positions_data(client):
 
 def test_get_direct_position_holders(client):
     res = helpers.get_direct_position_holders(5)
-    assert len(res) == 1
     assert set(row['first_name'] for row in res) == set(['Sean'])
 
     res = helpers.get_direct_position_holders(1)
