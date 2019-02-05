@@ -256,7 +256,7 @@ input[type=checkbox], input[type=radio] {
 }
 
 /* For better mobile and desktop positioning of lists. */
-.jumbotron ul {
+.jumbotron ul:not(.list-group) {
   padding: 10px;
 }
 
@@ -330,7 +330,7 @@ input[type=checkbox], input[type=radio] {
   text-align: right;
 }
 
-/* Creates a row-like element. These are intended to stack atop one another 
+/* Creates a row-like element. These are intended to stack atop one another
  * vertically.
  */
 .row {
@@ -367,7 +367,7 @@ input[type=checkbox], input[type=radio] {
  * should not be used for general styling or anything of the like. Odds are, *
  * you won't need them for anything!                                         */
 /*****************************************************************************/
- 
+
 
 /* Content needs to span the width of its parent. */
 #content {
@@ -550,7 +550,7 @@ input[type=checkbox], input[type=radio] {
   #copyright {
     font-size: 1vh;
     text-align: left;
- } 
+ }
 }
 
 /* END MOBILE CSS */
