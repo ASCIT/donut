@@ -645,6 +645,7 @@ label.required:after {
 
   .jumbotron h1 {
     font-size: 400%;
+    -webkit-text-stroke: 1px #f5903b;
   }
 
   /* Make sure unformatted paragraphs are visible on mobile. */
@@ -664,6 +665,11 @@ label.required:after {
     margin-top: 5%;
     border: 1px orange solid;
     border-radius: 5px;
+  }
+
+  .navbar-fixed-bottom .navbar-collapse, .navbar-fixed-top .navbar-collapse {
+    height: 1024px;
+    max-height: 1024px;
   }
 
   /* Get rid of this to avoid overlap with other elements. */
@@ -723,7 +729,7 @@ label.required:after {
   #navbar button {
     font-size: 2vh;
     position: absolute;
-    left: 7%;
+    left: 3.5%;
   }
 
   /* Space list elements in the navbar such that they don't overlap. */
