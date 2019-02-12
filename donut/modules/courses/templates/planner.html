@@ -6,7 +6,7 @@
     <div class='row'>
       <div class='col-md-3'>
         <input class='form-control' id='search' placeholder='Search...' />
-        <ul class='list-group' id='courses'>
+        <ul class='list-group' id='course-results'>
           <li class='list-group-item'>Loading...</li>
         </ul>
       </div>
@@ -111,8 +111,7 @@
     #warning {
       float: right;
     }
-    #courses {
-      height: 600px;
+    #course-results, #courses {
       overflow-y: auto;
       margin-bottom: 0;
     }
@@ -134,9 +133,6 @@
         visibility: hidden;
       }
     {% endfor %}
-    #courses {
-      height: 600px;
-    }
     thead tr {
       height: 1px; /* shrink header row */
     }
@@ -196,7 +192,7 @@
     }
 
     var courses = []
-    var coursesList, termLists, requirementsModal
+    var coursesList, termsTable, termLists, requirementsModal
     var terms = $('<table>').addClass('terms').append(
       $('<tr>').append(
         {% for term_name in TERMS.values() %}
@@ -435,8 +431,14 @@
       $('.progress-bar#hums').css('width', Math.min(hums / 12, 1) * 100 + '%')
       $('.progress-bar#pe').css('width', Math.min(PE / 3, 1) * 100 + '%')
     }
+    function setCoursesHeight() {
+      coursesList.css('height', String(innerHeight - 175) + 'px')
+      termsTable.css('height', String(innerHeight - 150) + 'px')
+    }
+
     $(document).ready(function() {
-      coursesList = $('ul#courses')
+      coursesList = $('ul#course-results')
+      termsTable = $('table#courses')
       termLists = $('.term-courses-list')
       requirementsModal = $('#requirements-modal')
       termLists
@@ -458,6 +460,8 @@
       $('#search').keyup(function() {
         displayCourses(searchCourses(courses, $(this).val()))
       })
+      setCoursesHeight()
+      $(window).resize(setCoursesHeight)
     })
   </script>
 {% endblock %}
