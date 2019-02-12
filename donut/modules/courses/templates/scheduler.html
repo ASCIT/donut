@@ -4,7 +4,7 @@
     <h3 id='warning'></h3>
     <h1>Course Scheduler</h1>
     <div class='row'>
-      <div class='col-md-3'>
+      <div class='col-sm-3'>
         <div class='form-group'>
           <label for='term'>Term</label>
           <select class='form-control' id='term'>
@@ -18,18 +18,18 @@
         <input class='form-control' id='search' placeholder='Search...' />
         <ul class='list-group' id='courses'></ul>
       </div>
-      <div class='col-md-9'>
+      <div class='col-sm-9'>
         <div class='row' id='scheduler'>
-          <div class='col-md-2'>
+          <div class='col-xs-2'>
             <div id='units'></div>
-            {% for hour in range(START_HOUR, END_HOUR + 1) %}
+            {% for hour in range(START_HOUR, END_HOUR) %}
               <div class='hour' style='top: {{ (hour - START_HOUR + 1) * HOUR_HEIGHT }}px'>
                 {{ (hour + 11) % 12 + 1 }} {{ 'AM' if hour < 12 else 'PM' }}
               </div>
             {% endfor %}
           </div>
           {% for day in WEEK_DAYS %}
-            <div class='col-md-2 day'>
+            <div class='col-xs-2 day'>
               <strong>{{ day }}</strong>
             </div>
           {% endfor %}
@@ -68,9 +68,6 @@
       width: 600%; /* fill all 5 other columns */
       border-top: 1px solid orange;
     }
-    .section label {
-      font-weight: normal;
-    }
     .interval {
       position: absolute;
       border: 1px solid #999;
@@ -95,9 +92,15 @@
       padding: 0;
       border: none;
     }
+    .section:hover {
+      cursor: pointer;
+    }
     .list-group-item.section {
       padding-top: 0;
       padding-bottom: 0;
+    }
+    .section.selected .section-name {
+      font-weight: bold;
     }
   </style>
 {% endblock %}
@@ -187,8 +190,8 @@
           var courseDisplay = $('[course=' + String(courseId) + ']')
           sections.forEach(function(section) {
             addSection(course, section, true)
-            courseDisplay.find('input[type=checkbox][section=' + String(section) + ']')
-              .prop('checked', true)
+            courseDisplay.find('.section[section=' + String(section) + ']')
+              .addClass('selected')
           })
         }
       }
@@ -246,12 +249,13 @@
                 })
                 .addClass('btn btn-danger remove')
                 .append($('<span>').addClass('glyphicon glyphicon-remove'))
-                .click(function() {
+                .click(function(e) {
                   intervals.forEach(function(element) { element.remove() })
                   intervals = null // allow GC
                   uncheckSection(course.id, sectionNumber)
                   fitIntervals()
                   dropSection(course, sectionNumber)
+                  e.stopPropagation() // prevent section dropdowns from closing
                 })
             )
           dayLists.eq(weekday).append(intervalItem)
@@ -308,8 +312,8 @@
     function uncheckSection(courseId, sectionNumber) {
       $(
         '[course=' + String(courseId) +
-        '] input[type=checkbox][section=' + String(sectionNumber) + ']'
-      ).prop('checked', false)
+        '] .section[section=' + String(sectionNumber) + ']'
+      ).removeClass('selected')
     }
     function fitIntervals() {
       dayLists.each(function(_, day) {
@@ -360,20 +364,24 @@
           )
         var sections = course.sections.map(function(section) {
           var number = section.number
-          var sectionItem = $('<div>').addClass('section').append(
-            $('<h5>').append(
-              $('<label>').append(
-                $('<input>')
-                  .attr({type: 'checkbox', section: number})
-                  .prop('checked', !!scheduledCourses[[courseId, number]])
-                  .change(function() {
-                    ($(this).prop('checked') ? addSection : removeSection)
-                      (course, number)
-                  }),
-                $('<span>').text(String(number) + ' - ' + section.instructor)
-              )
+          var sectionItem = $('<div>')
+            .addClass('section')
+            .attr('section', number)
+            .click(function(e) {
+              if ($(this).toggleClass('selected').hasClass('selected')) {
+                addSection(course, number)
+              }
+              else removeSection(course, number)
+              e.stopPropagation()
+            })
+            .append(
+              $('<h5>')
+                .addClass('section-name')
+                .text(String(number) + ' - ' + section.instructor)
             )
-          )
+          if (scheduledCourses[[courseId, number]]) {
+            sectionItem.addClass('selected')
+          }
           if (section.grades) sectionItem.append($('<h6>').text(section.grades))
           var times = section.times.split('\n'),
               locations = section.locations.split('\n')
@@ -406,6 +414,7 @@
         coursesList.append(courseItem)
       })
       $('.dropdown-toggle').dropdown()
+      coursesList.scrollTop(0)
     }
     function displayUnits() {
       units.text('Units: ' + String(coursesUnits))
