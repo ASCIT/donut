@@ -92,12 +92,13 @@
       padding: 0;
       border: none;
     }
-    .section:hover {
-      cursor: pointer;
+    .section {
+      width: 100%;
+      margin: 0 !important;
+      text-align: left;
     }
-    .list-group-item.section {
-      padding-top: 0;
-      padding-bottom: 0;
+    .list-group-item.section-item {
+      padding: 0;
     }
     .section.selected .section-name {
       font-weight: bold;
@@ -365,7 +366,7 @@
         var sections = course.sections.map(function(section) {
           var number = section.number
           var sectionItem = $('<div>')
-            .addClass('section')
+            .addClass('btn btn-default section')
             .attr('section', number)
             .click(function(e) {
               if ($(this).toggleClass('selected').hasClass('selected')) {
@@ -394,7 +395,7 @@
           var dropdownMenu = $('<ul>').addClass('dropdown-menu list-group')
           sections.forEach(function(section) {
             dropdownMenu.append(
-              $('<li>').addClass('list-group-item section').append(section)
+              $('<li>').addClass('list-group-item section-item').append(section)
             )
           })
           courseItem.append(
