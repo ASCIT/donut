@@ -139,7 +139,7 @@ table {
 /* This is the primary button class. Gives the button a white background
  * with an orange border and a slight bottom margin for spacing
  */
-.btn {
+.btn-default {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
   -o-transition: all 0.5s;
@@ -152,7 +152,7 @@ table {
 }
 
 /* When the primary button class is hovered, give it an orange background. */
-.btn:hover {
+.btn-default:hover {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
   -o-transition: all 0.5s;
