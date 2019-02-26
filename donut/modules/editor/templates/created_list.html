@@ -1,15 +1,18 @@
 {% extends "layout.html" %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
+{% endblock %}
 {% block scripts %}
   {{super()}}
   <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-  <script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
 {% endblock %}
 {% block page%}
 <div class="container theme-showcase" role="main">
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">List of User Created Pages</h1>
-      <div id = "content" style = "font-size:21px;font-weight:200; margin-bottom:15px;">
+      <div id = "display_list_content">
         <table class = "table">
           <tr>
             <th>Page name</th>
@@ -19,7 +22,7 @@
             <tr>
               <td><a href= "{{ link }}">{{name}}</a></td>
               {% if permissions %}
-                <td><a href= "{{ url_for('editor.created_list', filename=name)}}">Delete</td>
+                <td><a href= "{{ url_for('editor.delete_page', filename=name)}}">Delete</td>
               {% endif %}
             </tr>
           {% endfor %}

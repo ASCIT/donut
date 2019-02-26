@@ -29,8 +29,8 @@
 	  You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>.
 	</p>
 	<p>
-	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 35 characters.
-	  Titles with underscores are interchangeable with titles with spaces (IE, "This title" and "This_title"
+	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 100 characters.
+	  Titles with underscores are interchangeable with titles with spaces (i.e., "This title" and "This_title"
 	  are the same page). 
 	</p>
       </div>
@@ -44,7 +44,7 @@
       <br/>
       <div class="btn-group">
         <div class="btn-group" role="group">
-          <div class="dropdown">
+          <div class="dropdown" id="editor_drop_down">
             <button class="btn btn-outline-primary btn-sm" type="button">Styles<span class="caret"></span></button>
               <ul class="dropdown-menu">
                <li><a type="button" onClick="insert_italic()" class="btn btn-outline-secondary btn-sm">italic</a></li>
@@ -54,8 +54,10 @@
         </div>
         <div class="btn-group" role="group">
           <div class="dropdown">
-            <button class="btn btn-outline-primary btn-sm" type="button">Headings
-            <span class="caret"></span></button>
+            <button class="btn btn-outline-primary btn-sm" type="button">
+              Headings
+              <span class="caret"></span>
+	    </button>
             <ul class="dropdown-menu">
             {% for i in range(1,7) %}
               <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_heading({{i}})" style="font-size:{{26 - i*2}}px">Heading</a></li>
@@ -67,7 +69,8 @@
         <div class="btn-group" role="group">
           <div class="dropdown">
             <button class="btn btn-outline-primary btn-sm" type="button">Lists
-            <span class="caret"></span></button>
+              <span class="caret"></span>
+	    </button>
             <ul class="dropdown-menu">
               <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_ulist()">Unordered</a></li>
               <li><a class="btn btn-outline-secondary btn-sm" type="button" onClick="insert_olist()">Ordered</a></li>
@@ -84,7 +87,7 @@
 
       </textarea>
       <hr/>
-      <button id="runBtn" onClick="run()">preview</button>
+      <button id="runBtn" onClick="preview()">Preview</button>
       <button id="save" onClick="save()">Save Changes</button>
       <header>
         <h1 id = "preview_title" class="text-center"></h1>

@@ -69,6 +69,6 @@ target/
 .DS_Store
 
 # Files related to uploading	
-donut/modules/uploads/uploaded_files/*
-donut/modules/uploads/static/*.md
+#donut/modules/uploads/uploaded_files/*
+#donut/modules/uploads/static/*.md
 

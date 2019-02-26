@@ -1,14 +1,8 @@
 {% extends "layout.html" %}
-{% block head %}
+{% block scripts %}
   {{super()}}
-  <!-- Jquery is here because this page requires jqery and my js file to load-->
-  <!-- Putting this in a script block here screws up the bootstrap -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
-  <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
-  <script type="text/javascript">
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
+  <script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
 {% endblock %}
 {% block page %}
 <div class="container theme-showcase" role="main">
@@ -16,10 +10,9 @@
     <div class="jumbotron">
       <h1 id = "title" class="text-center">{{title}}</h1>
       <div id = "content">
-        <script> load('{{title}}');</script>
       </div>
       {% if permissions %}
-        <a href="{{ url_for('editor.editor', input_text=title.replace(' ', '_'), title=title.replace(' ', '_'))}}">edit this page</a>
+        <a href="{{ url_for('editor.editor', title=title.replace(' ', '_'))}}">edit this page</a>
       {% endif %}
     </div>
   </div>

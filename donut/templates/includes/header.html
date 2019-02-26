@@ -35,10 +35,6 @@
                             <li><a href="#">Newsgroups</a></li>
                             <li><a href="{{ url_for('rooms.rooms_home') }}">Room Reservations</a></li>
                             <li><a href="{{ url_for('voting.list_surveys') }}">Surveys and Voting</a></li>
-                            {% if 'username' in session %}
-                              <li><a href="{{ url_for('editor.editor')}}">Create A New Page</a></li>
-                            {% endif %}
-
                         </ul>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Committees <span class="caret"></span></a>

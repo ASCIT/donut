@@ -4,15 +4,15 @@
   height: 400px;
 }
 
-textarea{
+textarea {
   margin: 30px;
   width: 80%;
 }
-.btn{
+.btn {
   margin: 5px;
 }
 
 
-.dropdown:hover .dropdown-menu {
+.btn-group .dropdown:hover .dropdown-menu {
   display: block;
 }

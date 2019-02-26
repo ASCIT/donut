@@ -1,11 +1,8 @@
 import flask
-import json
+#import json
 import os
-import time
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
-from donut.modules.uploads.upload_permission import UploadPermissions
-from donut.auth_utils import check_permission, check_login
 
 
 @blueprint.route('/lib/<path:url>')
@@ -16,38 +13,34 @@ def display(url):
     page = helpers.read_page(url.replace(' ', '_'))
     if page == None:
         return flask.abort(404)
-    else:
-        return flask.render_template(
-            'page.html',
-            page=page,
-            title=url.replace('_', ' '),
-            permissions=(check_login() and check_permission(
-                flask.session['username'], UploadPermissions.ABLE)))
+    return flask.render_template(
+        'page.html',
+        title=url.replace('_', ' '),
+        permissions=(helpers.check_upload_permission()))
 
 
-@blueprint.route('/_send_page', methods=['GET'])
+@blueprint.route('/uploads/_send_page', methods=['GET'])
 def get_page():
     '''
     Sends the page to frontend.
     '''
     url = flask.request.args.get('url')
     page = helpers.read_page(url.replace(' ', '_'))
-    return flask.jsonify(result=page)
+    return page
 
 
-@blueprint.route('/uploads')
+@blueprint.route('/uploads', methods=['GET'])
 def uploads():
     '''
     Serves the webpage that allows a user to upload a file.
     '''
-    if check_login() and check_permission(flask.session['username'],
-                                          UploadPermissions.ABLE):
+    if helpers.check_upload_permission():
         return flask.render_template('uploads.html')
     else:
         flask.abort(403)
 
 
-@blueprint.route('/_upload_file', methods=['POST'])
+@blueprint.route('/uploads/_upload_file', methods=['POST'])
 def upload_file():
     '''
     Handles the uploading of the file
@@ -58,8 +51,7 @@ def upload_file():
     filename = secure_filename(file.filename)
     uploads = os.path.join(flask.current_app.root_path,
                            flask.current_app.config['UPLOAD_FOLDER'])
-    if check_login() and check_permission(flask.session['username'],
-                                          UploadPermissions.ABLE):
+    if helpers.check_upload_permission():
         helpers.remove_link(filename)
         file.save(os.path.join(uploads, filename))
         return flask.jsonify({
@@ -70,7 +62,7 @@ def upload_file():
         return flask.abort(403)
 
 
-@blueprint.route('/_check_valid_file', methods=['POST'])
+@blueprint.route('/uploads/_check_valid_file', methods=['POST'])
 def check_file():
     '''
     Checks if the file: exists, has a valid extension, and
@@ -78,9 +70,8 @@ def check_file():
     '''
     if 'file' not in flask.request.files:
         return flask.jsonify({'error': 'No file selected'})
-    file = flask.request.files['file']
-    if check_login() and check_permission(flask.session['username'],
-                                          UploadPermissions.ABLE):
+    if helpers.check_upload_permission():
+        file = flask.request.files['file']
         return flask.jsonify({'error': helpers.check_valid_file(file)})
     else:
         return flask.abort(403)
@@ -96,20 +87,24 @@ def uploaded_file(filename):
     return flask.send_from_directory(uploads, filename, as_attachment=False)
 
 
-@blueprint.route('/uploaded_list', methods=['GET'])
+@blueprint.route('/uploads/_delete')
+def delete_uploaded_file():
+    """
+    End point for deleting an upload
+    """
+    filename = flask.request.args.get('filename')
+    if filename != None and helpers.check_upload_permission():
+        helpers.remove_link(filename)
+    return flask.redirect(flask.url_for('uploads.uploaded_list'))
+
+
+@blueprint.route('/uploads/uploaded_list', methods=['GET'])
 def uploaded_list():
     '''
     Shows the list of uploaded files
     '''
-
-    filename = flask.request.args.get('filename')
-    if filename != None and check_login() and check_permission(
-            flask.session['username'], UploadPermissions.ABLE):
-        helpers.remove_link(filename)
-
     links = helpers.get_links()
     return flask.render_template(
         'uploaded_list.html',
         links=links,
-        permissions=(check_login() and check_permission(
-            flask.session['username'], UploadPermissions.ABLE)))
+        permissions=(helpers.check_upload_permission()))

@@ -19,18 +19,14 @@ def test_plain_editor_page(client):
 
 def test_text_editor_page(client):
     assert client.get(
-        flask.url_for(
-            'editor.editor', input_text='TESTING TESTING',
-            title="TEST")).status_code == 403
+        flask.url_for('editor.editor', title="TEST")).status_code == 403
 
 
 def test_path_related_funciton(client):
     helpers.remove_link("TEST TITLE")
     helpers.remove_link("ANOTHER TITLE")
     links = helpers.get_links()
-    titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for _, title in links]
     assert "TEST TITLE" not in ' '.join(titles)
     assert "ANOTHER TITLE" not in ' '.join(titles)
 
@@ -39,8 +35,8 @@ def test_path_related_funciton(client):
                         flask.current_app.config["UPLOAD_WEBPAGES"])
     assert helpers.get_links() != []
 
-    assert helpers.check_duplicate("TEST TITLE") == "Duplicate title"
-    assert helpers.check_duplicate("doesnt exist") == ""
+    assert helpers.check_duplicate("TEST TITLE")
+    assert not helpers.check_duplicate("doesnt exist")
 
     links = helpers.get_links()
     titles = [title for _, title in links]
@@ -51,9 +47,7 @@ def test_path_related_funciton(client):
     helpers.rename_title('TEST_TITLE', 'ANOTHER_TITLE')
 
     links = helpers.get_links()
-    titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for _, title in links]
     assert "TEST TITLE" not in ' '.join(titles)
     assert "ANOTHER TITLE" in ' '.join(titles)
 

@@ -2,11 +2,7 @@ import flask
 import json
 import os
 import re
-
 from donut.modules.editor import blueprint, helpers
-from flask import current_app, redirect, url_for
-from donut.modules.editor.edit_permission import EditPermission
-from donut.auth_utils import check_permission, check_login
 
 
 @blueprint.route('/editor', methods=['GET', 'POST'])
@@ -17,14 +13,16 @@ def editor():
     '''
     input_text = "Hello world"
     title = "TITLE"
-    inputt = flask.request.args.get('input_text')
+    inputt = flask.request.args.get('title')
     if inputt != None:
         input_text = helpers.read_markdown(inputt)
         title = flask.request.args.get('title')
-
-    if not helpers.get_lock_status(title) and check_login() and check_permission(flask.session['username'],
-                                          EditPermission.ABLE):
-        helpers.change_lock_status(title, True)
+        load_default = False
+    if inputt == None:
+        load_default = True
+    if not helpers.get_lock_status(
+            title, load_default) and helpers.check_edit_page_permission():
+        helpers.change_lock_status(title, True, load_default)
         return flask.render_template(
             'editor_page.html', input_text=input_text, title=title)
     else:
@@ -38,8 +36,20 @@ def close_page():
     """
     title = flask.request.form['title']
     helpers.change_lock_status(title, False)
-    return "anything"
-@blueprint.route('/_change_title', methods=['POST'])
+    return ""
+
+
+@blueprint.route('/pages/_keep_alive_page', methods=['POST'])
+def keep_alive_page():
+    """
+    Call to update the last access time for a page
+    """
+    title = flask.request.form['title']
+    helpers.change_lock_status(title, False)
+    return ""
+
+
+@blueprint.route('/pages/_change_title', methods=['POST'])
 def change_title():
     '''
     Allows one to change a file/page title.
@@ -48,11 +58,9 @@ def change_title():
     old_title = flask.request.form['old_title']
     input_text = flask.request.form['input_text']
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and check_login() and check_permission(
-            flask.session['username'], EditPermission.ABLE):
+    if title_res != None and helpers.check_edit_page_permission():
         helpers.rename_title(old_title, title)
-        return flask.render_template(
-            'editor_page.html', input_text=input_text, title=title)
+        return flask.render_template('editor_page.html', input_text=input_text)
     return flask.abort(403)
 
 
@@ -64,36 +72,51 @@ def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     # Allows all numbers and characters. Allows ".", "_", "-"
-    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and len(title) <= 35 and check_login(
-    ) and check_permission(flask.session['username'], EditPermission.ABLE):
+    markdown = markdown.replace('<', '')
+    markdown = markdown.replace('>', '')
+    if helpers.check_edit_page_permission():
         helpers.write_markdown(markdown, title)
-        return flask.jsonify({'url': url_for('uploads.display', url=title)})
-
+        return flask.jsonify({
+            'url': flask.url_for('uploads.display', url=title)
+        })
     else:
         flask.abort(403)
 
 
-@blueprint.route('/pages/_check_override', methods=['POST'])
-def check_duplicate():
+@blueprint.route('/pages/_check_errors', methods=['POST'])
+def check_errors():
+    """
+    Checks for any errors with the title
+    """
     title = flask.request.form['title']
-    return flask.jsonify({'error': helpers.check_duplicate(title)})
+    if helpers.check_duplicate(title):
+        return flask.jsonify({'error': "Duplicate title"})
+    elif helpers.check_title(title):
+        return flask.jsonify({'error': "Invalid Title"})
+    else:
+        return flask.jsonify({'error': ""})
 
 
-@blueprint.route('/created_list')
+@blueprint.route('/pages/_delete')
+def delete_page():
+    """
+    End point for page deletion
+    """
+    filename = flask.request.args.get('filename')
+    if filename != None and helpers.check_edit_page_permission():
+        helpers.remove_link(filename)
+
+    return flask.redirect(flask.url_for('editor.created_list'))
+
+
+@blueprint.route('/pages/list_of_pages')
 def created_list():
     '''
     Returns a list of all created pages
     '''
 
-    filename = flask.request.args.get('filename')
-    if filename != None and check_login() and check_permission(
-            flask.session['username'], EditPermission.ABLE):
-        helpers.remove_link(filename)
-
     links = helpers.get_links()
     return flask.render_template(
         'created_list.html',
         links=links,
-        permissions=(check_login() and check_permission(
-            flask.session['username'], EditPermission.ABLE)))
+        permissions=(helpers.check_edit_page_permission()))

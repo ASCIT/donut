@@ -1,26 +1,28 @@
 var TITLE_CUTOFF = 20;
 
 // Creates html
-function run() {
-  var text = document.getElementById('source').value,
-      title = document.getElementById('text_title').value,
-      target = document.getElementById('preview'),
-      target_title = document.getElementById('preview_title'),
+function preview() {
+  var text = $('#source').val(),
+      title = $('#text_title').val(),
+      target = $('#preview'),
+      target_title = $('#preview_title'),
       converter = new showdown.Converter({strikethrough: true}),
       html = converter.makeHtml(text);
-  target.innerHTML = html;
-  target_title.innerHTML = title;
+  target.html(html);
+  target_title.html(title);
 
 }
 
 // Changes the title of a file
 function change_title(oldTitle){
-  var title = document.getElementById('text_title').value;
-  var input_text = document.getElementById('source').value;
+  var title = $('#text_title').val();
+  var text = $('#source').val();
   $.ajax({
-    url: $SCRIPT_ROOT+'/_change_title',
+    url: '/pages/_change_title',
     type: 'POST',
-    data:{title:title, old_title:oldTitle, input_text:input_text},
+    data:{title:title, 
+          old_title:oldTitle, 
+          input_text:text},
     success: function(data) {
       window.alert("Title Change Sucessfully");
     },
@@ -32,10 +34,10 @@ function change_title(oldTitle){
 
 //###########
 
-function selectedString(string1, string2)
+function modHighlightedString(string1, string2)
 {
-  var ta = document.getElementById('source');
-  if (ta.value.substring(ta.selectionStart, ta.selectionEnd) == "")
+  var ta = $('#source')[0];
+  if (ta.selectionStart === ta.selectionEnd)
   {
     insert(string2, false);
   }
@@ -51,19 +53,19 @@ function insert_heading(size){
   {
     string += "#";
   }
-  selectedString(string, string + "Heading_title" + string+ "\n");
+  modHighlightedString(string, string + "Heading_title" + string+ "\n");
 }
 
 function insert_italic(){
-  selectedString("*", "*italicText*");
+  modHighlightedString("*", "*italicText*");
 }
 
 function insert_bold(){
-  selectedString("**", "**boldText**");
+  modHighlightedString("**", "**boldText**");
 }
 
 function insert_link(){
-  insert("[linkTitle](example.com)", false);
+  insert("[Link title](example.com)", false);
 }
 
 function insert_image(){
@@ -80,7 +82,7 @@ function insert_olist(){
 
 
 function insert(string, selected){
-  var ta = document.getElementById('source');
+  var ta = $("#source")[0];
   var begin = ta.selectionStart;
   var end = ta.selectionEnd;
   if(selected)
@@ -89,21 +91,21 @@ function insert(string, selected){
       ta.setSelectionRange(begin, begin);
       ta.focus();
       document.execCommand('insertText', false, string);
-      ta.setSelectionRange(end+string.length, end+string.length);
+      ta.setSelectionRange(end + string.length, end + string.length);
       ta.focus();
       document.execCommand('insertText', false, string);
     } else{
-      ta.value = ta.value.substring(0, ta.selectionStart)
-      + string + ta.value.substring(ta.selectionStart, ta.selectionEnd) + string
-      + ta.value.substring(ta.selectionEnd);
+      ta.value = ta.value.substring(0, begin)
+      + string + ta.value.substring(begin, end) + string
+      + ta.value.substring(end);
     }
   }
   else {
     if (document.queryCommandSupported('insertText')) {
       document.execCommand('insertText', false, string);
     } else{
-      ta.value = ta.value.substring(0, ta.selectionStart)
-      + string + ta.value.substring(ta.selectionStart);
+      ta.value = ta.value.substring(0, begin)
+      + string + ta.value.substring(begin);
     }
   }
 }
@@ -111,23 +113,30 @@ function insert(string, selected){
 // Saves the page created
 function save(){
   // Construct the html and get the info needed
-  var text = document.getElementById('source').value;
-  var target = document.getElementById('preview');
-  var title = document.getElementById("text_title").value;
-
+  var target = $("#preview");
+  var text = $("#source").val();
+  var title = $('#text_title').val();
   // Checking for valid titles
   if (title === '')
   {
     window.alert("Enter a title for your new page!");
+    return false;
   }
-  else {
-    $.ajax({
-      url: $SCRIPT_ROOT+'/pages/_check_override',
-      type: 'POST',
-      data:{markdown:text, title:title},
-      success: function(data) {
-        if (data.error === "")
-        {
+  
+  $.ajax({
+    url: $SCRIPT_ROOT+'/pages/_check_errors',
+    type: 'POST',
+    data:{markdown:text, title:title},
+    success: function(data) {
+      if (data.error === "Duplicate title" || data.error === "")
+      {
+        if (data.error === "Duplicate title") {
+          var res = confirm("You are overriding an existing file!");
+        }
+        else {
+          var res = true;
+        }
+        if (res){
           $.ajax({
             url: $SCRIPT_ROOT+'/pages/_save',
             type: 'POST',
@@ -136,40 +145,38 @@ function save(){
               window.location.href = data.url;
             },
             error: function(data){
-              window.alert("Please enter a valid title");
+              window.alert("Invalid permissions");
             }
           });
-        } else if (data.error === "Duplicate title") {
-          var res = confirm("You are overriding an existing file!");
-          if (res){
-            $.ajax({
-              url: $SCRIPT_ROOT+'/pages/_save',
-              type: 'POST',
-              data:{markdown:text, title:title},
-              success: function(data) {
-                window.location.href = data.url;
-              },
-              error: function(data){
-                window.alert("Please enter a valid title");
-              }
-            });
-          }
-        } else {
-          window.alert(data.error)
         }
-      },
-      error: function(data){
-        window.alert("Please enter a valid title");
+      } else {
+        window.alert(data.error);
       }
-    });
-  }
+    },
+    error: function(data){
+      window.alert("Unknown error occurred");
+    }
+  });
 }
-window.onbeforeunload = function(event) {
-  var title = document.getElementById("text_title").value;
+
+// Sends a request to the server to keep the lock alive every minute. 
+setInterval(function(){
+ var title = $('#text_title').val();
+  $.ajax({
+    url: '/pages/_keep_alive_page',
+    type: 'POST',
+    data:{title:title},
+ });
+}, 60*1000);
+
+
+window.addEventListener("beforeunload", function (e) {
+  e.preventDefault();
+  var title = $('#text_title').val();
   $.ajax({
     url: $SCRIPT_ROOT+'/pages/_close_page',
     type: 'POST',
     data:{title:title},
   });
-  return null;
-}
+  return "sure?";
+});

@@ -1,7 +1,8 @@
 import flask
 import os
-from flask import current_app
 import glob
+from donut.modules.uploads.upload_permission import UploadPermissions
+from donut.auth_utils import check_permission, check_login
 
 ALLOWED_EXTENSIONS = set(
     ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -11,14 +12,14 @@ def read_page(url):
     '''
     Reads in content from a markdown file
     '''
-    root = os.path.join(current_app.root_path,
-                        current_app.config["UPLOAD_WEBPAGES"])
+    root = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config["UPLOAD_WEBPAGES"])
     path = os.path.join(root, url + '.md')
-    if os.path.isfile(path):
-        with open(path, 'r') as f:
-            return f.read()
-    else:
+    if not os.path.isfile(path):
         return None
+
+    with open(path) as f:
+        return f.read()
 
 
 def allowed_file(filename):
@@ -40,6 +41,7 @@ def remove_link(filename):
         name = link.replace(path + '/', '')
         if filename == name:
             os.remove(link)
+            break
 
 
 def check_valid_file(file):
@@ -65,6 +67,14 @@ def check_valid_file(file):
     return ''
 
 
+def check_upload_permission():
+    """
+    Checks if the user has upload permissions
+    """
+    return check_login() and check_permission(flask.session['username'],
+                                              UploadPermissions.ABLE)
+
+
 def get_links():
     '''
     Get links for all uploaded files
@@ -76,7 +86,7 @@ def get_links():
     processed_links = []
     for link in links:
         filename = os.path.basename(link)
-        if filename != 'static' and filename != 'pages' and filename != '':
+        if '.' in filename and filename != '':
             processed_links.append((flask.url_for(
                 'uploads.uploaded_file', filename=filename), filename))
     return processed_links

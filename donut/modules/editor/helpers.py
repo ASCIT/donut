@@ -1,31 +1,55 @@
 import flask
 import os
 import glob
-from flask import current_app, redirect, url_for
+import re
 import pymysql.cursors
+from donut import auth_utils
+from donut.modules.editor.edit_permission import EditPermission
 
-def change_lock_status(title, new_lock_status):
+
+def change_lock_status(title, new_lock_status, default=False):
     """
     This is called when a user starts or stops editing a
     page
     """
+    if default:
+        return
+    # This is mainly because there were pages already created that weren't in
+    # the database.
     create_page_in_database(title)
     query = """
-    UPDATE webpage_files_locks SET locked = %r WHERE TITLE = %s
+    UPDATE webpage_files_locks SET locked = %r, last_edit_time = NOW(), last_edit_uid = %s WHERE TITLE = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (new_lock_status, title))
+        cursor.execute(
+            query, (new_lock_status,
+                    auth_utils.get_user_id(flask.session['username']), title))
 
-def get_lock_status(title):
+
+def get_lock_status(title, default=False):
+    """
+    Gets the edit lock status of the current request page. 
+    If we are landing in the default page, automatically return True
+    """
+
+    if default:
+        return False
     create_page_in_database(title)
     query = """
-    SELECT locked, NOW() - last_time_accessed as expired FROM webpage_files_locks WHERE title = %s
+    SELECT locked, NOW() - last_edit_time as expired FROM webpage_files_locks WHERE title = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
         res = cursor.fetchone()
-        print(res['expired'])
+
+    # Locking the file times out after 3 minutes (since we are
+    # updating the last access time every 1 minute, and we generously account for
+    # some lag ).
+    if res['expired'] >= 60 * 3:
+        change_lock_status(title, False)
+        return False
     return res['locked']
+
 
 def create_page_in_database(title):
     query = """
@@ -43,18 +67,20 @@ def create_page_in_database(title):
             cursor.execute(query2, title)
     return
 
+
 def rename_title(oldfilename, newfilename):
     """
     Changes the file name of an html file
     Need to look for paths
     """
-    oldpath = os.path.join(current_app.root_path,
-                           current_app.config["UPLOAD_WEBPAGES"],
+    oldpath = os.path.join(flask.current_app.root_path,
+                           flask.current_app.config["UPLOAD_WEBPAGES"],
                            oldfilename + '.md')
-    newpath = os.path.join(current_app.root_path,
-                           current_app.config["UPLOAD_WEBPAGES"],
+    newpath = os.path.join(flask.current_app.root_path,
+                           flask.current_app.config["UPLOAD_WEBPAGES"],
                            newfilename + '.md')
-    os.rename(oldpath, newpath)
+    if os.path.exists(oldpath) and not os.path.exists(newfilename):
+        os.rename(oldpath, newpath)
 
 
 def read_markdown(name):
@@ -72,19 +98,19 @@ def read_file(path):
     '''
     Reads in a file
     '''
-    if os.path.isfile(path):
-        with open(path) as f:
-            return f.read()
-    else:
-        return ""
+    if not os.path.isfile(path):
+        return ''
+
+    with open(path) as f:
+        return f.read()
 
 
 def get_links():
     '''
     Get links for all created webpages
     '''
-    root = os.path.join(current_app.root_path,
-                        current_app.config["UPLOAD_WEBPAGES"])
+    root = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config["UPLOAD_WEBPAGES"])
     links = glob.glob(root + '/*')
     results = []
     for filenames in links:
@@ -109,6 +135,9 @@ def remove_link(filename):
 
 
 def check_duplicate(filename):
+    """
+    Check to see if there are duplicate file names
+    """
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
     links = glob.glob(path + '/*')
@@ -116,8 +145,26 @@ def check_duplicate(filename):
     for i in links:
         name = i.replace(path + '/', '').replace('.md', '')
         if filename == name:
-            return "Duplicate title"
-    return ""
+            return True
+    return False
+
+
+def check_title(title):
+    """
+    Makes sure the title is valid
+    """
+    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
+    if title_res == None or len(title) >= 100:
+        return True
+    return False
+
+
+def check_edit_page_permission():
+    """
+    Checks if the user has permission to edit a page
+    """
+    return auth_utils.check_login() and auth_utils.check_permission(
+        flask.session['username'], EditPermission.ABLE)
 
 
 def write_markdown(markdown, title):
@@ -130,7 +177,7 @@ def write_markdown(markdown, title):
 
     title = title.replace(' ', '_')
     path = os.path.join(root, title + ".md")
-
+    create_page_in_database(title)
     # Writing to the new html file
     with open(path, 'w') as f:
         f.write(markdown)

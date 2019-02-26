@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block scripts %}
   {{super()}}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src={{ url_for('uploads.static', filename='script.js', _external = True)}} type="text/javascript"></script>
+  <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}} type="text/javascript"></script>
   <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
@@ -17,15 +16,15 @@
           See a list of all uploaded files
           <a href="{{ url_for('uploads.uploaded_list') }}">here</a>.
         </p>
-	<p>
-	  If you are uploading a file with the same name, you may need to refresh the page before seeing
-	  the new file. 
-	</p>
+        <p>
+          If you are uploading a file with the same name, you may need to refresh the page before seeing
+          the new file. 
+        </p>
       </div>
         <form id="upload-file" method="post" enctype="multipart/form-data">
           <label for="file">Select a file</label>
-          <input name="file" type="file">
-          <button id="submit_btn">Upload</button>
+          <input id="file" name="file" type="file"/>
+          <button id="submit_btn" onclick="return upload()" >Upload</button>
         </form>
     </div>
   </div>
