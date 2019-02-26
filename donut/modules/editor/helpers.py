@@ -7,7 +7,7 @@ from donut import auth_utils
 from donut.modules.editor.edit_permission import EditPermission
 
 
-def change_lock_status(title, new_lock_status, default=False):
+def change_lock_status(title, new_lock_status, default=False, forced=False):
     """
     This is called when a user starts or stops editing a
     page
@@ -17,21 +17,31 @@ def change_lock_status(title, new_lock_status, default=False):
     # This is mainly because there were pages already created that weren't in
     # the database.
     create_page_in_database(title)
-    query = """
-    UPDATE webpage_files_locks SET locked = %r, last_edit_time = NOW(), last_edit_uid = %s WHERE TITLE = %s
-    """
+    uid = auth_utils.get_user_id(flask.session['username'])
+    query = """ SELECT last_edit_uid FROM webpage_files_locks WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(
-            query, (new_lock_status,
-                    auth_utils.get_user_id(flask.session['username']), title))
+        cursor.execute(query, (title))
+        res = cursor.fetchone()
+    # If the page isn't locked before OR if the last user who edited this
+    # Is the same person OR if this function is called from
+    # is_locked due to the page being expired...
+    if forced or not is_locked(title) or res['last_edit_uid'] == uid:
+        query = """
+        UPDATE webpage_files_locks SET locked = %s, last_edit_time = NOW(), last_edit_uid = %s WHERE title = %s
+        """
+        with flask.g.pymysql_db.cursor() as cursor:
+            cursor.execute(query,
+                           (new_lock_status,
+                            auth_utils.get_user_id(flask.session['username']),
+                            title))
 
 
-def get_lock_status(title, default=False):
+def is_locked(title, default=False):
     """
     Gets the edit lock status of the current request page. 
     If we are landing in the default page, automatically return True
     """
-
+    TIMEOUT = 60 * 3
     if default:
         return False
     create_page_in_database(title)
@@ -45,27 +55,19 @@ def get_lock_status(title, default=False):
     # Locking the file times out after 3 minutes (since we are
     # updating the last access time every 1 minute, and we generously account for
     # some lag ).
-    if res['expired'] >= 60 * 3:
-        change_lock_status(title, False)
+    if res['expired'] >= TIMEOUT:
+        change_lock_status(title, False, forced=True)
         return False
     return res['locked']
 
 
 def create_page_in_database(title):
     query = """
-    SELECT locked FROM webpage_files_locks WHERE title = %s
+    INSERT INTO webpage_files_locks (title) VALUES (%s) ON DUPLICATE KEY UPDATE locked = locked
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
         res = cursor.fetchone()
-    if res == None:
-        query2 = """
-        INSERT INTO webpage_files_locks (title)
-        VALUES (%s)
-        """
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(query2, title)
-    return
 
 
 def rename_title(oldfilename, newfilename):
@@ -155,8 +157,8 @@ def check_title(title):
     """
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
     if title_res == None or len(title) >= 100:
-        return True
-    return False
+        return False
+    return True
 
 
 def check_edit_page_permission():

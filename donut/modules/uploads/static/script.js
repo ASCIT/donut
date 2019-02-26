@@ -11,9 +11,7 @@ function load() {
     url: '/uploads/_send_page',
     type: 'GET',
     data:{url:url},
-    success: function(data) {
-    convert(data)
-    }
+    success: convert
   });
 }
 

@@ -1,4 +1,8 @@
-var TITLE_CUTOFF = 20;
+var old_title;
+let KEEP_PAGE_ALIVE_TIME = 60*1000;
+$(function() {
+  old_title = $('#text_title').val();
+});
 
 // Creates html
 function preview() {
@@ -10,27 +14,30 @@ function preview() {
       html = converter.makeHtml(text);
   target.html(html);
   target_title.html(title);
-
 }
+$('#runBtn').click(preview);
 
 // Changes the title of a file
-function change_title(oldTitle){
+function change_title(){
   var title = $('#text_title').val();
   var text = $('#source').val();
+  console.log(old_title);
   $.ajax({
     url: '/pages/_change_title',
     type: 'POST',
     data:{title:title, 
-          old_title:oldTitle, 
+          old_title:old_title, 
           input_text:text},
     success: function(data) {
       window.alert("Title Change Sucessfully");
+      old_title = title;
     },
     error: function(data) {
       window.alert("Please enter a valid title!");
     }
   });
 }
+$('#change_title').click(change_title);
 
 //###########
 
@@ -47,7 +54,8 @@ function modHighlightedString(string1, string2)
 }
 
 // All markdown related functions
-function insert_heading(size){
+function insert_heading(event){
+  var size = event.data.size;
   var string = "";
   for(var i = 0; i < size; i++)
   {
@@ -55,30 +63,39 @@ function insert_heading(size){
   }
   modHighlightedString(string, string + "Heading_title" + string+ "\n");
 }
+for (var i = 1; i<8; i++) {
+  $('#heading'+String(i)).click({size:i}, insert_heading);
+}
 
 function insert_italic(){
   modHighlightedString("*", "*italicText*");
 }
+$('#italicize').click(insert_italic);
 
 function insert_bold(){
   modHighlightedString("**", "**boldText**");
 }
+$('#bold').click(insert_bold);
 
 function insert_link(){
   insert("[Link title](example.com)", false);
 }
+$('#link').click(insert_link);
 
 function insert_image(){
   insert("![Alt text](url/to/image)", false);
 }
+$('#image').click(insert_image);
 
 function insert_ulist(){
   insert("* list \n", false);
 }
+$('#ulist').click(insert_ulist);
 
 function insert_olist(){
   insert("1. list \n", false);
 }
+$('#olist').click(insert_olist);
 
 
 function insert(string, selected){
@@ -113,7 +130,6 @@ function insert(string, selected){
 // Saves the page created
 function save(){
   // Construct the html and get the info needed
-  var target = $("#preview");
   var text = $("#source").val();
   var title = $('#text_title').val();
   // Checking for valid titles
@@ -124,7 +140,7 @@ function save(){
   }
   
   $.ajax({
-    url: $SCRIPT_ROOT+'/pages/_check_errors',
+    url: '/pages/_check_errors',
     type: 'POST',
     data:{markdown:text, title:title},
     success: function(data) {
@@ -138,7 +154,7 @@ function save(){
         }
         if (res){
           $.ajax({
-            url: $SCRIPT_ROOT+'/pages/_save',
+            url: '/pages/_save',
             type: 'POST',
             data:{markdown:text, title:title},
             success: function(data) {
@@ -158,6 +174,7 @@ function save(){
     }
   });
 }
+$('#save').click(save);
 
 // Sends a request to the server to keep the lock alive every minute. 
 setInterval(function(){
@@ -167,16 +184,14 @@ setInterval(function(){
     type: 'POST',
     data:{title:title},
  });
-}, 60*1000);
-
+}, KEEP_PAGE_ALIVE_TIME);
 
 window.addEventListener("beforeunload", function (e) {
-  e.preventDefault();
   var title = $('#text_title').val();
+  var url = "{{ url_for('editor.close_page') }}";
   $.ajax({
-    url: $SCRIPT_ROOT+'/pages/_close_page',
+    url: "/pages/_close_page",
     type: 'POST',
     data:{title:title},
   });
-  return "sure?";
 });
