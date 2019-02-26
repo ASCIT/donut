@@ -13,7 +13,9 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
-from donut.modules import account, auth, marketplace, core, directory_search, editor, groups, rooms, uploads, voting
+from donut.modules import account, auth, marketplace, core, courses, directory_search, editor, groups, rooms, uploads, voting
+from donut.modules import account, auth, marketplace, core, courses, directory_search, groups, rooms, voting
+
 app = flask.Flask(__name__)
 
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -23,6 +25,7 @@ app.register_blueprint(account.blueprint)
 app.register_blueprint(auth.blueprint)
 app.register_blueprint(marketplace.blueprint)
 app.register_blueprint(core.blueprint)
+app.register_blueprint(courses.blueprint)
 app.register_blueprint(directory_search.blueprint)
 app.register_blueprint(groups.blueprint)
 app.register_blueprint(editor.blueprint)
@@ -61,8 +64,6 @@ def init(environment_name):
     app.config["DB_NAME"] = environment.db_name
     app.config["UPLOAD_WEBPAGES"] = 'modules/uploads/uploaded_files/pages'
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
-
-    app.config["EXISTING_LIST"] = 'modules/editor/static'
     # Maximum file upload size, in bytes.
     app.config["MAX_CONTENT_LENGTH"] = constants.MAX_CONTENT_LENGTH
 

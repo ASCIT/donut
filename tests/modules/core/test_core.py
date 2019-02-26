@@ -41,10 +41,6 @@ def test_get_group_list_of_member(client):
         "control": 0,
         "group_id": 1,
         "group_name": "Donut Devteam"
-    }, {
-        'control': 0,
-        'group_id': 4,
-        'group_name': 'BoC'
     }]
     assert get_group_list_of_member(2) == [{
         "control": 0,
@@ -58,14 +54,6 @@ def test_get_group_list_of_member(client):
         "control": 0,
         "group_id": 3,
         "group_name": "IHC"
-    }, {
-        'control': 0,
-        'group_id': 4,
-        'group_name': 'BoC'
-    }, {
-        'control': 0,
-        'group_id': 5,
-        'group_name': 'CRC'
     }]
 
 

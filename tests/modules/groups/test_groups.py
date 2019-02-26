@@ -19,10 +19,6 @@ group = {
 def test_get_group_list_data(client):
     assert helpers.get_group_list_data(["not_a_real_field"]) == "Invalid field"
     assert helpers.get_group_list_data(["group_name"]) == [{
-        'group_name': 'BoC'
-    }, {
-        'group_name': 'CRC'
-    }, {
         "group_name":
         "Donut Devteam"
     }, {
@@ -31,10 +27,9 @@ def test_get_group_list_data(client):
         "group_name":
         "Ruddock House"
     }]
-
     assert helpers.get_group_list_data()[0] == group
     assert helpers.get_group_list_data(None, {"group_id": 1})[0] == group
-    assert helpers.get_group_list_data(None, {"group_id": 6}) == []
+    assert helpers.get_group_list_data(None, {"group_id": 4}) == []
 
 
 def test_get_members_by_group(client):
@@ -53,7 +48,7 @@ def test_get_group_positions_data(client):
         "pos_id": 2,
         "pos_name": "Secretary"
     }]
-    assert helpers.get_group_positions(6) == []
+    assert helpers.get_group_positions(4) == []
 
 
 def test_get_position_holders(client):
@@ -77,11 +72,11 @@ def test_get_positions_held(client):
     assert 4 in res and 5 in res
 
     res = helpers.get_positions_held(2)
-    assert len(res) == 5
+    assert len(res) == 3
     assert 1 in res and 4 in res and 5 in res
 
     res = helpers.get_positions_held(1)
-    assert len(res) == 2
+    assert len(res) == 1
     assert 1 in res
 
     res = helpers.get_positions_held(-1)
@@ -115,7 +110,7 @@ def test_get_position_data(client):
         "start_date": None,
         "end_date": None
     } in res
-    assert len(res) == 11
+    assert len(res) == 7
 
 
 def test_delete_position(client):
@@ -134,7 +129,7 @@ def test_delete_position(client):
 
 
 def test_get_group_data(client):
-    assert helpers.get_group_data(6) == {}
+    assert helpers.get_group_data(4) == {}
     assert helpers.get_group_data(1, ["not_a_real_field"]) == "Invalid field"
     assert helpers.get_group_data(1) == group
     assert helpers.get_group_data(1, ["group_name"]) == {
@@ -162,6 +157,34 @@ def test_create_pos_holders(client):
         "end_date":
         datetime.date(2019, 2, 22)
     }]
+
+
+def test_create_group(client):
+    group_id = helpers.create_group("Page House", "May the work be light",
+                                    "House", False, False, True, True, True)
+    assert helpers.get_group_data(group_id, [
+        "group_id", "group_name", "group_desc", "type", "anyone_can_send",
+        "members_can_send", "newsgroups", "visible", "admin_control_members"
+    ]) == {
+        "group_name": "Page House",
+        "group_desc": "May the work be light",
+        "type": "House",
+        "newsgroups": False,
+        "anyone_can_send": False,
+        "members_can_send": True,
+        "visible": True,
+        "admin_control_members": True,
+        "group_id": group_id
+    }
+
+    # check that a new position with name "Member" was created
+    assert helpers.get_group_positions(group_id) == [{
+        "pos_id": 6,
+        "pos_name": "Member"
+    }]
+    helpers.delete_group(group_id)
+    assert helpers.get_group_data(group_id) == {}
+    assert helpers.get_group_positions(group_id) == []
 
 
 # Test Routes
