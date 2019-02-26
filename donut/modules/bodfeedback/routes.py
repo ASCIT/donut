@@ -33,14 +33,15 @@ def bodfeedback_submit():
     complaint_id = helpers.register_complaint(data)
     flask.flash(
         Markup('Success (you may want to save this link): <a href="' +
-            helpers.get_link(complaint_id) + '">View Complaint</a>'))
+               helpers.get_link(complaint_id) + '">View Complaint</a>'))
     return flask.redirect(flask.url_for('bodfeedback.bodfeedback'))
 
 
 # API endpoint with all visible data
-@blueprint.route('/1/bodfeedback/view/<uuid:id>')
+@blueprint.route('/1/bodfeedback/view/<id>')
 def bodfeedback_api_view_complaint(id):
     if not helpers.get_id(id):
+        bodfeedback()
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     # Pack all the data we need into a dict
@@ -48,7 +49,7 @@ def bodfeedback_api_view_complaint(id):
 
 
 # View a complaint
-@blueprint.route('/bodfeedback/view/<uuid:id>')
+@blueprint.route('/bodfeedback/view/<id>')
 def bodfeedback_view_complaint(id):
     if not helpers.get_id(id):
         return flask.render_template("404.html")
@@ -67,7 +68,7 @@ def bodfeedback_view_complaint(id):
 
 
 # Add a message to this post
-@blueprint.route('/1/bodfeedback/add/<uuid:id>', methods=['POST'])
+@blueprint.route('/1/bodfeedback/add/<id>', methods=['POST'])
 def bodfeedback_add_msg(id):
     complaint_id = helpers.get_id(id)
     if not complaint_id:
@@ -101,7 +102,7 @@ def bodfeedback_view_summary():
 
 
 # Mark a complaint read
-@blueprint.route('/1/bodfeedback/markRead/<uuid:id>')
+@blueprint.route('/1/bodfeedback/markRead/<id>')
 def bodfeedback_mark_read(id):
     # Authenticate
     if 'username' not in flask.session or not auth_utils.check_permission(
@@ -116,7 +117,7 @@ def bodfeedback_mark_read(id):
 
 
 # Mark a complaint unread
-@blueprint.route('/1/bodfeedback/markUnread/<uuid:id>')
+@blueprint.route('/1/bodfeedback/markUnread/<id>')
 def bodfeedback_mark_unread(id):
     # Authenticate
     if 'username' not in flask.session or not auth_utils.check_permission(
@@ -131,7 +132,7 @@ def bodfeedback_mark_unread(id):
 
 
 # Add an email to this complaint
-@blueprint.route('/1/bodfeedback/addEmail/<uuid:id>', methods=['POST'])
+@blueprint.route('/1/bodfeedback/addEmail/<id>', methods=['POST'])
 def bodfeedback_add_email(id):
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
@@ -150,7 +151,7 @@ def bodfeedback_add_email(id):
 
 
 # Remove an email from this complaint
-@blueprint.route('/1/bodfeedback/removeEmail/<uuid:id>', methods=['POST'])
+@blueprint.route('/1/bodfeedback/removeEmail/<id>', methods=['POST'])
 def bodfeedback_remove_email(id):
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], bod_permissions.ADD_REMOVE_EMAIL):
@@ -161,8 +162,7 @@ def bodfeedback_remove_email(id):
         flask.abort(400)
         return
     data = flask.request.form.getlist('emails')
-    if data:
-        for em in data:
-            helpers.remove_email(complaint_id, em)
+    for em in data:
+        helpers.remove_email(complaint_id, em)
     return flask.redirect(
         flask.url_for('bodfeedback.bodfeedback_view_complaint', id=id))

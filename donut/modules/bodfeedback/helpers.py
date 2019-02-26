@@ -24,17 +24,16 @@ def register_complaint(data, notification=True):
     # Register complaint
     query = """
     INSERT INTO bod_complaint_info (subject, status, uuid)
-    VALUES (%s, %s, UUID())
+    VALUES (%s, %s, UNHEX(REPLACE(UUID(), '-', '')))
     """
     status = 'new_msg'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (data['subject'], status))
-    complaint_id = cursor.lastrowid
+        complaint_id = cursor.lastrowid
     # Add email to db if applicable
     if data['email']:
-        emails = [x.strip() for x in data['email'].split(',')]
-        for e in emails:
-            add_email(complaint_id, e, False)
+        for email in data['email'].split(','):
+            add_email(complaint_id, email.strip(), False)
     # Add message to database
     add_msg(complaint_id, data['msg'], data['name'], notification)
     return complaint_id
@@ -50,13 +49,10 @@ def add_email(complaint_id, email, notification=True):
     INSERT INTO bod_complaint_emails (complaint_id, email)
     VALUES (%s, %s)
     """
-    try:
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(query, (complaint_id, email))
-        if notification:
-            send_update_email(email, complaint_id)
-    except pymysql.err.IntegrityError:
-        return False
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (complaint_id, email))
+    if notification:
+        send_update_email(email, complaint_id)
     return True
 
 
@@ -106,7 +102,7 @@ def get_link(complaint_id):
     '''
     Gets a (fully qualified) link to the view page for this complaint id
     '''
-    query = 'SELECT uuid FROM bod_complaint_info WHERE complaint_id = %s'
+    query = 'SELECT HEX(uuid) AS uuid FROM bod_complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
@@ -122,12 +118,12 @@ def get_id(uuid):
     Returns the complaint_id associated with a uuid
     or false if the uuid is not found
     '''
-    query = 'SELECT complaint_id FROM bod_complaint_info WHERE uuid = %s'
+    query = 'SELECT complaint_id FROM bod_complaint_info WHERE uuid = UNHEX(%s)'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, str(uuid))
+        cursor.execute(query, uuid)
         if not cursor.rowcount:
             return False
-    return cursor.fetchone()['complaint_id']
+        return cursor.fetchone()['complaint_id']
 
 
 def get_messages(complaint_id):
@@ -142,8 +138,6 @@ def get_messages(complaint_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
-    if not (res and 'message_id' in res[0]):
-        return None
     return res
 
 
@@ -178,9 +172,9 @@ def mark_read(complaint_id):
     Sets the status of this complaint to 'read'
     returns False if complaint_id is invalid
     '''
-    query = "UPDATE bod_complaint_info SET status = 'read' WHERE complaint_id = %s"
     if get_status(complaint_id) is None:
         return False
+    query = "UPDATE bod_complaint_info SET status = 'read' WHERE complaint_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -190,9 +184,9 @@ def mark_unread(complaint_id):
     Sets the status of this complaint to 'new_msg'
     returns False if complaint_id is invalid
     '''
-    query = "UPDATE bod_complaint_info SET status = 'new_msg' WHERE complaint_id = %s"
     if get_status(complaint_id) is None:
         return False
+    query = "UPDATE bod_complaint_info SET status = 'new_msg' WHERE complaint_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -214,13 +208,15 @@ def get_all_fields(complaint_id):
     Returns a dict with emails, messages, subject, status
     Returns None if complaint_id is invalid
     '''
+    if not get_subject(complaint_id):
+        return None
     data = {
         'emails': get_emails(complaint_id),
         'messages': get_messages(complaint_id),
         'subject': get_subject(complaint_id),
         'status': get_status(complaint_id)
     }
-    return data if data['subject'] else None
+    return data
 
 
 def get_new_posts():
