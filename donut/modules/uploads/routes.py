@@ -1,5 +1,4 @@
 import flask
-#import json
 import os
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
@@ -16,7 +15,7 @@ def display(url):
     return flask.render_template(
         'page.html',
         title=url.replace('_', ' '),
-        permissions=(helpers.check_upload_permission()))
+        permissions=helpers.check_upload_permission())
 
 
 @blueprint.route('/uploads/_send_page', methods=['GET'])
@@ -107,4 +106,4 @@ def uploaded_list():
     return flask.render_template(
         'uploaded_list.html',
         links=links,
-        permissions=(helpers.check_upload_permission()))
+        permissions=helpers.check_upload_permission())

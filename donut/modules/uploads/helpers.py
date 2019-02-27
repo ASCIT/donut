@@ -86,7 +86,7 @@ def get_links():
     processed_links = []
     for link in links:
         filename = os.path.basename(link)
-        if '.' in filename and filename != '':
+        if '.' in filename:
             processed_links.append((flask.url_for(
                 'uploads.uploaded_file', filename=filename), filename))
     return processed_links

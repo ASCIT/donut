@@ -1,4 +1,4 @@
-function upload(){
+$('#submit_btn').on('click', function() {
   var form_data = new FormData($('#upload-file')[0]);
   $.ajax({
       url: '/uploads/_check_valid_file',
@@ -28,8 +28,6 @@ function upload(){
                 window.alert("Please enter a valid title");
               }
             });
-          } else {
-            return false;
           } 
         } else {
           window.alert(data.error);
@@ -40,5 +38,5 @@ function upload(){
       }
   });
   return false;
-}
+})
                                

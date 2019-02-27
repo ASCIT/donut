@@ -20,7 +20,7 @@ def editor():
         load_default = False
     if inputt == None:
         load_default = True
-    if not helpers.get_lock_status(
+    if not helpers.is_locked(
             title, load_default) and helpers.check_edit_page_permission():
         helpers.change_lock_status(title, True, load_default)
         return flask.render_template(
@@ -45,7 +45,8 @@ def keep_alive_page():
     Call to update the last access time for a page
     """
     title = flask.request.form['title']
-    helpers.change_lock_status(title, False)
+    if helpers.check_edit_page_permission():
+        helpers.change_lock_status(title, True)
     return ""
 
 
@@ -57,8 +58,7 @@ def change_title():
     title = flask.request.form['title']
     old_title = flask.request.form['old_title']
     input_text = flask.request.form['input_text']
-    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res != None and helpers.check_edit_page_permission():
+    if helpers.check_title(title) and helpers.check_edit_page_permission():
         helpers.rename_title(old_title, title)
         return flask.render_template('editor_page.html', input_text=input_text)
     return flask.abort(403)
@@ -72,8 +72,8 @@ def save():
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
     # Allows all numbers and characters. Allows ".", "_", "-"
-    markdown = markdown.replace('<', '')
-    markdown = markdown.replace('>', '')
+    markdown = markdown.replace('<', '&lt;')
+    markdown = markdown.replace('>', '&gt;')
     if helpers.check_edit_page_permission():
         helpers.write_markdown(markdown, title)
         return flask.jsonify({
@@ -91,10 +91,9 @@ def check_errors():
     title = flask.request.form['title']
     if helpers.check_duplicate(title):
         return flask.jsonify({'error': "Duplicate title"})
-    elif helpers.check_title(title):
+    if not helpers.check_title(title):
         return flask.jsonify({'error': "Invalid Title"})
-    else:
-        return flask.jsonify({'error': ""})
+    return flask.jsonify({'error': ""})
 
 
 @blueprint.route('/pages/_delete')
@@ -119,4 +118,4 @@ def created_list():
     return flask.render_template(
         'created_list.html',
         links=links,
-        permissions=(helpers.check_edit_page_permission()))
+        permissions=helpers.check_edit_page_permission())
