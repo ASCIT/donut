@@ -14,26 +14,36 @@ def change_lock_status(title, new_lock_status, default=False, forced=False):
     """
     if default:
         return
+    #if this function is called from
+    # is_locked due to the page being expired...
+    if forced:
+        update_lock_query(title, new_lock_status)
+        return
     # This is mainly because there were pages already created that weren't in
     # the database.
     create_page_in_database(title)
     uid = auth_utils.get_user_id(flask.session['username'])
     query = """ SELECT last_edit_uid FROM webpage_files_locks WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (title))
+        cursor.execute(query, title)
         res = cursor.fetchone()
     # If the page isn't locked before OR if the last user who edited this
-    # Is the same person OR if this function is called from
-    # is_locked due to the page being expired...
-    if forced or not is_locked(title) or res['last_edit_uid'] == uid:
-        query = """
-        UPDATE webpage_files_locks SET locked = %s, last_edit_time = NOW(), last_edit_uid = %s WHERE title = %s
-        """
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(query,
-                           (new_lock_status,
-                            auth_utils.get_user_id(flask.session['username']),
-                            title))
+    # Is the same person
+    if not is_locked(title) or res['last_edit_uid'] == uid:
+        update_lock_query(title, new_lock_status)
+
+
+def update_lock_query(title, new_lock_status):
+    """
+    Query for updating lock status
+    """
+    query = """
+    UPDATE webpage_files_locks SET locked = %s, last_edit_time = NOW(), last_edit_uid = %s WHERE title = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(
+            query, (new_lock_status,
+                    auth_utils.get_user_id(flask.session['username']), title))
 
 
 def is_locked(title, default=False):
@@ -41,12 +51,13 @@ def is_locked(title, default=False):
     Gets the edit lock status of the current request page. 
     If we are landing in the default page, automatically return True
     """
+    # In seconds
     TIMEOUT = 60 * 3
     if default:
         return False
     create_page_in_database(title)
     query = """
-    SELECT locked, NOW() - last_edit_time as expired FROM webpage_files_locks WHERE title = %s
+    SELECT locked, TIMESTAMPDIFF(SECOND, last_edit_time, NOW()) as expired FROM webpage_files_locks WHERE title = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
@@ -62,6 +73,10 @@ def is_locked(title, default=False):
 
 
 def create_page_in_database(title):
+    """
+    There are some pages that exist but do not have entries in the 
+    database. 
+    """
     query = """
     INSERT INTO webpage_files_locks (title) VALUES (%s) ON DUPLICATE KEY UPDATE locked = locked
     """
@@ -153,12 +168,11 @@ def check_duplicate(filename):
 
 def check_title(title):
     """
-    Makes sure the title is valid
+    Makes sure the title is valid,
+    Allows all numbers and characters. Allows ".", "_", "-"
     """
     title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
-    if title_res == None or len(title) >= 100:
-        return False
-    return True
+    return title_res != None and len(title) < 100
 
 
 def check_edit_page_permission():
@@ -170,10 +184,10 @@ def check_edit_page_permission():
 
 
 def write_markdown(markdown, title):
-    '''
-        Creates an html file that was just created,
-        as well as the routes for flask
-    '''
+    """
+    Creates an html file that was just created,
+    as well as the routes for flask
+    """
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_WEBPAGES"])
 

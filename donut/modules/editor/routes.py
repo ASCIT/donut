@@ -71,7 +71,6 @@ def save():
     '''
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-    # Allows all numbers and characters. Allows ".", "_", "-"
     markdown = markdown.replace('<', '&lt;')
     markdown = markdown.replace('>', '&gt;')
     if helpers.check_edit_page_permission():

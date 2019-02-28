@@ -17,7 +17,6 @@ def read_page(url):
     path = os.path.join(root, url + '.md')
     if not os.path.isfile(path):
         return None
-
     with open(path) as f:
         return f.read()
 
