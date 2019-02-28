@@ -1,7 +1,20 @@
 var old_title;
+// In milli
 let KEEP_PAGE_ALIVE_TIME = 60*1000;
-$(function() {
+$(function() {	
   old_title = $('#text_title').val();
+  $('#runBtn').click(preview);
+  $('#change_title').click(change_title);
+  for (var i = 1; i <= 6; i++) {
+    $('#heading'+String(i)).click({size:i}, insert_heading);
+  }
+  $('#italicize').click(insert_italic);
+  $('#bold').click(insert_bold);
+  $('#link').click(insert_link);
+  $('#image').click(insert_image);
+  $('#ulist').click(insert_ulist);
+  $('#olist').click(insert_olist);
+  $('#save').click(save);
 });
 
 // Creates html
@@ -15,13 +28,11 @@ function preview() {
   target.html(html);
   target_title.html(title);
 }
-$('#runBtn').click(preview);
 
 // Changes the title of a file
 function change_title(){
   var title = $('#text_title').val();
   var text = $('#source').val();
-  console.log(old_title);
   $.ajax({
     url: '/pages/_change_title',
     type: 'POST',
@@ -37,7 +48,6 @@ function change_title(){
     }
   });
 }
-$('#change_title').click(change_title);
 
 //###########
 
@@ -63,39 +73,30 @@ function insert_heading(event){
   }
   modHighlightedString(string, string + "Heading_title" + string+ "\n");
 }
-for (var i = 1; i<8; i++) {
-  $('#heading'+String(i)).click({size:i}, insert_heading);
-}
 
 function insert_italic(){
   modHighlightedString("*", "*italicText*");
 }
-$('#italicize').click(insert_italic);
 
 function insert_bold(){
   modHighlightedString("**", "**boldText**");
 }
-$('#bold').click(insert_bold);
 
 function insert_link(){
   insert("[Link title](example.com)", false);
 }
-$('#link').click(insert_link);
 
 function insert_image(){
   insert("![Alt text](url/to/image)", false);
 }
-$('#image').click(insert_image);
 
 function insert_ulist(){
   insert("* list \n", false);
 }
-$('#ulist').click(insert_ulist);
 
 function insert_olist(){
   insert("1. list \n", false);
 }
-$('#olist').click(insert_olist);
 
 
 function insert(string, selected){
@@ -136,9 +137,8 @@ function save(){
   if (title === '')
   {
     window.alert("Enter a title for your new page!");
-    return false;
+    return;
   }
-  
   $.ajax({
     url: '/pages/_check_errors',
     type: 'POST',
@@ -174,7 +174,6 @@ function save(){
     }
   });
 }
-$('#save').click(save);
 
 // Sends a request to the server to keep the lock alive every minute. 
 setInterval(function(){
@@ -186,9 +185,8 @@ setInterval(function(){
  });
 }, KEEP_PAGE_ALIVE_TIME);
 
-window.addEventListener("beforeunload", function (e) {
+window.addEventListener("beforeunload", function () {
   var title = $('#text_title').val();
-  var url = "{{ url_for('editor.close_page') }}";
   $.ajax({
     url: "/pages/_close_page",
     type: 'POST',

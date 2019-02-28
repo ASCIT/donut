@@ -2,6 +2,7 @@ import flask
 import os
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
+from donut.modules.editor import helpers as editor_helpers
 
 
 @blueprint.route('/lib/<path:url>')
@@ -18,14 +19,13 @@ def display(url):
         permissions=helpers.check_upload_permission())
 
 
-@blueprint.route('/uploads/_send_page', methods=['GET'])
+@blueprint.route('/uploads/_send_page')
 def get_page():
     '''
     Sends the page to frontend.
     '''
     url = flask.request.args.get('url')
-    page = helpers.read_page(url.replace(' ', '_'))
-    return page
+    return helpers.read_page(url.replace(' ', '_'))
 
 
 @blueprint.route('/uploads', methods=['GET'])
@@ -45,7 +45,7 @@ def upload_file():
     Handles the uploading of the file
     '''
     if 'file' not in flask.request.files:
-        return flask.abort(500)
+        flask.abort(500)
     file = flask.request.files['file']
     filename = secure_filename(file.filename)
     uploads = os.path.join(flask.current_app.root_path,
@@ -58,7 +58,7 @@ def upload_file():
             flask.url_for('uploads.uploaded_file', filename=filename)
         })
     else:
-        return flask.abort(403)
+        flask.abort(403)
 
 
 @blueprint.route('/uploads/_check_valid_file', methods=['POST'])
@@ -105,5 +105,19 @@ def uploaded_list():
     links = helpers.get_links()
     return flask.render_template(
         'uploaded_list.html',
+        delete_file_endpoint='uploads.delete_uploaded_file',
         links=links,
         permissions=helpers.check_upload_permission())
+
+
+@blueprint.route('/pages/list_of_pages')
+def page_list():
+    '''
+    Returns a list of all created pages
+    '''
+    links = editor_helpers.get_links()
+    return flask.render_template(
+        'uploaded_list.html',
+        delete_file_endpoint="editor.delete_page",
+        links=links,
+        permissions=editor_helpers.check_edit_page_permission())

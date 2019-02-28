@@ -14,7 +14,6 @@ import os
 
 def test_plain_editor_page(client):
     assert client.get(flask.url_for('editor.editor')).status_code == 403
-    assert client.get(flask.url_for('editor.created_list')).status_code == 200
 
 
 def test_text_editor_page(client):
@@ -24,11 +23,11 @@ def test_text_editor_page(client):
 
 def test_path_related_funciton(client):
     helpers.remove_link("TEST TITLE")
-    helpers.remove_link("ANOTHER TITLE")
+    helpers.remove_link("ANOTHER Title")
     links = helpers.get_links()
-    titles = [title for _, title in links]
+    titles = [title for title, _ in links.items()]
     assert "TEST TITLE" not in ' '.join(titles)
-    assert "ANOTHER TITLE" not in ' '.join(titles)
+    assert "ANOTHER Title" not in ' '.join(titles)
 
     helpers.write_markdown("BLAHBLAH", "TEST TITLE")
     root = os.path.join(flask.current_app.root_path,
@@ -39,20 +38,24 @@ def test_path_related_funciton(client):
     assert not helpers.check_duplicate("doesnt exist")
 
     links = helpers.get_links()
-    titles = [title for _, title in links]
+    titles = [title for title, _ in links.items()]
     assert "TEST TITLE" in ' '.join(titles)
+    with app.test_request_context():
+        flask.session['username'] = 'dqu'
+
+        helpers.change_lock_status("TEST TITLE", False)
+        assert not helpers.is_locked("TEST TITiLE")
 
     client.get(
-        flask.url_for('uploads.display', url="TEST TITLE")).status_code == 403
-    helpers.rename_title('TEST_TITLE', 'ANOTHER_TITLE')
+        flask.url_for('uploads.display', url="TEST_TITLE")).status_code == 200
+    helpers.rename_title('TEST_TITLE', 'ANOTHER_Title')
 
     links = helpers.get_links()
-    titles = [title for _, title in links]
+    titles = [title for title, _ in links.items()]
     assert "TEST TITLE" not in ' '.join(titles)
-    assert "ANOTHER TITLE" in ' '.join(titles)
+    assert "ANOTHER Title" in ' '.join(titles)
 
     client.get(flask.url_for('uploads.display',
-                             url="ANOTHER TITLE")).status_code == 403
-    assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_TITLE')
-
-    helpers.remove_link("ANOTHER_TITLE")
+                             url="ANOTHER Title")).status_code == 200
+    assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_Title')
+    helpers.remove_link("ANOTHER_Title")

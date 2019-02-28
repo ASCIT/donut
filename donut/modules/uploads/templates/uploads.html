@@ -1,10 +1,7 @@
 {% extends "layout.html" %}
 {% block scripts %}
   {{super()}}
-  <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}} type="text/javascript"></script>
-  <script type="text/javascript">
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
+  <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}}></script>
 {% endblock %}
 {% block page %}
 <div class="container">
@@ -17,15 +14,20 @@
           <a href="{{ url_for('uploads.uploaded_list') }}">here</a>.
         </p>
         <p>
-          If you are uploading a file with the same name, you may need to refresh the page before seeing
+          You can upload txt, doc, docx, pdf, gif, png, and jpg files. 
+          They must be smaller than 10 MB. 
+        </p>
+        <p>
+          If you are uploading a file with the same name, 
+	  you may need to refresh the page before seeing
           the new file. 
         </p>
       </div>
-        <form id="upload-file" method="post" enctype="multipart/form-data">
-          <label for="file">Select a file</label>
-          <input id="file" name="file" type="file"/>
-          <button id="submit_btn">Upload</button>
-        </form>
+      <form id="upload-file" method="post" enctype="multipart/form-data">
+        <label for="file">Select a file</label>
+        <input id="file" name="file" type="file"/>
+        <button id="submit_btn">Upload</button>
+      </form>
     </div>
   </div>
 </div>

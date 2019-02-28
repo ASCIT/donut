@@ -8,18 +8,17 @@
   <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">List of Uploaded Pages</h1>
-      <div id = "content" style="font-size:21px;font-weight:200;
-        margin-bottom:15px;">
+      <div id = "content">
         <table class = "table">
           <tr>
             <th>File name</th>
             <th> </th>
           </tr>
-          {% for link, name in links %}
+          {% for name, link in links.items() %}
             <tr>
               <td><a href= "{{ link }}">{{name}}</a></td>
               {% if permissions%}
-                <td><a href= "{{ url_for('uploads.delete_uploaded_file', filename=name)}}">Delete</td>
+                <td><a href= "{{ url_for(delete_file_endpoint, filename=name)}}">Delete</td>
               {% endif %}
             </tr>
           {% endfor %}

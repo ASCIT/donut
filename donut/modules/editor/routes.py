@@ -5,13 +5,13 @@ import re
 from donut.modules.editor import blueprint, helpers
 
 
-@blueprint.route('/editor', methods=['GET', 'POST'])
+@blueprint.route('/editor', methods=['GET'])
 def editor():
     '''
     Returns the editor page where users can create and edit
     existing pages
     '''
-    input_text = "Hello world"
+    input_text = ""
     title = "TITLE"
     inputt = flask.request.args.get('title')
     if inputt != None:
@@ -20,13 +20,13 @@ def editor():
         load_default = False
     if inputt == None:
         load_default = True
-    if not helpers.is_locked(
-            title, load_default) and helpers.check_edit_page_permission():
-        helpers.change_lock_status(title, True, load_default)
-        return flask.render_template(
-            'editor_page.html', input_text=input_text, title=title)
-    else:
+    if helpers.is_locked(
+            title, load_default) or not helpers.check_edit_page_permission():
         return flask.abort(403)
+
+    helpers.change_lock_status(title, True, load_default)
+    return flask.render_template(
+        'editor_page.html', input_text=input_text, title=title)
 
 
 @blueprint.route('/pages/_close_page', methods=['POST'])
@@ -71,9 +71,7 @@ def save():
     '''
     markdown = flask.request.form['markdown']
     title = flask.request.form['title']
-    # Allows all numbers and characters. Allows ".", "_", "-"
-    markdown = markdown.replace('<', '&lt;')
-    markdown = markdown.replace('>', '&gt;')
+    markdown = markdown.replace('<', '&lt;').replace('>', '&gt;')
     if helpers.check_edit_page_permission():
         helpers.write_markdown(markdown, title)
         return flask.jsonify({
@@ -105,17 +103,4 @@ def delete_page():
     if filename != None and helpers.check_edit_page_permission():
         helpers.remove_link(filename)
 
-    return flask.redirect(flask.url_for('editor.created_list'))
-
-
-@blueprint.route('/pages/list_of_pages')
-def created_list():
-    '''
-    Returns a list of all created pages
-    '''
-
-    links = helpers.get_links()
-    return flask.render_template(
-        'created_list.html',
-        links=links,
-        permissions=helpers.check_edit_page_permission())
+    return flask.redirect(flask.url_for('uploads.page_list'))

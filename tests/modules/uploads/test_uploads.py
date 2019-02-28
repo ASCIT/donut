@@ -18,6 +18,7 @@ def test_routes(client):
     assert client.get(flask.url_for('uploads.uploads')).status_code == 403
     assert client.get(
         flask.url_for('uploads.uploaded_list')).status_code == 200
+    assert client.get(flask.url_for('uploads.page_list')).status_code == 200
 
 
 def test_get_links(client):
@@ -25,8 +26,7 @@ def test_get_links(client):
     helpers.remove_link("SOME_TITLE")
     links = helpers.get_links()
     titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for title, _ in links.items()]
     assert "SOME_TITLE" not in ''.join(titles)
 
     path = os.path.join(flask.current_app.root_path,
@@ -36,7 +36,7 @@ def test_get_links(client):
     f = open(path, "w+")
     f.close()
     links = helpers.get_links()
-    titles = [title for _, title in links]
+    titles = [title for title, _ in links.items()]
     assert "SOME.title" in ''.join(titles)
 
     editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
@@ -47,8 +47,7 @@ def test_get_links(client):
     helpers.remove_link("SOME.title.jpg")
     links = helpers.get_links()
     titles = []
-    for (discard, title) in links:
-        titles.append(title)
+    titles = [title for title, _ in links.items()]
     assert "SOME.title" not in ''.join(titles)
 
 
