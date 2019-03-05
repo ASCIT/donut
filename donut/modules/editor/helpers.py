@@ -149,6 +149,9 @@ def remove_link(filename):
         name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
         if filename == name:
             os.remove(i)
+    query = """DELETE FROM webpage_files_locks WHERE title = %s"""
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, filename)
 
 
 def check_duplicate(filename):
