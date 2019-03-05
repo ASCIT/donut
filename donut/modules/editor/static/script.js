@@ -138,7 +138,7 @@ function save(){
   if (title === '')
   {
     window.alert("Enter a title for your new page!");
-    return false;
+    return;
   }
   $.ajax({
     url: '/pages/_check_errors',

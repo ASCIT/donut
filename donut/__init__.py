@@ -17,7 +17,6 @@ from donut.modules import account, auth, marketplace, core, courses, directory_s
 from donut.modules import account, auth, marketplace, core, courses, directory_search, groups, rooms, voting
 
 app = flask.Flask(__name__)
-
 Bootstrap(app)  # enable Bootstrap in Flask
 
 # Load blueprint modules
