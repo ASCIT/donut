@@ -15,6 +15,4 @@ function load() {
   });
 }
 
-$(function() {
-  load();
-})
+$(load);

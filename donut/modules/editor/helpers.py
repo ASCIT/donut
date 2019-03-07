@@ -5,6 +5,8 @@ import re
 import pymysql.cursors
 from donut import auth_utils
 from donut.modules.editor.edit_permission import EditPermission
+# In seconds
+TIMEOUT = 60 * 3
 
 
 def change_lock_status(title, new_lock_status, default=False, forced=False):
@@ -51,8 +53,6 @@ def is_locked(title, default=False):
     Gets the edit lock status of the current request page. 
     If we are landing in the default page, automatically return True
     """
-    # In seconds
-    TIMEOUT = 60 * 3
     if default:
         return False
     create_page_in_database(title)
@@ -66,7 +66,7 @@ def is_locked(title, default=False):
     # Locking the file times out after 3 minutes (since we are
     # updating the last access time every 1 minute, and we generously account for
     # some lag ).
-    if res['expired'] >= TIMEOUT:
+    if res == None or res['expired'] >= TIMEOUT:
         change_lock_status(title, False, forced=True)
         return False
     return res['locked']
@@ -82,22 +82,24 @@ def create_page_in_database(title):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
-        res = cursor.fetchone()
 
 
-def rename_title(oldfilename, newfilename):
+def rename_title(old_filename, new_filename):
     """
     Changes the file name of an html file
     Need to look for paths
     """
-    oldpath = os.path.join(flask.current_app.root_path,
-                           flask.current_app.config["UPLOAD_WEBPAGES"],
-                           oldfilename + '.md')
-    newpath = os.path.join(flask.current_app.root_path,
-                           flask.current_app.config["UPLOAD_WEBPAGES"],
-                           newfilename + '.md')
-    if os.path.exists(oldpath) and not os.path.exists(newfilename):
-        os.rename(oldpath, newpath)
+    old_path = os.path.join(flask.current_app.root_path,
+                            flask.current_app.config["UPLOAD_WEBPAGES"],
+                            old_filename + '.md')
+    new_path = os.path.join(flask.current_app.root_path,
+                            flask.current_app.config["UPLOAD_WEBPAGES"],
+                            new_filename + '.md')
+
+    remove_file_from_db(old_filename)
+
+    if os.path.exists(old_path) and not os.path.exists(new_filename):
+        os.rename(old_path, new_path)
 
 
 def read_markdown(name):
@@ -107,8 +109,8 @@ def read_markdown(name):
 
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
-    curFile = read_file(os.path.join(path, name + '.md'))
-    return curFile
+    cur_file = read_file(os.path.join(path, name + '.md'))
+    return cur_file
 
 
 def read_file(path):
@@ -129,12 +131,12 @@ def get_links():
     root = os.path.join(flask.current_app.root_path,
                         flask.current_app.config["UPLOAD_WEBPAGES"])
     links = glob.glob(root + '/*')
-    results = []
-    for filenames in links:
-        filenames = filenames.replace(root + '/',
-                                      '').replace('.md', '').replace('_', ' ')
-        link = flask.url_for('uploads.display', url=filenames)
-        results.append((link, filenames))
+    results = {}
+    for filename in links:
+        filename = filename.replace(root + '/', '').replace('.md', '').replace(
+            '_', ' ')
+        link = flask.url_for('uploads.display', url=filename)
+        results[filename] = link
     return results
 
 
@@ -142,6 +144,7 @@ def remove_link(filename):
     '''
     Get rid of matching filenames
     '''
+    filename = filename.replace("_", " ")
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
     links = glob.glob(path + '/*')
@@ -149,6 +152,19 @@ def remove_link(filename):
         name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
         if filename == name:
             os.remove(i)
+    remove_file_from_db(filename)
+
+
+def get_glob():
+    path = os.path.join(flask.current_app.root_path,
+                        flask.current_app.config['UPLOAD_WEBPAGES'])
+    return glob.glob(path + '/*')
+
+
+def remove_file_from_db(filename):
+    """
+    Removes the information for a file from the db
+    """
     query = """DELETE FROM webpage_files_locks WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, filename)
@@ -174,7 +190,7 @@ def check_title(title):
     Makes sure the title is valid,
     Allows all numbers and characters. Allows ".", "_", "-"
     """
-    title_res = re.match("^[0-9a-zA-Z.\/_\- ]*$", title)
+    title_res = re.match(r'^[0-9a-zA-Z./\-_: ]*$', title)
     return title_res != None and len(title) < 100
 
 

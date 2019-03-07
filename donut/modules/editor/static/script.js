@@ -5,7 +5,7 @@ $(function() {
   old_title = $('#text_title').val();
   $('#runBtn').click(preview);
   $('#change_title').click(change_title);
-  for (var i = 1; i<7; i++) {
+  for (var i = 1; i <= 6; i++) {
     $('#heading'+String(i)).click({size:i}, insert_heading);
   }
   $('#italicize').click(insert_italic);
@@ -33,7 +33,6 @@ function preview() {
 function change_title(){
   var title = $('#text_title').val();
   var text = $('#source').val();
-  console.log(old_title);
   $.ajax({
     url: '/pages/_change_title',
     type: 'POST',
@@ -186,9 +185,8 @@ setInterval(function(){
  });
 }, KEEP_PAGE_ALIVE_TIME);
 
-window.addEventListener("beforeunload", function (e) {
+window.addEventListener("beforeunload", function () {
   var title = $('#text_title').val();
-  var url = "{{ url_for('editor.close_page') }}";
   $.ajax({
     url: "/pages/_close_page",
     type: 'POST',

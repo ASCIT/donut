@@ -1,10 +1,7 @@
 {% extends "layout.html" %}
 {% block scripts %}
   {{super()}}
-  <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}} type="text/javascript"></script>
-  <script type="text/javascript">
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  </script>
+  <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}}></script>
 {% endblock %}
 {% block page %}
 <div class="container">

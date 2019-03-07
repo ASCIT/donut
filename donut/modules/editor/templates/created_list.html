@@ -16,9 +16,11 @@
         <table class = "table">
           <tr>
             <th>Page name</th>
-            <th></th>
+            {% if permissions %}
+              <th></th>
+            {% endif %}
           </tr>
-          {% for link, name in links %}
+          {% for name, link in links.items() %}
             <tr>
               <td><a href= "{{ link }}">{{name}}</a></td>
               {% if permissions %}
