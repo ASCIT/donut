@@ -14,6 +14,7 @@ import os
 
 def test_plain_editor_page(client):
     assert client.get(flask.url_for('editor.editor')).status_code == 403
+    assert client.get(flask.url_for('editor.page_list')).status_code == 200
 
 
 def test_text_editor_page(client):

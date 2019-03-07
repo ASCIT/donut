@@ -26,7 +26,7 @@ function preview() {
       converter = new showdown.Converter({strikethrough: true}),
       html = converter.makeHtml(text);
   target.html(html);
-  target_title.html(title);
+  target_title.text(title);
 }
 
 // Changes the title of a file

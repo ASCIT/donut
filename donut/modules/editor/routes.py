@@ -103,4 +103,17 @@ def delete_page():
     if filename != None and helpers.check_edit_page_permission():
         helpers.remove_link(filename)
 
-    return flask.redirect(flask.url_for('uploads.page_list'))
+    return flask.redirect(flask.url_for('editor.page_list'))
+
+
+@blueprint.route('/pages/list_of_pages')
+def page_list():
+    '''
+    Returns a list of all created pages
+    '''
+    links = helpers.get_links()
+    return flask.render_template(
+        'uploaded_list.html',
+        delete_file_endpoint="editor.delete_page",
+        links=links,
+        permissions=helpers.check_edit_page_permission())

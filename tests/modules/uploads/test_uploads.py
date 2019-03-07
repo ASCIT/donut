@@ -18,7 +18,6 @@ def test_routes(client):
     assert client.get(flask.url_for('uploads.uploads')).status_code == 403
     assert client.get(
         flask.url_for('uploads.uploaded_list')).status_code == 200
-    assert client.get(flask.url_for('uploads.page_list')).status_code == 200
 
 
 def test_get_links(client):
