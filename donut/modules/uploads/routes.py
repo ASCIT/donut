@@ -2,7 +2,6 @@ import flask
 import os
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
-from donut.modules.editor import helpers as editor_helpers
 
 
 @blueprint.route('/lib/<path:url>')
@@ -108,16 +107,3 @@ def uploaded_list():
         delete_file_endpoint='uploads.delete_uploaded_file',
         links=links,
         permissions=helpers.check_upload_permission())
-
-
-@blueprint.route('/pages/list_of_pages')
-def page_list():
-    '''
-    Returns a list of all created pages
-    '''
-    links = editor_helpers.get_links()
-    return flask.render_template(
-        'uploaded_list.html',
-        delete_file_endpoint="editor.delete_page",
-        links=links,
-        permissions=editor_helpers.check_edit_page_permission())

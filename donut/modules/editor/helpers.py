@@ -190,8 +190,8 @@ def check_title(title):
     Makes sure the title is valid,
     Allows all numbers and characters. Allows ".", "_", "-"
     """
-    title_res = re.match(r'^[0-9a-zA-Z./\-_: ]*$', title)
-    return title_res != None and len(title) < 100
+    return len(title) < 100 and re.match(r'^[0-9a-zA-Z./\-_: ]*$',
+                                         title) != None
 
 
 def check_edit_page_permission():
