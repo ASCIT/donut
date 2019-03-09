@@ -25,7 +25,7 @@ def change_lock_status(title, new_lock_status, default=False, forced=False):
     # the database.
     create_page_in_database(title)
     uid = auth_utils.get_user_id(flask.session['username'])
-    query = """ SELECT last_edit_uid FROM webpage_files_locks WHERE title = %s"""
+    query = """SELECT last_edit_uid FROM webpage_files_locks WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
         res = cursor.fetchone()
@@ -56,6 +56,7 @@ def is_locked(title, default=False):
     if default:
         return False
     create_page_in_database(title)
+
     query = """
     SELECT locked, TIMESTAMPDIFF(SECOND, last_edit_time, NOW()) as expired FROM webpage_files_locks WHERE title = %s
     """
@@ -66,7 +67,7 @@ def is_locked(title, default=False):
     # Locking the file times out after 3 minutes (since we are
     # updating the last access time every 1 minute, and we generously account for
     # some lag ).
-    if res == None or res['expired'] >= TIMEOUT:
+    if res['expired'] >= TIMEOUT:
         change_lock_status(title, False, forced=True)
         return False
     return res['locked']
@@ -128,9 +129,7 @@ def get_links():
     '''
     Get links for all created webpages
     '''
-    root = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config["UPLOAD_WEBPAGES"])
-    links = glob.glob(root + '/*')
+    links, root = get_glob()
     results = {}
     for filename in links:
         filename = filename.replace(root + '/', '').replace('.md', '').replace(
@@ -145,9 +144,7 @@ def remove_link(filename):
     Get rid of matching filenames
     '''
     filename = filename.replace("_", " ")
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_WEBPAGES'])
-    links = glob.glob(path + '/*')
+    links, path = get_glob()
     for i in links:
         name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
         if filename == name:
@@ -156,9 +153,12 @@ def remove_link(filename):
 
 
 def get_glob():
+    """
+    Grabs the list of files from a preset path. 
+    """
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
-    return glob.glob(path + '/*')
+    return (glob.glob(path + '/*'), path)
 
 
 def remove_file_from_db(filename):
@@ -174,9 +174,7 @@ def check_duplicate(filename):
     """
     Check to see if there are duplicate file names
     """
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_WEBPAGES'])
-    links = glob.glob(path + '/*')
+    links, path = get_glob()
     filename = filename.replace(' ', '_')
     for i in links:
         name = i.replace(path + '/', '').replace('.md', '')
