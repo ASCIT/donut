@@ -132,8 +132,6 @@ def get_links():
     links, root = get_glob()
     results = {}
     for filename in links:
-        filename = filename.replace(root + '/', '').replace('.md', '').replace(
-            '_', ' ')
         link = flask.url_for('uploads.display', url=filename)
         results[filename] = link
     return results
@@ -144,7 +142,7 @@ def remove_link(filename):
     Get rid of matching filenames
     '''
     filename = filename.replace("_", " ")
-    links, path = get_glob()
+    links, path = get_glob(clean_links=False)
     for i in links:
         name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
         if filename == name:
@@ -152,13 +150,26 @@ def remove_link(filename):
     remove_file_from_db(filename)
 
 
-def get_glob():
+def get_glob(clean_links=True):
     """
     Grabs the list of files from a preset path. 
     """
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
-    return (glob.glob(path + '/*'), path)
+    filenames = glob.glob(path + '/*')
+    if clean_links:
+        filenames = clean_file_names(path, filenames)
+    return (filenames, path)
+
+
+def clean_file_names(path, links):
+    """
+    Stripes a few things from the glob links
+    """
+    for i in range(len(links)):
+        links[i] = links[i].replace(path + '/', '').replace('.md', '').replace(
+            "_", " ")
+    return links
 
 
 def remove_file_from_db(filename):
@@ -175,9 +186,9 @@ def check_duplicate(filename):
     Check to see if there are duplicate file names
     """
     links, path = get_glob()
-    filename = filename.replace(' ', '_')
-    for i in links:
-        name = i.replace(path + '/', '').replace('.md', '')
+    filename = filename.replace('_', ' ')
+
+    for name in links:
         if filename == name:
             return True
     return False
