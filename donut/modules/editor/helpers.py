@@ -166,10 +166,10 @@ def clean_file_names(path, links):
     """
     Stripes a few things from the glob links
     """
-    for i in range(len(links)):
-        links[i] = links[i].replace(path + '/', '').replace('.md', '').replace(
-            "_", " ")
-    return links
+    return [
+        link.replace(path + '/', '').replace('.md', '').replace('_', ' ')
+        for link in links
+    ]
 
 
 def remove_file_from_db(filename):
