@@ -100,7 +100,6 @@ def rename_title(old_filename, new_filename):
     remove_file_from_db(old_filename)
 
     if os.path.exists(old_path) and not os.path.exists(new_path):
-        os.rename(old_path, new_path)
 
 
 def read_markdown(name):
