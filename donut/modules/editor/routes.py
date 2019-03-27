@@ -18,7 +18,7 @@ def editor():
         input_text = helpers.read_markdown(inputt)
         title = flask.request.args.get('title')
         load_default = False
-    if inputt == None:
+    else:
         load_default = True
     if helpers.is_locked(
             title, load_default) or not helpers.check_edit_page_permission():

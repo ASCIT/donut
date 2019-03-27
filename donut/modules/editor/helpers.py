@@ -99,7 +99,7 @@ def rename_title(old_filename, new_filename):
 
     remove_file_from_db(old_filename)
 
-    if os.path.exists(old_path) and not os.path.exists(new_filename):
+    if os.path.exists(old_path) and not os.path.exists(new_path):
         os.rename(old_path, new_path)
 
 
@@ -110,8 +110,7 @@ def read_markdown(name):
 
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_WEBPAGES'])
-    cur_file = read_file(os.path.join(path, name + '.md'))
-    return cur_file
+    return read_file(os.path.join(path, name + '.md'))
 
 
 def read_file(path):
