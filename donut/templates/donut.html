@@ -3,7 +3,8 @@
 
 <div class="container theme-showcase" role="main">
 
-    <div class="absolute-center" style="background-color: #1c1d25; height: 835px; width: 100%;"></div>
+    <div class="bg-cover dim absolute-center"></div>
+    <div class="bg-cover bg-image"></div>
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div id="homepage-jumbotron" class="jumbotron absolute-center">
@@ -21,10 +22,10 @@
 
 <script>
 setInterval(function(){ 
-    if (window.outerWidth < 800 && document.getElementById("background-video")) {
+    if (window.outerWidth < 900 && document.getElementById("background-video")) {
 	document.getElementById("background-video").outerHTML = "";
     }
-    if (window.outerWidth > 800 && document.getElementById("background-donut")) {
+    if (window.outerWidth >= 900 && document.getElementById("background-donut")) {
         document.getElementById("background-donut").outerHTML = "";
     }
 }, 1000 / 60);
