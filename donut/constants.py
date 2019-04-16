@@ -25,3 +25,65 @@ class Gender(Enum):
     FEMALE = 0
     """Value of members.gender if member is male"""
     MALE = 1
+
+CONTACTS = {
+    'Administration': [
+        {
+            'name': 'Kevin Gilmartin',
+            'role': 'Dean of Undergraduate Students',
+            'email': 'kmg@hss.caltech.edu'
+        },
+        {
+            'name': 'Lesley Nye',
+            'role': 'Dean of Undergraduate Students',
+            'email': 'lnye@caltech.edu'
+        },
+        {
+            'name': 'Kristin Weyman',
+            'role': 'Associate Dean of Undergraduate Students',
+            'email': 'kweyman@caltech.edu'
+        },
+        {
+            'name': 'Beth Larranaga',
+            'role': 'Office Manager',
+            'email': 'rosel@caltech.edu'
+        },
+        {
+            'name': 'Sara Loredo',
+            'role': 'Office Assistant',
+            'email': 'sara@caltech.edu'
+        }
+    ],
+    'Student Life': [
+        {
+            'name': 'Tom Mannion',
+            'role': 'Senior Director, Student Activities and Programs',
+            'email': 'mannion@caltech.edu'
+        },
+        {
+            'name': 'Joe Shepherd',
+            'role': 'Vice President for Student Affairs',
+            'email': 'joseph.e.shepherd@caltech.edu'
+        },
+        {
+            'name': 'Felicia Hunt',
+            'role': 'Assistant Vice President for Student Affairs and Residential Experience',
+            'email': 'fhunt@caltech.edu'
+        },
+        {
+            'name': 'Maria Katsas',
+            'role': 'Director of Housing',
+            'email': 'maria@caltech.edu'
+        },
+        {
+            'name': 'Allie McIntosh',
+            'role': 'Community Educator and Deputy Title IX Coordinator',
+            'email': 'allie@caltech.edu'
+        },
+        {
+            'name': 'Jaime Reyes',
+            'role': 'Acting Director of Dining Services',
+            'email': 'reyes@caltech.edu'
+        }
+    ]
+}
