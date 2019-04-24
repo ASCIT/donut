@@ -93,8 +93,8 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
 
 /* For bodfeedback module */
 INSERT INTO bod_complaint_info(complaint_id, subject, status, uuid) VALUES
-    (1, 'Sub1', 'new_msg', 'sample_uuid'),
-    (2, 'Sub2', 'read', 'sample_uuid2');
+    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
+    (2, 'Sub2', 'read', '2');
 
 INSERT INTO bod_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
     (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),

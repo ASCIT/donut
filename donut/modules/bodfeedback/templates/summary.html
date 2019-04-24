@@ -3,18 +3,18 @@
 
 <div class="jumbotron">
     <table>
-	<tr>
-	    <th>Subject</th>
-	    <th>Latest Message</th>
-	    <th>Link</th>
-	</tr>
+        <tr>
+            <th>Subject</th>
+            <th>Latest Message</th>
+            <th>Link</th>
+        </tr>
 	{% for complaint in complaints %}
 	<tr>
-	    <td>{{ complaint['subject'] }}</td>
-	    <td>{{ complaint['poster'] }}:  {{ complaint['message'] }}<br>Posted at {{ complaint['time'].strftime('%b %d %Y %-I:%M%p') }}</td>
-	    <td><a href="{{ complaint['link'] }}">Link</a></td>
-	</tr>
-	{% endfor %}
+            <td>{{ complaint['subject'] }}</td>
+            <td>{{ complaint['poster'] }}:  {{ complaint['message'] }}<br>Posted at {{ complaint['time'].strftime('%b %d %Y %-I:%M%p') }}</td>
+            <td><a href="{{ complaint['link'] }}">Link</a></td>
+        </tr>
+        {% endfor %}
     </table>
 </div>
 {% endblock %}

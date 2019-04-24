@@ -41,7 +41,6 @@ def bodfeedback_submit():
 @blueprint.route('/1/bodfeedback/view/<id>')
 def bodfeedback_api_view_complaint(id):
     if not helpers.get_id(id):
-        bodfeedback()
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(id)
     # Pack all the data we need into a dict

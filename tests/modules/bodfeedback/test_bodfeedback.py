@@ -5,13 +5,15 @@ from datetime import datetime
 
 
 def test_get_link(client):
+    print(helpers.get_link(1))
     assert helpers.get_link(
-        1) == flask.url_for('home') + 'bodfeedback/view/sample_uuid'
+        1
+    ) == 'http://127.0.0.1/bodfeedback/view/F034CB412C0411E997ED021EF4D6E881'
     assert helpers.get_link(500) is None
 
 
 def test_get_id(client):
-    assert helpers.get_id('sample_uuid') == 1
+    assert helpers.get_id('F034CB412C0411E997ED021EF4D6E881') == 1
     assert helpers.get_id('nonsense') == False
 
 
@@ -28,7 +30,7 @@ def test_get_messages(client):
         'poster': 'Davis',
         'message_id': 2
     }]
-    assert helpers.get_messages(500) is None
+    assert helpers.get_messages(500) == ()
 
 
 def test_get_summary(client):
@@ -93,13 +95,20 @@ def test_get_all_fields(client):
 def test_get_new_posts(client):
     posts = helpers.get_new_posts()
     assert posts == [{
-        'complaint_id': 1,
-        'subject': 'Sub1',
-        'status': 'new_msg',
-        'uuid': 'sample_uuid',
-        'message': 'Sample Message 2',
-        'poster': 'Davis',
-        'time': datetime(2018, 1, 2)
+        'complaint_id':
+        1,
+        'subject':
+        'Sub1',
+        'status':
+        'new_msg',
+        'uuid':
+        b'\xf04\xcbA,\x04\x11\xe9\x97\xed\x02\x1e\xf4\xd6\xe8\x81',
+        'message':
+        'Sample Message 2',
+        'poster':
+        'Davis',
+        'time':
+        datetime(2018, 1, 2)
     }]
 
 

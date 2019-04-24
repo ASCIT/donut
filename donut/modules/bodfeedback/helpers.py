@@ -8,9 +8,10 @@ def send_update_email(email, complaint_id):
     '''
     Sends an email to [email] of poster and BoD
     '''
+    BOD_EMAIL = 'bod@donut.caltech.edu'
     msg = email_templates.added_message.format(get_link(complaint_id))
     subject = "Received BoD Feedback"
-    email_utils.send_email(email + ', bod@donut.caltech.edu', msg, subject)
+    email_utils.send_email(', '.join((email, BOD_EMAIL)), msg, subject)
 
 
 def register_complaint(data, notification=True):
@@ -50,7 +51,10 @@ def add_email(complaint_id, email, notification=True):
     VALUES (%s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (complaint_id, email))
+        try:
+            cursor.execute(query, (complaint_id, email))
+        except pymysql.err.IntegrityError:
+            return False
     if notification:
         send_update_email(email, complaint_id)
     return True
@@ -137,8 +141,7 @@ def get_messages(complaint_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
 
 
 def get_summary(complaint_id):
@@ -230,8 +233,7 @@ def get_new_posts():
     post.status AS status, post.uuid AS uuid, comment.message AS message, 
     comment.poster AS poster, comment.time AS time 
     FROM bod_complaint_info post
-    INNER JOIN bod_complaint_messages comment
-    ON comment.complaint_id = post.complaint_id
+    NATURAL JOIN bod_complaint_messages comment
     INNER JOIN (
     SELECT complaint_id, max(time) AS time 
     FROM bod_complaint_messages GROUP BY complaint_id
