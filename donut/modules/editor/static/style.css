@@ -1,0 +1,26 @@
+#targetDiv {
+  border: 1px dashed #333;
+  width: 900px;
+  height: 400px;
+}
+
+textarea {
+  margin: 30px;
+  width: 80%;
+}
+
+.btn {
+  margin: 5px;
+}
+
+.btn-group .dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+#display_area{
+  text-align: center;
+}
+
+#preview{
+  text-align: left;
+}
