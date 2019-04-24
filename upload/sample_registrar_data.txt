@@ -1,2 +1,3 @@
-"FULL_NAME"	"LAST_NAME"	"FIRST_NAME"	"MIDDLE_NAME"	"UID"	"GENDER"	"BIRTH_DATE"	"OPTION"	"OPTION2"	"YOS"	"MSC"	"PHONE_NUMBER"	"EMAIL"	"LINE1"	"LINE2"	"LINE3"	"CITY"	"STATE"	"ZIP"	"COUNTRY"
-"Example, Testing Tester"	"Example"	"Testing"	"Tester"	"9967351"	"M"	"13-SEP-2004"	"Geophysics"	"Physics"	"Junior"	"MSC 999"	"444-444-4444"	"test@caltech.edu"	"957 N Test St"	""	""	"Chicago"	"IL"	"00000"	""
+"FULL_NAME"	"LAST_NAME"	"FIRST_NAME"	"MIDDLE_NAME"	"UID"	"GENDER"	"BIRTH_DATE"	"OPTION"	"OPTION2"	"YOS"	"MSC"	"PHONE_NUMBER"	"EMAIL"	"LINE1"	"LINE2"	"LINE3"	"CITY"	"STATE"	"ZIP"	"COUNTRY"	"HOUSE_AFFILIATION_1"	"HOUSE_AFFILIATION_2"	"HOUSE_AFFILIATION_3"	"NICK_NAME"
+"Example 1, Testing Tester"	"Example 1"	"Testing"	"Tester"	"1234567"	"F"	"22-MAR-2003"	"Geophysics"	"Physics"	"Junior"	"MSC 999"	"444-444-4444"	"test@caltech.edu"	"957 N Test St"	""	""	"Chicago"	"IL"	"00000"	""	""	""	""	""
+"Example 2, Testing Tester"	"Example 2"	"Testing"	"Tester"	"9967351"	"M"	"13-SEP-2004"	"Geophysics"	"Physics"	"Junior"	"MSC 999"	"444-444-4444"	"test@caltech.edu"	"957 N Test St"	""	""	"Chicago"	"IL"	"00000"	""	""	""	""	""

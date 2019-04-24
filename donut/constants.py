@@ -25,3 +25,30 @@ class Gender(Enum):
     FEMALE = 0
     """Value of members.gender if member is male"""
     MALE = 1
+
+
+registrar_gender = {
+    'F': Gender.FEMALE.value,
+    'M': Gender.MALE.value,
+}
+
+registrar_month = {
+    'JAN': 1,
+    'FEB': 2,
+    'MAR': 3,
+    'APR': 4,
+    'MAY': 5,
+    'JUN': 6,
+    'JUL': 7,
+    'AUG': 8,
+    'SEP': 9,
+    'OCT': 10,
+    'NOV': 11,
+    'DEC': 12,
+}
+
+registrar_column_labels = [
+    'uid', 'last_name', 'first_name', 'preferred_name',
+    'middle_name', 'email', 'phone', 'gender', 'birthday', 'msc',
+    'address', 'city', 'state', 'zip', 'country',
+]
