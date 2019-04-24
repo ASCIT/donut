@@ -76,6 +76,7 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
+    flask.request.start = datetime.datetime.now()
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
@@ -88,6 +89,21 @@ def before_request():
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)
+
+
+@app.after_request
+def log_request(response):
+    duration = datetime.datetime.now() - flask.request.start
+    duration = round(duration / datetime.timedelta(milliseconds=1))
+    method = flask.request.method
+    path = flask.request.path
+    args = dict(flask.request.args.items())
+    args = f' {args}' if args else ''
+    source = flask.request.remote_addr
+    user = flask.session.get('username')
+    user = ' by ' + user if user else ''
+    app.logger.info(f'{method} {path}{args}{user} in {duration} ms')
+    return response
 
 
 @app.teardown_request
