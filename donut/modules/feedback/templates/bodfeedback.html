@@ -7,7 +7,7 @@
     <div class="jumbotron">
         <img src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
         {% if summary %}
-        <a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
+        <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
         {% endif %}
         <p>This is the BoD anonymous course feedback form.</p>
         <p>Ever wanted to suggest something to the Board of Director's, but didn't want to say it directly / didn't know when BoD meetings were? Ever wanted to comment about how an event was run, or are curious about how to get involved?
@@ -21,7 +21,7 @@ Well then, simply fill out the form below. The ASCIT BoD would love to hear all 
 
         <div class="col-md-8 col-md-offset-2">
           <div class="row">
-            <form method="POST" action="{{ url_for('bodfeedback.bodfeedback_submit') }}">
+            <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
               <table id="feedback" class="table">
                 <tr>
                   <div class="form-group">

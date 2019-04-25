@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-8">
               {% if admin or 'SUMMARY' in perms%}
-                  <a class="btn btn-primary" href="{{ url_for('bodfeedback.bodfeedback_view_summary') }}" role="button">Summary</a>
+                  <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
               {% endif %}
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -19,7 +19,7 @@
                             <p>No emails subscribed to this complaint </p>
                         {% else %}
                             <p>Subscribed emails: </p>
-                            <form method="POST" id="remove-email" action="{{ url_for('bodfeedback.bodfeedback_remove_email', id=complaint['uuid']) }}">
+                            <form method="POST" id="remove-email" action="{{ url_for('feedback.feedback_remove_email', id=complaint['uuid'], group=group) }}">
                                 {% for email in complaint['emails'] %}
                                     <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
                                 {% endfor %}
@@ -41,7 +41,7 @@
                         <h4>Add an email</h4>
                     </div>
                     <div class="panel-body">
-                        <form method="POST" id="add-email" action="{{ url_for('bodfeedback.bodfeedback_add_email', id=complaint['uuid']) }}">
+                        <form method="POST" id="add-email" action="{{ url_for('feedback.feedback_add_email', id=complaint['uuid'], group=group) }}">
                             <div class="form-group">
                                 <p>Email: </p>
                                 <input class="form-control" type="text" name="email" />
@@ -75,7 +75,7 @@
                         <p>Add a comment<p>
                     </div>
                     <div class="panel-body">
-                        <form method="POST" id="addMessage" action="{{ url_for('bodfeedback.bodfeedback_add_msg', id=complaint['uuid']) }}">
+                        <form method="POST" id="addMessage" action="{{ url_for('feedback.feedback_add_msg', id=complaint['uuid'], group=group) }}">
                             <div class="form-group">
                                 <p>Name: </p>
                                 <input class="form-control" type="text" name="poster" />
@@ -106,12 +106,12 @@
      {% endif %} 
      $('#markRead').click(function() {
 	 $.ajax({
-	     url: "{{ url_for('bodfeedback.bodfeedback_mark_read', id=complaint['uuid']) }}",
+	     url: "{{ url_for('feedback.feedback_mark_read', id=complaint['uuid'], group=group) }}",
              type: 'GET',
              success: function(){
                  $('#markRead').hide();
                  $('#markUnread').show();
-                 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
+                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
              },
              error: function(response){
                 alert("An error occurred");
@@ -120,12 +120,12 @@
      });
      $('#markUnread').click(function() {
          $.ajax({
-             url: "{{ url_for('bodfeedback.bodfeedback_mark_unread', id=complaint['uuid']) }}",
+             url: "{{ url_for('feedback.feedback_mark_unread', id=complaint['uuid'], group=group) }}",
              type: 'GET',
              success: function(){
                  $('#markUnread').hide();
                  $('#markRead').show();
-                 window.location.href = "{{ url_for('bodfeedback.bodfeedback_view_complaint', id=complaint['uuid']) }}";
+                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
              },
              error: function(response){
                 alert("An error occurred");
