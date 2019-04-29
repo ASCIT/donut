@@ -184,6 +184,10 @@ td {
  * divs, unless otherwise specified in the commentary.                       */
 /*****************************************************************************/
 
+.bg-image {
+  background: url(../images/background_image.jpg) center center no-repeat;
+  background-size: 200% 100%;
+}
 
 /* This is the primary button class. Gives the button a white background
  * with an orange border and a slight bottom margin for spacing
