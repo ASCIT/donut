@@ -2,6 +2,7 @@ import flask
 from flask import jsonify
 from donut import app
 from donut.auth_utils import get_user_id
+from donut.constants import CONTACTS
 from donut.modules.core import helpers
 from donut.modules import groups
 
@@ -13,7 +14,7 @@ def home():
 
 @app.route('/contact')
 def contact():
-    return flask.render_template('contact.html')
+    return flask.render_template('contact.html', contacts=CONTACTS)
 
 
 @app.route('/campus_positions')

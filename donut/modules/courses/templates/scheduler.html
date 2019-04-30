@@ -1,0 +1,437 @@
+{% extends 'layout.html' %}
+{% block page %}
+  <div class='col-md-10 col-md-offset-1' style='float: none'>
+    <h3 id='warning'></h3>
+    <h1>Course Scheduler</h1>
+    <div class='row'>
+      <div class='col-sm-3'>
+        <div class='form-group'>
+          <label for='term'>Term</label>
+          <select class='form-control' id='term'>
+            {% for term in terms %}
+              <option value='{{ term["year"] }}-{{ term["term"] }}'>
+                {{ TERMS[term["term"]] }} {{ term["year"] }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <input class='form-control' id='search' placeholder='Search...' />
+        <ul class='list-group' id='courses'></ul>
+      </div>
+      <div class='col-sm-9'>
+        <div class='row' id='scheduler'>
+          <div class='col-xs-2'>
+            <div id='units'></div>
+            {% for hour in range(START_HOUR, END_HOUR) %}
+              <div class='hour' style='top: {{ (hour - START_HOUR + 1) * HOUR_HEIGHT }}px'>
+                {{ (hour + 11) % 12 + 1 }} {{ 'AM' if hour < 12 else 'PM' }}
+              </div>
+            {% endfor %}
+          </div>
+          {% for day in WEEK_DAYS %}
+            <div class='col-xs-2 day'>
+              <strong>{{ day }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block styles %}
+  {{ super() }}
+  <style>
+    input[type=checkbox] {
+      left: 0;
+    }
+    #warning {
+      float: right;
+      margin: 0;
+    }
+    #scheduler {
+      height: 600px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: 2px solid orange;
+    }
+    #courses {
+      height: 500px;
+      overflow-y: auto;
+    }
+    .day {
+      display: flex;
+      justify-content: center;
+      border-left: 2px solid orange;
+      height: {{ (END_HOUR - START_HOUR + 1) * HOUR_HEIGHT }}px;
+    }
+    .hour {
+      position: absolute;
+      width: 600%; /* fill all 5 other columns */
+      border-top: 1px solid orange;
+    }
+    .interval {
+      position: absolute;
+      border: 1px solid #999;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .interval .btn.remove {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .interval:hover .interval-label {
+      display: none;
+    }
+    .interval:hover .btn.remove {
+      display: inline-block;
+    }
+    .interval-label {
+      word-break: break-all;
+    }
+    .dropdown-menu.list-group {
+      padding: 0;
+      border: none;
+    }
+    .section {
+      width: 100%;
+      margin: 0 !important;
+      text-align: left;
+    }
+    .list-group-item.section-item {
+      padding: 0;
+    }
+    .section.selected .section-name {
+      font-weight: bold;
+    }
+  </style>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script src='{{ url_for("static", filename="js/hash.js") }}'></script>
+  <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
+  <script>
+    var SHOW_COURSES = 50
+    var OM = 'OM,'
+    var START_HOUR = {{ START_HOUR }}
+    var HOUR_HEIGHT = {{ HOUR_HEIGHT }}
+    var DAYS = {
+      'M': 0,
+      'T': 1,
+      'W': 2,
+      'R': 3,
+      'F': 4
+    }
+    var HASH_RANGE = Math.pow(2, 32)
+
+    var termSelect, coursesList, search, dayLists, units
+    var termLoadToken
+    var termCourses = []
+    var scheduledCourses = {}
+    var coursesUnits
+
+    function displayWarning(message) {
+      $('#warning').text(message).show()
+    }
+    function loadTerm() {
+      var yearTerm = termSelect.val().replace('-', '/')
+      var loadToken = {}
+      termLoadToken = loadToken
+      coursesList.children().remove()
+      coursesList.append(
+        $('<li>').addClass('list-group-item').text('Loading...')
+      )
+      search.val('')
+      $('.interval').remove()
+      coursesUnits = 0
+      displayUnits()
+      var coursesLoaded = false, myCoursesLoaded = false
+      var mySections
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/courses/' + yearTerm,
+        success: function(courses) {
+          if (termLoadToken !== loadToken) return
+
+          termCourses = courses
+          displayCourses(courses)
+          if (myCoursesLoaded) showMyCourses()
+          else coursesLoaded = true
+        },
+        error: function() {
+          displayWarning('Failed to load courses')
+        }
+      })
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/sections/' + yearTerm + '/mine',
+        success: function(sections) {
+          if (termLoadToken !== loadToken) return
+
+          mySections = sections
+          if (coursesLoaded) showMyCourses()
+          else myCoursesLoaded = true
+        },
+        error: function() {
+          displayWarning('Failed to load your courses')
+        }
+      })
+      function showMyCourses() {
+        var courseIds = {}
+        mySections.forEach(function(section) {
+          var courseId = section.id
+          ;(courseIds[courseId] || (courseIds[courseId] = []))
+            .push(section.section)
+        })
+        var course, courseId, sections
+        for (var i = 0; i < termCourses.length; i++) {
+          course = termCourses[i]
+          courseId = course.id
+          sections = courseIds[courseId]
+          if (!sections) continue
+          var courseDisplay = $('[course=' + String(courseId) + ']')
+          sections.forEach(function(section) {
+            addSection(course, section, true)
+            courseDisplay.find('.section[section=' + String(section) + ']')
+              .addClass('selected')
+          })
+        }
+      }
+    }
+    function backgroundColor(course) {
+      var nameHash = hashString(course.number) ^ hashString(course.name)
+      return 'hsl(' + String(360 * nameHash / HASH_RANGE) + ', 100%, 80%)'
+    }
+    function addSection(course, sectionNumber, skipAPIAdd) {
+      scheduledCourses[[course.id, sectionNumber]] = true
+      var sections = course.sections
+      var section
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].number === sectionNumber) {
+          section = sections[i]
+          break
+        }
+      }
+      coursesUnits += course.units.reduce(function(a, b) { return a + b })
+      displayUnits()
+      var background = backgroundColor(course)
+      var intervals = []
+      section.times.split('\n').forEach(function(time) {
+        var daysStart = time.slice(0, OM.length) === OM ? OM.length : 0
+        var space = time.indexOf(' ')
+        if (space < 0) return // time is either "A" or "OM, A"
+
+        var days = time.slice(daysStart, space)
+        var interval = time.slice(space + 1)
+        var heights = interval.split(' - ').map(function(time) {
+          var hoursMinutes = time.split(':').map(Number)
+          hour = hoursMinutes[0] + hoursMinutes[1] / 60
+          return (hour - START_HOUR) * HOUR_HEIGHT
+        })
+        for (var day = 0; day < days.length; day++) {
+          var weekday = DAYS[days[day]]
+          var intervalItem = $('<div>')
+            .addClass('interval')
+            .attr('start', heights[0]).attr('end', heights[1])
+            .css({
+              top: String(heights[0] + HOUR_HEIGHT) + 'px',
+              height: String(heights[1] - heights[0]) + 'px',
+              background: background
+            })
+            .append(
+              $('<div>').addClass('interval-label').append(
+                $('<strong>').text(course.number),
+                $('<div>').text(sectionNumber)
+              ),
+              $('<button>')
+                .attr({
+                  type: 'button',
+                  course: course.id,
+                  section: sectionNumber
+                })
+                .addClass('btn btn-danger remove')
+                .append($('<span>').addClass('glyphicon glyphicon-remove'))
+                .click(function(e) {
+                  intervals.forEach(function(element) { element.remove() })
+                  intervals = null // allow GC
+                  uncheckSection(course.id, sectionNumber)
+                  fitIntervals()
+                  dropSection(course, sectionNumber)
+                  e.stopPropagation() // prevent section dropdowns from closing
+                })
+            )
+          dayLists.eq(weekday).append(intervalItem)
+          intervals.push(intervalItem)
+        }
+      })
+      fitIntervals()
+      if (skipAPIAdd) return
+
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/course/' + String(course.id) +
+          '/section/' + String(sectionNumber) + '/add',
+        success: function(response) {
+          displayWarning(response.success ? '' : response.message)
+        },
+        error: function() {
+          displayWarning(
+            'Failed to add course ' + course.number +
+            ' - section ' + String(sectionNumber)
+          )
+        }
+      })
+    }
+    function dropSection(course, sectionNumber) {
+      scheduledCourses[[course.id, sectionNumber]] = false
+      coursesUnits -= course.units.reduce(function(a, b) { return a + b })
+      displayUnits()
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/course/' + String(course.id) +
+          '/section/' + String(sectionNumber) + '/drop',
+        success: function(response) {
+          displayWarning(response.success ? '' : response.message)
+        },
+        error: function() {
+          displayWarning(
+            'Failed to drop course ' + course.number +
+            ' - section ' + String(sectionNumber)
+          )
+        }
+      })
+    }
+    function removeSection(course, sectionNumber) {
+      var removeButtons = $(
+        'button[course=' + String(course.id) +
+        '][section=' + String(sectionNumber) + ']'
+      )
+      if (removeButtons.length) $(removeButtons.eq(0)).click()
+      else dropSection(course, sectionNumber)
+    }
+    function uncheckSection(courseId, sectionNumber) {
+      $(
+        '[course=' + String(courseId) +
+        '] .section[section=' + String(sectionNumber) + ']'
+      ).removeClass('selected')
+    }
+    function fitIntervals() {
+      dayLists.each(function(_, day) {
+        var intervals = []
+        $(day).children('.interval').each(function(_, element) {
+          var $element = $(element)
+          intervals.push({
+            element: $element,
+            start: Number($element.attr('start')),
+            end: Number($element.attr('end'))
+          })
+        })
+        intervals.sort(function(a, b) { return a.end - b.end })
+        var intervalsToSchedule = intervals, remainingIntervals
+        var lastEnd
+        for (var indent = 0; intervalsToSchedule.length; indent++) {
+          lastEnd = -Infinity
+          remainingIntervals = []
+          intervalsToSchedule.forEach(function(interval) {
+            if (interval.start >= lastEnd) { // schedulable
+              interval.indent = indent
+              lastEnd = interval.end
+            }
+            else remainingIntervals.push(interval)
+          })
+          intervalsToSchedule = remainingIntervals
+        }
+        intervals.forEach(function(interval) {
+          interval.element.css({
+            width: String(100 / indent) + '%',
+            left: String(100 * interval.indent / indent) + '%'
+          })
+        })
+      })
+    }
+    function displayCourses(courses) {
+      coursesList.children().remove()
+      courses.slice(0, SHOW_COURSES).forEach(function(course) {
+        var courseId = course.id
+        var courseItem = $('<li>')
+          .addClass('list-group-item')
+          .attr('course', courseId)
+          .css('background', backgroundColor(course))
+          .append(
+            $('<h4>').text(course.number),
+            $('<h5>').text(course.name),
+            $('<h5>').addClass('units').text(course.units.join('-'))
+          )
+        var sections = course.sections.map(function(section) {
+          var number = section.number
+          var sectionItem = $('<div>')
+            .addClass('btn btn-default section')
+            .attr('section', number)
+            .click(function(e) {
+              if ($(this).toggleClass('selected').hasClass('selected')) {
+                addSection(course, number)
+              }
+              else removeSection(course, number)
+              e.stopPropagation()
+            })
+            .append(
+              $('<h5>')
+                .addClass('section-name')
+                .text(String(number) + ' - ' + section.instructor)
+            )
+          if (scheduledCourses[[courseId, number]]) {
+            sectionItem.addClass('selected')
+          }
+          if (section.grades) sectionItem.append($('<h6>').text(section.grades))
+          var times = section.times.split('\n'),
+              locations = section.locations.split('\n')
+          times.forEach(function(time, i) {
+            sectionItem.append($('<h6>').text(time + ' in ' + locations[i]))
+          })
+          return sectionItem
+        })
+        if (sections.length > 1) {
+          var dropdownMenu = $('<ul>').addClass('dropdown-menu list-group')
+          sections.forEach(function(section) {
+            dropdownMenu.append(
+              $('<li>').addClass('list-group-item section-item').append(section)
+            )
+          })
+          courseItem.append(
+            $('<div>').addClass('dropdown').append(
+              $('<button>')
+                .addClass('btn btn-default dropdown-toggle')
+                .attr({type: 'button', 'data-toggle': 'dropdown'})
+                .append(
+                  'Sections',
+                  $('<span>').addClass('caret')
+                ),
+              dropdownMenu
+            )
+          )
+        }
+        else courseItem.append(sections[0])
+        coursesList.append(courseItem)
+      })
+      $('.dropdown-toggle').dropdown()
+      coursesList.scrollTop(0)
+    }
+    function displayUnits() {
+      units.text('Units: ' + String(coursesUnits))
+    }
+
+    $(document).ready(function() {
+      termSelect = $('#term').change(loadTerm)
+      coursesList = $('#courses')
+      search = $('#search').keyup(function() {
+        displayCourses(searchCourses(termCourses, $(this).val()))
+      })
+      dayLists = $('.day')
+      units = $('#units')
+
+      loadTerm()
+    })
+  </script>
+{% endblock %}

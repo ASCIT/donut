@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('editor.static', filename='style.css')}}>
+{% endblock %}
+{% block scripts %}
+  {{super()}}
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+  <script src={{ url_for('editor.static', filename='script.js', _external = True)}}></script>
+{% endblock %}
+{% block page %} 
+<div class="container theme-showcase" role="main">
+  <div class="col-md-24">
+    <div class="jumbotron" id="display_area">
+      <h1 id = "title" class="text-center">Editing</h1>
+      <div id="info">
+        <p>
+          See a list of all created pages
+          <a href="{{ url_for('editor.page_list') }}">here</a>. 
+	</p>
+	<p>
+	  See the exact syntax for markdown pages
+          <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax">here</a>.
+	</p>
+	<p>
+	  You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>.
+	</p>
+	<p>
+	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 100 characters.
+	  Titles with underscores are interchangeable with titles with spaces (i.e., "This title" and "This_title"
+	  are the same page). 
+	</p>
+      </div>
+
+      <div id='sucesss'>
+      </div>
+      <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
+      <br/>
+      <button id="change_title">Change Title</button>
+
+      <br/>
+      <div class="btn-group">
+        <div class="btn-group" role="group">
+          <div class="dropdown" id="editor_drop_down">
+            <button class="btn btn-outline-primary btn-sm" type="button">Styles<span class="caret"></span></button>
+              <ul class="dropdown-menu">
+               <li><a type="button" id="italicize" class="btn btn-outline-secondary btn-sm">italic</a></li>
+               <li><a type="button" id="bold" class="btn btn-outline-secondary btn-sm">bold</a></li>
+              </ul>
+          </div>
+        </div>
+        <div class="btn-group" role="group">
+          <div class="dropdown">
+            <button class="btn btn-outline-primary btn-sm" type="button">
+              Headings
+              <span class="caret"></span>
+	    </button>
+            <ul class="dropdown-menu">
+            {% for i in range(1,7) %}
+	    <li><a class="btn btn-outline-secondary btn-sm" type="button" id="heading{{i}}" style="font-size:{{26 - i*2}}px">Heading</a></li>
+            {% endfor %}
+	    </ul>
+          </div>
+        </div>
+
+        <div class="btn-group" role="group">
+          <div class="dropdown">
+            <button class="btn btn-outline-primary btn-sm" type="button">Lists
+              <span class="caret"></span>
+	    </button>
+            <ul class="dropdown-menu">
+              <li><a class="btn btn-outline-secondary btn-sm" type="button" id="ulist">Unordered</a></li>
+              <li><a class="btn btn-outline-secondary btn-sm" type="button" id="olist">Ordered</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <button class="btn btn-outline-primary btn-sm" type="button" id="link">Links</button>
+        <button class="btn btn-outline-primary btn-sm" type="button" id="image">Images</button>
+      </div>
+      <br/>
+
+      <textarea id="source" rows="10" cols="20" width="80%">{{input_text}}
+
+      </textarea>
+      <hr/>
+      <button id="runBtn">Preview</button>
+      <button id="save">Save Changes</button>
+      <header>
+        <h1 id = "preview_title" class="text-center"></h1>
+      </header>
+      <div id="preview" style="text-align: left">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -146,7 +146,9 @@ CREATE TABLE positions (
                                        -- emails from this group
 
     PRIMARY KEY (pos_id),
-    FOREIGN KEY (group_id) REFERENCES groups(group_id)
+    FOREIGN KEY (group_id) 
+        REFERENCES groups(group_id)
+        ON DELETE CASCADE
 );
 
 -- Position to Member Table
@@ -157,7 +159,9 @@ CREATE TABLE position_holders (
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (pos_id) REFERENCES positions(pos_id),
+    FOREIGN KEY (pos_id) 
+        REFERENCES positions(pos_id)
+        ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
