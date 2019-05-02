@@ -3,34 +3,33 @@
 {% include "topbar.html" %}
 
 <h4>
-    Found {{ datalist|length }} result{% if datalist|length != 1 %}s{% endif %}.
+    Found {{ items|length }} result{% if items|length != 1 %}s{% endif %}.
 </h4>
-{% if datalist %}
+{% if items %}
     <div>
-        <table style="width:100%;min-width:590px" class="table table-condensed table-hover sortable" frame=void rules=rows>
+        <table class="table table-condensed table-hover sortable" frame=void rules=rows>
             <thead>
                 <tr>
-                    {% for i in headers %}
-                        <th>
-                            <b>{{i}}</b>
-                        </th>
-                    {% endfor %}
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Seller</th>
+                    <th>Date</th>
+                    <th>Category</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- display data in one main table -->
-                {% for row in datalist %}
-                    {% set i = loop.index0 %}
+                {% for item in items %}
                     <tr>
-                        {% for cell in row %}
-                            {% set j = loop.index0 %}
-                            {% set link = links[i][j] %}
-                            <td>
-                                {% if link %} <a href={{ link }}> {% endif %}
-                                {{ cell }}
-                                {% if link %} </a> {% endif %}
-                            </td>
-                        {% endfor %}
+                        <td>
+                            <a href="{{ item['url'] }}">{{ item['item_title'] }}</a>
+                        </td>
+                        <td>{{ item['item_price'] }}</td>
+                        <td>
+                            <a href="{{ item['user_url'] }}">{{ item['user_name'] }}</a>
+                        </td>
+                        <td>{{ item['item_timestamp'] }}</td>
+                        <td>{{ item['cat_title'] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

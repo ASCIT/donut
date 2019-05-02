@@ -1,12 +1,9 @@
 import flask
 import re
-from math import ceil
 
-from donut.modules.core.helpers import get_member_data
+from donut.modules.core.helpers import get_member_data, get_name_and_email
 from donut.auth_utils import get_user_id, check_permission
 from donut.resources import Permissions
-
-from . import routes
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
@@ -18,6 +15,10 @@ SKIP_WORDS = set([
     'they', 'this', 'to', 'up', 'us', 'was', 'we', 'what', 'who', 'why',
     'will', 'with', 'you', 'your'
 ])
+
+PUNCTUATION = r'[,.\-_!;:/\\]'
+
+ALL_CATEGORY = 'all'
 
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
@@ -37,11 +38,13 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
                                          final page.
     """
     # Get category titles.
-    categories = table_fetch_all('marketplace_categories', ['cat_title'])
+    categories = table_fetch('marketplace_categories', fields=['cat_id', 'cat_title'])
 
     # If there's nothing in categories, 404; something's borked.
-    if len(categories) == 0:
-        return flask.render_template('404.html'), 404
+    if not categories:
+        flask.abort(404)
+
+    categories.insert(0, {'cat_id': ALL_CATEGORY, 'cat_title': 'All categories'})
 
     # Pass the category array, urls array, and width string, along with the
     # arguments passed in to this function, on to Flask in order to render the
@@ -266,298 +269,125 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
 ###############
 # SEARCH PAGE #
 ###############
-def generate_search_table(fields=None, attrs={}, query=''):
+SEARCH_FIELDS = [
+    'item_id', 'cat_title', 'item_title', 'textbook_title',
+    'item_price', 'user_id', 'item_timestamp'
+]
+
+def generate_search_table(attrs, query):
     """
-    Provides a centralized way to generate the 2d array of cells that is
-    displayed in a table, along with all the stuff that needs to be packaged
-    with it.  Calls a few functions further down to get the data, merge some
-    columns, and rename the headers.
-
     Arguments:
-        fields: A list of the fields that are requested to be in the table.  For
-                example: ['cat_id', 'item_title', 'textbook_title',
-                'item_price', ...]
-
         attrs: A map of fields to values that make up conditions on the fields.
                For example, {'cat_id':1} will only return results for which the
                category id is 1.
 
         query: The query we want to filter our results by.  If '', no
                filtering happens.
-
-    Returns:
-        result: The 2d array that was requested.
-
-        headers: The English-ified headers for each column.
-
-        links: A 2d array that, in each cell, gives the url of the link that
-               clicking on the corresponding cell in result should yield.  If
-               none, the cell will contain the number 0 instead.
     """
 
-    # We need the item_id to generate the urls that clicking on the item title
-    # should go to.
-    # Also, we add it to the front so that we can get the id before we need to
-    # use it (i.e., when we're adding it to links)
-    fields = ['item_id'] + (fields or [])
+    fields = SEARCH_FIELDS
 
     if query:
         # Also add cat_id, textbook_author and textbook_isbn to the end so
         # that we can use those fields to query by.
-        fields = fields + ['textbook_author', 'textbook_isbn', 'cat_id']
+        fields += ['textbook_author', 'textbook_isbn']
 
-    result = get_table_list_data(
-        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks', fields,
-        attrs)
+    result = table_fetch("""
+        marketplace_items NATURAL LEFT JOIN
+        marketplace_textbooks NATURAL JOIN
+        marketplace_categories
+    """, fields=fields, attrs=attrs)
 
     if query:
         # Filter by query.
-        result = search_datalist(fields, result, query)
-        # Take textbook_author, textbook_isbn, and cat_id (the last 3
-        # columns) back out.
-        fields = fields[:-3]
-        for i in range(len(result)):
-            result[i] = result[i][:-3]
-
-    # Maps fields to their index in each result.  Done after search_datalist
-    # in order to avoid key conflicts.
-    field_index_map = {k: v for v, k in enumerate(fields)}
-
-    (result, fields, field_index_map) = merge_titles(result, fields,
-                                                     field_index_map)
-
-    sanitized_res = []
-    links = []
+        result = search_datalist(result, query)
 
     # Format the data, parsing the timestamps, converting the ids to actual
     # information, and adding links
-    for item_listing in result:
-        #temp_res_row = item_listing
-        link_row = [''] * len(item_listing)
+    for item in result:
+        if not item['item_title']:
+            item['item_title'] = item['textbook_title']
+        item['item_timestamp'] = item['item_timestamp'].strftime('%m/%d/%y')
+        user_id = item['user_id']
+        item['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
+        item['user_name'] = get_name_and_email(user_id)['full_name']
+        item['url'] = flask.url_for('.view_item', item_id=item['item_id'])
 
-        if 'item_id' in field_index_map:
-            item_id = int(item_listing[field_index_map['item_id']])
-
-        if 'item_timestamp' in field_index_map:
-            item_listing[field_index_map['item_timestamp']] = item_listing[
-                field_index_map['item_timestamp']].strftime('%m/%d/%y')
-
-        if 'user_id' in field_index_map:
-            link_row[field_index_map['user_id']] = flask.url_for(
-                'directory_search.view_user',
-                user_id=int(item_listing[field_index_map['user_id']]))
-
-            item_listing[field_index_map['user_id']] = get_name_from_user_id(
-                int(item_listing[field_index_map['user_id']]))
-
-        if 'textbook_edition' in field_index_map:
-            item_listing[
-                field_index_map['textbook_edition']] = process_edition(
-                    item_listing[field_index_map['textbook_edition']])
-
-        if 'cat_id' in field_index_map:
-            item_listing[field_index_map[
-                'cat_id']] = get_category_name_from_id(
-                    int(item_listing[field_index_map['cat_id']]))
-
-        if 'item_title' in field_index_map:
-            link_row[field_index_map['item_title']] = flask.url_for(
-                '.view_item', item_id=item_id)
-
-        if 'textbook_title' in field_index_map:
-            link_row[field_index_map['textbook_title']] = flask.url_for(
-                '.view_item', item_id=item_id)
-
-        # Strip off the item_id column we added earlier in the function.
-        item_listing = item_listing[1:]
-        link_row = link_row[1:]
-
-        # Add our rows to the real 2d arrays that we'll return.
-        sanitized_res.append(item_listing)
-        links.append(link_row)
-
-    # Strip off the item_id column we added at the beginning.
-    fields = fields[1:]
-
-    headers = process_category_headers(fields)
-
-    return (sanitized_res, headers, links)
+    return result
 
 
-def merge_titles(datalist, fields, field_index_map):
+def search_datalist(datalist, query):
     """
-    Takes datalist and merges the two columns, item_title and textbook_title.
-
-    Arguments:
-        datalist: a 2d list of data, with columns determined by fields.
-        fields: the column titles from the SQL tables.
-        field_index_map: a map from fields to their index in datalist.
-
-    Returns:
-        datalist: the original table, but with the two columns merged.
-        fields: the column titles similarly merged together into item_title.
+    Searches in datalist to create a new datalist,
+    sorted first by relevance and then by date created.
     """
-    item_index = field_index_map.get('item_title')
-    textbook_index = field_index_map.get('textbook_title')
-
-    if item_index is None or textbook_index is None:
-        # Can't merge, since the two columns aren't there.
-        return (datalist, fields, field_index_map)
-
-    for row_index in range(len(datalist)):
-        row = datalist[row_index]
-        if row[item_index] == '':
-            row[item_index] = row[textbook_index]
-        del row[textbook_index]
-        datalist[row_index] = row
-    del fields[textbook_index]
-
-    # Update field_index_map.
-    field_index_map = {k: v for v, k in enumerate(fields)}
-
-    return (datalist, fields, field_index_map)
-
-
-def process_category_headers(fields):
-    """
-    Converts fields from sql headers to English.
-
-    Arguments:
-        fields: the list of fields that will be changed into the headers that
-                are returned.
-
-    Returns:
-        headers: the list of headers that will become the headers of the tables.
-    """
-    headers = []
-    for i in fields:
-        if i == 'item_title':
-            headers.append('Item')
-        elif i == 'item_price':
-            headers.append('Price')
-        elif i == 'user_id':
-            headers.append('Sold by')
-        elif i == 'item_timestamp':
-            headers.append('Date')
-        elif i == 'textbook_title':
-            headers.append('Title')
-        elif i == 'textbook_author':
-            headers.append('Author')
-        elif i == 'textbook_edition':
-            headers.append('Edition')
-        elif i == 'cat_id':
-            headers.append('Category')
-    return headers
-
-
-def search_datalist(fields, datalist, query):
-    """
-    Searches in datalist (which has columns denoted in fields) to
-    create a new datalist, sorted first by relevance and then by date
-    created.
-    """
-    # Map column names to indices.
-    field_index_map = {k: v for v, k in enumerate(fields)}
-
-    # Add a special column at the end: score.
-    field_index_map['score'] = len(fields)
-
     query_tokens = tokenize_query(query)
     perfect_matches = []
     imperfect_matches = []
+    perfect_score = len(query_tokens)
 
-    query_isbns = []
     # ISBNs instantly make listings a perfect match
-    for token in query_tokens:
-        if validate_isbn(token):
-            query_isbns.append(token)
+    query_isbns = [token for token in query_tokens if validate_isbn(token)]
 
     for listing in datalist:
         item_tokens = []
-        is_isbn_match = False
-        if get_category_name_from_id(
-                listing[field_index_map['cat_id']]) == 'Textbooks':
+        if listing['cat_title'] == 'Textbooks':
             # if it's a textbook, include the author's name and the
             # book title in the item tokens
-            item_tokens = tokenize_query(
-                listing[field_index_map['textbook_title']])
-            item_tokens += tokenize_query(
-                listing[field_index_map['textbook_author']])
+            item_tokens = tokenize_query(listing['textbook_title'])
+            item_tokens += tokenize_query(listing['textbook_author'])
 
             # does the isbn match any of the query's isbns?
-            for isbn in query_isbns:
-                if listing[field_index_map['textbook_isbn']] == isbn:
-                    is_isbn_match = True
-                    break
+            is_isbn_match = any(isbn == listing['textbook_isbn'] for isbn in query_isbns)
         else:
             # only include the item title
-            item_tokens = tokenize_query(
-                listing[field_index_map['item_title']])
+            item_tokens = tokenize_query(listing['item_title'])
+            is_isbn_match = False
 
         score = get_matches(query_tokens, item_tokens)
 
-        # if it's an isbn match, give it a perfect score as well
-        # so that it doesn't get placed after all of the other perfect
-        # matches
-        if is_isbn_match:
-            score = len(query_tokens)
+        if score > 0:
+            listing['score'] = score
 
-        if score == 0:
-            continue
+            if is_isbn_match or score == perfect_score:
+                perfect_matches.append(listing)
+            else:
+                imperfect_matches.append(listing)
 
-        listing.append(score)
-
-        if score == len(query_tokens):
-            perfect_matches.append(listing)
-        else:
-            imperfect_matches.append(listing)
-
-    search_results = []
     # if we have any perfect matches, don't include the imperfect ones
-    search_results = perfect_matches or imperfect_matches
-
-    search_results = sorted(
-        search_results,
-        key=
-        lambda item: (item[field_index_map['score']], item[field_index_map['item_timestamp']])
+    return sorted(
+        perfect_matches or imperfect_matches,
+        key=lambda item: (item['score'], item['item_timestamp'])
     )
-
-    # chop off the last column, which holds the score
-    for i in range(len(search_results)):
-        search_results[i].pop()
-
-    return search_results
 
 
 def get_matches(l1, l2):
     """
     Returns the number of matches between list 1 and list 2.
     """
-    l1 = set(l1)
+    if len(l1) > len(l2):
+        return get_matches(l1, l2)
+
     l2 = set(l2)
-    if len(l1) < len(l2):
-        return len([x for x in l1 if x in l2])
-    else:
-        return len([x for x in l2 if x in l1])
+    return sum(1 for x in l1 if x in l2)
 
 
 def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
     """
-    query = query.split()
     # Validate ISBNs before we remove hyphens.
-    tokens = list(filter(validate_isbn, query))
-    query = filter(lambda token: not validate_isbn(token), query)
+    tokens = []
+    query_tokens = []
+    for token in query.split():
+        (tokens if validate_isbn(token) else query_tokens).append(token)
 
     # Remove punctuation.
-    query = ' '.join(query)
-    punctuation_regex = r'[,.\-_!;:/\\]'
-    query = re.sub(punctuation_regex, ' ', query).split()
+    query_tokens = re.sub(PUNCTUATION, ' ', ' '.join(query_tokens)).split()
 
     # If any of the words in query are in our SKIP_WORDS, don't add them
     # to tokens.
-    for token in query:
+    for token in query_tokens:
         token = token.lower()
         if token not in SKIP_WORDS:
             tokens.append(token)
@@ -654,92 +484,7 @@ def process_edition(edition):
 #################
 # TABLE QUERIES #
 #################
-def get_table_list_data(tables, fields=None, attrs={}):
-    """
-    Queries the database (specifically, table <table>) and returns list of
-    member data constrained by the specified attributes.
-
-    Arguments:
-        tables: The table(s) to query.  Ex: 'marketplace_items', or
-                'marketplace_items NATURAL LEFT JOIN
-                marketplace_textbooks'.
-        fields: The fields to return. If None specified, then default_fields
-                are used.
-        attrs:  The attributes of the members to filter for.
-    Returns:
-        result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of lists.
-    """
-    if fields == None:
-        s_select_columns = 'SELECT * '
-    else:
-        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
-
-    s_from = 'FROM ' + tables
-
-    s_where = ''
-    if attrs:
-        s_where = ' WHERE '
-        s_where += ' AND '.join([key + ' = %s' for key in attrs])
-
-    s = s_select_columns + s_from + s_where
-
-    # Execute the query.
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, list(attrs.values()))
-        result = cursor.fetchall()
-
-    # Return the list of lists.
-    result = list(map(lambda a: list(a.values()), result))
-    return result
-
-
-def table_fetch_one(tables, fields=None, attrs={}):
-    """
-    Queries the database (specifically, table <table>) and returns list of member data
-    constrained by the specified attributes.
-
-    Arguments:
-        tables: The table(s) to query.  Ex: 'marketplace_items', or
-                'marketplace_items NATURAL LEFT JOIN
-                marketplace_textbooks'.
-        fields: The fields to return. If None specified, then default_fields
-                are used.
-        attrs:  The attributes of the members to filter for.
-    Returns:
-        result: The fields and corresponding values of members with desired
-                attributes. In the form of a list.
-    """
-    if fields == None:
-        s_select_columns = 'SELECT * '
-    else:
-        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
-
-    s_from = 'FROM ' + tables
-
-    s_where = ''
-    if attrs:
-        s_where = ' WHERE '
-        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
-
-    s = s_select_columns + s_from + s_where
-
-    # Execute the query
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, list(attrs.values()))
-        result = cursor.fetchone()
-
-    # Return the values as a list
-    result = list(result.values())
-
-    # If only one field requested, unwrap [_] to _
-    if len(fields) == 1:
-        result = result[0]
-
-    return result
-
-
-def table_fetch_all(tables, fields=None, attrs={}):
+def table_fetch(tables, one=False, fields=None, attrs={}):
     """
     Queries the database (specifically, table <table>) and returns list of member data
     constrained by the specified attributes.
@@ -755,31 +500,23 @@ def table_fetch_all(tables, fields=None, attrs={}):
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
     """
-    if fields == None:
-        s_select_columns = 'SELECT * '
-    else:
-        s_select_columns = 'SELECT ' + ', '.join(fields) + ' '
-
-    s_from = 'FROM ' + tables
-
-    s_where = ''
+    s = 'SELECT ' + ('*' if fields is None else ', '.join(fields))
+    s += ' FROM ' + tables
     if attrs:
-        s_where = ' WHERE '
-        s_where += ' AND '.join([key + ' = %s' for key in attrs.keys()])
-
-    s = s_select_columns + s_from + s_where
+        s += ' WHERE ' + ' AND '.join([key + ' = %s' for key in attrs])
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, list(attrs.values()))
-        result = cursor.fetchall()
+        result = cursor.fetchone() if one else cursor.fetchall()
 
-    # Return the list of lists
-    result = list(map(lambda a: list(a.values()), result))
-
-    # If only one field requested, unwrap [[_], [_], [_]] to [_, _, _]
+    # If only one field requested, unwrap each row
     if len(fields) == 1:
-        result = list(map(lambda a: a[0], result))
+        field, = fields
+        if one:
+            result = result and result[field] # avoid unwrapping None
+        else:
+            result = [row[field] for row in result]
 
     return result
 
@@ -1103,25 +840,6 @@ def get_user_id_of_item(item_id):
     return result['user_id']
 
 
-def get_name_from_user_id(user_id):
-    """
-    Queries the database and returns the full name (first and last) of the user with the specified user id (NOT UID).
-
-    Arguments:
-        user_id: The user id of the requested user (NOT UID).
-    Returns:
-        result: A string of the user's full name.
-                (first + ' ' + last)
-    """
-    s = 'SELECT full_name FROM members_full_name WHERE user_id=%s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [user_id])
-        result = cursor.fetchone()
-    if result == None:
-        return None
-    return result['full_name']
-
-
 def get_textbook_info_from_textbook_id(textbook_id):
     """
     Queries the database and returns the title and author of the textbook with the specified id.
@@ -1154,8 +872,6 @@ def get_category_name_from_id(cat_id):
     s = 'SELECT cat_title FROM marketplace_categories WHERE cat_id=%s'
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [cat_id])
+        cursor.execute(s, cat_id)
         result = cursor.fetchone()
-    if result == None:
-        return None
-    return result['cat_title']
+    return result and result['cat_title']

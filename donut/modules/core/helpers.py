@@ -113,10 +113,8 @@ def get_name_and_email(user_id):
     WHERE user_id=%s"""
 
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        result = cursor.fetchall()
-
-    return (result[0]["full_name"], result[0]["email"])
+        cursor.execute(query, user_id)
+        return cursor.fetchone()
 
 
 def get_group_list_of_member(user_id):

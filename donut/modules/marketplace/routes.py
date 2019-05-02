@@ -18,88 +18,46 @@ def marketplace():
     # cat_id = 0 indicates that the select object should be set to 'all
     # categories', which is the default
 
+SEARCH_ATTRS = set([
+    'item_id', 'cat_id', 'user_id', 'item_title', 'item_details',
+    'item_images', 'item_condition', 'item_price', 'item_timestamp',
+    'item_active', 'textbook_id', 'textbook_isbn', 'textbook_edition',
+    'textbook_title'
+])
 
-@blueprint.route('/marketplace/view')
-def category():
-    """Display all results in that category, with no query."""
-
-    if 'cat' not in flask.request.args:
-        return flask.render_template('404.html'), 404
-
-    category_id = flask.request.args['cat']
-
-    fields = []
-    if helpers.get_category_name_from_id(category_id) == 'Textbooks':
-        fields = [
-            'textbook_title', 'textbook_author', 'textbook_edition',
-            'item_price', 'user_id', 'item_timestamp'
-        ]
-    else:
-        fields = ['item_title', 'item_price', 'user_id', 'item_timestamp']
-
-    (datalist, headers, links) = helpers.generate_search_table(
-        fields=fields, attrs={'cat_id': category_id,
-                              'item_active': True})
-
-    return helpers.render_with_top_marketplace_bar(
-        'search.html',
-        datalist=datalist,
-        cat_id=category_id,
-        headers=headers,
-        links=links)
-
+SEARCH_HEADERS = ['Item', 'Price', 'Seller', 'Date', 'Title', 'Category']
 
 @blueprint.route('/marketplace/search')
 def query():
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
 
-    if 'cat' not in flask.request.args or 'q' not in flask.request.args:
-        return flask.render_template('404.html'), 404
+    category_id = flask.request.args.get('cat')
+    if category_id is None:
+        flask.abort(404)
+    query = flask.request.args.get('q', '')
 
-    category_id = flask.request.args['cat']
-    query = flask.request.args['q']
-
-    fields = [
-        'cat_id', 'item_title', 'textbook_title', 'item_price', 'user_id',
-        'item_timestamp'
-    ]
     # Create a dict of the passed in attributes which are filterable
-    filterable_attrs = [
-        'item_id', 'cat_id', 'user_id', 'item_title', 'item_details',
-        'item_images', 'item_condition', 'item_price', 'item_timestamp',
-        'item_active', 'textbook_id', 'textbook_isbn', 'textbook_edition',
-        'textbook_title'
-    ]
     attrs = {
-        attr_name: flask.request.args[attr_name]
-        for attr_name in flask.request.args if attr_name in filterable_attrs
+        attr: value
+        for attr, value in flask.request.args.items() if attr in SEARCH_ATTRS
     }
     attrs['item_active'] = True
-    if category_id == 'all':
-        category_id = 0
-    else:
-        attrs['cat_id'] = category_id
+    if category_id != helpers.ALL_CATEGORY:
+        try:
+            attrs['cat_id'] = int(category_id)
+        except ValueError:
+            flask.abort(404)
         # only pass in the cat_id to get_marketplace_items_list_data if it's not
         # 'all', because cat_id (and everything in attrs) goes into a WHERE
         # clause, and not specifying is the same as selecting all.
 
-    # now, the category id had better be a number
-    try:
-        cat_id_num = int(category_id)
-        (datalist, headers, links) = helpers.generate_search_table(
-            fields=fields, attrs=attrs, query=query)
+    items = helpers.generate_search_table(attrs, query)
 
-        return helpers.render_with_top_marketplace_bar(
-            'search.html',
-            datalist=datalist,
-            cat_id=cat_id_num,
-            headers=headers,
-            links=links)
-
-    except ValueError:
-        # not a number? something's wrong
-        return flask.render_template('404.html'), 404
+    return helpers.render_with_top_marketplace_bar(
+        'search.html',
+        items=items,
+        cat_id=category_id)
 
 
 @blueprint.route('/marketplace/view_item')

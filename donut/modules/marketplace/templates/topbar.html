@@ -5,22 +5,24 @@
         <div class="jumbotron" style="text-align: center">
             <h2>Marketplace</h2>
             <div class="nav nav-pills nav-justified" style="border-top: 2px solid black;">
-                <a href={{ url_for(".marketplace") }}>Home</a>
+                <a href="{{ url_for('.marketplace') }}">Home</a>
                 <br>
-                <a href={{ url_for(".manage") }}>Manage your listings</a>
+                <a href="{{ url_for('.manage') }}">Manage your listings</a>
                 <br>
-                <a href={{ url_for(".sell", state='new') }} method='post'>Sell an item</a>
+                <a href="{{ url_for('.sell', state='new') }}" method='post'>Sell an item</a>
             </div>
             <div class="row mp-nav-div" style="border-top: 2px solid black;border-bottom: 2px solid black;margin:5px 0px;font-size: 17px">
                 <div class="mp-nav" style="display:flex; flex-wrap: wrap; text-align: center;">
                     {% for cat in cats %}
-                        <a href={{ url_for(".category", cat=loop.index0) }} style="margin: auto;">{{ cat }}</a>
+                        <a href="{{ url_for('.query', cat=cat['cat_id']) }}" style="margin: auto;">
+                            {{ cat['cat_title'] }}
+                        </a>
                     {% endfor %}
                 </div>
             </div>
             <br>
             <div>
-                <form action={{ url_for(".query") }}>
+                <form action="{{ url_for('.query') }}">
                     <div class="form-group">
                         <label for="q">Search for an item</label>
                         <input class="form-control" placeholder="Enter search terms" name="q" id="q" autofocus />
@@ -28,22 +30,13 @@
                     <div class="form-group">
                         <label for="cat">Category</label>
                         <select class="form-control" name="cat" id="cat">
-                            <!-- option 0: all categories -->
-                            <option {% if 0 == cat_id %} selected {% endif%}
-                                value=all>
-                                All Categories
-                            </option>
-
-                            <!-- other options, one for each category -->
-                            {% for row in cats %}
-                                {% set i = loop.index0 %}
-                                {% for cat in row %}
-                                    {% set j = loop.index0 %}
-                                <option {% if i*row|length+j+1 == cat_id %} selected {% endif%}
-                                        value={{ i*row|length+j+1 }}>
-                                    {{ cat }}
+                            {% for cat in cats %}
+                                <option
+                                    {% if cat_id == cat['cat_id'] %} selected {% endif %}
+                                    value="{{ cat['cat_id'] }}"
+                                >
+                                    {{ cat['cat_title'] }}
                                 </option>
-                                {% endfor %}
                             {% endfor %}
                         </select>
                     </div>
