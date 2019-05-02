@@ -1,0 +1,111 @@
+{% if "username" in session %}
+<base target="_parent" />
+<div class="col-md-8 col-md-offset-2">
+  <form method="POST" action="{{ url_for('calendar.calendar_add_events' , update=0) }}">
+         <div class="form-group">
+            <label for="name" class="required">Event Name:</label>
+         <input type="text" name="name" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label for="tag" class="required">Tag:</label>
+
+            {% for item in permissions %}
+            {% if permissions[item] and item != 'Any'%}
+                <label class="checkbox-inline"><input type="checkbox" name="tag" value="{{ item }}">{{ item }}</label>
+            {% endif %}
+            {% endfor %}
+        </div>
+          <div class="form-group">
+		    <label for="date" class="required">Date</label>
+              <input
+                type="date"
+                class="form-control"
+                name="start_date"
+                id="start_date"
+                required
+                {% if date is not none %}value={{ date }}{% endif %}
+              />
+          </div>
+          <label for="start_hour" class="required">Start time</label>
+		  <div class="input-group">
+            <input
+                type="number"
+                class="form-control"
+                name="start_hour"
+                id="start_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+                {% if start_hour is not none %}value={{ start_hour }}{% endif %}
+            />
+            <span class="input-group-addon">:</span>
+            <input
+                type="number"  
+                class="form-control"
+                name="start_minute"     
+                id="start_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+                {% if start_minute is not none %}value={{ start_minute }}{% endif %}
+            />
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="date" class="required">End Date </label>
+            <input
+                type="date"
+                class="form-control"
+                name="end_date"
+                id="end_date"
+                required
+                {% if date is not none %}value={{ date }}{% endif %}
+            />
+          </div>
+          <label for="end_hour" class="required">Start time</label>
+          <div class="input-group">
+            <input
+                type="number"
+                class="form-control"
+                name="end_hour"
+                id="end_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+                {% if start_end is not none %}value={{ end_hour }}{% endif %}
+            />
+            <span class="input-group-addon">:</span>
+            <input
+                type="number"
+                class="form-control"
+                name="end_minute"
+                id="end_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+                {% if end_minute is not none %}value={{ end_minute }}{% endif %}
+            />
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" name="location" class="form-control"/>
+          </div>
+        <div class="form-group">
+            <label for="description" class="required">Description:</label>
+            <textarea class="form-control" name="description" rows="5" required ></textarea>
+        </div>
+      <div class="row">
+        <div class="text-center">
+          <input class="btn" type="submit" value="Submit" />
+        </div>
+      </div>
+    </form>
+</div>
+{% else %}
+    <h2>Please log in to add events</h2>
+{% endif %}
