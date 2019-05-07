@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block scripts %}
+  {{super()}}
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+{% endblock %}
+{% block page %}
+<div class="container">
+  <div class="col-md-24">
+    <div class="jumbotron">
+      <h1 id = "title" class="text-center">List of Uploaded Pages</h1>
+      <div id = "content">
+        <table class = "table">
+          <tr>
+            <th>File name</th>
+            <th> </th>
+          </tr>
+          {% for name, link in links.items() %}
+            <tr>
+              <td><a href= "{{ link }}">{{name}}</a></td>
+              {% if permissions%}
+                <td><a href= "{{ url_for(delete_file_endpoint, filename=name)}}">Delete</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
