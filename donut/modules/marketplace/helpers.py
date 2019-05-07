@@ -38,13 +38,16 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
                                          final page.
     """
     # Get category titles.
-    categories = table_fetch('marketplace_categories', fields=['cat_id', 'cat_title'])
+    categories = table_fetch(
+        'marketplace_categories', fields=['cat_id', 'cat_title'])
 
     # If there's nothing in categories, 404; something's borked.
     if not categories:
         flask.abort(404)
 
-    categories.insert(0, {'cat_id': ALL_CATEGORY, 'cat_title': 'All categories'})
+    categories.insert(0,
+                      {'cat_id': ALL_CATEGORY,
+                       'cat_title': 'All categories'})
 
     # Pass the category array, urls array, and width string, along with the
     # arguments passed in to this function, on to Flask in order to render the
@@ -270,9 +273,10 @@ def generate_links_for_managed_item(item, field_index_map, item_active,
 # SEARCH PAGE #
 ###############
 SEARCH_FIELDS = [
-    'item_id', 'cat_title', 'item_title', 'textbook_title',
-    'item_price', 'user_id', 'item_timestamp'
+    'item_id', 'cat_title', 'item_title', 'textbook_title', 'item_price',
+    'user_id', 'item_timestamp'
 ]
+
 
 def generate_search_table(attrs, query):
     """
@@ -292,11 +296,14 @@ def generate_search_table(attrs, query):
         # that we can use those fields to query by.
         fields += ['textbook_author', 'textbook_isbn']
 
-    result = table_fetch("""
-        marketplace_items NATURAL LEFT JOIN
-        marketplace_textbooks NATURAL JOIN
-        marketplace_categories
-    """, fields=fields, attrs=attrs)
+    result = table_fetch(
+        """
+            marketplace_items NATURAL LEFT JOIN
+            marketplace_textbooks NATURAL JOIN
+            marketplace_categories
+        """,
+        fields=fields,
+        attrs=attrs)
 
     if query:
         # Filter by query.
@@ -309,7 +316,8 @@ def generate_search_table(attrs, query):
             item['item_title'] = item['textbook_title']
         item['item_timestamp'] = item['item_timestamp'].strftime('%m/%d/%y')
         user_id = item['user_id']
-        item['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
+        item['user_url'] = flask.url_for(
+            'directory_search.view_user', user_id=user_id)
         item['user_name'] = get_name_and_email(user_id)['full_name']
         item['url'] = flask.url_for('.view_item', item_id=item['item_id'])
 
@@ -338,7 +346,8 @@ def search_datalist(datalist, query):
             item_tokens += tokenize_query(listing['textbook_author'])
 
             # does the isbn match any of the query's isbns?
-            is_isbn_match = any(isbn == listing['textbook_isbn'] for isbn in query_isbns)
+            is_isbn_match = any(isbn == listing['textbook_isbn']
+                                for isbn in query_isbns)
         else:
             # only include the item title
             item_tokens = tokenize_query(listing['item_title'])
@@ -357,8 +366,7 @@ def search_datalist(datalist, query):
     # if we have any perfect matches, don't include the imperfect ones
     return sorted(
         perfect_matches or imperfect_matches,
-        key=lambda item: (item['score'], item['item_timestamp'])
-    )
+        key=lambda item: (item['score'], item['item_timestamp']))
 
 
 def get_matches(l1, l2):
@@ -439,10 +447,7 @@ def validate_isbn(isbn):
                 weight = 3
             digit = int(isbn[i])
             total += digit * weight
-        if total % 10 == 0:
-            return True
-        else:
-            return False
+        return total % 10 == 0
 
     return False
 
@@ -514,7 +519,7 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
     if len(fields) == 1:
         field, = fields
         if one:
-            result = result and result[field] # avoid unwrapping None
+            result = result and result[field]  # avoid unwrapping None
         else:
             result = [row[field] for row in result]
 

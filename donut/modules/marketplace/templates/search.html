@@ -6,35 +6,33 @@
     Found {{ items|length }} result{% if items|length != 1 %}s{% endif %}.
 </h4>
 {% if items %}
-    <div>
-        <table class="table table-condensed table-hover sortable" frame=void rules=rows>
-            <thead>
+    <table class="table table-condensed table-hover sortable" frame=void rules=rows>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Seller</th>
+                <th>Date</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- display data in one main table -->
+            {% for item in items %}
                 <tr>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Seller</th>
-                    <th>Date</th>
-                    <th>Category</th>
+                    <td>
+                        <a href="{{ item['url'] }}">{{ item['item_title'] }}</a>
+                    </td>
+                    <td>${{ item['item_price'] }}</td>
+                    <td>
+                        <a href="{{ item['user_url'] }}">{{ item['user_name'] }}</a>
+                    </td>
+                    <td>{{ item['item_timestamp'] }}</td>
+                    <td>{{ item['cat_title'] }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                <!-- display data in one main table -->
-                {% for item in items %}
-                    <tr>
-                        <td>
-                            <a href="{{ item['url'] }}">{{ item['item_title'] }}</a>
-                        </td>
-                        <td>{{ item['item_price'] }}</td>
-                        <td>
-                            <a href="{{ item['user_url'] }}">{{ item['user_name'] }}</a>
-                        </td>
-                        <td>{{ item['item_timestamp'] }}</td>
-                        <td>{{ item['cat_title'] }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endif %}
 
 {% endblock %}

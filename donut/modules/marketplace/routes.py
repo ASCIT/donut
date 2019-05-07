@@ -18,14 +18,21 @@ def marketplace():
     # cat_id = 0 indicates that the select object should be set to 'all
     # categories', which is the default
 
-SEARCH_ATTRS = set([
+
+SEARCH_ATTRS = set((
     'item_id', 'cat_id', 'user_id', 'item_title', 'item_details',
     'item_images', 'item_condition', 'item_price', 'item_timestamp',
     'item_active', 'textbook_id', 'textbook_isbn', 'textbook_edition',
     'textbook_title'
-])
+))
 
-SEARCH_HEADERS = ['Item', 'Price', 'Seller', 'Date', 'Title', 'Category']
+VIEW_FIELDS = (
+    'textbook_id', 'cat_title', 'user_id', 'item_title',
+    'item_details', 'item_condition', 'item_price', 'item_timestamp',
+    'item_active', 'textbook_edition', 'textbook_isbn', 'textbook_title',
+    'textbook_author'
+)
+
 
 @blueprint.route('/marketplace/search')
 def query():
@@ -55,88 +62,48 @@ def query():
     items = helpers.generate_search_table(attrs, query)
 
     return helpers.render_with_top_marketplace_bar(
-        'search.html',
-        items=items,
-        cat_id=category_id)
+        'search.html', items=items, cat_id=category_id)
 
 
-@blueprint.route('/marketplace/view_item')
-def view_item():
-    """View additional details about item <item_id>, passed through flask.request.args."""
+@blueprint.route('/marketplace/view_item/<int:item_id>')
+def view_item(item_id):
+    """View additional details about item <item_id>"""
 
-    if 'item_id' not in flask.request.args:
-        return flask.render_template('404.html'), 404
-
-    # make sure item_id is a number
-    item_id = None
-    try:
-        item_id = int(flask.request.args['item_id'])
-    except ValueError:
-        return flask.render_template('404.html'), 404
-
-    stored = {}
-    stored_fields = [
-        'textbook_id', 'item_id', 'cat_id', 'user_id', 'item_title',
-        'item_details', 'item_condition', 'item_price', 'item_timestamp',
-        'item_active', 'textbook_edition', 'textbook_isbn', 'textbook_title',
-        'textbook_author'
-    ]
-    data = helpers.get_table_list_data(
-        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
-        stored_fields, {'item_id': item_id})
+    item = helpers.table_fetch(
+        """
+            marketplace_items NATURAL LEFT JOIN
+            marketplace_textbooks NATURAL JOIN
+            marketplace_categories
+        """,
+        one=True,
+        fields=VIEW_FIELDS,
+        attrs={'item_id': item_id})
 
     # make sure the item_id is a valid item, i.e. data is nonempty
-    if len(data) == 0:
-        return flask.render_template('404.html'), 404
-
-    # 2d list to the first list inside it
-    data = data[0]
-
-    for i in range(len(data)):
-        stored[stored_fields[i]] = data[i]
-
-    # cat_title from cat_id
-    cat_id_map = {
-        sublist[0]: sublist[1]
-        for sublist in helpers.get_table_list_data('marketplace_categories',
-                                                   ['cat_id', 'cat_title'])
-    }
-    cat_title = cat_id_map[stored['cat_id']]
-
-    # full_name and email from user_id
-    (stored['full_name'],
-     stored['email']) = get_name_and_email(stored['user_id'])
-
-    # if any field is None, replace it with '' to display more cleanly
-    for field in stored:
-        if stored[field] == None:
-            stored[field] = ''
-
-    # notify if the item is inactive
-    if not stored['item_active']:
-        flask.flash('The listing for this item is no longer active!')
+    if item is None:
+        flask.abort(404)
 
     # grab the stored image links
-    data = helpers.get_table_list_data('marketplace_images', ['img_link'],
-                                       {'item_id': item_id})
-    # unwrap elements of 2d array
-    stored_images = list(map(lambda x: x[0], data))
-    # pad out to MAX_NUM_IMAGES
-    stored_images += [""] * (MAX_NUM_IMAGES - len(stored_images))
+    image_links = helpers.table_fetch(
+        'marketplace_images',
+        fields=['img_link'],
+        attrs={'item_id': item_id})
 
-    has_edit_privs = False
-    if 'username' in flask.session:
-        current_user_id = get_user_id(flask.session['username'])
-        if stored['user_id'] == current_user_id or check_permission(
-                Permissions.ADMIN):
-            has_edit_privs = True
+    # TODO: use permissions
+    can_edit = 'username' in flask.session and \
+        get_user_id(flask.session['username']) == item['user_id']
+
+    # notify if the item is inactive
+    if not item['item_active']:
+        flask.flash('The listing for this item is no longer active!')
 
     return helpers.render_with_top_marketplace_bar(
         'view_item.html',
-        stored=stored,
-        stored_images=stored_images,
-        cat_title=cat_title,
-        has_edit_privs=has_edit_privs)
+        item_id=item_id,
+        item=item,
+        image_links=image_links,
+        user=get_name_and_email(item['user_id']),
+        can_edit=can_edit)
 
 
 @blueprint.route('/marketplace/manage', methods=['GET', 'POST'])
