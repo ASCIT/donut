@@ -14,7 +14,8 @@ def feedback(group):
         perms = auth_utils.get_permissions(flask.session['username'])
         if default_permissions.ADMIN in perms or bod_permissions.SUMMARY in perms:
             summary = True
-    return flask.render_template('bodfeedback.html', summary=summary, group=group)
+    return flask.render_template(
+        'bodfeedback.html', summary=summary, group=group)
 
 
 # Submit feedback form
@@ -29,7 +30,8 @@ def feedback_submit(group):
         if not data[field]:
             flask.flash('Please fill in all required fields (marked with *)',
                         'error')
-            return flask.redirect(flask.url_for('feedback.feedback', group=group))
+            return flask.redirect(
+                flask.url_for('feedback.feedback', group=group))
     complaint_id = helpers.register_complaint(group, data)
     flask.flash(
         Markup('Success (you may want to save this link): <a href="' +

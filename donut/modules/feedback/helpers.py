@@ -8,10 +8,14 @@ def send_update_email(group, email, complaint_id):
     '''
     Sends an email to [email] of poster and BoD
     '''
-    BOD_EMAIL = 'bod@donut.caltech.edu'
+    EMAIL = "{}@donut.caltech.edu".format(group)
     msg = email_templates.added_message.format(get_link(group, complaint_id))
-    subject = "Received BoD Feedback"
-    email_utils.send_email(', '.join((email, BOD_EMAIL)), msg, subject)
+    subject = "Received {} Feedback".format(group)
+    try:
+        email_utils.send_email(', '.join((email, EMAIL)), msg, subject)
+        return True
+    except:
+        return False
 
 
 def register_complaint(group, data, notification=True):
@@ -24,7 +28,7 @@ def register_complaint(group, data, notification=True):
     if not (data and data['subject'] and data['msg']): return False
     # Register complaint
     query = """
-    INSERT INTO {}_complaint_info (subject, status, uuid)
+    INSERT INTO {}_complaint_info (subject, status, uuid) 
     VALUES (%s, %s, UNHEX(REPLACE(UUID(), '-', '')))
     """.format(group)
     status = 'new_msg'
@@ -34,7 +38,7 @@ def register_complaint(group, data, notification=True):
     # Add email to db if applicable
     if data['email']:
         for email in data['email'].split(','):
-            add_email(complaint_id, email.strip(), False)
+            add_email(group, complaint_id, email.strip(), False)
     # Add message to database
     add_msg(group, complaint_id, data['msg'], data['name'], notification)
     return complaint_id
@@ -66,7 +70,8 @@ def remove_email(group, complaint_id, email):
     returns False if complaint_id is invalid
     '''
     if not get_subject(group, complaint_id): return False
-    query = 'DELETE FROM {}_complaint_emails WHERE complaint_id = %s AND email = %s'.format(group)
+    query = 'DELETE FROM {}_complaint_emails WHERE complaint_id = %s AND email = %s'.format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
     return True
@@ -87,14 +92,16 @@ def add_msg(group, complaint_id, message, poster, notification=True):
     VALUES (%s, %s, %s, NOW())
     """.format(group)
     # Update the status to new_msg
-    query2 = 'UPDATE {}_complaint_info SET status = "new_msg" WHERE complaint_id = %s'.format(group)
+    query2 = 'UPDATE {}_complaint_info SET status = "new_msg" WHERE complaint_id = %s'.format(
+        group)
     if not poster:
         poster = '(anonymous)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
     if notification:
-        query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(group)
+        query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(
+            group)
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(query, complaint_id)
             res = cursor.fetchall()
@@ -106,7 +113,8 @@ def get_link(group, complaint_id):
     '''
     Gets a (fully qualified) link to the view page for this complaint id
     '''
-    query = 'SELECT HEX(uuid) AS uuid FROM {}_complaint_info WHERE complaint_id = %s'.format(group)
+    query = 'SELECT HEX(uuid) AS uuid FROM {}_complaint_info WHERE complaint_id = %s'.format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
@@ -114,7 +122,10 @@ def get_link(group, complaint_id):
             return None
         uuid = res['uuid']
     return flask.url_for(
-        'feedback.feedback_view_complaint', group=group, id=uuid, _external=True)
+        'feedback.feedback_view_complaint',
+        group=group,
+        id=uuid,
+        _external=True)
 
 
 def get_id(group, uuid):
@@ -122,7 +133,8 @@ def get_id(group, uuid):
     Returns the complaint_id associated with a uuid
     or false if the uuid is not found
     '''
-    query = 'SELECT complaint_id FROM {}_complaint_info WHERE uuid = UNHEX(%s)'.format(group)
+    query = 'SELECT complaint_id FROM {}_complaint_info WHERE uuid = UNHEX(%s)'.format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, uuid)
         if not cursor.rowcount:
@@ -148,7 +160,8 @@ def get_summary(group, complaint_id):
     '''
     Returns a dict with the following fields: subject, status
     '''
-    query = 'SELECT subject, status FROM {}_complaint_info WHERE complaint_id = %s'.format(group)
+    query = 'SELECT subject, status FROM {}_complaint_info WHERE complaint_id = %s'.format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         return cursor.fetchone()
@@ -177,7 +190,8 @@ def mark_read(group, complaint_id):
     '''
     if get_status(group, complaint_id) is None:
         return False
-    query = "UPDATE {}_complaint_info SET status = 'read' WHERE complaint_id = %s".format(group)
+    query = "UPDATE {}_complaint_info SET status = 'read' WHERE complaint_id = %s".format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -189,7 +203,8 @@ def mark_unread(group, complaint_id):
     '''
     if get_status(group, complaint_id) is None:
         return False
-    query = "UPDATE {}_complaint_info SET status = 'new_msg' WHERE complaint_id = %s".format(group)
+    query = "UPDATE {}_complaint_info SET status = 'new_msg' WHERE complaint_id = %s".format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -199,7 +214,8 @@ def get_emails(group, complaint_id):
     Returns a list of subscribed emails for this complaint (which may be empty)
     or an empty list if complaint_id is invalid
     '''
-    query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(group)
+    query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(
+        group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
