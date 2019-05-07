@@ -240,7 +240,7 @@ def get_all_fields(group, complaint_id):
 
 def get_new_posts(group):
     '''
-    Returns all posts with status 'new_msg' and their associated list
+    Returns all new posts and their associated list
     of messages. Will be an array of dicts with keys complaint_id, subject,
     status, uuid, message, poster, time
     Note that message and poster refer to the latest comment on this complaint
@@ -255,7 +255,7 @@ def get_new_posts(group):
     FROM {0}_complaint_messages GROUP BY complaint_id
     ) maxtime
     ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
-    WHERE post.status = 'new_msg'
+    WHERE post.status = 'new_msg' 
     """.format(group)
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)

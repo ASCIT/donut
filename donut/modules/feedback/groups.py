@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class groups(Enum):
+class GROUPS(Enum):
     BOD = 'bod'
     ARC = 'arc'
