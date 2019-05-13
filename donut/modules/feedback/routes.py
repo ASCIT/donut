@@ -5,34 +5,32 @@ from donut.modules.feedback import helpers
 from donut import auth_utils
 from donut.modules.feedback.permissions import BOD_PERMISSIONS, ARC_PERMISSIONS
 from donut.default_permissions import Permissions as default_permissions
-from donut.modules.feedback.groups import GROUPS
+from donut.modules.feedback.groups import Groups
 permissions = {'bod': BOD_PERMISSIONS, 'arc': ARC_PERMISSIONS}
 
 
 @blueprint.route('/feedback/<group>')
 def feedback(group):
+    if group not in Groups:
+        return flask.render_template("404.html")
     summary = False
     if auth_utils.check_login():
         perms = auth_utils.get_permissions(flask.session['username'])
         if default_permissions.ADMIN in perms or permissions[group].SUMMARY in perms:
             summary = True
-    return flask.render_template('feedback.html', summary=summary, group=group)
+    return flask.render_template(
+        'feedback.html', summary=summary, group=Groups[group])
 
 
 # Submit feedback form
 @blueprint.route('/feedback/<group>/submit', methods=['POST'])
 def feedback_submit(group):
+    if group not in Groups:
+        return flask.render_template("404.html")
     fields = ['name', 'email', 'subject', 'msg']
-    required = ['subject', 'msg']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
-    for field in required:
-        if not data[field]:
-            flask.flash('Please fill in all required fields (marked with *)',
-                        'error')
-            return flask.redirect(
-                flask.url_for('feedback.feedback', group=group))
     complaint_id = helpers.register_complaint(group, data)
     flask.flash(
         Markup('Success (you may want to save this link): <a href="' +
@@ -43,7 +41,7 @@ def feedback_submit(group):
 # API endpoint with all visible data
 @blueprint.route('/1/feedback/<group>/view/<id>')
 def feedback_api_view_complaint(group, id):
-    if not helpers.get_id(id):
+    if group not in Groups or not helpers.get_id(group, id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(group, id)
     # Pack all the data we need into a dict
@@ -53,7 +51,7 @@ def feedback_api_view_complaint(group, id):
 # View a complaint
 @blueprint.route('/feedback/<group>/view/<id>')
 def feedback_view_complaint(group, id):
-    if not helpers.get_id(group, id):
+    if group not in Groups or not helpers.get_id(group, id):
         return flask.render_template("404.html")
     complaint_id = helpers.get_id(group, id)
     complaint = helpers.get_all_fields(group, complaint_id)
@@ -72,6 +70,8 @@ def feedback_view_complaint(group, id):
 # Add a message to this post
 @blueprint.route('/1/feedback/<group>/add/<id>', methods=['POST'])
 def feedback_add_msg(group, id):
+    if group not in Groups:
+        return flask.render_template("404.html")
     complaint_id = helpers.get_id(group, id)
     if not complaint_id:
         flask.abort(400)
@@ -91,6 +91,8 @@ def feedback_add_msg(group, id):
 # Allow bod members to see a summary
 @blueprint.route('/feedback/<group>/view/summary')
 def feedback_view_summary(group):
+    if group not in Groups:
+        return flask.render_template("404.html")
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].SUMMARY):
         flask.abort(403)
@@ -106,6 +108,8 @@ def feedback_view_summary(group):
 # Mark a complaint read
 @blueprint.route('/1/feedback/<group>/markRead/<id>')
 def feedback_mark_read(group, id):
+    if group not in Groups:
+        return flask.render_template("404.html")
     # Authenticate
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].TOGGLE_READ):
@@ -121,6 +125,8 @@ def feedback_mark_read(group, id):
 # Mark a complaint unread
 @blueprint.route('/1/feedback/<group>/markUnread/<id>')
 def feedback_mark_unread(group, id):
+    if group not in Groups:
+        return flask.render_template("404.html")
     # Authenticate
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].TOGGLE_READ):
@@ -136,6 +142,8 @@ def feedback_mark_unread(group, id):
 # Add an email to this complaint
 @blueprint.route('/1/feedback/<group>/addEmail/<id>', methods=['POST'])
 def feedback_add_email(group, id):
+    if group not in Groups:
+        return flask.render_template("404.html")
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].ADD_REMOVE_EMAIL):
         flask.abort(403)
@@ -155,6 +163,8 @@ def feedback_add_email(group, id):
 # Remove an email from this complaint
 @blueprint.route('/1/feedback/<group>/removeEmail/<id>', methods=['POST'])
 def feedback_remove_email(group, id):
+    if group not in Groups:
+        return flask.render_template("404.html")
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].ADD_REMOVE_EMAIL):
         flask.abort(403)
