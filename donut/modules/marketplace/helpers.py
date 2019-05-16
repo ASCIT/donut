@@ -17,8 +17,26 @@ SKIP_WORDS = set([
 ])
 
 PUNCTUATION = r'[,.\-_!;:/\\]'
+EDITION = r'^(|\d+|international)$'
+# matches prices of the form ****.**, ****, and .**
+# examples:
+# first capture group:
+# 123.98
+# 123
+# second capture group:
+# third capture group:
+# 0.98
+# .98
+PRICE = r'^([1-9]\d+(\.\d{2})?|0?\.\d{2})$'
+IMGUR_IMAGE = r'^https?://i\.imgur\.com/[a-z\d]+\.(jpg|png|gif)'
+IMGUR_POST = r'^https?://imgur\.com/([a-z\d]+)$'
 
 ALL_CATEGORY = 'all'
+
+
+def get_categories():
+    return table_fetch(
+        'marketplace_categories', fields=['cat_id', 'cat_title'])
 
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
@@ -38,8 +56,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
                                          final page.
     """
     # Get category titles.
-    categories = table_fetch(
-        'marketplace_categories', fields=['cat_id', 'cat_title'])
+    categories = get_categories()
 
     # If there's nothing in categories, 404; something's borked.
     if not categories:
@@ -516,7 +533,7 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
         result = cursor.fetchone() if one else cursor.fetchall()
 
     # If only one field requested, unwrap each row
-    if len(fields) == 1:
+    if fields and len(fields) == 1:
         field, = fields
         if one:
             result = result and result[field]  # avoid unwrapping None
@@ -529,131 +546,21 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
 #############
 # SELL PAGE #
 #############
-def generate_hidden_form_elements(skip_fields):
-    """
-    Creates a list of names of parameters and values, gathered from flask.request.form, to be passed into sell_*.html.
-    There, they will be turned into hidden form elements and passed into the request form.
-    Some fields are skipped because including them would overwrite other fields.
-
-    Arguments:
-        skip_fields: The fields to skip.
-    Returns:
-        to_return: The list of parameters and values, in a 2d list where each row is of the form ['parameter', value]
-    """
-    parameters = [
-        'cat_id', 'item_title', 'item_condition', 'item_details', 'item_price',
-        'textbook_id', 'textbook_edition', 'textbook_isbn', 'state'
-    ]
-
-    to_return = []
-    for parameter in parameters:
-        if parameter in skip_fields:
-            continue
-        if parameter in flask.request.form:
-            to_return.append([parameter, flask.request.form[parameter]])
-
-    if 'item_images' not in skip_fields:
-        if 'item_images[]' in flask.request.form:
-            for image in flask.request.form.getlist('item_images[]'):
-                to_return.append(['item_images[]', image])
-
-    return to_return
+def validate_edition(edition):
+    return re.match(EDITION, edition, re.IGNORECASE) is not None
 
 
-def validate_data():
-    """
-    Validates the data submitted in the sell form.
+def validate_price(price):
+    return re.match(PRICE, price) is not None
 
-    Returns:
-        A list of all the validation errors; an empty list if no errors.
-    """
-    errors = []
-    try:
-        category_id = int(flask.request.form['cat_id'])
-    except ValueError:
-        # this should never happen through normal form use
-        errors.append('Somehow the category got all messed up.')
 
-    cat_title = get_table_list_data(
-        'marketplace_categories',
-        fields=['cat_title'],
-        attrs={'cat_id': category_id})
-    if len(cat_title) == 0:
-        # the category id doesn't correspond to any category
-        errors.append('Somehow the category got all messed up.')
-    else:
-        # 2d array to a single element
-        # [['Furniture']] -> 'Furniture'
-        cat_title = cat_title[0][0]
-
-    if cat_title == 'Textbooks':
-        # regex to make sure the textbook edition is valid
-        if 'textbook_edition' in flask.request.form:
-            edition_regex = '^(|[0-9]+|international)$'
-            if re.match(edition_regex,
-                        str(flask.request.form['textbook_edition']),
-                        re.IGNORECASE) == None:
-                errors.append(
-                    'Textbook edition is invalid. Try providing a number or \'International\'.'
-                )
-
-        # validate the isbn too, if it's present
-        if 'textbook_isbn' in flask.request.form and flask.request.form['textbook_isbn'] != '':
-            if not validate_isbn(flask.request.form['textbook_isbn']):
-                errors.append(
-                    'Textbook ISBN appears to be invalid. Please check that you typed it in correctly.'
-                )
-
-    else:
-        # just need to make sure the item_title exists
-        if not 'item_title' in flask.request.form or flask.request.form['item_title'] == '':
-            errors.append('Item title cannot be empty.')
-
-    # condition is mandatory
-    if not 'item_condition' in flask.request.form or flask.request.form['item_condition'] == '':
-        errors.append('Item condition must be set.')
-
-    # price must be present and valid
-    if not 'item_price' in flask.request.form or flask.request.form['item_price'] == '':
-        errors.append('Price cannot be left blank.')
-    else:
-        price_regex = '^([0-9]{1,4}\.[0-9]{0,2}|[0-9]{1,4}|\.[0-9]{1,2})$'
-        # matches prices of the form ****.**, ****, and .**
-        # examples:
-        # first capture group:
-        # 123.98
-        # 1234.9
-        # 12.
-        # second capture group:
-        # 12
-        # 123
-        # third capture group:
-        # .9
-        # .98
-        if re.match(price_regex, flask.request.form['item_price']) == None:
-            errors.append(
-                'Price must be between 0 (inclusive) and 10,000 (exclusive) with at most 2 decimal places.'
-            )
-
-    image_regex_1 = "^https?://i\.imgur\.com/[a-z0-9]+\.(jpg|png|gif)$"
-    image_regex_2 = "^https?://imgur\.com/[a-z0-9]+$"
-    for image in flask.request.form.get('item_images', []):
-        if image == "":
-            continue
-
-        if re.match(image_regex_1, image, re.IGNORECASE) == None:
-            if re.match(image_regex_2, image, re.IGNORECASE) != None:
-                # if it's in format 2, convert it to format 1 by taking
-                # the key and adding .png.  Imgur automatically
-                # converts any image uploaded to all three types (jpg, png, gif).
-                key = image.split('/')[-1]
-                image = "https://i.imgur.com/" + key + ".png"
-            else:
-                errors.append(
-                    'Some image links appear to be invalid - try re-uploading?'
-                )
-
-    return errors
+def validate_image(image):
+    if re.match(IMGUR_IMAGE, image, re.IGNORECASE):
+        return image
+    post_match = re.match(IMGUR_POST, image, re.IGNORECASE)
+    if post_match:
+        return f'https://i.imgur.com/{post_match.group(1)}.png'
+    return None
 
 
 def create_new_listing(stored):
@@ -874,9 +781,8 @@ def get_category_name_from_id(cat_id):
     Returns:
         result: A string with the name of the category.
     """
-    s = 'SELECT cat_title FROM marketplace_categories WHERE cat_id=%s'
-
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, cat_id)
-        result = cursor.fetchone()
-    return result and result['cat_title']
+    return table_fetch(
+        'marketplace_categories',
+        one=True,
+        fields=['cat_title'],
+        attrs={'cat_id': cat_id})

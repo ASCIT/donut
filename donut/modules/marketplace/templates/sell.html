@@ -1,0 +1,180 @@
+{% extends "layout.html" %}
+{% block page %}
+  {% include "topbar.html" %}
+  <div class="col-md-6 col-md-offset-3" style="float: none">
+    <h3>
+      {% if state == 'new' %}
+        Create a new item
+      {% else %}
+        Modify an existing item
+      {% endif %}
+    </h3>
+    <form action="{{ url_for('.sell', state=state, item_id=item_id) }}" method="POST">
+      <div class="form-group">
+        <label class="required" for="category">Please select a category for your item</label>
+        <select class="form-control" name="cat" id="category">
+          {% for cat in categories %}
+            <option
+              {% if cat['cat_id'] == item.get('cat_id') %} selected {% endif %}
+              value="{{ cat['cat_id'] }}"
+            >
+              {{ cat['cat_title'] }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="select-textbook" style="display: none">
+        <p>Please look for your textbook in the list below.</p>
+        <table class="table table-condensed sortable">
+          <thead>
+            <tr>
+              <th class="sorttable_nosort"></th>
+              <th style="width: 50%">Title</th>
+              <th style="width: 50%">Author</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for textbook in textbooks %}
+              <tr>
+                <td>
+                  <input
+                    type="radio"
+                    name="textbook_id"
+                    value="{{ textbook['textbook_id'] }}"
+                    {% if textbook['textbook_id'] == item.get('textbook_id') %} checked {% endif %}
+                  />
+                </td>
+                <td>{{ textbook['textbook_title'] }}</td>
+                <td>{{ textbook['textbook_author'] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p>If you can't find your textbook, you can add it here.</p>
+        <div class="form-group">
+          <label for="textbook_title">Title</label>
+          <input
+            class="form-control"
+            name="textbook_title"
+            id="textbook_title"
+            value="{{ item.get('textbook_title', '') }}"
+          />
+        </div>
+        <div class="form-group">
+          <label for="textbook_author">Author</label>
+          <input
+            class="form-control"
+            name="textbook_author"
+            id="textbook_author"
+            value="{{ item.get('textbook_author', '') }}"
+          />
+        </div>
+        <p>Please enter the edition of the textbook you are selling, if you know it.</p>
+        <div class="form-group">
+          <label for="textbook_edition">Edition</label>
+          <input
+            class="form-control"
+            name="textbook_edition"
+            id="textbook_edition"
+            value="{{ item.get('textbook_edition', '') }}"
+          />
+        </div>
+        <div class="form-group">
+          <label for="textbook_isbn">ISBN</label>
+          <input
+            class="form-control"
+            name="textbook_isbn"
+            id="textbook_isbn"
+            value="{{ item.get('textbook_isbn', '') }}"
+          />
+        </div>
+      </div>
+      <div class="form-group" id="select-item">
+        <label class="required" for="item_title">Title</label>
+        <input
+          class="form-control"
+          name="item_title"
+          id="item_title"
+          value="{{ item.get('item_title', '') }}"
+        />
+      </div>
+      <div class="form-group">
+        <label class="required" for="condition">Condition</label>
+        <select class="form-control" name="condition" id="condition">
+          <option value="">Chose one...</option>
+          {% for condition in conditions %}
+            <option
+              value="{{ condition }}"
+              {% if condition == item.get('condition') %} selected {% endif %}
+            >
+              {{ condition }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="required" for="price">Price</label>
+        <div class="input-group">
+          <span class="input-group-addon">$</span>
+          <input
+            class="form-control"
+            name="price"
+            id="price"
+            value="{{ item.get('price', '') }}"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="details">Details</label>
+        <textarea class="form-control" name="details" id="details">{{ item.get('details', '') }}</textarea>
+      </div>
+      <p>
+        You may submit up to 5 images using the buttons below.
+        If the buttons don't work or you wish to upload them manually, you may also copy the links here.
+        All images are uploaded to imgur.
+      </p>
+      {% for i in range(MAX_IMAGES) %}
+        <div class="form-group">
+          <label for="image{{ i }}">Image {{ i + 1 }}</label>
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" onclick="showUploadForm({{ i }})">
+                Upload an image
+              </button>
+            </span>
+            <input
+              class="form-control"
+              name="images"
+              id="image{{ i }}"
+              value="{{ item['images'][i] }}"
+            />
+          </div>
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script>
+    var IMGUR_CLIENT_ID = '{{ imgur_id }}'
+    var LOADING_PATH = "{{ url_for('static', filename='images/marketplace/loading.gif') }}"
+    $(document).ready(function() {
+      var selectTextbook = $('#select-textbook'),
+          selectItem = $('#select-item')
+      $('#category').on('change', function() {
+        if ($(this).val() == '{{ textbooks_cat }}') {
+          selectTextbook.show()
+          selectItem.hide()
+        }
+        else {
+          selectTextbook.hide()
+          selectItem.show()
+        }
+      })
+    })
+  </script>
+  <script src="{{ url_for('static', filename='js/marketplace/overlay.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/marketplace/sell_images.js') }}"></script>
+{% endblock %}
