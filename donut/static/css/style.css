@@ -217,9 +217,28 @@ td {
   margin-bottom: 5%;
 }
 
+.btn:focus {
+  background-color: orange;
+  border-color: orange;
+}
+
+.btn:active {
+  background-color: orange;
+}
+
 .btn-primary:hover {
   border-color: orange;
 }
+
+.btn-primary:focus {
+  background-color: orange;
+  border-color: orange;
+}
+
+.btn-primary:active {
+  background-color: orange;
+}
+
 
 /* A centering class for divs in larger divs. */
 .center {
@@ -335,11 +354,10 @@ input[type=checkbox], input[type=radio] {
 }
 
 .jumbotron form input {
-  padding: 0.5%;
   margin-top: 1%;
   border: 1px orange solid;
   border-radius: 5px;
-  padding: 5px;
+  margin-right: 10px;
 }
 
 .jumbotron form input:focus {
