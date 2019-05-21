@@ -38,7 +38,8 @@ def get_question_types():
 
 
 def allowed_to_take(user_id):
-    return lambda survey: survey['group_id'] is None or is_user_in_group(user_id, survey['group_id'])
+    return lambda survey: survey['group_id'] is None or is_user_in_group(
+        user_id, survey['group_id'])
 
 
 def get_visible_surveys(user_id):

@@ -3,11 +3,8 @@
   {% include "topbar.html" %}
   <div class="col-md-6 col-md-offset-3" style="float: none">
     <h3>
-      {% if state == 'new' %}
-        Create a new item
-      {% else %}
-        Modify an existing item
-      {% endif %}
+      {% if state == 'new' %} Create a new {% else %} Modify an existing {% endif %}
+      item
     </h3>
     <form action="{{ url_for('.sell', state=state, item_id=item_id) }}" method="POST">
       <div class="form-group">
@@ -23,7 +20,10 @@
           {% endfor %}
         </select>
       </div>
-      <div id="select-textbook" style="display: none">
+      <div
+        id="select-textbook"
+        {% if item.get('cat_id') != textbooks_cat %} style="display: none" {% endif %}
+      >
         <p>Please look for your textbook in the list below.</p>
         <table class="table table-condensed sortable">
           <thead>
@@ -89,7 +89,11 @@
           />
         </div>
       </div>
-      <div class="form-group" id="select-item">
+      <div
+        class="form-group"
+        id="select-item"
+        {% if item.get('cat_id') == textbooks_cat %} style="display: none" {% endif %}
+      >
         <label class="required" for="item_title">Title</label>
         <input
           class="form-control"
@@ -100,12 +104,12 @@
       </div>
       <div class="form-group">
         <label class="required" for="condition">Condition</label>
-        <select class="form-control" name="condition" id="condition">
+        <select class="form-control" name="item_condition" id="condition">
           <option value="">Chose one...</option>
           {% for condition in conditions %}
             <option
               value="{{ condition }}"
-              {% if condition == item.get('condition') %} selected {% endif %}
+              {% if condition == item.get('item_condition') %} selected {% endif %}
             >
               {{ condition }}
             </option>
@@ -118,18 +122,18 @@
           <span class="input-group-addon">$</span>
           <input
             class="form-control"
-            name="price"
+            name="item_price"
             id="price"
-            value="{{ item.get('price', '') }}"
+            value="{{ item.get('item_price', '') }}"
           />
         </div>
       </div>
       <div class="form-group">
         <label for="details">Details</label>
-        <textarea class="form-control" name="details" id="details">{{ item.get('details', '') }}</textarea>
+        <textarea class="form-control" name="item_details" id="details">{{ item.get('item_details', '') }}</textarea>
       </div>
       <p>
-        You may submit up to 5 images using the buttons below.
+        You may submit up to {{ MAX_IMAGES }} images using the buttons below.
         If the buttons don't work or you wish to upload them manually, you may also copy the links here.
         All images are uploaded to imgur.
       </p>
@@ -154,6 +158,10 @@
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </div>
+{% endblock %}
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace/overlay.css') }}" />
 {% endblock %}
 {% block scripts %}
   {{ super() }}

@@ -8,7 +8,7 @@ CREATE TABLE marketplace_textbooks (
 	textbook_title VARCHAR(191) NOT NULL,
 	textbook_author VARCHAR(191) NOT NULL,
 PRIMARY KEY(textbook_id),
-UNIQUE KEY (textbook_title, textbook_author)
+UNIQUE KEY(textbook_title, textbook_author)
 );
 
 CREATE TABLE marketplace_categories (
@@ -22,14 +22,13 @@ UNIQUE KEY(cat_title)
 
 
 CREATE TABLE marketplace_items (
-
 	item_id INT NOT NULL AUTO_INCREMENT,
 	cat_id INT NOT NULL,
 	user_id INT NOT NULL,
-	item_title VARCHAR(255) NOT NULL,
+	item_title VARCHAR(255),
 	item_details TEXT,
 	item_condition VARCHAR(20),
-	item_price NUMERIC(6,2),
+	item_price NUMERIC(6, 2),
 	item_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	item_active BOOLEAN DEFAULT true,
 	textbook_id INT,

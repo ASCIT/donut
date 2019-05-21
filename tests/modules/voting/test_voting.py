@@ -293,20 +293,41 @@ def test_process_params_error(client):
         del params[delete_param]
         assert_message(b'Invalid form data', params)
     for date_field in ['start_date', 'end_date']:
-        assert_message(b'Invalid form data', {**default_params, date_field: '123'})
+        assert_message(b'Invalid form data', {
+            **default_params, date_field: '123'
+        })
     for hour_field in ['start_hour', 'end_hour']:
-        assert_message(b'Invalid form data', {**default_params, hour_field: 'abc'})
-        assert_message(b'Invalid form data', {**default_params, hour_field: '0'})
-        assert_message(b'Invalid form data', {**default_params, hour_field: '13'})
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: 'abc'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: '0'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: '13'
+        })
     for minute_field in ['start_minute', 'end_minute']:
-        assert_message(b'Invalid form data', {**default_params, minute_field: 'abc'})
-        assert_message(b'Invalid form data', {**default_params, minute_field: '-1'})
-        assert_message(b'Invalid form data', {**default_params, minute_field: '60'})
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: 'abc'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: '-1'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: '60'
+        })
     for period_field in ['start_period', 'end_period']:
-        assert_message(b'Invalid form data', {**default_params, period_field: 'a'})
-        assert_message(b'Invalid form data', {**default_params, period_field: ''})
+        assert_message(b'Invalid form data', {
+            **default_params, period_field: 'a'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, period_field: ''
+        })
     assert_message(b'Invalid form data', {**default_params, 'group': 'a'})
-    assert_message(b'Start must be before end', {**default_params, 'start_date': '2018-05-09', 'end_date': '2018-05-08'})
+    assert_message(b'Start must be before end', {
+        **default_params, 'start_date': '2018-05-09',
+        'end_date': '2018-05-08'
+    })
     rv = client.post(
         flask.url_for('voting.make_survey'),
         data=default_params,
@@ -823,30 +844,38 @@ def test_submit(client):
         del sess['username']
     survey_id = helpers.get_survey_data(access_key)['survey_id']
     question_types = helpers.get_question_types()
-    helpers.set_questions(survey_id, [{ # question id 8
-        'title': 'Question A',
-        'description': '',
-        'type': question_types['Dropdown'],
-        'choices': ['1', '2', '3'] # choices 12, 13, 14
-    }, {  # question id 9
-        'title': 'Question B',
-        'description': 'bbb',
-        'type': question_types['Short text']
-    }, { # question id 10
-        'title': 'Question C',
-        'description': 'ccc',
-        'type': question_types['Checkboxes'],
-        'choices': ['a', 'b', 'c'] # choices 15, 16, 17
-    }, { # question id 11
-        'title': 'Question D',
-        'description': '',
-        'type': question_types['Long text']
-    }, { # question id 12
-        'title': 'Question E',
-        'description': '',
-        'type': question_types['Elected position'],
-        'choices': ['do', 're', 'me'] # choices 18, 19, 20
-    }])
+    helpers.set_questions(
+        survey_id,
+        [
+            {  # question id 8
+                'title': 'Question A',
+                'description': '',
+                'type': question_types['Dropdown'],
+                'choices': ['1', '2', '3']  # choices 12, 13, 14
+            },
+            {  # question id 9
+                'title': 'Question B',
+                'description': 'bbb',
+                'type': question_types['Short text']
+            },
+            {  # question id 10
+                'title': 'Question C',
+                'description': 'ccc',
+                'type': question_types['Checkboxes'],
+                'choices': ['a', 'b', 'c']  # choices 15, 16, 17
+            },
+            {  # question id 11
+                'title': 'Question D',
+                'description': '',
+                'type': question_types['Long text']
+            },
+            {  # question id 12
+                'title': 'Question E',
+                'description': '',
+                'type': question_types['Elected position'],
+                'choices': ['do', 're', 'me']  # choices 18, 19, 20
+            }
+        ])
     print(helpers.get_questions_json(survey_id, True))
     # Test (some) restriction
     rv = client.post(

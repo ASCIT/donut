@@ -203,15 +203,16 @@ def sell():
         form = flask.request.form
         textbook_id = form.get('textbook_id')
         item = {
-            'cat_id': int(form.get('cat')),
+            'cat_id': int(form['cat']),
             'textbook_id': textbook_id and int(textbook_id),
             'textbook_title': form['textbook_title'],
             'textbook_author': form['textbook_author'],
             'textbook_edition': form['textbook_edition'],
             'textbook_isbn': form['textbook_isbn'],
-            'condition': form['condition'],
-            'price': form['price'],
-            'details': form['details'],
+            'item_title': form['item_title'],
+            'item_condition': form['item_condition'],
+            'item_price': form['item_price'],
+            'item_details': form['item_details'],
             'images': [image for image in form.getlist('images') if image]
         }
     elif editing:
@@ -270,12 +271,14 @@ def sell():
             edition = item['textbook_edition']
             if edition and not helpers.validate_edition(edition):
                 errors.append('Invalid textbook edition')
-            isbn = item['isbn']
+            isbn = item['textbook_isbn']
             if isbn and not helpers.validate_isbn(isbn):
                 errors.append('Invalid textbook ISBN')
         elif not item['item_title']:
             errors.append('Missing item title')
-        price = item['price']
+        if not item['item_condition']:
+            errors.append('Missing condition')
+        price = item['item_price']
         if not (price and helpers.validate_price(price)):
             errors.append('Invalid price')
         images = item['images']
@@ -298,16 +301,18 @@ def sell():
                 helpers.update_current_listing(item_id, item)
                 flask.flash('Updated!')
             else:
+                item['user_id'] = get_user_id(username)
                 item_id = helpers.create_new_listing(item)
                 flask.flash('Posted!')
-            return flask.redirect(flask.url_for('.view', item_id=item_id))
+            return flask.redirect(flask.url_for('.view_item', item_id=item_id))
 
     # Otherwise, they have not submitted anything, so render the form
     item['images'] += [''] * (MAX_IMAGES - len(item['images']))
 
     categories = helpers.table_fetch(
         'marketplace_categories', fields=['cat_id', 'cat_title'])
-    textbooks_cat, = (cat['cat_id'] for cat in categories if cat['cat_title'] == 'Textbooks')
+    textbooks_cat, = (cat['cat_id'] for cat in categories
+                      if cat['cat_title'] == 'Textbooks')
     textbooks = helpers.table_fetch('marketplace_textbooks')
     return helpers.render_with_top_marketplace_bar(
         'sell.html',

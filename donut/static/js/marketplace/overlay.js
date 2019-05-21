@@ -41,7 +41,7 @@ function showOverlay()
 
     // Append the overlay elements to each other.
     $(overlay).append(overlayBackground, overlayWindow);
-    $("#mainbody").append(overlay);
+    $("body").append(overlay);
 }
 
 /*

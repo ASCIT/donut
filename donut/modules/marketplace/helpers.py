@@ -17,17 +17,16 @@ SKIP_WORDS = set([
 ])
 
 PUNCTUATION = r'[,.\-_!;:/\\]'
-EDITION = r'^(|\d+|international)$'
+EDITION = r'^(\d+|international)$'
 # matches prices of the form ****.**, ****, and .**
 # examples:
 # first capture group:
 # 123.98
 # 123
 # second capture group:
-# third capture group:
 # 0.98
 # .98
-PRICE = r'^([1-9]\d+(\.\d{2})?|0?\.\d{2})$'
+PRICE = r'^([1-9]\d*(\.\d{2})?|0?\.\d{2})$'
 IMGUR_IMAGE = r'^https?://i\.imgur\.com/[a-z\d]+\.(jpg|png|gif)'
 IMGUR_POST = r'^https?://imgur\.com/([a-z\d]+)$'
 
@@ -391,7 +390,7 @@ def get_matches(l1, l2):
     Returns the number of matches between list 1 and list 2.
     """
     if len(l1) > len(l2):
-        return get_matches(l1, l2)
+        l1, l2 = l2, l1
 
     l2 = set(l2)
     return sum(1 for x in l1 if x in l2)
@@ -563,57 +562,39 @@ def validate_image(image):
     return None
 
 
-def create_new_listing(stored):
+def create_new_listing(item):
     """
     Inserts into the database!
 
     Arguments:
-        stored: a map with the info
+        item: a dict with the item's fields
     Returns:
         the item_id, or -1 if it fails
     """
-    user_id = int(stored['user_id'])
-    cat_id = int(stored['cat_id'])
-    cat_title = stored['cat_title']
-    item_condition = stored['item_condition']
-    item_details = stored['item_details']
-    item_price = stored['item_price']
-    item_images = []
-    item_images = stored['item_images']
-    result = []
     item_id = -1
-    if cat_title == 'Textbooks':
-        textbook_id = int(stored['textbook_id'])
-        textbook_edition = stored['textbook_edition']
-        textbook_isbn = stored['textbook_isbn'].replace('-', '')
-        s = '''INSERT INTO marketplace_items
-                (user_id, cat_id, item_condition, item_details, item_price, textbook_id, textbook_edition, textbook_isbn)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'''
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [
-                user_id, cat_id, item_condition, item_details, item_price,
-                textbook_id, textbook_edition, textbook_isbn
-            ])
-            item_id = cursor.lastrowid
-    else:
-        item_title = stored['item_title']
-        s = '''INSERT INTO marketplace_items (user_id, cat_id, item_title, item_condition, item_details, item_price) VALUES (%s, %s, %s, %s, %s, %s)'''
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [
-                user_id, cat_id, item_title, item_condition, item_details,
-                item_price
-            ])
-            item_id = cursor.lastrowid
+    query = """
+        INSERT INTO marketplace_items (
+            user_id, cat_id, item_title, item_condition, item_details,
+            item_price, textbook_id, textbook_edition, textbook_isbn
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query,
+                       (item['user_id'], item['cat_id'], item.get('item_title')
+                        or None, item['item_condition'], item['item_details']
+                        or None, item['item_price'], item.get('textbook_id')
+                        or None, item.get('textbook_edition') or None,
+                        item.get('textbook_isbn') or None))
+        item_id = cursor.lastrowid
 
     if item_id == -1:
         return -1
 
-    s = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'
-    for image in item_images:
-        if image == "":
-            continue
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [item_id, image])
+    query = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        for image in item['images']:
+            cursor.execute(query, (item_id, image))
     return item_id
 
 
@@ -682,27 +663,28 @@ def add_textbook(title, author):
         author: The author.
 
     Returns:
-        True if the insert succeeds, and False if not (the textbook
-        already exists)
+        The id of the new textbook
     """
     # check if the textbook exists
-    s = '''SELECT textbook_title FROM
-            marketplace_textbooks WHERE textbook_title = %s AND
-            textbook_author = %s'''
+    query = """
+        SELECT textbook_id
+        FROM marketplace_textbooks
+        WHERE textbook_title = %s AND textbook_author = %s
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [title, author])
+        cursor.execute(query, (title, author))
         result = cursor.fetchone()
-    if result:
-        # the textbook already exists
-        return False
+        if result:
+            # the textbook already exists
+            return result['textbook_id']
 
-    s = '''INSERT INTO marketplace_textbooks
-            (textbook_title, textbook_author) VALUES (%s,
-            %s)'''
+    query = """
+        INSERT INTO marketplace_textbooks (textbook_title, textbook_author)
+        VALUES (%s, %s)
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [title, author])
-
-    return True
+        cursor.execute(query, (title, author))
+        return cursor.lastrowid
 
 
 def delete_item(item_id):

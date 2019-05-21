@@ -28,14 +28,18 @@
             <th>Author</th>
             <td>{{ item['textbook_author'] }}</td>
         </tr>
-        <tr>
-            <th>Edition</th>
-            <td>{{ item['textbook_edition'] }}</td>
-        </tr>
-        <tr>
-            <th>ISBN</th>
-            <td>{{ item['textbook_isbn'] }}</td>
-        </tr>
+        {% if item['textbook_edition'] %}
+            <tr>
+                <th>Edition</th>
+                <td>{{ item['textbook_edition'] }}</td>
+            </tr>
+        {% endif %}
+        {% if item['textbook_isbn'] %}
+            <tr>
+                <th>ISBN</th>
+                <td>{{ item['textbook_isbn'] }}</td>
+            </tr>
+        {% endif %}
     {% endif %}
     <tr>
         <th>Condition</th>
@@ -45,10 +49,12 @@
         <th>Price</th>
         <td>${{ item['item_price'] }}</td>
     </tr>
-    <tr>
-        <th>Details</th>
-        <td>{{ item['item_details'] }}</td>
-    </tr>
+    {% if item['item_details'] %}
+        <tr>
+            <th>Details</th>
+            <td>{{ item['item_details'] }}</td>
+        </tr>
+    {% endif %}
     <tr>
         <th>Images</th>
         <td>
