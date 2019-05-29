@@ -283,7 +283,7 @@ def sell():
             errors.append('Invalid price')
         images = item['images']
         for i in range(len(images)):
-            image = validate_image(images[i])
+            image = helpers.validate_image(images[i])
             if image:
                 images[i] = image
             else:
@@ -320,6 +320,7 @@ def sell():
         item_id=item_id,
         item=item,
         MAX_IMAGES=MAX_IMAGES,
+        imgur_id=flask.current_app.config['IMGUR_API']['id'],
         categories=categories,
         textbooks=textbooks,
         textbooks_cat=textbooks_cat,
