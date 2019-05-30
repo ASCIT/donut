@@ -76,7 +76,7 @@
             class="form-control"
             name="textbook_edition"
             id="textbook_edition"
-            value="{{ item.get('textbook_edition', '') }}"
+            value="{{ item.get('textbook_edition') or '' }}"
           />
         </div>
         <div class="form-group">
@@ -85,7 +85,7 @@
             class="form-control"
             name="textbook_isbn"
             id="textbook_isbn"
-            value="{{ item.get('textbook_isbn', '') }}"
+            value="{{ item.get('textbook_isbn') or '' }}"
           />
         </div>
       </div>
@@ -99,7 +99,7 @@
           class="form-control"
           name="item_title"
           id="item_title"
-          value="{{ item.get('item_title', '') }}"
+          value="{{ item.get('item_title') or '' }}"
         />
       </div>
       <div class="form-group">
@@ -130,7 +130,7 @@
       </div>
       <div class="form-group">
         <label for="details">Details</label>
-        <textarea class="form-control" name="item_details" id="details">{{ item.get('item_details', '') }}</textarea>
+        <textarea class="form-control" name="item_details" id="details">{{ item.get('item_details') or '' }}</textarea>
       </div>
       <p>
         You may submit up to {{ MAX_IMAGES }} images using the buttons below.
