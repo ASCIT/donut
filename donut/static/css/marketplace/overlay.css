@@ -25,10 +25,6 @@
     color: #ff0000;
 }
 
-#uploadImageForm {
-    border: 5px;
-}
-
 #uploadingAnimation {
     z-index: 9002;
     position: fixed;

@@ -17,35 +17,41 @@ function showUploadForm(imageNum)
   showOverlay();
 
   // Create the forms to upload images.
-  var uploadForm = "<div style=\"margin: 10px\">";
-
-  // Used to report error messages.
-  uploadForm += "<div id=\"uploadImageError\"></div>";
-  uploadForm += "<table id=\"uploadImageForm\">";
-  uploadForm += "<tr>";
-  uploadForm += "<td>Upload from your computer:</td>";
-  uploadForm += "<td>Upload from the web:</td>";
-  uploadForm += "</tr><tr>";
-
-  // Upload from computer
-  uploadForm += "<td><input type=\"file\" id=\"image_file\" /></td>";
-
-  // Upload from url
-  uploadForm += "<td><input type=\"text\" id=\"image_url\" " +
-    "placeholder=\"Enter an image URL here\" /></td>";
-
-  uploadForm += "</tr><tr>";
-
-  // Upload from computer button
-  uploadForm += "<td><button type=\"button\" " +
-    "onclick=\"uploadFromFile(" + imageNum + ")\">Upload</button></td>";
-
-  // Upload from url button
-  uploadForm += "<td><button type=\"button\" " +
-    "onclick=\"uploadFromURL(" + imageNum + ")\">Upload</button></td>";
-  uploadForm += "</tr>";
-  uploadForm += "</table";
-  uploadForm += "</div>";
+  var uploadForm = $('<div>').addClass('panel panel-default').append(
+    $('<div>').addClass('panel-heading').append(
+      $('<div>').addClass('panel-title').text('Upload image')
+    ),
+    $('<div>').addClass('panel-body').append(
+      // Used to report error messages.
+      $('<div>').attr('id', 'uploadImageError'),
+      $('<div>').addClass('row').append(
+        // Upload from computer
+        $('<div>').addClass('col-xs-6').append(
+          $('<form>').append(
+            $('<div>').addClass('form-group').append(
+              $('<label>').attr('for', 'image_file').text('Upload from computer'),
+              $('<input>').attr({type: 'file', id: 'image_file'}).addClass('form-control')
+            ),
+            $('<button>').attr('type', 'button').addClass('btn btn-success')
+              .text('Upload')
+              .click(function() { uploadFromFile(imageNum) })
+          )
+        ),
+        // Upload from url
+        $('<div>').addClass('col-xs-6').append(
+          $('<form>').append(
+            $('<div>').addClass('form-group').append(
+              $('<label>').attr('for', 'image_url').text('Upload from URL'),
+              $('<input>').addClass('form-control').attr({id: 'image_url', placeholder: 'URL'})
+            ),
+            $('<button>').attr('type', 'button').addClass('btn btn-success')
+              .text('Upload')
+              .click(function() { uploadFromURL(imageNum) })
+          )
+        )
+      )
+    )
+  );
 
   // Display the form.
   $("#overlayWindow").append(uploadForm);
