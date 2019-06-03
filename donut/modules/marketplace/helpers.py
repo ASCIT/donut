@@ -18,6 +18,8 @@ SKIP_WORDS = set([
 
 PUNCTUATION = r'[,.\-_!;:/\\]'
 EDITION = r'^(\d+|international)$'
+ISBN_10 = r'^\d{9}[x\d]$'
+ISBN_13 = r'^\d{13}$'
 # matches prices of the form ****.**, ****, and .**
 # examples:
 # first capture group:
@@ -310,7 +312,7 @@ def generate_search_table(attrs, query):
     if query:
         # Also add cat_id, textbook_author and textbook_isbn to the end so
         # that we can use those fields to query by.
-        fields += ['textbook_author', 'textbook_isbn']
+        fields.extend(('textbook_author', 'textbook_isbn'))
 
     result = table_fetch(
         """
@@ -442,26 +444,21 @@ def validate_isbn(isbn):
 
     # Regexes shamelessly copypasted.
     # The ISBN-10 can have an x at the end (but the ISBN-13 can't).
-    if re.match('^[0-9]{9}[0-9x]$', isbn, re.IGNORECASE) != None:
+    if re.match(ISBN_10, isbn, re.IGNORECASE):
         # Check the check digit.
         total = 0
-        for i in range(10):
-            char = isbn[i].lower()
-            digit = 10  # x has value 10.
-            if char != 'x':
-                digit = int(char)
+        for i, char in enumerate(isbn):
+            digit = 10 if char.lower() == 'x' else int(char)  # x has value 10.
             weight = 10 - i
             total += digit * weight
         return total % 11 == 0
 
-    if re.match('^[0-9]{13}$', isbn, re.IGNORECASE) != None:
+    if re.match(ISBN_13, isbn, re.IGNORECASE):
         # Check the check digit.
         total = 0
-        for i in range(13):
-            weight = 1
-            if i % 2 != 0:
-                weight = 3
-            digit = int(isbn[i])
+        for i, char in enumerate(isbn):
+            weight = 3 if i % 2 else 1
+            digit = int(char)
             total += digit * weight
         return total % 10 == 0
 
@@ -562,6 +559,13 @@ def validate_image(image):
     return None
 
 
+def insert_images(item_id, item):
+    query = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        for image in item['images']:
+            cursor.execute(query, (item_id, image))
+
+
 def create_new_listing(item):
     """
     Inserts into the database!
@@ -569,9 +573,8 @@ def create_new_listing(item):
     Arguments:
         item: a dict with the item's fields
     Returns:
-        the item_id, or -1 if it fails
+        the item_id
     """
-    item_id = -1
     query = """
         INSERT INTO marketplace_items (
             user_id, cat_id, item_title, item_condition, item_details,
@@ -588,68 +591,39 @@ def create_new_listing(item):
                         item.get('textbook_isbn') or None))
         item_id = cursor.lastrowid
 
-    if item_id == -1:
-        return -1
-
-    query = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s)'
-    with flask.g.pymysql_db.cursor() as cursor:
-        for image in item['images']:
-            cursor.execute(query, (item_id, image))
+    insert_images(item_id, item)
     return item_id
 
 
-def update_current_listing(item_id, stored):
+def update_current_listing(item_id, item):
     """
     Changes items in the database!
 
     Arguments:
-        stored: a map with the info
-    Returns:
-        the item_id, or -1 if it fails
+        item_id: the id of the item to update
+        item: a dict with the item's fields
     """
-    user_id = int(stored['user_id'])
-    cat_id = int(stored['cat_id'])
-    cat_title = stored['cat_title']
-    item_condition = stored['item_condition']
-    item_details = stored['item_details']
-    item_price = stored['item_price']
-    item_images = []
-    item_images = stored['item_images']
-    result = []
-    if cat_title == 'Textbooks':
-        textbook_id = int(stored['textbook_id'])
-        textbook_edition = stored['textbook_edition']
-        textbook_isbn = stored['textbook_isbn'].replace('-', '')
-        s = '''UPDATE marketplace_items SET
-                user_id=%s, cat_id=%s, item_condition=%s, item_details=%s, item_price=%s,
-                textbook_id=%s, textbook_edition=%s, textbook_isbn=%s WHERE item_id=%s'''
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [
-                user_id, cat_id, item_condition, item_details, item_price,
-                textbook_id, textbook_edition, textbook_isbn, item_id
-            ])
-    else:
-        item_title = stored['item_title']
-        s = '''UPDATE marketplace_items SET
-                user_id=%s, cat_id=%s, item_title=%s, item_condition=%s, item_details=%s,
-                item_price=%s WHERE item_id=%s'''
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [
-                user_id, cat_id, item_title, item_condition, item_details,
-                item_price, item_id
-            ])
+    query = """
+        UPDATE marketplace_items
+        SET cat_id = %s, item_title = %s, item_condition = %s,
+            item_details = %s, item_price = %s, textbook_id = %s,
+            textbook_edition = %s, textbook_isbn = %s
+        WHERE item_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query,
+                       (item['cat_id'], item.get('item_title') or None,
+                        item['item_condition'], item['item_details'] or None,
+                        item['item_price'], item.get('textbook_id') or None,
+                        item.get('textbook_edition') or None,
+                        item.get('textbook_isbn') or None, item_id))
 
     # clean the database of all items that used to be affiliated with <item_id>
-    s = 'DELETE FROM marketplace_images WHERE item_id = %s'
+    query = 'DELETE FROM marketplace_images WHERE item_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
+        cursor.execute(query, item_id)
 
-    s = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s);'
-    for image in item_images:
-        if image == "":
-            continue
-        with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(s, [item_id, image])
+    insert_images(item_id, item)
     return item_id
 
 

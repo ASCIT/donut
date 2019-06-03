@@ -48,27 +48,29 @@
                 <td>{{ textbook['textbook_author'] }}</td>
               </tr>
             {% endfor %}
+            <tr>
+              <td>
+                <input type="radio" name="textbook_id" value="0"/>
+              </td>
+              <td>
+                <input
+                  class="form-control"
+                  name="textbook_title"
+                  id="textbook_title"
+                  value="{{ item.get('textbook_title', '') }}"
+                />
+              </td>
+              <td>
+                <input
+                  class="form-control"
+                  name="textbook_author"
+                  id="textbook_author"
+                  value="{{ item.get('textbook_author', '') }}"
+                />
+              </td>
+            </tr>
           </tbody>
         </table>
-        <p>If you can't find your textbook, you can add it here.</p>
-        <div class="form-group">
-          <label for="textbook_title">Title</label>
-          <input
-            class="form-control"
-            name="textbook_title"
-            id="textbook_title"
-            value="{{ item.get('textbook_title', '') }}"
-          />
-        </div>
-        <div class="form-group">
-          <label for="textbook_author">Author</label>
-          <input
-            class="form-control"
-            name="textbook_author"
-            id="textbook_author"
-            value="{{ item.get('textbook_author', '') }}"
-          />
-        </div>
         <p>Please enter the edition of the textbook you are selling, if you know it.</p>
         <div class="form-group">
           <label for="textbook_edition">Edition</label>

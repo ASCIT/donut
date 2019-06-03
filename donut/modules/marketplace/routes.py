@@ -272,8 +272,11 @@ def sell():
             if edition and not helpers.validate_edition(edition):
                 errors.append('Invalid textbook edition')
             isbn = item['textbook_isbn']
-            if isbn and not helpers.validate_isbn(isbn):
-                errors.append('Invalid textbook ISBN')
+            if isbn:
+                if helpers.validate_isbn(isbn):
+                    item['textbook_isbn'] = isbn.replace('-', '')
+                else:
+                    errors.append('Invalid textbook ISBN')
         elif not item['item_title']:
             errors.append('Missing item title')
         if not item['item_condition']:
