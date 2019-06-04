@@ -84,6 +84,11 @@ def view_item(item_id):
     if item is None:
         flask.abort(404)
 
+    # Display textbook edition
+    edition = item['textbook_edition']
+    if edition:
+        item['textbook_edition'] = helpers.process_edition(edition)
+
     # grab the stored image links
     image_links = helpers.get_image_links(item_id)
 
@@ -109,7 +114,7 @@ def manage():
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 
     return helpers.render_with_top_marketplace_bar(
-        'manage.html', items=helpers.get_my_items())
+        'manage_items.html', items=helpers.get_my_items())
 
 
 @blueprint.route('/marketplace/archive/<int:item_id>')

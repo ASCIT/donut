@@ -2,8 +2,7 @@ import flask
 import re
 
 from donut.modules.core.helpers import get_member_data, get_name_and_email
-from donut.auth_utils import get_user_id, check_permission
-from donut.resources import Permissions
+from donut.auth_utils import get_user_id
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong

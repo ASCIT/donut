@@ -58,12 +58,12 @@ INSERT INTO member_options(user_id, option_id, option_type) VALUES
 INSERT INTO images(user_id, extension, image) VALUES
     (3, 'png', 'NOT_A_REAL_IMAGE');
 
-INSERT INTO marketplace_categories(cat_title, cat_order) VALUES
-    ('Furniture', 1),
-    ('Textbooks', 2);
+INSERT INTO marketplace_categories(cat_title) VALUES
+    ('Furniture'),
+    ('Textbooks');
 
 INSERT INTO marketplace_items(cat_id, user_id, item_title, item_details, item_condition, item_price) VALUES
-    (1, 1, 'A table', "It\'s a pretty cool table, I guess", 'Good', 5.99);
+    (1, 1, 'A table', "It's a pretty cool table, I guess", 'Good', 5.99);
 
 INSERT INTO users(user_id, username) VALUES
     (1, "dqu"),
