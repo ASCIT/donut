@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block scripts %}
+  {{super()}}
+  <script src="https://cdn.rawgit.com/showdownjs/showdown/1.0.1/dist/showdown.min.js"></script>
+  <script src="{{ url_for('uploads.static', filename='script.js', _external = True)}}" type="text/javascript"></script>
+{% endblock %}
+{% block page %}
+<div class="container theme-showcase" role="main">
+  <div class="col-md-24">
+    <div class="jumbotron">
+      <h1 id = "title" class="text-center">{{title}}</h1>
+      <div id = "content">
+      </div>
+      {% if permissions %}
+        <a href="{{ url_for('editor.editor', title=title.replace(' ', '_'))}}">edit this page</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@ import flask
 import pymysql.cursors
 from donut.auth_utils import get_permissions, get_user_id
 from donut.constants import Gender
-from donut.resources import Permissions
+from donut.default_permissions import Permissions
 
 
 def get_hidden_fields(viewer_name, viewee_id):
@@ -102,7 +102,7 @@ def get_users_by_name_query(search):
     Finds users whose names match the given query.
     Max 10 users returned, in alphabetical order.
     """
-    query = 'SELECT user_id, full_name FROM members NATURAL JOIN members_full_name WHERE '
+    query = 'SELECT user_id, full_name, graduation_year FROM members NATURAL JOIN members_full_name WHERE '
     search, name_query = make_name_query(search)
     query += name_query
     query += ' ORDER BY LOWER(full_name) LIMIT 10'
@@ -164,8 +164,11 @@ def execute_search(**kwargs):
         return cursor.fetchall()
 
 
-def members_unique_values(field):
-    query = 'SELECT DISTINCT ' + field + ' FROM members WHERE ' + field + ' IS NOT NULL AND ' + field + '!= "" ORDER BY ' + field
+def members_unique_values(field, string):
+    query = 'SELECT DISTINCT ' + field + ' FROM members WHERE ' + field + ' IS NOT NULL'
+    if string:
+        query += ' AND LENGTH(TRIM(' + field + '))'
+    query += ' ORDER BY ' + field
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return [member[field] for member in cursor.fetchall()]
@@ -193,8 +196,8 @@ def get_residences():
 
 
 def get_grad_years():
-    return members_unique_values('graduation_year')
+    return members_unique_values('graduation_year', False)
 
 
 def get_states():
-    return members_unique_values('state')
+    return members_unique_values('state', True)

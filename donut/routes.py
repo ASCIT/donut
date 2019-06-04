@@ -2,6 +2,7 @@ import flask
 from flask import jsonify
 from donut import app
 from donut.auth_utils import get_user_id
+from donut.constants import CONTACTS
 from donut.modules.core import helpers
 from donut.modules import groups
 
@@ -13,12 +14,12 @@ def home():
 
 @app.route('/contact')
 def contact():
-    return flask.render_template('contact.html')
+    return flask.render_template('contact.html', contacts=CONTACTS)
 
 
 @app.route('/campus_positions')
 def campus_positions():
-    '''Renders the campus positions template. We collect a list of 
+    '''Renders the campus positions template. We collect a list of
     groups that the currently loged in user is the admin of. We
     also collect the total list of positions and pass it in'''
     approved_group_ids = []

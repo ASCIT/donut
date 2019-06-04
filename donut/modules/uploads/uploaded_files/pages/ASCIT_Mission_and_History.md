@@ -1,0 +1,10 @@
+The main body of undergraduate student government is ASCIT (pronounced "ask-it"), the Associated Students of the California Institute of Technology. Since January 1935, ASCIT has had the advantage of incorporation; as an independent non-profit corporation, it operates free of Caltech administrative control. ASCIT is governed by the nine elected members of the Board of Directors (BoD). The Directors set the budget, discuss and act on student concerns and issues, and represent the undergraduates to the faculty, administration, and other groups.
+
+ASCIT supports a significant number of activities at Caltech. ASCIT publishes The California Tech (the student-run weekly newspaper), the Big T (yearbook), the little t (a valuable student handbook), the Totem (annual literary magazine), and the CLUE (review of courses and professors). A copier is maintained for student use. A large portion of the ASCIT budget is designated for social events and the funding of the various student clubs on campus. Recently, ASCIT created the Screening Room, equipped with media equipment for watching movies. ASCIT also formed a DVD library, and rents out a theater showing once a year for ASCIT members as a substitute for classic motion picture showings on-campus, which were held in the past. Many of ASCIT's new services are consolidated on its new DONUT website, which allows users to make reservations for the Screening Room and other club rooms, vote online, and perform price-checks on textbooks and sell or buy used books from other students.
+
+To a greater extent than at most other colleges, undergraduates have a say in the policies of the Institute. For example, the Honor System is exclusively under student control; it is administered and enforced by ASCIT's Board of Control (BOC). Undergraduates serve on Faculty Standing Committees and have informal access to Faculty and Administration.
+
+In 2002, the ASCIT President completed a SURF entitled ["A History of Undergraduate Self-Governance at Caltech"](uploaded_file/Jou02ppt.pdf). It is helpful if you are interested in a primer to the history of student life at Caltech.
+
+ASCIT Home
+
