@@ -85,16 +85,11 @@ def view_item(item_id):
         flask.abort(404)
 
     # grab the stored image links
-    image_links = helpers.table_fetch(
-        'marketplace_images', fields=['img_link'], attrs={'item_id': item_id})
-
-    # TODO: use permissions
-    can_edit = 'username' in flask.session and \
-        get_user_id(flask.session['username']) == item['user_id']
+    image_links = helpers.get_image_links(item_id)
 
     # notify if the item is inactive
     if not item['item_active']:
-        flask.flash('The listing for this item is no longer active!')
+        flask.flash('This item has been archived!')
 
     return helpers.render_with_top_marketplace_bar(
         'view_item.html',
@@ -102,10 +97,10 @@ def view_item(item_id):
         item=item,
         image_links=image_links,
         user=get_name_and_email(item['user_id']),
-        can_edit=can_edit)
+        can_edit=helpers.can_manage(item))
 
 
-@blueprint.route('/marketplace/manage', methods=['GET', 'POST'])
+@blueprint.route('/marketplace/manage')
 def manage():
     if 'username' not in flask.session:
         # they're not logged in, kick them out
@@ -113,59 +108,28 @@ def manage():
         flask.session['next'] = flask.url_for('.manage')
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 
-    if flask.request.method == 'POST':
-        if 'item' not in flask.request.form:
-            flask.flash('Invalid request')
-        else:
-            item = flask.request.form['item']
-            # archive, unarchive, delete
-            if flask.request.form['state'] == 'archive':
-                result = helpers.manage_set_active_status(item, 0)
-                if result == False:
-                    flask.flash('You do not own that item.')
-
-            elif flask.request.form['state'] == 'unarchive':
-                result = helpers.manage_set_active_status(item, 1)
-                if result == False:
-                    flask.flash('You do not own that item.')
-
-            elif flask.request.form['state'] == 'delete':
-                result = helpers.manage_delete_item(item)
-                if result == False:
-                    flask.flash('You do not own that item.')
-
-    return helpers.display_managed_items()
+    return helpers.render_with_top_marketplace_bar(
+        'manage.html', items=helpers.get_my_items())
 
 
-@blueprint.route('/marketplace/manage_confirm', methods=['GET'])
-def manage_confirm():
-    if 'username' not in flask.session:
-        # they're not logged in, kick them out
-        flask.flash('Login required to access that page.')
-        flask.session['next'] = flask.url_for('.manage')
-        return helpers.render_with_top_marketplace_bar('requires_login.html')
+@blueprint.route('/marketplace/archive/<int:item_id>')
+def archive(item_id):
+    if not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to archive this item.')
+        return flask.redirect(flask.url_for('.marketplace'))
 
-    if 'state' in flask.request.args:
-        if 'item' not in flask.request.args:
-            flask.flash('Invalid URL')
+    helpers.set_active_status(item_id, False)
+    return flask.redirect(flask.url_for('.manage'))
 
-        else:
-            item = flask.request.args['item']
 
-            # archive, unarchive, delete
-            if flask.request.args['state'] == 'archive':
-                return helpers.manage_display_confirmation(
-                    action='archive', item_id=item)
+@blueprint.route('/marketplace/unarchive/<int:item_id>')
+def unarchive(item_id):
+    if not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to unarchive this item.')
+        return flask.redirect(flask.url_for('.marketplace'))
 
-            elif flask.request.args['state'] == 'unarchive':
-                return helpers.manage_display_confirmation(
-                    action='unarchive', item_id=item)
-
-            elif flask.request.args['state'] == 'delete':
-                return helpers.manage_display_confirmation(
-                    action='delete', item_id=item)
-
-    return helpers.display_managed_items()
+    helpers.set_active_status(item_id, True)
+    return flask.redirect(flask.url_for('.manage'))
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
@@ -227,30 +191,17 @@ def sell():
             return flask.redirect(flask.url_for('.sell'))
 
         # make sure the current user is the one who posted the item
-        # TODO: use permissions
-        if item['user_id'] != get_user_id(username):
-            if flask.request.referrer is None:
-                # there's no previous page? that's weird, just go home
-                return flask.redirect(flask.url_for('home'))
-            else:
-                flask.flash('You do not have permission to edit this item.')
-                # go back to the previous page
-                return flask.redirect(flask.request.referrer)
+        if not helpers.can_manage(item):
+            flask.flash('You do not have permission to edit this item.')
+            return flask.redirect(flask.url_for('.marketplace'))
 
-        item['images'] = helpers.table_fetch(
-            'marketplace_images',
-            fields=['img_link'],
-            attrs={'item_id': item_id})
+        item['images'] = helpers.get_image_links(item_id)
     else:
         item = {'images': []}
 
     if saving:
         errors = []
-        cat_title = helpers.table_fetch(
-            'marketplace_categories',
-            one=True,
-            fields=['cat_title'],
-            attrs={'cat_id': item['cat_id']})
+        cat_title = helpers.get_category_name_from_id(item['cat_id'])
         if not cat_title:
             errors.append('Invalid category')
         is_textbook = cat_title == 'Textbooks'
@@ -312,8 +263,7 @@ def sell():
     # Otherwise, they have not submitted anything, so render the form
     item['images'] += [''] * (MAX_IMAGES - len(item['images']))
 
-    categories = helpers.table_fetch(
-        'marketplace_categories', fields=['cat_id', 'cat_title'])
+    categories = helpers.table_fetch('marketplace_categories')
     textbooks_cat, = (cat['cat_id'] for cat in categories
                       if cat['cat_title'] == 'Textbooks')
     textbooks = helpers.table_fetch('marketplace_textbooks')

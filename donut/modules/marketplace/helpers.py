@@ -35,11 +35,6 @@ IMGUR_POST = r'^https?://imgur\.com/([a-z\d]+)$'
 ALL_CATEGORY = 'all'
 
 
-def get_categories():
-    return table_fetch(
-        'marketplace_categories', fields=['cat_id', 'cat_title'])
-
-
 def render_with_top_marketplace_bar(template_url, **kwargs):
     """
     Provides an easy way for routing functions to pass the variables required
@@ -57,7 +52,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
                                          final page.
     """
     # Get category titles.
-    categories = get_categories()
+    categories = table_fetch('marketplace_categories')
 
     # If there's nothing in categories, 404; something's borked.
     if not categories:
@@ -73,218 +68,52 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     return flask.render_template(template_url, cats=categories, **kwargs)
 
 
+def can_manage(item):
+    """
+    Returns whether the currently logged-in user can manage a given item.
+    Item may be {'user_id': str} or an item_id.
+    """
+
+    user_id = table_fetch(
+        'marketplace_items',
+        one=True,
+        fields=('user_id', ),
+        attrs={'item_id': item}) if type(item) == int else item['user_id']
+
+    # TODO: use permissions
+    username = flask.session.get('username')
+    return username and get_user_id(username) == user_id
+
+
 ###############
 # MANAGE PAGE #
 ###############
-def manage_set_active_status(item, is_active):
-    """
-    Checks permissions and then sets the is_active status of item <item> to
-    <is_active>.
-    """
-    current_user_id = get_user_id(flask.session['username'])
-    if current_user_id != get_user_id_of_item(item) and not check_permission(
-            Permissions.ADMIN):
-        return False
+MANAGE_FIELDS = ('item_id', 'item_title', 'textbook_title', 'item_price',
+                 'item_timestamp', 'cat_title', 'item_active')
 
-    s = 'UPDATE marketplace_items SET item_active=%s WHERE item_id=%s'
+
+def set_active_status(item_id, is_active):
+    """
+    Sets the is_active status of item <item> to <is_active>.
+    """
+    query = 'UPDATE marketplace_items SET item_active = %s WHERE item_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (is_active, item))
-
-    return True
+        cursor.execute(query, (is_active, item_id))
 
 
-def manage_delete_item(item_id):
-    """
-    Checks permissions and then deletes the item.
-    """
-    current_user_id = get_user_id(flask.session['username'])
-    if current_user_id != get_user_id_of_item(
-            item_id) and not check_permission(Permissions.ADMIN):
-        return False
-
-    return delete_item(item_id)
-
-
-def manage_display_confirmation(action, item_id):
-    """
-    Displays a confirmation message where the user can confirm that they want
-    to archive, unarchive, or delete of one of their items.
-    """
-    headers = ['Category', 'Item', 'Price', 'Date']
-
-    fields = [
-        'cat_id', 'item_title', 'textbook_title', 'item_price',
-        'item_timestamp'
-    ]
-
-    field_index_map = {k: v for v, k in enumerate(fields)}
-
-    item_details = table_fetch_one(
-        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
-        fields=fields,
-        attrs={'item_id': item_id})
-
-    if item_details == None:
-        # The item doesn't exist, something went wrong.
-        return flask.render_template('404.html'), 404
-
-    # Pretty timestamps!
-    item_details[field_index_map['item_timestamp']] = item_details[
-        field_index_map['item_timestamp']].strftime('%m/%d/%y')
-
-    # Convert category ids to category names.
-    item_details[field_index_map['cat_id']] = get_category_name_from_id(
-        item_details[field_index_map['cat_id']])
-
-    # Overall title is either item_title or textbook_title.
-    if item_details[field_index_map['item_title']] == '':
-        item_details[field_index_map['item_title']] = item_details[
-            field_index_map['textbook_title']]
-    del item_details[field_index_map['textbook_title']]
-
-    links = [''] * len(item_details)
-    links[field_index_map['item_title']] = flask.url_for(
-        '.view_item', item_id=item_id)
-
-    return render_with_top_marketplace_bar(
-        'manage/confirm.html',
-        action=action,
-        headers=headers,
-        item=item_details,
-        links=links,
-        item_id=item_id)
-
-
-def display_managed_items():
+def get_my_items():
     """
     Handles the generation of the table of managed items.
     """
-    headers = ['Category', 'Item', 'Price', 'Date', '', '', '']
 
-    fields = [
-        'cat_id', 'item_title', 'textbook_title', 'item_price',
-        'item_timestamp', 'item_active', 'item_id'
-    ]
-    field_index_map = {k: v for v, k in enumerate(fields)}
-
-    # Get all owned items.
-    owned_items = table_fetch_all(
-        'marketplace_items NATURAL LEFT JOIN marketplace_textbooks',
-        fields=fields,
+    return table_fetch(
+        """
+            marketplace_items NATURAL LEFT JOIN
+            marketplace_textbooks NATURAL JOIN
+            marketplace_categories
+        """,
+        fields=MANAGE_FIELDS,
         attrs={'user_id': get_user_id(flask.session['username'])})
-
-    active_items = []
-    active_links = []
-    inactive_items = []
-    inactive_links = []
-    for item in owned_items:
-        item_active = item[field_index_map['item_active']]
-        item_id = item[field_index_map['item_id']]
-        (item, field_index_map) = row_text_from_managed_item(
-            item, field_index_map)
-        links = generate_links_for_managed_item(item, field_index_map,
-                                                item_active, item_id)
-
-        if item_active:
-            active_items.append(item)
-            active_links.append(links)
-        else:
-            inactive_items.append(item)
-            inactive_links.append(links)
-
-    return render_with_top_marketplace_bar(
-        'manage/manage.html',
-        headers=headers,
-        activelist=active_items,
-        activelinks=active_links,
-        inactivelist=inactive_items,
-        inactivelinks=inactive_links)
-
-
-def row_text_from_managed_item(item, field_index_map):
-    """
-    For use in routes.manage().  Removes item_active and item_id from item[],
-    replacing them with edit, (un)archive, and delete text instead.  Also
-    modifies field_index_map to reflect this change.
-    """
-    # Convert datestrings into actual dates.
-    item[field_index_map['item_timestamp']] = item[field_index_map[
-        'item_timestamp']].strftime('%m/%d/%y')
-    # Convert category ids to category names.
-    item[field_index_map['cat_id']] = get_category_name_from_id(
-        item[field_index_map['cat_id']])
-
-    if item[field_index_map['item_title']] == '':
-        item[field_index_map['item_title']] = item[field_index_map[
-            'textbook_title']]
-
-    item_active = item[field_index_map['item_active']]
-    # Remove item_active, item_id, and textbook_title.
-    del item[field_index_map['item_id']]
-    del item[field_index_map['item_active']]
-    del item[field_index_map['textbook_title']]
-    # This order is important because if we delete item_active first,
-    # field_index_map['item_id'] will be wrong, so delete in reverse
-    # order.
-
-    # In the real text of the manage page, we need edit, (un)archive, and delete
-    # links.
-    item.append('Edit')
-    field_index_map['edit'] = len(item) - 1
-
-    if item_active:
-        item.append('Archive')
-    else:
-        item.append('Unarchive')
-    field_index_map['archive'] = len(item) - 1
-
-    item.append('Delete')
-    field_index_map['delete'] = len(item) - 1
-
-    return (item, field_index_map)
-
-
-def generate_links_for_managed_item(item, field_index_map, item_active,
-                                    item_id):
-    """
-    For use in routes.manage().  Creates links to edit, (un)archive, and delete
-    pages.
-
-    Arguments:
-        item: The list of item details.
-
-        field_index_map: A map from a field to the index where its info is
-                         stored in item.
-
-        item_active: Whether or not the item is active -- affects whether the
-                     link is archive or unarchive.
-
-        item_id: ID of the item.
-
-    Returns:
-        links: A list the same size as item[], with links to edit, (un)archive,
-               and delete pages stored at field_index_map['edit'], ['archive'],
-               and ['delete'] respectively, and '' everywhere else.
-    """
-    links = [''] * len(item)
-
-    links[field_index_map['item_title']] = flask.url_for(
-        '.view_item', item_id=item_id)
-
-    links[field_index_map['edit']] = flask.url_for(
-        '.sell', item_id=item_id, state='edit')
-
-    if item_active:
-        links[field_index_map['archive']] = flask.url_for(
-            '.manage_confirm', item=item_id, state='archive')
-    else:
-        links[field_index_map['archive']] = flask.url_for(
-            '.manage_confirm', item=item_id, state='unarchive')
-
-    links[field_index_map['delete']] = flask.url_for(
-        '.manage_confirm', item=item_id, state='delete')
-
-    return links
 
 
 ###############
@@ -688,26 +517,6 @@ def delete_item(item_id):
 #####################
 # HELPFUL FUNCTIONS #
 #####################
-def get_user_id_of_item(item_id):
-    """
-    Gets the user_id of the user who owns the item <item_id>.
-
-    Arguments:
-        item_id: The id of the item.
-
-    Returns:
-        The user_id
-    """
-    s = 'SELECT user_id FROM marketplace_items WHERE item_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
-        result = cursor.fetchone()
-    if result == None:
-        # the item doesn't exist
-        return False
-    return result['user_id']
-
-
 def get_textbook_info_from_textbook_id(textbook_id):
     """
     Queries the database and returns the title and author of the textbook with the specified id.
@@ -740,5 +549,12 @@ def get_category_name_from_id(cat_id):
     return table_fetch(
         'marketplace_categories',
         one=True,
-        fields=['cat_title'],
+        fields=('cat_title', ),
         attrs={'cat_id': cat_id})
+
+
+def get_image_links(item_id):
+    return table_fetch(
+        'marketplace_images',
+        fields=('img_link', ),
+        attrs={'item_id': item_id})
