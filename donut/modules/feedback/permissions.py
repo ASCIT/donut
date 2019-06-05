@@ -14,3 +14,10 @@ class ARC_PERMISSIONS(enum.IntEnum):
     TOGGLE_READ = 13
     ADD_REMOVE_EMAIL = 14
     VIEW_EMAILS = 15
+
+
+class DONUT_PERMISSIONS(enum.IntEnum):
+    SUMMARY = 16
+    TOGGLE_READ = 17
+    ADD_REMOVE_EMAIL = 18
+    VIEW_EMAILS = 19

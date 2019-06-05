@@ -2,7 +2,7 @@ import flask
 from donut.modules.feedback import helpers
 from donut.testing.fixtures import client
 from datetime import datetime
-groups = ['bod', 'arc']
+groups = ['bod', 'arc', 'donut']
 
 
 def test_get_link(client):
