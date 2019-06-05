@@ -628,7 +628,6 @@ label.required:after {
   /* Make sure the main container spans the whole page. */
   .container {
     width: 100%;
-    height: 100%;
   }
 
   /* Dim overlay for homepage background to make text more visible. */
