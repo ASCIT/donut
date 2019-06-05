@@ -224,10 +224,16 @@ td {
 
 .btn:active {
   background-color: orange;
+  border-color: #FFF;
 }
 
 .btn-primary:hover {
   border-color: orange;
+}
+
+.btn-primary:active:focus {
+  background-color: orange;
+  border-color: #FFF;
 }
 
 .btn-primary:focus {
