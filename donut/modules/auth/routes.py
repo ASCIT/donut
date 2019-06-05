@@ -1,6 +1,7 @@
 import flask
 from donut import auth_utils, constants
 from donut.modules.auth import blueprint, helpers
+from donut.modules.auth.permissions import Permissions
 
 
 @blueprint.route('/login')
@@ -12,13 +13,52 @@ def login():
 @blueprint.route('/login/submit', methods=['POST'])
 def login_submit():
     """Handle authentication."""
-    username = flask.request.form.get('username', None)
+    mask_and_user = flask.request.form.get('username', None)
     password = flask.request.form.get('password', None)
+
+    # Need to take care of the case when masquerading occurs.
+    username = None
+    mask = None
+
+    if mask_and_user is not None:
+        # Check for the character to split.
+        if ':' in mask_and_user:
+            # If it's there, we assume the second part is a mask name.
+            split = mask_and_user.split(':')
+
+            if len(split) > 2:
+                flask.flash('You cannot specify multiple masks at once.')
+                return flask.redirect(flask.url_for('auth.login'))
+
+            username, mask = split
+        else:
+            username = mask_and_user
 
     if username is not None and password is not None:
         user_id = helpers.authenticate(username, password)
         if user_id is not None:
-            flask.session['username'] = username
+            permissions = auth_utils.get_permissions(username)
+
+            # We need to check if the user has masking permissions.
+            mask_perm = auth_utils.check_permission(username, Permissions.MASK)
+
+            if mask is not None:
+                if mask_perm:
+                    # But check to make sure the mask exists.
+                    if not auth_utils.get_user_id(mask):
+                        flask.flash('That person does not exist to mask.')
+                        return flask.redirect(flask.url_for('auth.login'))
+
+                    # If the user has mask permissions, give them the mask.
+                    flask.session['username'] = mask
+                    permissions = auth_utils.get_permissions(mask)
+                else:
+                    # Else, refuse the attempt to masquerade.
+                    flask.flash('You do not have permission to masquerade.')
+                    return flask.redirect(flask.url_for('auth.login'))
+            else:
+                flask.session['username'] = username
+
             # Update last login time
             auth_utils.update_last_login(username)
 
