@@ -468,6 +468,15 @@ input[type=checkbox], input[type=radio] {
   font-weight: 600;
 }
 
+.panel-primary>.panel-heading {
+  background-color: orange;
+  border-color: orange;
+}
+
+.panel-primary {
+  border-color: orange;
+}
+
 /* Class for centering text. */
 .pos-center {
   text-align: center;
