@@ -47,8 +47,8 @@ INSERT INTO members(
     1,
     '203'
 );
-INSERT INTO members(uid, last_name, first_name, email, phone) VALUES
-    ('2045251', 'Yu', 'Sean', 'ssyu@caltech.edu', NULL);
+INSERT INTO members(uid, last_name, first_name, email) VALUES
+    ('2045251', 'Yu', 'Sean', 'ssyu@caltech.edu');
 
 
 INSERT INTO member_options(user_id, option_id, option_type) VALUES

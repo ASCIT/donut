@@ -1,5 +1,6 @@
 from donut.testing.fixtures import client
 from donut import app
+import donut.modules.groups.helpers as group_helpers
 from donut.modules.marketplace import helpers
 import flask
 from decimal import Decimal
@@ -85,3 +86,74 @@ def test_add_textbook(client):
 
     assert helpers.add_textbook("title", "author") == 1
     assert count_textbooks() == 3
+
+
+def test_can_manage(client):
+    # User who is not logged in cannot manage any items
+    with app.test_request_context():
+        assert not helpers.can_manage({'user_id': 3})
+
+    # Non-admin can only manage their items
+    with app.test_request_context():
+        flask.session['username'] = 'csander'
+        assert helpers.can_manage({'user_id': 3})
+        assert not helpers.can_manage({'user_id': 2})
+
+    # Admin can manage everyone's items
+    group_helpers.add_position(1, 'Lead')
+    group_helpers.create_position_holder(7, 2, None, None)
+    query = 'INSERT INTO position_permissions(pos_id, permission_id) VALUES (7, 1)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+    with app.test_request_context():
+        flask.session['username'] = 'reng'
+        assert helpers.can_manage({'user_id': 2})
+        assert helpers.can_manage({'user_id': 3})
+
+
+def test_archive(client):
+    item_id = helpers.create_new_listing({
+        'user_id': 3,
+        'cat_id': 1,
+        'item_title': 'Thing',
+        'item_condition': 'Good',
+        'item_details': '',
+        'item_price': '1.23',
+        'images': []
+    })
+    assert helpers.table_fetch(
+        'marketplace_items',
+        one=True,
+        fields=('item_active', ),
+        attrs={'item_id': item_id})
+    helpers.set_active_status(item_id, False)
+    assert not helpers.table_fetch(
+        'marketplace_items',
+        one=True,
+        fields=('item_active', ),
+        attrs={'item_id': item_id})
+    helpers.set_active_status(item_id, True)
+    assert helpers.table_fetch(
+        'marketplace_items',
+        one=True,
+        fields=('item_active', ),
+        attrs={'item_id': item_id})
+
+
+def test_my_items(client):
+    with app.test_request_context():
+        flask.session['username'] = 'dqu'
+        item, = helpers.get_my_items()
+        del item['item_timestamp']
+        assert item == {
+            'item_id': 1,
+            'item_title': 'A table',
+            'textbook_title': None,
+            'item_price': Decimal('5.99'),
+            'cat_title': 'Furniture',
+            'item_active': 1
+        }
+
+    with app.test_request_context():
+        flask.session['username'] = 'reng'
+        assert helpers.get_my_items() == ()
