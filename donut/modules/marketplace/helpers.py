@@ -185,12 +185,11 @@ def search_datalist(datalist, query):
     query_isbns = [token for token in query_tokens if validate_isbn(token)]
 
     for listing in datalist:
-        item_tokens = []
         if listing['cat_title'] == 'Textbooks':
             # if it's a textbook, include the author's name and the
             # book title in the item tokens
             item_tokens = tokenize_query(listing['textbook_title'])
-            item_tokens += tokenize_query(listing['textbook_author'])
+            item_tokens.extend(tokenize_query(listing['textbook_author']))
 
             # does the isbn match any of the query's isbns?
             is_isbn_match = any(isbn == listing['textbook_isbn']
@@ -200,20 +199,20 @@ def search_datalist(datalist, query):
             item_tokens = tokenize_query(listing['item_title'])
             is_isbn_match = False
 
-        score = get_matches(query_tokens, item_tokens)
+        score = perfect_score if is_isbn_match else \
+            get_matches(query_tokens, item_tokens)
 
-        if score > 0:
+        if score:
             listing['score'] = score
 
-            if is_isbn_match or score == perfect_score:
-                perfect_matches.append(listing)
-            else:
-                imperfect_matches.append(listing)
+            (perfect_matches if score == perfect_score else imperfect_matches) \
+                .append(listing)
 
     # if we have any perfect matches, don't include the imperfect ones
     return sorted(
         perfect_matches or imperfect_matches,
-        key=lambda item: (item['score'], item['item_timestamp']))
+        key=lambda item: (item['score'], item['item_timestamp']),
+        reverse=True)  # highest score and newest first
 
 
 def get_matches(l1, l2):

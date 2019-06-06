@@ -76,7 +76,7 @@ def before_request():
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
-        connection = pymysql.connect(
+        flask.g.pymysql_db = pymysql.connect(
             host='localhost',
             database=app.config['DB_NAME'],
             user=app.config['DB_USER'],
@@ -85,7 +85,6 @@ def before_request():
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)
-        flask.g.pymysql_db = connection
 
 
 @app.teardown_request

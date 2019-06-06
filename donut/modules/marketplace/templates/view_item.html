@@ -55,14 +55,16 @@
             <td>{{ item['item_details'] }}</td>
         </tr>
     {% endif %}
-    <tr>
-        <th>Images</th>
-        <td>
-            {% for link in image_links %}
-                <img class="item-image" src="{{ link }}" />
-            {% endfor %}
-        </td>
-    </tr>
+    {% if image_links %}
+        <tr>
+            <th>Images</th>
+            <td>
+                {% for link in image_links %}
+                    <img class="item-image" src="{{ link }}" />
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
 </table>
 
 <h4>Seller details</h4>
