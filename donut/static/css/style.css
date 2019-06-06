@@ -46,6 +46,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Guarantees some elegant formatting with regard to the rest of the
+ * page.
+ */
 body:before {
   content: "";
   height: 100%;
@@ -79,21 +82,22 @@ a {
   color: #FF8C00;
 }
 
+/* Adds a red asterik after required form elements to specify that
+ * they are, in fact, required.
+ */
 label.required:after {
   content:"*";
   color:red;
 }
 
+/* Just some slight padding around radio buttons. */
 input[type=checkbox], input[type=radio] {
   position: relative;
   top: 2px;
   left: 3px;
 }
 
-.candidate {
-  width: 100%;
-}
-
+/* All the wonderful main title formatting. */
 .jumbotron h1 {
   -webkit-filter: drop-shadow(1px 1px 0 white)
             drop-shadow(-1px 1px 0 white)
@@ -166,10 +170,12 @@ table {
   padding-bottom: 10px;
 }
 
+/* Better than them being centered. */
 td {
   text-align: left;
 }
 
+/* When we need something to be center regardless of other elements. */
 .absolute-center {
   position: absolute;
   top: 50%;
@@ -184,6 +190,7 @@ td {
  * divs, unless otherwise specified in the commentary.                       */
 /*****************************************************************************/
 
+/* For small screens, primarily mobile when we don't want to load a video. */
 .bg-image {
   background: url(../images/background_image.jpg) center center no-repeat;
   background-size: 100% 100%;
@@ -217,34 +224,39 @@ td {
   margin-bottom: 5%;
 }
 
+/* Buttons are orange. */
 .btn:focus {
   background-color: orange;
   border-color: orange;
 }
 
+/* Except here when they have a white border for contrast. */
 .btn:active {
   background-color: orange;
   border-color: #FFF;
 }
 
+/* And back to orange. */
 .btn-primary:hover {
   border-color: orange;
 }
 
+/* A strange case, but still orange. */
 .btn-primary:active:focus {
   background-color: orange;
   border-color: #FFF;
 }
 
+/* Yep, still orange. */
 .btn-primary:focus {
   background-color: orange;
   border-color: orange;
 }
 
+/* Guess what? We really like the color orange. */
 .btn-primary:active {
   background-color: orange;
 }
-
 
 /* A centering class for divs in larger divs. */
 .center {
@@ -254,12 +266,7 @@ td {
   width: 50%;
 }
 
-input[type=checkbox], input[type=radio] {
-  position: relative;
-  top: 2px;
-  left: 3px;
-}
-
+/* Make sure this survey element spans the page for readability. */
 .candidate {
   width: 100%;
 }
@@ -317,6 +324,9 @@ input[type=checkbox], input[type=radio] {
 
 /* END FORM ELEMENTS */
 
+/* When we need to have a container spanning half the page width on the
+ * right.
+ */
 .half-float-right {
   width: 50%;
   float: right;
@@ -324,6 +334,9 @@ input[type=checkbox], input[type=radio] {
   margin: 0;
 }
 
+/* When we need to have a container spanning half the page width on the
+ * left.
+ */
 .half-float-left {
   width: 45%;
   float: left;
@@ -331,6 +344,7 @@ input[type=checkbox], input[type=radio] {
   margin: 0;
 }
 
+/* Gives us some leeway in formatting inputs. */
 .input {
   display: flex;
 }
@@ -344,6 +358,7 @@ input[type=checkbox], input[type=radio] {
   font-family: 'Open Sans', 'sans-serif';
 }
 
+/* The main wrapper for everything to keep it tidy. */
 #homepage-jumbotron {
   padding-top: 20%;
   background-color: #1c1d25;
@@ -359,6 +374,7 @@ input[type=checkbox], input[type=radio] {
   width: 60%;
 }
 
+/* Some padding and orange-ifying for textboxes. */
 .jumbotron form input {
   margin-top: 1%;
   border: 1px orange solid;
@@ -374,10 +390,14 @@ input[type=checkbox], input[type=radio] {
   border: 1px orange solid;
 }
 
+/* Padding inside the footer specifically for the copyright not to overlap
+ * anything.
+ */
 #copyright {
   padding: 15px;
 }
 
+/* Some padding to avoid anything overlapping the header. */
 #header {
   margin-bottom: 50px;
 }
@@ -386,6 +406,7 @@ input[type=checkbox], input[type=radio] {
   border: 1px orange solid;
 }
 
+/* Magic that lets us have a video that spans the page perfectly. */
 .jumbotron .background-video {
   position: absolute;
   right: 0;
@@ -399,26 +420,32 @@ input[type=checkbox], input[type=radio] {
   overflow: hidden;
 }
 
+/* For thin text, primarily body text or footnotes. */
 .jumbotron .light-text p {
   font-weight: 300;
 }
 
+/* For standard text, primarily body text or subheaders. */
 .jumbotron .normal-text p {
   font-weight: 400;
 }
 
+/* For thick text, primarily headers. */
 .jumbotron .heavy-text p {
   font-weight: 600;
 }
 
+/* For large text, primarily headers. */
 .jumbotron .large-text p {
   font-size: 1.5em;
 }
 
+/* For medium text, primarily body text or subheaders. */
 .jumbotron .medium-text p {
   font-size: 1.25em;
 }
 
+/* For small text, primarily body text. */
 .jumbotron .small-text p {
   font-size: 1em;
 }
@@ -452,14 +479,11 @@ input[type=checkbox], input[type=radio] {
   background: linear-gradient(to right, orange, #d96924);
 }
 
+/* Very specifically orange. */
 .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
   color: #fff;
   background-color: orange;
   border-color: orange;
-}
-
-#question_container {
-  list-style-type: none;
 }
 
 /* BEGIN MOBILE CSS */
@@ -535,6 +559,7 @@ input[type=checkbox], input[type=radio] {
   }
 }
 
+/* Donut graphic animation for mobile. */
 #background-donut {
   -webkit-animation: rotating 10s linear infinite;
   -moz-animation: rotating 10s linear infinite;
@@ -614,11 +639,7 @@ input[type=checkbox], input[type=radio] {
   font-size: 10px;
 }
 
-label.required:after {
-  content: "*";
-  color: red;
-}
-
+/* Avoids bullet points  where we don't want them. */
 #question_container {
   list-style-type: none;
 }
@@ -634,6 +655,7 @@ label.required:after {
 
 @media only screen and (orientation: landscape) {
 
+  /* Background image for mobile to replace video. */
   .bg-image {
     background: url(../images/background_image.jpg) center center no-repeat;
     background-size: 200% 100%;
@@ -653,6 +675,7 @@ label.required:after {
     height: 100%;
   }
 
+  /* To make sure that the screen is covered with the background image. */
   .bg-cover {
     height: 835px;
     width: 100%;
@@ -665,6 +688,7 @@ label.required:after {
     font-size: 60px;
   }*/
 
+  /* Avoids issues with strange background transitions. */
   #homepage-jumbotron {
     background-color: transparent;
     height: auto;
@@ -672,7 +696,7 @@ label.required:after {
 }
 
 @media only screen and (min-width: 900px) {
-
+  /* For large screens that need to see the background image. */
   .bg-image {
     background-size: 100% 100%;   
     display: none;
@@ -680,13 +704,14 @@ label.required:after {
 }
 
 @media only screen and (min-width: 900px) and (orientation: portrait) {
+  /* Positioning the video for sufficiently large screens. */
   .jumbotron .background-video {
     bottom: 0;
   }
 }
 
 @media only screen and (min-width: 600px) and (max-width: 899px) {
-  
+  /* For tablets, format the background image to be reasonably scaled. */
   .bg-image {
     background-size: 150% 100%;
     display: block;
@@ -695,6 +720,8 @@ label.required:after {
 
 @media only screen and (min-width: 200px) and (max-width: 900px) and (orientation: portrait) {
 
+
+  /* For small screens, make sure the background image is reasonably scaled. */
   .bg-image {
     background: url(../images/background_image.jpg) center center no-repeat;
     background-size: 350% 100%;
