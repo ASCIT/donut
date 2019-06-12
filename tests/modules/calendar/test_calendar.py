@@ -65,14 +65,14 @@ def test_data_handling(client):
         for i in db_all_events:
             assert any(i['id'] == vals['id'] for vals in all_events)
 
-        the_first_events = helpers.get_events(11, 1111, 11, 1111)
+        the_first_events = helpers.sync_data(11, 1111, 11, 1111)
         # In case some misguided soul or sadistic person decides to modify things in year 1111....
         ori_num = len(the_first_events)
         update_name = '我要放飞自我 la la la'
 
         db_events = helpers.get_events_backup(11, 1111, 11, 1111)
 
-        assert len(db_events) == ori_num
+        assert len(db_events) == len(the_first_events)
 
         for i in db_events:
             assert any(i['id'] == vals['id'] for vals in the_first_events)
