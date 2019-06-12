@@ -23,10 +23,8 @@
             <label for="tag" class="required">Calendar:</label>
           </td>
           <td class="calendar">
-            {% for item in permissions %}
-              {% if item != 'Any' %}
-                <label class="checkbox-inline"><input type="checkbox" name="tag" value="{{ item }}">{{ item }}</label>
-              {% endif %}
+            {% for item in permissions if item != 'Any'%}
+              <label class="checkbox-inline"><input type="checkbox" name="tag" value="{{ item }}">{{ item }}</label>
             {% endfor %}
           </td>
         </div>

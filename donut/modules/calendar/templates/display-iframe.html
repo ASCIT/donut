@@ -11,13 +11,14 @@
 {% block content %}
 <base target="_parent" />
   <div class="month-year text-center">
-    <h4></h4></div>
+    <h4></h4>
+  </div>
   <div id='failover_message'>
     Using a cached version of events from donut's databases. To force a sync with google calendars, 
     <a href={{ url_for('calendar.sync')}}>click this link</a>
   </div>
   <table id="cal" class="table table-bordered">
-    <tr>
+    <tr class="calendarHeaders">
       <th>S</th>
       <th>M</th>
       <th>T</th>
@@ -27,14 +28,12 @@
       <th>S</th>
     </tr>
   </table>
-  {% for item in permissions %}
-    {% if item != 'Any' %}
-       <label class="checkbox-inline"><input type="checkbox" name="display_tag" value="{{ item }}">{{ item }}</label>
-    {% endif %}
+  {% for item in permissions if item != 'Any'%}
+       <label class="checkbox-inline"><input type="checkbox" name="display_tag" value="{{ item }}"/>{{ item }}</label>
   {% endfor %}
   <label for="jumpto" class="required" id="start_time">Jump to:
-  <input type="text" class="jumpto_month" max="12" placeholder="MM"/> </input>
-  <input type="text" class="jumpto_year" min="1970" max="2036" placeholder="YYYY"/> </input>
+  <input type="number" class="jumpto_month" max="12" placeholder="MM"/> </input>
+  <input type="number" class="jumpto_year" min="1970" max="2036" placeholder="YYYY"/> </input>
   <button type="button" class="jumpto">Go</button>
 </label>
   
@@ -162,8 +161,8 @@
      {% if permissions['Any'] %}
       <div class="row">
         <div class="text-center">
-          <input class="btn" type="submit" value="Update" target="_parent" />
-          <input class="btn deleteEvent" value="Delete" />
+          <button type="submit" value="Update" target="_parent"> Update </button>
+          <button type=button class="deleteEvent" value="Delete"> Delete </button>
         </div>
       </div>
     {% endif %}

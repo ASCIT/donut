@@ -37,37 +37,51 @@ def events_list():
 
 @blueprint.route('/calendar/sync')
 def sync():
-    helpers.sync_data(all_data=True)
+    res = helpers.sync_data(all_data=True)
+    error_message = helpers.check_if_error(res)
+    if error_message:
+        flask.flash(error_message)
     return flask.render_template(
         'calendar.html', permissions=helpers.get_permission())
 
 
 @blueprint.route('/1/calendar_all_events', methods=['POST'])
 def get_all_events():
-    return flask.jsonify({'events': helpers.sync_data(all_data=True)})
+    res = helpers.sync_data(all_data=True)
+    error_message = helpers.check_if_error(res)
+    if error_message:
+        return flask.jsonify({'err': error_message})
+    return flask.jsonify({'events': res})
 
 
 @blueprint.route('/1/calendar_all_events_backup', methods=['POST'])
 def get_all_events_backup():
-    return flask.jsonify({'events': helpers.get_all_events_backup()})
+    res = helpers.get_events_backup(all_data=True)
+    error_message = helpers.check_if_error(res)
+    if error_message:
+        return flask.jsonify({'err': error_message})
+    return flask.jsonify({'events': res})
 
 
 @blueprint.route('/1/calendar_events', methods=['POST'])
 def get_events():
-    return flask.jsonify({
-        'events':
-        helpers.sync_data(1, flask.request.form['year'], 12,
-                          flask.request.form['year'])
-    })
+    res = helpers.sync_data(1, flask.request.form['year'], 12,
+                            flask.request.form['year'])
+    error_message = helpers.check_if_error(res)
+    if error_message:
+        return flask.jsonify({'err': error_message})
+    return flask.jsonify({'events': res})
 
 
 @blueprint.route('/1/calendar_events_backup', methods=['POST'])
 def get_events_backup():
-    return flask.jsonify({
-        'events':
-        helpers.get_events_backup(1, flask.request.form['year'], 12,
-                                  flask.request.form['year'])
-    })
+
+    res = helpers.get_events_backup(1, flask.request.form['year'], 12,
+                                    flask.request.form['year'])
+    error_message = helpers.check_if_error(res)
+    if error_message:
+        return flask.jsonify({'err': error_message})
+    return flask.jsonify({'events': res})
 
 
 @blueprint.route('/calendar/share_cal', methods=['POST'])
@@ -87,7 +101,7 @@ def calendar_share_cal():
         flask.flash('Error when sharing calendars:' + e +
                     " ; if the error persists, contact dev team", 'error')
     else:
-        flask.flash('Sucess! Please check your gmail')
+        flask.flash('Success! Please check your gmail')
     return flask.redirect(flask.url_for('calendar.calendar'))
 
 
@@ -116,13 +130,12 @@ def calendar_add_events(update=0):
     end_date = flask.request.form.get('end_date')
     end_hour = flask.request.form.get('end_hour')
     end_time = flask.request.form.get('end_minute')
-    begin_datetime = datetime.datetime(
-        int(start_date[0:4]),
-        int(start_date[5:7]),
-        int(start_date[8:10]), int(start_hour), int(start_time))
-    end_datetime = datetime.datetime(
-        int(end_date[0:4]),
-        int(end_date[5:7]), int(end_date[8:10]), int(end_hour), int(end_time))
+
+    start_year, start_month, start_day = map(int, start_date.split('-'))
+    end_year, end_month, end_day = map(int, end_date.split('-'))
+
+    begin_datetime = datetime.datetime(start_year, start_month, start_day)
+    end_datetime = datetime.datetime(end_year, end_month, end_day)
     if begin_datetime >= end_datetime:
         flask.flash('Invalid times', 'error')
         return flask.redirect(flask.url_for('calendar.calendar'))
@@ -136,7 +149,7 @@ def calendar_add_events(update=0):
         flask.request.form.getlist('tag'), start_time, end_time, update,
         flask.request.form.get('location'), flask.request.form.get('eventId'))
     if e:
-        flask.flash('Error when adding events: ' + e +
+        flask.flash('Error when adding events: ' + str(e) +
                     ' ; If this error persists, contact devteam', 'error')
 
     return flask.redirect(flask.url_for('calendar.calendar'))

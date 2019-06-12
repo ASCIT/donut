@@ -10,10 +10,6 @@ from donut.modules.calendar.permissions import calendar_permissions
 from donut import auth_utils
 import json
 
-# DEBUGGING
-import time
-current_milli_time = lambda: int(round(time.time() * 1000))
-
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 SERVICE_ACCOUNT_FILE = 'calendar.json'
 creds = service_account.Credentials.from_service_account_file(
@@ -31,8 +27,8 @@ cal_permissions = {
     'Ricketts': calendar_permissions.RICKETTS,
     'Ruddock': calendar_permissions.RUDDOCK,
     'Other': calendar_permissions.OTHER,  # For clubs
-    'Athletics': calendar_permissions.
-    ATHLETICS  # For all ath team and sports related events?
+    # For all ath team and sports related events?
+    'Athletics': calendar_permissions.ATHLETICS
 }
 
 cal_id = {
@@ -47,21 +43,7 @@ cal_id = {
     'Other': 'autpk7a63u98aqqtrnj0mentpg@group.calendar.google.com',
     'Athletics': 'g2itc2p2r9affcc77l1d2vg47s@group.calendar.google.com'
 }
-
-
-def get_all_events_backup():
-    '''
-    Returns a list of all events from our db. 
-    '''
-    query = '''
-        SELECT * FROM calendar_events
-    '''
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
-        db_events = cursor.fetchall()
-    for i in db_events:
-        set_event_dict(i)
-    return db_events
+TIME_ZONE = 'America/Los_Angeles'
 
 
 def set_event_dict(db_event):
@@ -76,16 +58,23 @@ def set_event_dict(db_event):
 def get_events_backup(begin_month=datetime.datetime.now().month,
                       begin_year=datetime.datetime.now().year,
                       end_month=datetime.datetime.now().month,
-                      end_year=datetime.datetime.now().year + 2):
+                      end_year=datetime.datetime.now().year + 2,
+                      all_data=False):
     '''
     Gets events from our db. Backup from google calendars data. 
     '''
-    query = """
+
+    if all_data:
+        query = """
+            SELECT * FROM calendar_events 
+            ORDER BY begin_time
+        """
+    else:
+        query = """
             SELECT * FROM calendar_events 
             WHERE %s <= end_time AND begin_time <= %s
             ORDER BY begin_time
-    """
-
+        """
     min_time = datetime.datetime(int(begin_year), begin_month,
                                  1).isoformat('T') + 'Z'
     max_time = datetime.datetime(
@@ -93,7 +82,7 @@ def get_events_backup(begin_month=datetime.datetime.now().month,
         int(end_month), calendar.monthrange(
             int(end_year), int(end_month))[1]).isoformat('T') + 'Z'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [min_time, max_time])
+        cursor.execute(query, [min_time, max_time] if not all_data else [])
         db_events = cursor.fetchall()
     for i in db_events:
         set_event_dict(i)
@@ -107,17 +96,17 @@ def insert_event_to_db(calendar_tag,
                        event_location,
                        begin_time,
                        end_time,
-                       username=''):
+                       username=None):
     '''
     Inserts events to our db. If the event already exists (by looking 
     for the google id) then update. 
     '''
     insert = '''
-        INSERT INTO calendar_events (username, calendar_tag, 
+        INSERT INTO calendar_events (uid, calendar_tag, 
         google_event_id, summary, description, 
         location, begin_time, end_time) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE
-        username = VALUES(username), 
+        uid = VALUES(uid), 
         summary=VALUES(summary), 
         description=VALUES(description),
         location=VALUES(location),
@@ -126,8 +115,9 @@ def insert_event_to_db(calendar_tag,
     '''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(insert, [
-            username, calendar_tag, google_event_id, event_summary,
-            event_description, event_location, begin_time, end_time
+            auth_utils.get_user_id(username), calendar_tag, google_event_id,
+            event_summary, event_description, event_location, begin_time,
+            end_time
         ])
 
 
@@ -171,11 +161,11 @@ def sync_data(begin_month=datetime.datetime.now().month,
         int(end_month), calendar.monthrange(
             int(end_year), int(end_month))[1]).isoformat('T') + 'Z'
     try:
-
-        all_events = get_all_events() if all_data else get_events(
-            begin_month, begin_year, end_month, end_year)
-        if all_events == []:
-            return
+        all_events = get_events(
+            begin_month, begin_year, end_month, end_year, all_data=all_data)
+        # We hit an error.
+        if type(all_events) is str:
+            return all_events
         # First, get the events from the database
         if all_data:
             query = """
@@ -186,15 +176,11 @@ def sync_data(begin_month=datetime.datetime.now().month,
                 cursor.execute(query)
                 db_events = cursor.fetchall()
         else:
-            query = """
-                    SELECT * FROM calendar_events 
-                    WHERE %s <= end_time AND begin_time <= %s
-                    ORDER BY begin_time
-                """
-            with flask.g.pymysql_db.cursor() as cursor:
-                cursor.execute(query, [min_time, max_time])
-                db_events = cursor.fetchall()
+            db_events = get_events_backup(begin_month, begin_year, end_month,
+                                          end_year, end_year)
 
+        to_be_deleted = []
+        visited_events = {}
         for i in all_events:
             calendar_tag = i['organizer']['displayName']
             google_event_id = i['id']
@@ -208,27 +194,23 @@ def sync_data(begin_month=datetime.datetime.now().month,
             insert_event_to_db(calendar_tag, google_event_id, event_summary,
                                event_description, event_location, begin_time,
                                end_time)
-            to_be_deleted = ''
-
             # Find the current google event in our db and make
             # sure that we mark it as visited.
-            for db_event_key in db_events:
-                if db_event_key['google_event_id'] == google_event_id:
-                    to_be_deleted = db_event_key
-                    db_events.remove(to_be_deleted)
-                    break
+            visited_events[google_event_id] = True
 
         for db_event_key in db_events:
-            delete_event_from_db(db_event_key['google_event_id'])
+            if db_event_key['google_event_id'] not in visited_events:
+                delete_event_from_db(db_event_key['google_event_id'])
         return all_events
     except Exception as e:
-        return []
+        return e.get('message', e) if type(e) is dict else str(e)
 
 
 def get_events(begin_month=datetime.datetime.now().month,
                begin_year=datetime.datetime.now().year,
                end_month=datetime.datetime.now().month,
-               end_year=datetime.datetime.now().year + 2):
+               end_year=datetime.datetime.now().year + 2,
+               all_data=False):
     """
     Gets events from the beginning to the end from google. 
     """
@@ -241,8 +223,11 @@ def get_events(begin_month=datetime.datetime.now().month,
             calendar.monthrange(int(end_year),
                                 int(end_month))[1]).isoformat('T') + 'Z'
         all_events = []
+        if all_data:
+            min_time = '0001-01-01T00:00:00Z'
+            max_time = '9999-12-31T00:00:00Z'
 
-        for key, value in cal_id.items():
+        for value in cal_id.values():
             next_page = True
             while next_page:
                 events_result = service.events().list(
@@ -255,30 +240,8 @@ def get_events(begin_month=datetime.datetime.now().month,
                 all_events.extend(events)
                 next_page = 'nextPageToken' in events_result
         return all_events
-    except:
-        return []
-
-
-def get_all_events():
-    '''
-    Gets all events from google calendars for ALL calendars. 
-    '''
-    try:
-        all_events = []
-        for key, value in cal_id.items():
-            next_page = True
-            while next_page:
-                events_result = service.events().list(
-                    calendarId=value,
-                    singleEvents=True,
-                    maxResults=2500,
-                    orderBy='startTime').execute()
-                events = events_result.get('items', [])
-                all_events.extend(events)
-                next_page = 'nextPageToken' in events_result
-        return all_events
-    except:
-        return []
+    except Exception as e:
+        return e.get('message', e) if type(e) is dict else str(e)
 
 
 def add_event(name,
@@ -303,9 +266,9 @@ def add_event(name,
     """
     try:
         if update:
+            calendar_tag = calendar_tag[0]
             event = service.events().get(
-                calendarId=cal_id[calendar_tag[0]],
-                eventId=event_id).execute()
+                calendarId=cal_id[calendar_tag], eventId=event_id).execute()
             event['start']['dateTime'] = begin_time
             event['end']['dateTime'] = end_time
             event['start']['date'] = None
@@ -315,31 +278,32 @@ def add_event(name,
             event['summary'] = name
             event['description'] = description
             event['location'] = location
-            if get_permission()[calendar_tag[0]]:
+            if get_permission()[calendar_tag]:
                 new_event = service.events().update(
-                    calendarId=cal_id[calendar_tag[0]],
+                    calendarId=cal_id[calendar_tag],
                     eventId=event['id'],
                     body=event).execute()
-                insert_event_to_db(calendar_tag[0], new_event['id'], name,
+                insert_event_to_db(calendar_tag, new_event['id'], name,
                                    description, location, begin_time, end_time,
                                    flask.session['username'])
             return ''
+        perms = get_permission()
         for cal_tag in calendar_tag:
             event = {
                 'summary': name,
                 'description': description,
                 'start': {
                     'dateTime': begin_time,
-                    'timeZone': 'America/Los_Angeles',
+                    'timeZone': TIME_ZONE,
                 },
                 'end': {
                     'dateTime': end_time,
-                    'timeZone': 'America/Los_Angeles',
+                    'timeZone': TIME_ZONE,
                 },
                 'location': location,
                 'visibility': 'public',
             }
-            if get_permission()[cal_tag]:
+            if perms[cal_tag]:
                 created_event = service.events().insert(
                     calendarId=cal_id[cal_tag], body=event).execute()
                 insert_event_to_db(cal_tag, created_event['id'], name,
@@ -347,7 +311,7 @@ def add_event(name,
                                    flask.session['username'])
         return ''
     except Exception as e:
-        return e.get('message', e)
+        return e.get('message', e) if type(e) is dict else str(e)
 
 
 def share_calendar(calendars, email, permission_level):
@@ -355,7 +319,7 @@ def share_calendar(calendars, email, permission_level):
     Shares a set of calendars to a given email
     '''
     try:
-        for index, cal_name in enumerate(calendars):
+        for cal_name in calendars:
             role = permission_level if auth_utils.check_permission(
                 flask.session['username'],
                 cal_permissions[cal_name]) else 'reader'
@@ -372,27 +336,27 @@ def share_calendar(calendars, email, permission_level):
                 calendarId=cal_id[cal_name], body=rule).execute()
 
             query = """
-                INSERT INTO calendar_logs (username, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
+                INSERT INTO calendar_logs (uid, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
                 (%s, %s, %s, %s, NOW(), %s) 
                 """
             with flask.g.pymysql_db.cursor() as cursor:
-                cursor.execute(query,
-                               (flask.session['username'], cal_id[cal_name],
-                                email, created_rule['id'], role))
+                cursor.execute(
+                    query, (auth_utils.get_user_id(flask.session['username']),
+                            cal_id[cal_name], email, created_rule['id'], role))
         return ''
     except Exception as e:
-        return e.get('message', e)
+        return e.get('message', e) if type(e) is dict else str(e)
 
 
 def delete(cal_event_id, cal_name):
     try:
         if get_permission()[cal_name]:
-            service.events().delete(
+            res = service.events().delete(
                 calendarId=cal_id[cal_name], eventId=cal_event_id).execute()
             delete_event_from_db(cal_event_id)
         return ''
     except Exception as e:
-        return e.get('message', e)
+        return e.get('message', e) if type(e) is dict else str(e)
 
 
 def get_permission():
@@ -403,10 +367,17 @@ def get_permission():
     # If they have edit permissions on anything, the events pages and stuff
     # will show up.
     anyy = False
-    for tag in cal_permissions:
-        perms[
-            tag] = 'username' in flask.session and auth_utils.check_permission(
-                flask.session['username'], cal_permissions[tag])
+    username = flask.session[
+        'username'] if 'username' in flask.session else None
+    for tag, perm in cal_permissions.items():
+        perms[tag] = auth_utils.check_permission(username, perm)
         anyy = perms[tag] or anyy
     perms['Any'] = anyy
     return perms
+
+
+def check_if_error(e):
+    if type(e) is not list:
+        return 'Error when fetching events from google: ' + str(
+            e) + ' ; If this error persists, contact devteam'
+    return

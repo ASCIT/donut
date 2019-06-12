@@ -14,7 +14,26 @@ import os
 
 
 def test_plain_calendar_page(client):
-    assert client.get(flask.url_for('calendar.calendar')).status_code == 200
+    assert client.get(flask.url_for('calendar.add_events')).status_code == 200
+    rv = client.get(flask.url_for('calendar.calendar'))
+    assert b'Please log in to share to your calendar' in rv.data
+    assert rv.status_code == 200
+    assert client.get(flask.url_for('calendar.sync')).status_code == 200
+    assert client.post(
+        flask.url_for('calendar.get_all_events')).status_code == 200
+    assert client.post(
+        flask.url_for('calendar.get_all_events_backup')).status_code == 200
+    assert client.post(
+        flask.url_for('calendar.get_events_backup'),
+        data=dict(year=2019)).status_code == 200
+    assert client.post(
+        flask.url_for('calendar.get_events'),
+        data=dict(year=2019)).status_code == 200
+    assert client.post(
+        flask.url_for('calendar.calendar_share_cal')).status_code == 302
+    assert client.post(
+        flask.url_for('calendar.calendar_add_events',
+                      update=0)).status_code == 302
 
 
 def test_data_handling(client):
@@ -42,7 +61,7 @@ def test_data_handling(client):
         all_events = helpers.sync_data(all_data=True)
         assert all_events != []
 
-        db_all_events = helpers.get_all_events_backup()
+        db_all_events = helpers.get_events_backup(all_data=True)
         for i in db_all_events:
             assert any(i['id'] == vals['id'] for vals in all_events)
 

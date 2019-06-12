@@ -4,43 +4,42 @@
   <link rel="stylesheet" href={{ url_for('calendar.static', filename='style.css')}}>
 {% endblock %}
 {% block page %}
-
-	<div class="jumbotron col-md-8 col-md-offset-2" id="tab-content" style="float: none; padding-bottom: 5px">
-		<ul class="nav nav-tabs nav-justified">
-			<li class="active">
-				<a href="#display" aria-controls="display" role="tab" data-toggle="tab">
-					Show Calendar
-				</a>
-			</li>
-            <li>
-                <a href="#events_list" aria-controls="events_list" role="tab" data-toggle="tab">
-                    Event List
-                </a>
-            </li>
-			<li>
-				<a href="#add_events" aria-controls="add_events" role="tab" data-toggle="tab">
-				    Add Event
-				</a>
-			</li>
-            <li>
-                <a href="#share_cal" aria-controls="share_cal" role="tab" data-toggle="tab">
-                    Share Calendar
-                </a>
-            </li>
-		</ul>
-		<div class="tab-content">
-			<div class="tab-pane active" id="display">
-				{% include "display.html" %}
-			</div>
-            <div class="tab-pane" id="events_list">
-                {% include "events_list.html" %}
-            </div>
-			<div class="tab-pane" id="add_events">
-				{% include "add_events-iframe.html" %}
-			</div>
-            <div class="tab-pane" id="share_cal">
-                {% include "share_cal.html" %}
-            </div>
-		</div>
-	</div>
+  <div class="jumbotron col-md-8 col-md-offset-2" id="tab-content" style="float: none; padding-bottom: 5px">
+    <ul class="nav nav-tabs nav-justified">
+      <li class="active">
+        <a href="#display" aria-controls="display" role="tab" data-toggle="tab">
+            Show Calendar
+        </a>
+      </li>
+     <li>
+        <a href="#events_list" aria-controls="events_list" role="tab" data-toggle="tab">
+            Event List
+        </a>
+      </li>
+      <li>
+        <a href="#add_events" aria-controls="add_events" role="tab" data-toggle="tab">
+            Add Event
+        </a>
+      </li>
+      <li>
+        <a href="#share_cal" aria-controls="share_cal" role="tab" data-toggle="tab">
+            Share Calendar
+        </a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane active" id="display">
+        {% include "display.html" %}
+      </div>
+      <div class="tab-pane" id="events_list">
+        {% include "events_list.html" %}
+      </div>
+      <div class="tab-pane" id="add_events">
+        {% include "add_events-iframe.html" %}
+      </div>
+      <div class="tab-pane" id="share_cal">
+        {% include "share_cal.html" %}
+      </div>
+    </div>
+  </div>
 {% endblock %}

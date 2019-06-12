@@ -3,9 +3,8 @@ var d = new Date();
 
 var content = 'January February March April May June July August September October November December'.split(' ');
 var weekDayName = 'SUN MON TUES WED THURS FRI'.split(' ');
-var daysOfMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 var events = {}
-var curYear = 2020;
+var curYear = CURRENT_DATE.getFullYear();
 var colorLabel = {
   'Avery': "#ff7744",
   'Lloyd': "#ffd974",
@@ -78,8 +77,7 @@ function showEventInfo(event)
   }
   $('#start_date').val(begin.substring(0, 10));
   $('#end_date').val(end.substring(0, 10));
-  $(".deleteEvent").off("click");
-  $(".deleteEvent").on('click',{eventID:data.id, tag:data.organizer.displayName}, deleteEvent);
+  $(".deleteEvent").off("click").click({eventID:data.id, tag:data.organizer.displayName}, deleteEvent);
   
 
 
@@ -107,13 +105,13 @@ function showEventInfo(event)
 // Render the events for a month and year on our calendar. 
 function renderEvents(month, year)
 {
-  $('div').filter($('.day')).each(function(){$(this).empty();});
-  for(var i = 0; i < events[month].length; i++)
+  $('div.day').each(function(){$(this).empty();});
+
+  events[month].forEach(function(curEvent) 
   {
         
-    var curEvent =  events[month][i];
     var checked = $(':checkbox').filter(
-     function( index ) {
+     function() {
         return $(this).val() === curEvent.organizer.displayName;});
 
     var begin = curEvent.start.dateTime || curEvent.start.date;
@@ -123,32 +121,29 @@ function renderEvents(month, year)
     var endDay = parseInt(end.substring(8, 10), 10);
     var startMonth = parseInt(begin.substring(5, 7), 10);
     var endMonth = parseInt(end.substring(5, 7), 10);
-    startDay = month > startMonth - 1 ? 1 : startDay;
-    endDay = month < endMonth - 1 ? daysOfMonth[month] : endDay;
-    for(var j = startDay; j <= endDay; j ++)
+
+    var indexOneMonth = month + 1;
+    startDay = indexOneMonth > startMonth || year > Number(begin.substring(0, 4)) ? 1 : startDay;
+    endDay = indexOneMonth < endMonth || year < Number(end.substring(0, 4)) ? new Date(year, indexOneMonth, 0).getDate() : endDay;
+    for(var j = startDay; j <= endDay; j++)
     {
-      var divNode = document.createElement('div');
-      divNode.style.backgroundColor = colorLabel[curEvent.organizer.displayName];
-      divNode.className = 'events';
-      divNode.className += ' '+curEvent.organizer.displayName;
-      divNode.className += ' rounded-circle'; 
-      divNode.setAttribute("id", curEvent.id + j);
-      divNode.className += ' ' + curEvent.id;        
-               
-      var eventName = document.createElement('Label');
-      eventName.innerHTML = curEvent.summary;
-      divNode.appendChild(eventName);
-      if (month === d.getUTCMonth())
+      var divNode = $("<div>");
+      divNode.css("background-color", colorLabel[curEvent.organizer.displayName]);
+      divNode.addClass('events ' + curEvent.organizer.displayName + ' rounded-circle ' + curEvent.id);
+      divNode.attr("id", curEvent.id + j);
+      var eventName = $("<label>").text(curEvent.summary);
+      divNode.append(eventName);
+      if (month === d.getMonth())
       {
-        document.getElementById('day ' + j).appendChild(divNode);
-        $("#"+curEvent.id+j).on('click',{data: curEvent}, showEventInfo);
+        $('#day' + j).append(divNode);
+        $("#"+curEvent.id+j).click({data: curEvent}, showEventInfo);
       }
       
       if(!checked[0].checked){
-        divNode.style.display = "none"; 
+        divNode.css("display", "none"); 
       }
     }
-  }
+  });
 }
 
 // Delete event from our db and from the page
@@ -178,11 +173,9 @@ function deleteEvent(event)
 // Cache the events locally for an entire year. 
 function process_events(data, month, year)
 {
- data.events = data.events || [];
-
-  for(var i = 0; i < data.events.length; i++)
+  var cal_events = data.events || [];
+  cal_events.forEach(function(curEvent)
   {
-    var curEvent = data.events[i];
     var beginStr = curEvent.start.dateTime || curEvent.start.date;
     var beginMonth = parseInt(beginStr.substring(5, 7));
     var endStr = curEvent.end.dateTime || curEvent.end.date;
@@ -199,14 +192,13 @@ function process_events(data, month, year)
       events[beginMonth-1].push(curEvent);
       beginMonth += 1;
     }
-  }
+  });
   renderEvents(month, year);
 }
 
 // Actually requests for the events from the server. 
 function getEvents(month, year){
   // We don't always need to send a request. 
-  if (month === 11||month === 0 || $.isEmptyObject(events) || curYear != year)
   {
     curYear = year;
     $('div').filter($('.day')).each(function(){$(this).text('loading')});
@@ -218,13 +210,18 @@ function getEvents(month, year){
       url: '/1/calendar_events',
       type: 'POST',
       data:{
-        month:month+1, 
         year:year
       },
       success:function(res){
-          process_events(res, month, year);
-          $('#failover_message').hide();
+          if (res.err)
+          {
+              alert(res.err);
+          } else {
+            process_events(res, month, year);
+            $('#failover_message').hide();
+          }
       },
+
       // Perhaps the timeout is too long... But this is about the time where
       // Half of the time it'll work and the other half wouldn't
       timeout:3000, 
@@ -236,14 +233,18 @@ function getEvents(month, year){
                 url: '/1/calendar_events_backup',
                 type: 'POST',
                 data:{
-                    month:month+1,
                     year:year
                 },
                 success:function(data){
-                    if (!window.parent.location.href.includes('sync')){
-                        $('#failover_message').show();
-                    }
-                    process_events(data, month, year); 
+                    if (data.err)
+                    {
+                        alert(data.err);
+                    } else{
+                      if (!window.parent.location.href.includes('sync')){
+                          $('#failover_message').show();
+                      }
+                      process_events(data, month, year);
+                    } 
                 }
             });
         }
@@ -260,23 +261,24 @@ function renderCalendar(startDay, totalDays, currentDate) {
   var $table = $('#cal');
   var $week = getCalendarRow();
   var $day;
-  var i = 1;
-  for (; i <= totalDays; i++) {
+  var render_date = new Date(d.setDate(1));
+  for (var i = 0; i <= totalDays; i++) {
+
     $day = $week.find('td').eq(currentDay);
     $day.text(i);
     if (i === currentDate) {
       $day.addClass('today');
     }
-
-    $day.append("</br>");
-    var wrapper = $('<div></div>').attr('id', 'day '+i).addClass('day');
+    $day.append("<br>");
+    var wrapper = $('<div>').attr('id', 'day'+i).addClass('day');
     $day.append(wrapper);
-    // +1 next day until Saturday (6), then reset to Sunday (0)
-    currentDay = ++currentDay % 7;
+
+    currentDay = render_date.getDay();
+    render_date.setDate(render_date.getDate() + 1);
 
     // Generate new row when day is Saturday, but only if there are
     // additional days to render
-    if (currentDay === 0 && (i + 1 <= totalDays)) {
+    if (currentDay === 0 && (i < totalDays)) {
       $week = getCalendarRow();
       currentRow++;
     }
@@ -285,7 +287,7 @@ function renderCalendar(startDay, totalDays, currentDate) {
 
 // Clear generated calendar
 function clearCalendar() {
-  var $trs = $('tr').not(':eq(0)').not($('.calendar'));
+  var $trs = $('#cal tbody tr:not(.calendar, .calendarHeaders)');
   $trs.remove();
   $('#extraInfo').hide();
   $('#extraInfo_triangle').hide();
@@ -295,9 +297,9 @@ function clearCalendar() {
 // Generates table row used when rendering Calendar
 function getCalendarRow() {
   var $table = $('#cal');
-  var $tr = $('<tr/>');
-  for (var i = 0, len = 7; i < len; i++) {
-    $tr.append($('<td/>'));
+  var $tr = $('<tr>');
+  for (var i = 0; i < 7; i++) {
+    $tr.append($('<td>'));
   }
   $table.append($tr);
   return $tr;
@@ -308,7 +310,7 @@ function myCalendar() {
   var day = d.getDay();
   var year = d.getFullYear();
   var date = d.getDate();
-  var totalDaysOfMonth = daysOfMonth[month];
+  var totalDaysOfMonth = new Date(year, month+1, 0).getDate();
   var counter = 1;
 
   var $ym = $('<h3>');
@@ -323,22 +325,16 @@ function myCalendar() {
     dateToHighlight = date;
   }
 
-  //Getting February Days Including The Leap Year
-  if (month === 1) {
-    if ((year % 100 !== 0) && (year % 4 === 0) || (year % 400 === 0)) {
-      totalDaysOfMonth = 29;
-    }
-  }
-
   // Get Start Day
   renderCalendar(getCalendarStart(day, date), totalDaysOfMonth, dateToHighlight);
   if (curYear != year ||$.isEmptyObject(events))
   {
+    curYear = year;
     getEvents(month, year);
   }
   else
   {
-    renderEvents(month);
+    renderEvents(month, year);
   }
 };
 
@@ -377,12 +373,10 @@ $(document).ready(function() {
   });  
 
   // Bind the little x button
-  $(document).on('click', '.close', function(){
+  $('.close').click(function() {
         $(this).parent().hide();
         $('#extraInfo_triangle').hide();
   });
-  $(":checkbox").each( function (){
-    this.checked = true;
-  });
+  $(':checkbox').prop('checked', true);
 });
 

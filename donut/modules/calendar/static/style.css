@@ -1,10 +1,10 @@
 body{
-    padding-bottom:0%;
-    padding-top:0%;
+    padding-bottom:0;
+    padding-top:0;
 }
 
 .checkbox-inline input[type=checkbox]{
-    margin-left: 0px;
+    margin-left: 0;
 }
 
 #cal td{
@@ -36,7 +36,6 @@ body{
     width:100%;
 }
 
-
 .close {
     float: right;
     color: #000;
@@ -45,8 +44,8 @@ body{
 
 
 .events{
-    
-    margin: 0px;
+    word-wrap: break-word;
+    margin: 0;
     margin-top:2px;
     padding: 0px;
     width:100%;
@@ -54,6 +53,7 @@ body{
     font-size:10px;
     overflow:auto;
     padding-left:3px;
+    word-break: break-all;
 }
 
 #searchTable {
@@ -62,10 +62,9 @@ body{
 
 .searchEvents
 {
-
-    margin: 0px;
+    margin: 0;
     margin-top:2px;
-    padding: 0px;
+    padding: 0;
     width:100%;
     height:30px;
     font-size:12px;
@@ -73,14 +72,14 @@ body{
 }
 
 .searchInfoUpdate{
-    margin-bottom:0px;
-    margin-top:0px;
+    margin-bottom:0;
+    margin-top:0;
 }
 
 #extraInfo{
     display:none;
     position: absolute;
-    top: 0px;
+    top: 0;
     z-index: 999;
     width:50%;
     border: gray;
@@ -105,9 +104,8 @@ body{
 }
 
 #extendInfo{
-    /*display:none;*/
     position: float;
-    top: 0px;
+    top: 0;
     z-index: 999;
     width: 100%;
     background-color:rgba(255,255,255,0.5);
@@ -124,12 +122,9 @@ body{
     width: 0;
     height: 0;
     box-sizing: border-box;
-    
     border: 1em solid black;
-    
     transform-origin: 0 0;
     transform: rotate(-135deg);
-    
     z-index:9999;
     display:none;
 }
@@ -138,4 +133,12 @@ body{
     background-color: #FFFFE5;
     text-align: center;
     display:none;
+}
+
+.input_float{
+    position: float;
+}
+
+button {
+    margin:7px;
 }

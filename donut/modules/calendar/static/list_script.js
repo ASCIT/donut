@@ -14,23 +14,18 @@ var color_label = {
 function isFuture(curEvent)
 {
 
-    var timeStr = curEvent['end']['dateTime'] || curEvent['end']['date'];
-    var year = parseInt(timeStr.substring(0, 4), 10);
-    var day = parseInt(timeStr.substring(8, 10), 10);
-    var month = parseInt(timeStr.substring(5, 7), 10);    
+    var timeStr = curEvent.end.dateTime || curEvent.end.date;
+    var year = Number(timeStr.substring(0, 4))
+    var day = Number(timeStr.substring(8, 10));
+    var month = Number(timeStr.substring(5, 7));    
     var curDay = new Date();
-    if (year > curDay.getFullYear()){ return true};
-    if (year < curDay.getFullYear()){ return false};
-    if (month-1 > curDay.getMonth()){ return true};
-    if (month-1 <  curDay.getMonth()){ return false};
-    if (day >= curDay.getDate()){ return true};
-    return false;
+    var curEvent = new Date(timeStr);
+    return curEvent >= curDay;
 }
 
 function showEventInfo(event)
 {
-    var data = event.data.data;
-  data = event.data.data;
+  var data = event.data.data;
   $('#eventName').text(data.summary);
   $('#eventName_edit').val(data.summary);
  
@@ -63,27 +58,26 @@ function showEventInfo(event)
   }
   $('#start_date').val(begin.substring(0, 10));
   $('#end_date').val(end.substring(0, 10));
-  //$('#'+data.id).append($('#extendInfo'));
   $('#extendInfo').show();
+  $(".deleteEvent").on('click',{eventID:data.id, tag:data.organizer.displayName}, deleteEvent);
+
 }
 
 // Show all searched event
 function renderAll(eventList, tag)
 {
-    $(tag).not($('#extendInfo')).empty();
+    $(tag + ':not(#extendInfo)').empty();
     eventList.forEach(function(curEvent) {
-        var divNode = document.createElement('div');        
-        divNode.style.backgroundColor = color_label[curEvent['organizer']['displayName']];
-        divNode.className = 'searchEvents';
-        divNode.className +=  ' rounded';
-        divNode.setAttribute("id", curEvent['id']);
-        var eventName = document.createElement('Label');
-        eventName.innerHTML = curEvent['summary'];
-        divNode.appendChild(eventName);
+    var divNode = $('<div>')
+        .css('background', color_label[curEvent.organizer.displayName])
+        .addClass('searchEvents rounded')
+        .attr('id', curEvent.id)
+        .append($('<label>').text(curEvent.summary))
+        .click({data: curEvent, div: divNode}, showEventInfo)
         $(tag).append(divNode);
         $("#"+curEvent.id).on('click',{data: curEvent, div:divNode}, showEventInfo);
     });
-    if ($.isEmptyObject(eventList))
+    if (!eventList.length)
     {
         $(tag).text('No results :(');
     }
@@ -98,11 +92,11 @@ function search(data, query)
       var description = '';
       if (typeof(calEvent['description']) !== 'undefined')
       {
-        description = calEvent['description'].toLowerCase();
+        var description = (calEvent.description || '').toLowerCase();
       }
       var score = 0;
       query.forEach(function(segment) {
-        if(name.includes(segment))
+        if(name.indexOf(segment)>-1)
         {
           score += 1;
         }
@@ -110,7 +104,7 @@ function search(data, query)
         {
           score += .5;
         }
-        if(description.includes(segment))
+        if(description.indexOf(segment>-1))
         {
           score += .5;
         }
@@ -121,14 +115,9 @@ function search(data, query)
       })
       if (score)
       {
-        if (isFuture(calEvent))
-          {
-            possibleEventsFuture.push({calEvent:calEvent, score:score});
-          }
-          else{
-            possibleEventsPast.push({calEvent:calEvent, score:score});
-          }
-       }
+        (isFuture(calEvent) ? possibleEventsFuture : possibleEventsPast)
+            .push({calEvent:calEvent, score:score});
+      }
   })
   possibleEventsFuture = possibleEventsFuture.sort(function(a, b) { return b.score - a.score })
                        .map(function(eventScore) { return eventScore.calEvent });
@@ -151,8 +140,6 @@ function getData()
    $.ajax({
       url: '/1/calendar_all_events',
       type: 'POST',
-      data:{
-      },
       success: function(data){
         $('#failover_message').hide();
         search(data, query);
@@ -164,8 +151,6 @@ function getData()
           $.ajax({
               url: '/1/calendar_all_events_backup',
               type: 'POST',
-              data:{
-              },
               success:function(data){
                 if (!window.parent.location.href.includes('sync')){
                     $('#failover_message').show();
@@ -177,6 +162,29 @@ function getData()
       }
     });
 }
+
+// Delete event from our db and from the page
+function deleteEvent(event)
+{
+    $.ajax({
+      url: '/1/calendar/delete_event',
+      type: 'POST',
+      data:{
+        id:event.data.eventID,
+        tag:event.data.tag
+      },
+      success: function(data) {
+        if(data.deleted === '')
+        {
+            $('#'+event.data.eventID).remove();
+        }
+        else{
+            alert(data.deleted);
+        }
+      }
+    });
+}
+
 $(function(){
     $('.btn[value="Submit"]').click(getData);
 });
