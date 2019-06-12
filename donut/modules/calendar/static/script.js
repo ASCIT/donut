@@ -105,7 +105,7 @@ function showEventInfo(event)
 // Render the events for a month and year on our calendar. 
 function renderEvents(month, year)
 {
-  $('div.day').each(function(){$(this).empty();});
+  $('div.day').empty();
 
   events[month].forEach(function(curEvent) 
   {
@@ -140,7 +140,7 @@ function renderEvents(month, year)
       }
       
       if(!checked[0].checked){
-        divNode.css("display", "none"); 
+        divNode.hide(); 
       }
     }
   });

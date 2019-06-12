@@ -102,11 +102,11 @@ def insert_event_to_db(calendar_tag,
     for the google id) then update. 
     '''
     insert = '''
-        INSERT INTO calendar_events (uid, calendar_tag, 
+        INSERT INTO calendar_events (user_id, calendar_tag, 
         google_event_id, summary, description, 
         location, begin_time, end_time) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE
-        uid = VALUES(uid), 
+        user_id = VALUES(user_id), 
         summary=VALUES(summary), 
         description=VALUES(description),
         location=VALUES(location),
@@ -336,7 +336,7 @@ def share_calendar(calendars, email, permission_level):
                 calendarId=cal_id[cal_name], body=rule).execute()
 
             query = """
-                INSERT INTO calendar_logs (uid, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
+                INSERT INTO calendar_logs (user_id, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
                 (%s, %s, %s, %s, NOW(), %s) 
                 """
             with flask.g.pymysql_db.cursor() as cursor:
@@ -367,8 +367,7 @@ def get_permission():
     # If they have edit permissions on anything, the events pages and stuff
     # will show up.
     anyy = False
-    username = flask.session[
-        'username'] if 'username' in flask.session else None
+    username = flask.session.get('username')
     for tag, perm in cal_permissions.items():
         perms[tag] = auth_utils.check_permission(username, perm)
         anyy = perms[tag] or anyy
@@ -380,4 +379,3 @@ def check_if_error(e):
     if type(e) is not list:
         return 'Error when fetching events from google: ' + str(
             e) + ' ; If this error persists, contact devteam'
-    return

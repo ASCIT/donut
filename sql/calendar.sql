@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS calendar_logs;
 DROP TABLE IF EXISTS calendar_events;
 CREATE TABLE calendar_logs(
     log_id                 INT          NOT NULL AUTO_INCREMENT,
-    uid                    CHAR(7)  NOT NULL, 
+    user_id                    INT  NOT NULL, 
     calendar_id            VARCHAR(25)  NOT NULL, 
     calendar_gmail         VARCHAR(50)  NOT NULL,
     user_gmail         VARCHAR(50)  NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE calendar_logs(
 
 CREATE TABLE calendar_events(
     event_id            INT          NOT NULL AUTO_INCREMENT,
-    uid                 CHAR(7) , -- Who created this even
+    user_id             INT , -- Who created this even
     calendar_tag        VARCHAR(15)  NOT NULL,
     google_event_id     VARCHAR(80)  NOT NULL, 
     summary             TEXT, 

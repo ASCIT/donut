@@ -89,11 +89,7 @@ function search(data, query)
   var possibleEventsPast = [];
   data['events'].forEach(function(calEvent) {
       var name = calEvent['summary'].toLowerCase();
-      var description = '';
-      if (typeof(calEvent['description']) !== 'undefined')
-      {
-        var description = (calEvent.description || '').toLowerCase();
-      }
+      var description = (calEvent.description || '').toLowerCase();
       var score = 0;
       query.forEach(function(segment) {
         if(name.indexOf(segment)>-1)
@@ -104,7 +100,7 @@ function search(data, query)
         {
           score += .5;
         }
-        if(description.indexOf(segment>-1))
+        if(description.indexOf(segment)>-1)
         {
           score += .5;
         }
