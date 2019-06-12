@@ -273,8 +273,8 @@ def add_event(name,
             event['end']['dateTime'] = end_time
             event['start']['date'] = None
             event['end']['date'] = None
-            event['end']['timeZone'] = 'America/Los_Angeles'
-            event['start']['timeZone'] = 'America/Los_Angeles'
+            event['end']['timeZone'] = TIME_ZONE
+            event['start']['timeZone'] = TIME_ZONE
             event['summary'] = name
             event['description'] = description
             event['location'] = location

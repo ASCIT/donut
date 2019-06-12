@@ -117,11 +117,14 @@ Programs introduce one perspective in order to stimulate thought and to provide 
         modded_events = helpers.get_events(11, 1111, 11, 1111)
 
         assert len(modded_events) == ori_num + 1
+        updated = False
         for i in modded_events:
             if i['summary'] == update_name and i['description'] == update_description:
+                updated = True
                 deleted = helpers.delete(i['id'],
                                          i['organizer']['displayName'])
 
+        assert updated
         modded_events = helpers.get_events(11, 1111, 11, 1111)
         assert len(modded_events) == ori_num
 

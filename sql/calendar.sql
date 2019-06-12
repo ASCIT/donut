@@ -9,7 +9,7 @@ CREATE TABLE calendar_logs(
     acl_id                 VARCHAR(50)  NOT NULL,
     request_time           DATETIME     NOT NULL, 
     request_permission     CHAR(4)     NOT NULL, 
-    PRIMARY KEY (log_id),
+    PRIMARY KEY (log_id)
 );
 
 CREATE TABLE calendar_events(
