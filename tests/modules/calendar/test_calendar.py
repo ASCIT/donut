@@ -46,7 +46,9 @@ def test_data_handling(client):
     with app.test_request_context():
         flask.session['username'] = 'dqu'
         assert helpers.get_permission() == {
+            'ASCIT': True,
             'Avery': True,
+            'Bechtel': True,
             'Blacker': True,
             'Dabney': True,
             'Fleming': True,

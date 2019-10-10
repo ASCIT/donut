@@ -18,7 +18,9 @@ creds = service_account.Credentials.from_service_account_file(
 service = build('calendar', 'v3', credentials=creds)
 
 cal_permissions = {
+    'ASCIT': calendar_permissions.ASCIT,
     'Avery': calendar_permissions.AVERY,
+    'Bechtel': calendar_permissions.BECHTEL,
     'Blacker': calendar_permissions.BLACKER,
     'Dabney': calendar_permissions.DABNEY,
     'Fleming': calendar_permissions.FLEMING,
@@ -32,7 +34,9 @@ cal_permissions = {
 }
 
 cal_id = {
+    'ASCIT': '7oh8jqmoalleugdpvn89q1og2g@group.calendar.google.com',
     'Avery': 'el289n0076jqiklh4a04bs89gs@group.calendar.google.com',
+    'Bechtel': 'c595ju8nj800pcvhfabifll2vs@group.calendar.google.com',
     'Blacker': 'g77nktkofnupa29gg3lt419sik@group.calendar.google.com',
     'Dabney': 'l0m8d3bu0s3pt07oprvkm4su98@group.calendar.google.com',
     'Ricketts': 'i5aas9edk4r7db7g6a6gu6ijvg@group.calendar.google.com',
@@ -63,7 +67,8 @@ def get_events_backup(begin_month=datetime.datetime.now().month,
     '''
     Gets events from our db. Backup from google calendars data. 
     '''
-
+    if 'username' not in flask.session:
+        return []
     if all_data:
         query = """
             SELECT * FROM calendar_events 
@@ -154,6 +159,8 @@ def sync_data(begin_month=datetime.datetime.now().month,
     This function syncs either a period or all data, if all_data is set
     to true. 
     """
+    if 'username' not in flask.session:
+        return []
     min_time = datetime.datetime(int(begin_year), begin_month,
                                  1).isoformat('T') + 'Z'
     max_time = datetime.datetime(
@@ -214,6 +221,8 @@ def get_events(begin_month=datetime.datetime.now().month,
     """
     Gets events from the beginning to the end from google. 
     """
+    if 'username' not in flask.session:
+        return []
     try:
         min_time = datetime.datetime(int(begin_year), begin_month,
                                      1).isoformat('T') + 'Z'

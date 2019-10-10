@@ -9,30 +9,30 @@ body{
 
 #cal td{
     height: 30%;
-    overflow: scroll;
+    overflow: auto;
     width: 80px;
 }
 
 .day {
     height: 39px;
-    overflow: scroll;
+    overflow: auto;
     border-radius:5px;
 }
 
 #future {
     height:195px;
-    overflow:scroll;
+    overflow:auto;
 }
 
 #past {
     height:195px;
-    overflow:scroll;
+    overflow:auto;
 }
 
 
 
 #resultsTable{
-    overflow: scroll;
+    overflow: auto;
     width:100%;
 }
 
@@ -109,7 +109,7 @@ body{
     z-index: 999;
     width: 100%;
     background-color:rgba(255,255,255,0.5);
-    overflow: scroll;
+    overflow: auto;
 }
 
 #extendInfo tr{

@@ -1,6 +1,7 @@
 language: python
 python:
   - "3.6"
+dist: trusty
 services: mysql
 before_install:
   - sudo apt-get install libmariadbclient-dev

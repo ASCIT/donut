@@ -13,10 +13,14 @@
   <div class="month-year text-center">
     <h4></h4>
   </div>
+  {% if "username" in session %}
   <div id='failover_message'>
     Using a cached version of events from donut's databases. To force a sync with google calendars, 
     <a href={{ url_for('calendar.sync')}}>click this link</a>
   </div>
+  {% else %}
+    Please log in to see Caltech students' events!
+  {% endif %}
   <table id="cal" class="table table-bordered">
     <tr class="calendarHeaders">
       <th>S</th>
@@ -31,6 +35,7 @@
   {% for item in permissions if item != 'Any'%}
        <label class="checkbox-inline"><input type="checkbox" name="display_tag" value="{{ item }}"/>{{ item }}</label>
   {% endfor %}
+  </br>
   <label for="jumpto" class="required" id="start_time">Jump to:
   <input type="number" class="jumpto_month" max="12" placeholder="MM"/> </input>
   <input type="number" class="jumpto_year" min="1970" max="2036" placeholder="YYYY"/> </input>
