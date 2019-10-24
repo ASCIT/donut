@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<form method="POST" action={{ url_for("newsgroups.post_message") }}>
+	<table id="message" class="table">
+	<tr>
+	<div class="form-group">
+		<label for="group" id="group">Group</label>
+		<select class="form-control" id="group" name="group">
+			{% for group in groups %}
+				<option>{{ group }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	</tr>
+	<tr>
+	<div class="form-group">
+		<td> Subject*: </td>
+                 <td><input type="text" name="subject" class="form-control" required /></td>
+        </div>
+	</tr>
+	<tr>
+                  <div class="form-group">
+			  <td>Feedback*: </td>
+                    <td><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
+                  </div>
+               
+	</tr>
+	</table>
+	<div class="row">
+                <div class="text-center">
+                  <input class="btn" type="submit" value="Submit" />
+                </div>
+              </div>
+{% endblock %}

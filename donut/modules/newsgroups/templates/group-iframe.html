@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<h1> {{ name }} </h1>
+<h2> {{ desc }} </h2>
+{% if not member %}
+<form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group_id) }}">
+  <div class="form-group">
+	 <input class="btn btn-primary" id="apply-btn" type="submit" value="Apply for Subscription"/>
+  </form>
+{% endif %}
+<h2> Group Owners </h2>
+{% for owner in owners %}
+<th> {{ owner }} </th>
+{% endfor %}
+{% endblock %}

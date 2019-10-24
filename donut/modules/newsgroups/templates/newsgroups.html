@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block page %}
+	<div class="col-md-6 col-md-offset-3" style="float: none; padding-bottom: 25px">
+		<ul class="nav nav-tabs nav-justified">
+			<li class="active">
+				<a href="#view" aria-controls="view" role="tab" data-toggle="tab">
+					View
+				</a>
+			</li>
+			<li>
+				<a href="#manage" aria-controls="manage" role="tab" data-toggle="tab">
+					Manage
+				</a>
+			</li>
+			<li>
+                                <a href="#post" aria-controls="post" role="tab" data-toggle="tab">
+                                        Post Message
+                                </a>
+                        </li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="view">
+				{% include "view.html" %}
+			</div>
+			<div class="tab-pane" id="manage">
+				{% include "manage.html" %}
+			</div>
+			<div class="tab-pane" id="post">
+                                {% include "post.html" %}
+                        </div>
+		</div>
+	</div>
+{% endblock %}
