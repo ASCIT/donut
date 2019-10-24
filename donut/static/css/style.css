@@ -151,6 +151,17 @@ table {
   margin-bottom: 5%;
 }
 
+/* This is mirroring the btn-default. 
+ */
+.btn-primary {
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+
+  margin-bottom: 5%;
+}
+
 /* When the primary button class is hovered, give it an orange background. */
 .btn-default:hover {
   -webkit-transition: all 0.5s;

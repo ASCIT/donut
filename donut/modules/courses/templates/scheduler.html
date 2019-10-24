@@ -380,7 +380,7 @@
               $('<h5>')
                 .addClass('section-name')
                 .text(String(number) + ' - ' + section.instructor)
-            )
+            ).css("white-space", "normal")
           if (scheduledCourses[[courseId, number]]) {
             sectionItem.addClass('selected')
           }
