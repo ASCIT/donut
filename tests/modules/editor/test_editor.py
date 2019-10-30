@@ -29,6 +29,12 @@ def test_text_editor_page(client):
         flask.session['username'] = 'dqu'
         helpers.change_lock_status(
             "Some really really really interesting title", False)
+        assert not helpers.is_locked(
+            "Some really really really interesting title")
+        helpers.change_lock_status("Some less interesting title", True)
+        assert helpers.is_locked("Some less interesting title")
+        helpers.change_lock_status("default", True, default=True)
+        assert not helpers.is_locked("default")
 
     rv = client.get(
         flask.url_for(
