@@ -8,6 +8,7 @@ CREATE DATABASE donut_test;
 USE donut_test;
 
 -- Create the database schema.
+SOURCE sql/calendar.sql
 SOURCE sql/donut.sql
 SOURCE sql/directory.sql
 SOURCE sql/editor.sql

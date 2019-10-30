@@ -72,3 +72,5 @@ target/
 donut/modules/uploads/uploaded_files
 donut/modules/uploads/static/*.md
 
+# Google account keys
+calendar*json
