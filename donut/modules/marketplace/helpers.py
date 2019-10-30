@@ -7,14 +7,13 @@ from donut.default_permissions import Permissions
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
-SKIP_WORDS = set([
-    'a', 'all', 'am', 'an', 'and', 'are', 'as', 'at', 'be', 'been', 'but',
-    'by', 'did', 'do', 'for', 'from', 'had', 'has', 'have', 'he', 'her',
-    'hers', 'him', 'his', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'me',
-    'my', 'not', 'of', 'on', 'or', 'so', 'that', 'the', 'their', 'them',
-    'they', 'this', 'to', 'up', 'us', 'was', 'we', 'what', 'who', 'why',
-    'will', 'with', 'you', 'your'
-])
+SKIP_WORDS = set(
+    ('a', 'all', 'am', 'an', 'and', 'are', 'as', 'at', 'be', 'been', 'but',
+     'by', 'did', 'do', 'for', 'from', 'had', 'has', 'have', 'he', 'her',
+     'hers', 'him', 'his', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'me',
+     'my', 'not', 'of', 'on', 'or', 'so', 'that', 'the', 'their', 'them',
+     'they', 'this', 'to', 'up', 'us', 'was', 'we', 'what', 'who', 'why',
+     'will', 'with', 'you', 'your'))
 
 PUNCTUATION = r'[,.\-_!;:/\\]'
 EDITION = r'^(\d+|international)$'
@@ -53,11 +52,6 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
     """
     # Get category titles.
     categories = table_fetch('marketplace_categories')
-
-    # If there's nothing in categories, 404; something's borked.
-    if not categories:
-        flask.abort(404)
-
     categories.insert(0,
                       {'cat_id': ALL_CATEGORY,
                        'cat_title': 'All categories'})
@@ -119,10 +113,8 @@ def get_my_items():
 ###############
 # SEARCH PAGE #
 ###############
-SEARCH_FIELDS = [
-    'item_id', 'cat_title', 'item_title', 'textbook_title', 'item_price',
-    'user_id', 'item_timestamp'
-]
+SEARCH_FIELDS = ('item_id', 'cat_title', 'item_title', 'textbook_title',
+                 'item_price', 'user_id', 'item_timestamp')
 
 
 def generate_search_table(attrs, query):
@@ -141,7 +133,7 @@ def generate_search_table(attrs, query):
     if query:
         # Also add cat_id, textbook_author and textbook_isbn to the end so
         # that we can use those fields to query by.
-        fields.extend(('textbook_author', 'textbook_isbn'))
+        fields += ('textbook_author', 'textbook_isbn')
 
     result = table_fetch(
         """
@@ -166,14 +158,15 @@ def generate_search_table(attrs, query):
         item['user_url'] = flask.url_for(
             'directory_search.view_user', user_id=user_id)
         item['user_name'] = get_name_and_email(user_id)['full_name']
-        item['url'] = flask.url_for('.view_item', item_id=item['item_id'])
+        item['url'] = flask.url_for(
+            'marketplace.view_item', item_id=item['item_id'])
 
     return result
 
 
-def search_datalist(datalist, query):
+def search_datalist(items, query):
     """
-    Searches in datalist to create a new datalist,
+    Searches in items to create a new list of items,
     sorted first by relevance and then by date created.
     """
     query_tokens = tokenize_query(query)
@@ -184,35 +177,38 @@ def search_datalist(datalist, query):
     # ISBNs instantly make listings a perfect match
     query_isbns = [token for token in query_tokens if validate_isbn(token)]
 
-    for listing in datalist:
-        if listing['cat_title'] == 'Textbooks':
+    for item in items:
+        if item['cat_title'] == 'Textbooks':
             # if it's a textbook, include the author's name and the
             # book title in the item tokens
-            item_tokens = tokenize_query(listing['textbook_title'])
-            item_tokens.extend(tokenize_query(listing['textbook_author']))
+            item_tokens = tokenize_query(item['textbook_title'])
+            item_tokens.extend(tokenize_query(item['textbook_author']))
 
             # does the isbn match any of the query's isbns?
-            is_isbn_match = any(isbn == listing['textbook_isbn']
+            is_isbn_match = any(isbn == item['textbook_isbn']
                                 for isbn in query_isbns)
         else:
             # only include the item title
-            item_tokens = tokenize_query(listing['item_title'])
+            item_tokens = tokenize_query(item['item_title'])
             is_isbn_match = False
 
         score = perfect_score if is_isbn_match else \
             get_matches(query_tokens, item_tokens)
 
         if score:
-            listing['score'] = score
+            item['score'] = score
 
             (perfect_matches if score == perfect_score else imperfect_matches) \
-                .append(listing)
+                .append(item)
 
     # if we have any perfect matches, don't include the imperfect ones
-    return sorted(
+    items = sorted(
         perfect_matches or imperfect_matches,
         key=lambda item: (item['score'], item['item_timestamp']),
         reverse=True)  # highest score and newest first
+    for item in items:
+        del item['score']
+    return items
 
 
 def get_matches(l1, l2):
@@ -259,9 +255,6 @@ def validate_isbn(isbn):
     Returns:
         valid: Whether or not the isbn is valid (a boolean).
     """
-    if type(isbn) != str:
-        return False
-
     # Hyphens are annoying but there should never be one at start or end,
     # nor should there be two in a row.
     if isbn[0] == '-' or isbn[-1] == '-' or '--' in isbn:
@@ -312,7 +305,7 @@ def process_edition(edition):
             # It's probably an edition, not a year.
 
             # If the tens digit is 1, it's always 'th'.
-            if (edition / 10) % 10 == 1:
+            if (edition // 10) % 10 == 1:
                 return str(edition) + 'th'
             if edition % 10 == 1:
                 return str(edition) + 'st'
@@ -452,7 +445,6 @@ def update_current_listing(item_id, item):
         cursor.execute(query, item_id)
 
     insert_images(item_id, item)
-    return item_id
 
 
 def add_textbook(title, author):
@@ -489,53 +481,9 @@ def add_textbook(title, author):
         return cursor.lastrowid
 
 
-def delete_item(item_id):
-    """
-    Deletes an item.
-
-    Arguments:
-        item_id: The id of the item to delete.
-
-    Returns:
-        True if the delete succeeds, and False if not (the item doesn't exist)
-    """
-    s = 'SELECT item_id FROM marketplace_items WHERE item_id = %s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
-        result = cursor.fetchone()
-    if result == None:
-        # the item doesn't exist
-        return False
-
-    s = 'DELETE FROM marketplace_items WHERE item_id=%s'
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [item_id])
-    return True
-
-
 #####################
 # HELPFUL FUNCTIONS #
 #####################
-def get_textbook_info_from_textbook_id(textbook_id):
-    """
-    Queries the database and returns the title and author of the textbook with the specified id.
-
-    Arguments:
-        textbok_id: The id of the requested textbook.
-    Returns:
-        result: A list of the textbook title and author.
-    """
-    s = 'SELECT textbook_title, textbook_author FROM marketplace_textbooks WHERE textbook_id=%s'
-
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, [textbook_id])
-        result = cursor.fetchone()
-
-    if result == None:
-        return None
-    return [result['textbook_title'], result['textbook_author']]
-
-
 def get_category_name_from_id(cat_id):
     """
     Queries the database and returns the name of the category with the specified id.
