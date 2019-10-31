@@ -8,6 +8,13 @@
   <div class="form-group">
 	 <input class="btn btn-primary" id="apply-btn" type="submit" value="Apply for Subscription"/>
   </form>
+{% else %}
+<h1> Send: {{ actions["send"] }} </h1>
+<h1> Receive: {{ actions["receive"] }} </h1>
+<h1> Control: {{ actions["control"] }} </h1>
+{% endif %}
+{% if actions["send"] %}
+<a href="post-iframe.html", group_selected=true, group_0=group) }}>Send Message</a>
 {% endif %}
 <h2> Group Owners </h2>
 {% for owner in owners %}

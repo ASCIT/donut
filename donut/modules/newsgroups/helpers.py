@@ -25,6 +25,28 @@ def get_my_newsgroups(username):
         res = cursor.fetchall()
     return res
 
+def get_can_send_groups(username):
+    query = '''
+    SELECT group_name, group_id
+    FROM groups NATURAL JOIN positions
+    NATURAL JOIN position_holders
+    NATURAL JOIN users
+    WHERE users.username = %s
+    AND groups.newsgroups = TRUE
+    AND positions.send = TRUE
+    UNION DISTINCT
+    SELECT group_name, group_id
+    FROM groups NATURAL JOIN positions
+    NATURAL JOIN position_holders
+    WHERE groups.newsgroups = TRUE
+    AND groups.anyone_can_send = TRUE
+    '''
+    res = None
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, username)
+        res = cursor.fetchall()
+    return res
+
 def get_newsgroup_info(group_id):
     """Gets info for newsgroup."""
 
@@ -55,3 +77,15 @@ def get_user_actions(username, group_id):
 def apply_subscription(username, group_id):
     # TODO
     pass
+
+def positions_held(username, group_id):
+    query = """
+    SELECT p.pos_id
+    FROM groups NATURAL JOIN positions p NATURAL JOIN position_holders NATURAL JOIN users
+    WHERE users.username = %s AND groups.group_id = %s
+    """
+    res = None
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (username, group_id))
+        res = cursor.fetchall()
+    return res

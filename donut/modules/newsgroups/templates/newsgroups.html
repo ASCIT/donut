@@ -4,12 +4,12 @@
 		<ul class="nav nav-tabs nav-justified">
 			<li class="active">
 				<a href="#view" aria-controls="view" role="tab" data-toggle="tab">
-					View
+					All Groups
 				</a>
 			</li>
 			<li>
-				<a href="#manage" aria-controls="manage" role="tab" data-toggle="tab">
-					Manage
+				<a href="#mygroups" aria-controls="mygroups" role="tab" data-toggle="tab">
+					My Groups
 				</a>
 			</li>
 			<li>
@@ -22,9 +22,9 @@
 			<div class="tab-pane active" id="view">
 				{% include "view.html" %}
 			</div>
-			<div class="tab-pane" id="manage">
-				{% include "manage.html" %}
-			</div>
+			<div class="tab-pane" id="mygroups">
+                                {% include "mygroups.html" %}
+                        </div>
 			<div class="tab-pane" id="post">
                                 {% include "post.html" %}
                         </div>

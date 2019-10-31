@@ -7,9 +7,13 @@
 	<div class="form-group">
 		<label for="group" id="group">Group</label>
 		<select class="form-control" id="group" name="group">
+			{% if group_selected %}
+			<option value=group_0["group_id]" selected>{{ group_0["group_name"] }}</option>
+			{% else %}
 			{% for group in groups %}
-				<option>{{ group }}</option>
+			<option value=group["group_id"]>{{ group["group_name"] }}</option>
 			{% endfor %}
+			{% endif %}
 		</select>
 	</div>
 	</tr>

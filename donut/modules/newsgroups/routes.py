@@ -23,7 +23,8 @@ def post():
     username = flask.session['username'] if 'username' in flask.session else None
     return flask.render_template(
             'post-iframe.html',
-            groups=helpers.get_my_newsgroups(username))
+            group_selected=False,
+            groups=helpers.get_can_send_groups(username))
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
 def post_message():
@@ -31,6 +32,7 @@ def post_message():
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
+    # TODO: send email
     return flask.redirect(url_for('newsgroups.post'))
 
 
@@ -39,11 +41,13 @@ def view_group(group_id):
     group_info = helpers.get_newsgroup_info(group_id)
     username = flask.session['username'] if 'username' in flask.session else None
     pos_actions = helpers.get_user_actions(username, group_id)
+    pos_held = helpers.positions_held(username, group_id)
     return flask.render_template(
             'group-iframe.html',
             name=group_info['group_name'],
             desc=group_info['group_desc'],
             group_id=group_id,
+            member=(pos_held !=  ()),
             actions=pos_actions,
             owners=['TODO'])
 
@@ -53,3 +57,10 @@ def apply_subscription(group_id):
     # TODO: fix flashes in home page
     flask.flash('Successfully applied for subscription')
     return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
+
+@blueprint.route('/newsgroups/mygroups')
+def mygroups():
+    username = flask.session['username'] if 'username' in flask.session else None
+    return flask.render_template(
+            'view-iframe.html',
+            groups=helpers.get_my_newsgroups(username))
