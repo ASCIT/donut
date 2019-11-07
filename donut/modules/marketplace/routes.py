@@ -147,13 +147,7 @@ def sell():
         return helpers.render_with_top_marketplace_bar('requires_login.html')
 
     # Extract item id
-    item_id = flask.request.args.get('item_id')
-    if item_id is not None:
-        try:
-            item_id = int(item_id)
-        except ValueError:
-            flask.flash('Invalid item')
-            return flask.redirect(flask.url_for('.sell'))
+    item_id = helpers.try_int(flask.request.args.get('item_id'))
 
     # STATES
     # ------
@@ -170,18 +164,17 @@ def sell():
     editing = state == 'edit'
     if saving:
         form = flask.request.form
-        textbook_id = form.get('textbook_id')
         item = {
-            'cat_id': int(form['cat']),
-            'textbook_id': textbook_id and int(textbook_id),
-            'textbook_title': form['textbook_title'],
-            'textbook_author': form['textbook_author'],
-            'textbook_edition': form['textbook_edition'],
-            'textbook_isbn': form['textbook_isbn'],
-            'item_title': form['item_title'],
-            'item_condition': form['item_condition'],
-            'item_price': form['item_price'],
-            'item_details': form['item_details'],
+            'cat_id': helpers.try_int(form.get('cat')),
+            'textbook_id': helpers.try_int(form.get('textbook_id')),
+            'textbook_title': form.get('textbook_title'),
+            'textbook_author': form.get('textbook_author'),
+            'textbook_edition': form.get('textbook_edition'),
+            'textbook_isbn': form.get('textbook_isbn'),
+            'item_title': form.get('item_title'),
+            'item_condition': form.get('item_condition'),
+            'item_price': form.get('item_price'),
+            'item_details': form.get('item_details'),
             'images': [image for image in form.getlist('images') if image]
         }
     elif editing:
@@ -190,19 +183,19 @@ def sell():
             one=True,
             fields=SELL_FIELDS,
             attrs={'item_id': item_id})
-        if item is None:
+        if not item:
             # no data? the item_id must be wrong
             flask.flash('Invalid item')
-            return flask.redirect(flask.url_for('.sell'))
-
-        # make sure the current user is the one who posted the item
-        if not helpers.can_manage(item):
-            flask.flash('You do not have permission to edit this item.')
             return flask.redirect(flask.url_for('.marketplace'))
 
         item['images'] = helpers.get_image_links(item_id)
     else:
         item = {'images': []}
+
+    # make sure the current user is the one who posted the item
+    if editing and not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to edit this item')
+        return flask.redirect(flask.url_for('.marketplace'))
 
     if saving:
         errors = []
@@ -225,10 +218,10 @@ def sell():
                 if not item['textbook_author']:
                     errors.append('Missing textbook author')
             edition = item['textbook_edition']
-            if edition and not helpers.validate_edition(edition):
+            if not (edition is None or helpers.validate_edition(edition)):
                 errors.append('Invalid textbook edition')
             isbn = item['textbook_isbn']
-            if isbn:
+            if isbn is not None:
                 if helpers.validate_isbn(isbn):
                     item['textbook_isbn'] = isbn.replace('-', '')
                 else:
@@ -241,8 +234,8 @@ def sell():
         if not (price and helpers.validate_price(price)):
             errors.append('Invalid price')
         images = item['images']
-        for i in range(len(images)):
-            image = helpers.validate_image(images[i])
+        for i, image in enumerate(images):
+            image = helpers.validate_image(image)
             if image:
                 images[i] = image
             else:

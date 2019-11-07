@@ -48,5 +48,3 @@ CREATE TABLE marketplace_images (
 	PRIMARY KEY(img_id),
 	FOREIGN KEY(item_id) REFERENCES marketplace_items(item_id) ON DELETE CASCADE
 );
-
-

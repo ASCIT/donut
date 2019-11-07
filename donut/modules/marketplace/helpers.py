@@ -505,3 +505,13 @@ def get_image_links(item_id):
         'marketplace_images',
         fields=('img_link', ),
         attrs={'item_id': item_id})
+
+
+def try_int(x):
+    if x is None:
+        return x
+
+    try:
+        return int(x)
+    except ValueError:
+        return None
