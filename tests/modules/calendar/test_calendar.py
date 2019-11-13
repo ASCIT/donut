@@ -38,8 +38,6 @@ def test_plain_calendar_page(client):
 
 def test_data_handling(client):
 
-    #perms = helpers.get_permission()
-    #assert not perms['Any']
     with client.session_transaction() as sess:
         # Should be able to do everything
         sess['username'] = 'dqu'
