@@ -339,10 +339,10 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
         result: The fields and corresponding values of members with desired
                 attributes. In the form of a list of lists.
     """
-    s = 'SELECT ' + ('*' if fields is None else ', '.join(fields))
+    s = 'SELECT ' + ', '.join(fields or ('*', ))
     s += ' FROM ' + tables
     if attrs:
-        s += ' WHERE ' + ' AND '.join([key + ' = %s' for key in attrs])
+        s += ' WHERE ' + ' AND '.join(key + ' = %s' for key in attrs)
 
     # Execute the query
     with flask.g.pymysql_db.cursor() as cursor:

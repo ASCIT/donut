@@ -218,16 +218,21 @@ def sell():
                 if not item['textbook_author']:
                     errors.append('Missing textbook author')
             edition = item['textbook_edition']
-            if not (edition is None or helpers.validate_edition(edition)):
+            if edition and not helpers.validate_edition(edition):
                 errors.append('Invalid textbook edition')
             isbn = item['textbook_isbn']
-            if isbn is not None:
+            if isbn:
                 if helpers.validate_isbn(isbn):
                     item['textbook_isbn'] = isbn.replace('-', '')
                 else:
                     errors.append('Invalid textbook ISBN')
-        elif not item['item_title']:
-            errors.append('Missing item title')
+            item['item_title'] = None
+        else:
+            if not item['item_title']:
+                errors.append('Missing item title')
+            item['textbook_id'] = None
+            item['textbook_edition'] = None
+            item['textbook_isbn'] = None
         if not item['item_condition']:
             errors.append('Missing condition')
         price = item['item_price']
