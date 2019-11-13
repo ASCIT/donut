@@ -98,11 +98,57 @@ INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
 INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
+/* bodfeedback */
+INSERT INTO bod_complaint_info(complaint_id, subject, status, uuid) VALUES
+    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
+    (2, 'Sub2', 'read', '2');
+
+INSERT INTO bod_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
+    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
+    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
+
+INSERT INTO bod_complaint_emails(complaint_id, email, email_id) VALUES
+    (1, 'test@example.com', 1),
+    (1, 'test2@example.com', 2);
+
+/* arcfeedback */
+INSERT INTO arc_complaint_info(complaint_id, subject, status, uuid) VALUES
+    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
+    (2, 'Sub2', 'read', '2');
+
+INSERT INTO arc_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
+    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
+    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
+
+INSERT INTO arc_complaint_emails(complaint_id, email, email_id) VALUES
+    (1, 'test@example.com', 1),
+    (1, 'test2@example.com', 2);
+
+/* donutfeedback */
+INSERT INTO donut_complaint_info(complaint_id, subject, status, uuid) VALUES
+    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
+    (2, 'Sub2', 'read', '2');
+
+INSERT INTO donut_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
+    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
+    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
+
+INSERT INTO donut_complaint_emails(complaint_id, email, email_id) VALUES
+    (1, 'test@example.com', 1),
+    (1, 'test2@example.com', 2);
+
 INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
     (1, 'Admin', 'ALL', 'Grants all other permissions -- FOR DEV ONLY'),
     (2, 'Edit', 'Rotation Info', 'IHC members may edit general rotation information'),
-    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search');
+    (3, 'View', 'Directory Search Hidden Fields', 'Donut Admins may always view hidden fields in directory search'),
+    (8, 'View', 'Bodfeedback summary', 'View a summary page of all bodfeedback'),
+    (9, 'Edit', 'Bodfeedback', 'Mark a complaint read/unread'),
+    (10, 'Edit', 'Bodfeedback emails', 'Add or remove subscribed emails from bodfeedback'),
+    (11, 'View', 'Bodfeedback emails', 'View the list of subscribed emails on bodfeedback');
 
 INSERT INTO position_permissions(pos_id, permission_id) VALUES
     (1, 1),
