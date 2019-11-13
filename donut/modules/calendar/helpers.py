@@ -345,13 +345,14 @@ def share_calendar(calendars, email, permission_level):
                 calendarId=cal_id[cal_name], body=rule).execute()
 
             query = """
-                INSERT INTO calendar_logs (user_id, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
-                (%s, %s, %s, %s, NOW(), %s) 
+                INSERT INTO calendar_logs (user_id, calendar_id, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
+                (%s, %s, %s, %s, %s, NOW(), %s) 
                 """
             with flask.g.pymysql_db.cursor() as cursor:
                 cursor.execute(
                     query, (auth_utils.get_user_id(flask.session['username']),
-                            cal_id[cal_name], email, created_rule['id'], role))
+                            cal_name, cal_id[cal_name], email,
+                            created_rule['id'], role))
         return ''
     except Exception as e:
         return e.get('message', e) if type(e) is dict else str(e)
