@@ -36,6 +36,7 @@ def test_plain_calendar_page(client):
                       update=0)).status_code == 302
 
 
+@pytest.mark.skip(reason="Shouldn't have unit tests that require http")
 def test_data_handling(client):
 
     with client.session_transaction() as sess:
