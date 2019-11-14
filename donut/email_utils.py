@@ -19,3 +19,15 @@ def send_email(to, msg, subject, use_prefix=True):
     s = smtplib.SMTP('localhost')
     s.sendmail('auto@donut.caltech.edu', [to], msg.as_string())
     s.quit()
+
+def newsgroup_send_email(recipients, group, msg, subject):
+    msg = MIMEText(msg)
+    msg['Subject'] = subject
+    msg['From'] = 'auto@donut.caltech.edu'
+    msg['To'] = group.lower().replace(' ', '_')
+    s = smtplib.SMTP('localhost')
+    s.sendmail(
+            'auto@donut.caltech.edu', 
+            [msg['To']] + recipients, 
+            msg.as_string())
+    s.quit()

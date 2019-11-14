@@ -1,3 +1,4 @@
+from donut import email_utils
 import flask
 from donut.modules.core.helpers import get_name_and_email
 
@@ -18,91 +19,104 @@ def get_past_messages(group_id, limit=10):
     return res
 
 def get_newsgroups():
-    """Gets list of newsgroups."""
+    """Gets all newsgroups."""
 
-    query = 'SELECT group_name, group_id FROM groups WHERE newsgroups = TRUE'
+    query = '''
+    SELECT group_name, group_id FROM groups 
+    WHERE newsgroups=TRUE 
+    '''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         res = cursor.fetchall()
     return res
 
-def get_my_newsgroups(username):
+def get_my_newsgroups(user_id):
     """Gets list of user is a member of."""
 
     query = '''
     SELECT group_name, group_id 
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
-    NATURAL JOIN users 
-    WHERE users.username = %s
-    AND groups.newsgroups = TRUE
+    WHERE user_id=%s
+    AND groups.newsgroups=1
     '''
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, username)
+        cursor.execute(query, user_id)
         res = cursor.fetchall()
     return res
 
-def get_can_send_groups(username):
+def get_can_send_groups(user_id):
     query = '''
     SELECT group_name, group_id
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
-    NATURAL JOIN users
-    WHERE users.username = %s
-    AND groups.newsgroups = TRUE
-    AND positions.send = TRUE
+    WHERE user_id= %s
+    AND groups.newsgroups=1
+    AND positions.send=1
     UNION DISTINCT
     SELECT group_name, group_id
-    FROM groups NATURAL JOIN positions
-    NATURAL JOIN position_holders
-    WHERE groups.newsgroups = TRUE
-    AND groups.anyone_can_send = TRUE
+    FROM groups 
+    WHERE groups.newsgroups=1
+    AND groups.anyone_can_send=1
     '''
     res = None
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, username)
+        cursor.execute(query, user_id)
         res = cursor.fetchall()
     return res
 
-def get_newsgroup_info(group_id):
-    """Gets info for newsgroup."""
-
-    query = """
-    SELECT group_name, group_desc, anyone_can_send, members_can_send, visible, admin_control_members 
-    FROM groups WHERE group_id = %s
-    """
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, group_id)
-        res = cursor.fetchone()
-    return res
-
-def get_user_actions(username, group_id):
+def get_user_actions(user_id, group_id):
     """Gets allowed actions for user."""
 
-    if not username:
+    if not user_id:
         return None
     query = """
     SELECT p.send AS send, p.control AS control, p.receive AS receive
-    FROM groups NATURAL JOIN positions p NATURAL JOIN position_holders NATURAL JOIN users
-    WHERE users.username = %s AND groups.group_id = %s
+    FROM groups NATURAL JOIN positions p 
+    NATURAL JOIN position_holders
+    WHERE user_id=%s AND groups.group_id=%s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (username, group_id))
+        cursor.execute(query, (user_id, group_id))
         res = cursor.fetchone()
     return res
 
-def apply_subscription(username, group_id):
+def apply_subscription(user_id, group_id):
     # TODO
     pass
 
-def positions_held(username, group_id):
-    query = """
-    SELECT p.pos_id
-    FROM groups NATURAL JOIN positions p NATURAL JOIN position_holders NATURAL JOIN users
-    WHERE users.username = %s AND groups.group_id = %s
-    """
-    res = None
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (username, group_id))
-        res = cursor.fetchall()
-    return res
+def unsubscribe(user_id, group_id):
+    if not username:
+        return None
+    # TODO
+    pass
+
+def send_email(data):
+   """Sends email to newsgroup."""
+
+   query = """
+   SELECT DISTINCT members.email
+   FROM positions p 
+   LEFT JOIN position_relations pr ON p.pos_id=pr.pos_id_to
+   INNER JOIN position_holders ph 
+   ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
+   NATURAL JOIN members
+   WHERE group_id=%s AND p.receive=1
+   """
+   emails = []
+   print(data['group'])
+   with flask.g.pymysql_db.cursor() as cursor:
+       cursor.execute(query, data['group'])
+       emails = [item['email'] for item in cursor.fetchall()]
+   if not emails:
+       return True
+   emails = list(set(emails))
+   try:
+       email_utils.newsgroup_send_email(
+               emails, 
+               data['group_name'],
+               data['subject'], 
+               data['msg'])
+       return True
+   except:
+       return False

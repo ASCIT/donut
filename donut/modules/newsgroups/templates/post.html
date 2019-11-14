@@ -1,8 +1,39 @@
-<div style="position: relative; height: 0; padding-bottom: 80%; overflow: hidden">
-        <iframe
-                src={{ url_for(".post") }}
-                frameBorder="0"
-                seamless="seamless"
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-        ></iframe>
-</div>
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+<form method="POST" action={{ url_for("newsgroups.post_message") }}>
+	<table id="message" class="table">
+	<tr>
+	<div class="form-group">
+		<label for="group" id="group">Group</label>
+		<select class="form-control" id="group" name="group">
+			{% for group in groups %}
+			{% if group_selected == group["group_id"]|string %}
+			<option value="{{ group['group_id'] }}" selected>{{ group["group_name"] }}</option>
+			{% else %}
+			<option value="{{ group['group_id'] }}">{{ group["group_name"] }}</option>
+			{% endif %}
+			{% endfor %}
+		</select>
+	</div>
+	</tr>
+	<tr>
+	<div class="form-group">
+		<td> Subject*: </td>
+                 <td><input type="text" name="subject" class="form-control" required /></td>
+        </div>
+	</tr>
+	<tr>
+                  <div class="form-group">
+			  <td>Message*: </td>
+                    <td><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
+                  </div>
+               
+	</tr>
+	</table>
+	<div class="row">
+                <div class="text-center">
+                  <input class="btn" type="submit" value="Submit" />
+                </div>
+              </div>
+{% endblock %}
