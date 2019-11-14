@@ -1,4 +1,21 @@
 import flask
+from donut.modules.core.helpers import get_name_and_email
+
+def get_past_messages(group_id, limit=10):
+    """Returns a list of past sent messages"""
+    query = """
+    SELECT subject, message, time_sent, user_id FROM
+    newsgroup_posts WHERE group_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [group_id])
+        res = cursor.fetchall()
+    for message in res:
+        ### TODO: make a view messages page or smth
+        messages['url'] = flask.url_for("home") 
+        messages['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
+        messages['name'] = get_name_and_email(user_id)['full_name']
+    return res
 
 def get_newsgroups():
     """Gets list of newsgroups."""

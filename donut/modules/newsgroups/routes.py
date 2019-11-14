@@ -49,6 +49,7 @@ def view_group(group_id):
             group_id=group_id,
             member=(pos_held !=  ()),
             actions=pos_actions,
+            recent_messages=helpers.get_past_messages(group_id),
             owners=['TODO'])
 
 @blueprint.route('/newsgroups/viewgroup/apply/<group_id>', methods=['POST'])
