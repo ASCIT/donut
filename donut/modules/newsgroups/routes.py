@@ -22,6 +22,7 @@ def post(group_id=None):
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
 def post_message():
+    user_id = auth_utils.get_user_id(flask.session['username'])
     fields = ['group', 'subject', 'msg']
     data = {}
     for field in fields:
@@ -29,10 +30,10 @@ def post_message():
     data['group_name'] = groups.get_group_data(data['group'], ['group_name'])['group_name']
     if helpers.send_email(data):
         flask.flash('Email sent')
+        helpers.insert_email(user_id, data)
     else:
         flask.flash('Email failed to send')
     return flask.redirect(flask.url_for('newsgroups.post'))
-
 
 @blueprint.route('/newsgroups/viewgroup/<group_id>')
 def view_group(group_id):
@@ -47,7 +48,7 @@ def view_group(group_id):
             group=group_info,
             member=groups.is_user_in_group(user_id, group_id),
             actions=pos_actions,
-            recent_messages=helpers.get_past_messages(group_id),
+            messages=helpers.get_past_messages(group_id),
             owners=['TODO'])
 
 @blueprint.route('/newsgroups/viewgroup/apply/<group_id>', methods=['POST'])

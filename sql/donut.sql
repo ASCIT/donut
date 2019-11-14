@@ -141,9 +141,9 @@ CREATE TABLE newsgroup_posts (
     subject                 TEXT         NOT NULL, 
     message                 TEXT         NOT NULL,
     user_id                 INT          NOT NULL, -- Who sent this message
-    time_sent               DATETIME     NOT NULL, -- When were messages sent
+    time_sent               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP, -- When were messages sent
     PRIMARY KEY (newsgroup_post_id), 
-    FOREIGN KEY (group_id) REFERENCES groups(group_id)
+    FOREIGN KEY (group_id) REFERENCES groups(group_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 

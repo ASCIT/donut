@@ -6,16 +6,16 @@ def get_past_messages(group_id, limit=10):
     """Returns a list of past sent messages"""
     query = """
     SELECT subject, message, time_sent, user_id FROM
-    newsgroup_posts WHERE group_id = %s
+    newsgroup_posts WHERE group_id = %s LIMIT %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [group_id])
+        cursor.execute(query, (group_id, limit))
         res = cursor.fetchall()
     for message in res:
         ### TODO: make a view messages page or smth
-        messages['url'] = flask.url_for("home") 
-        messages['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
-        messages['name'] = get_name_and_email(user_id)['full_name']
+        message['url'] = flask.url_for("home") 
+        # message['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
+        # message['name'] = get_name_and_email(user_id)['full_name']
     return res
 
 def get_newsgroups():
@@ -23,7 +23,7 @@ def get_newsgroups():
 
     query = '''
     SELECT group_name, group_id FROM groups 
-    WHERE newsgroups=TRUE 
+    WHERE newsgroups=1
     '''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
@@ -104,7 +104,6 @@ def send_email(data):
    WHERE group_id=%s AND p.receive=1
    """
    emails = []
-   print(data['group'])
    with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, data['group'])
        emails = [item['email'] for item in cursor.fetchall()]
@@ -120,3 +119,12 @@ def send_email(data):
        return True
    except:
        return False
+
+def insert_email(user_id, data):
+    query = """
+    INSERT INTO newsgroup_posts 
+    VALUES (NULL, %s, %s, %s, %s, NULL)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+       cursor.execute(query, (data['group'], data['subject'], 
+           data['msg'], user_id))

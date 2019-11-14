@@ -24,5 +24,17 @@
 {% for owner in owners %}
 <th> {{ owner }} </th>
 {% endfor %}
+<h4> Past Messages </h4>
+    <table style="width:100%">
+  <tr>
+    <th>Date</th>
+    <th>From</th>
+    <th>Subject</th>
+  </tr>
+{% for message in messages %}
+          <td> {{message.time_sent}}</td>
+          <td> {{message.name}} </td>
+          <td> {{message.subject}} </td>
+{% endfor %}
 {% endif %}
 {% endblock %}
