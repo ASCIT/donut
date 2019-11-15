@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+<h1> <a href={{ url_for("newsgroups.view_group", group_id=group_id) }}>{{ group_name }}</a></h1>
+<h4> Past Messages </h4>
+    <table style="width:100%">
+  <tr>
+    <th>Date</th>
+    <th>From</th>
+    <th>Subject</th>
+  </tr>
+{% for message in messages %}
+          <td> {{message.time_sent}}</td>
+          <td> {{message.name}} </td>
+	  <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
+{% endfor %}
+{% endblock %}

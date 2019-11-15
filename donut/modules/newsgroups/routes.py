@@ -7,6 +7,8 @@ from . import blueprint, helpers
 
 @blueprint.route('/newsgroups')
 def newsgroups_home():
+    if 'username' not in flask.session:
+        return flask.abort(403)
     return flask.render_template(
             'newsgroups.html',
             groups=helpers.get_newsgroups())
@@ -14,6 +16,8 @@ def newsgroups_home():
 @blueprint.route('/newsgroups/post')
 @blueprint.route('/newsgroups/post/<group_id>')
 def post(group_id=None):
+    if 'username' not in flask.session:
+        return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
     return flask.render_template(
             'post.html',
@@ -22,6 +26,8 @@ def post(group_id=None):
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
 def post_message():
+    if 'username' not in flask.session:
+        return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
     fields = ['group', 'subject', 'msg']
     data = {}
@@ -37,6 +43,8 @@ def post_message():
 
 @blueprint.route('/newsgroups/viewgroup/<group_id>')
 def view_group(group_id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
     pos_actions = helpers.get_user_actions(user_id, group_id)
     fields = ['group_id', 'group_name', 'group_desc', 'anyone_can_send',
@@ -53,18 +61,24 @@ def view_group(group_id):
 
 @blueprint.route('/newsgroups/viewgroup/apply/<group_id>', methods=['POST'])
 def apply_subscription(group_id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
     helpers.apply_subscription(flask.session['username'], group_id)
     flask.flash('Successfully applied for subscription')
     return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
 
 @blueprint.route('/newsgroups/viewgroup/unsub/<group_id>', methods=['POST'])
 def unsubscribe(group_id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
     helpers.unsubscribe(flask.session['username'], group_id)
     flask.flash('Successfully unsubscribed')
     return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
 
 @blueprint.route('/newsgroups/mygroups')
 def mygroups():
+    if 'username' not in flask.session:
+        return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
     return flask.render_template(
             'newsgroups.html',
@@ -72,7 +86,21 @@ def mygroups():
 
 @blueprint.route('/newsgroups/viewmsg/<post_id>')
 def view_post(post_id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
     post = helpers.get_post(post_id)
     return flask.render_template(
             'view_post.html',
             post=post)
+
+@blueprint.route('/newsgroups/allposts/<group_id>')
+def all_posts(group_id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
+    user_id = auth_utils.get_user_id(flask.session['username'])
+    group_name = groups.get_group_data(group_id, ['group_name'])['group_name']
+    return flask.render_template(
+            'all_posts.html',
+            group_id=group_id,
+            group_name=group_name,
+            messages=helpers.get_past_messages(group_id, 50))

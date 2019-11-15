@@ -3,7 +3,7 @@ import flask
 import smtplib
 from donut.modules.core.helpers import get_name_and_email
 
-def get_past_messages(group_id, limit=10):
+def get_past_messages(group_id, limit=5):
     """Returns a list of past sent messages"""
 
     query = """
