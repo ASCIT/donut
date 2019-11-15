@@ -1,21 +1,18 @@
 from donut import email_utils
 import flask
+import smtplib
 from donut.modules.core.helpers import get_name_and_email
 
 def get_past_messages(group_id, limit=10):
     """Returns a list of past sent messages"""
+
     query = """
-    SELECT subject, message, time_sent, user_id FROM
-    newsgroup_posts WHERE group_id = %s LIMIT %s
+    SELECT newsgroup_post_id, subject, message, time_sent, user_id 
+    FROM newsgroup_posts WHERE group_id=%s LIMIT %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, limit))
         res = cursor.fetchall()
-    for message in res:
-        ### TODO: make a view messages page or smth
-        message['url'] = flask.url_for("home") 
-        # message['user_url'] = flask.url_for('directory_search.view_user', user_id=user_id)
-        # message['name'] = get_name_and_email(user_id)['full_name']
     return res
 
 def get_newsgroups():
@@ -46,11 +43,13 @@ def get_my_newsgroups(user_id):
     return res
 
 def get_can_send_groups(user_id):
+    """Gets groups that user is allowed to post to."""
+
     query = '''
     SELECT group_name, group_id
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
-    WHERE user_id= %s
+    WHERE user_id=%s
     AND groups.newsgroups=1
     AND positions.send=1
     UNION DISTINCT
@@ -86,7 +85,7 @@ def apply_subscription(user_id, group_id):
     pass
 
 def unsubscribe(user_id, group_id):
-    if not username:
+    if not user_id:
         return None
     # TODO
     pass
@@ -103,13 +102,12 @@ def send_email(data):
    NATURAL JOIN members
    WHERE group_id=%s AND p.receive=1
    """
-   emails = []
+   emails = None
    with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, data['group'])
        emails = [item['email'] for item in cursor.fetchall()]
    if not emails:
        return True
-   emails = list(set(emails))
    try:
        email_utils.newsgroup_send_email(
                emails, 
@@ -117,14 +115,28 @@ def send_email(data):
                data['subject'], 
                data['msg'])
        return True
-   except:
+   except smtplib.SMTPException:
        return False
 
 def insert_email(user_id, data):
     query = """
     INSERT INTO newsgroup_posts 
-    VALUES (NULL, %s, %s, %s, %s, NULL)
+    (group_id, subject, message, user_id)
+    VALUES (%s, %s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, (data['group'], data['subject'], 
            data['msg'], user_id))
+
+def get_post(post_id):
+    query = """
+    SELECT group_name, group_id, subject, message, user_id, time_sent 
+    FROM newsgroup_posts
+    NATURAL JOIN groups
+    WHERE newsgroup_post_id=%s
+    """
+    res = None
+    with flask.g.pymysql_db.cursor() as cursor:
+       cursor.execute(query, post_id)
+       res = cursor.fetchone()
+    return res

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+	<h3>
+		<label for="from">From: </label>
+		<a href={{ url_for('newsgroups.newsgroups_home') }}>{{ post.user_id }}</a> </h3>
+	<h3>
+	<label for="to">To: </label>
+	<a href={{ url_for('newsgroups.view_group', group_id=post.group_id) }}>{{ post.group_name }}</a>
+		</h3>
+		<h3>Date: {{ post.time_sent }}</h3>
+		<h3>Message:</h3>
+		<h4>{{ post.message }}</h4>
+{% endblock %}
