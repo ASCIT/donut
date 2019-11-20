@@ -38,7 +38,7 @@ def get_my_newsgroups(user_id):
     AND groups.newsgroups=1
     '''
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, user_id)
+        cursor.execute(query, [user_id])
         res = cursor.fetchall()
     return res
 
@@ -49,7 +49,7 @@ def get_can_send_groups(user_id):
     SELECT group_name, group_id
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
-    WHERE user_id=%s
+    WHERE user_id=%s 
     AND groups.newsgroups=1
     AND positions.send=1
     UNION DISTINCT
@@ -60,7 +60,7 @@ def get_can_send_groups(user_id):
     '''
     res = None
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, user_id)
+        cursor.execute(query, [user_id])
         res = cursor.fetchall()
     return res
 
