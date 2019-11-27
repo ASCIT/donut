@@ -13,6 +13,9 @@ def get_past_messages(group_id, limit=5):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, limit))
         res = cursor.fetchall()
+    # Generate who sent the message
+    for i in res:
+        i['name'] = get_name_and_email(i['user_id'])[0]
     return res
 
 def get_newsgroups():
