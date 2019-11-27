@@ -213,3 +213,11 @@ CREATE TABLE news (
     news_text   TEXT NOT NULL,
     PRIMARY KEY (news_id)
 );
+CREATE TABLE group_applications (
+    group_app_id    INT NOT NULL AUTO_INCREMENT,
+    user_id         INT NOT NULL, 
+    group_id        INT NOT NULL, 
+    PRIMARY KEY (group_app_id),
+    FOREIGN KEY (user_id) REFERENCES members(user_id),
+    FOREIGN KEY (group_id) REFERENCES groups(group_id)
+)

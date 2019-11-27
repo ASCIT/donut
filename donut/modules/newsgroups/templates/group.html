@@ -25,6 +25,24 @@
 {% endif %}
 <h1> Receive: {{ actions["receive"] }} </h1>
 <h1> Control: {{ actions["control"] }} </h1>
+{% if actions["control"] %}
+  <h4> Applications </h4>
+  <table style="width:100%">
+      <tr>
+        <th>Applicant</th>
+        <th>Email</th>
+        <th>Subscription</th>
+      </tr>
+      {% for applicant in applications %}
+        <tr>
+          <td> {{applicant.name}}</td>
+          <td> {{applicant.email}} </td>
+          <td> <a href={{ url_for('campus_positions')}}>Add to Group</a> </td>
+          <td> <a href={{ url_for('newsgroups.delete_application', user_id=applicant.user_id, group_id=group['group_id']) }}>Dismiss</a> </td>
+         </tr>
+      {% endfor %}
+    </table>
+{% endif %}
 {% if actions['send'] or group['anyone_can_send'] %}
 <br>
 <a href={{ url_for('newsgroups.post', group_id=group['group_id']) }}>Send Message</a>

@@ -84,8 +84,16 @@ def get_user_actions(user_id, group_id):
     return res
 
 def apply_subscription(user_id, group_id):
-    # TODO
-    pass
+    '''
+    Inserts into groups table with the position "Applicant"
+    '''
+    # TODO: Make sure each is unique!
+    query = """
+    INSERT INTO group_applications(group_id, user_id)
+    VALUES (%s, %s)
+    """    
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (group_id, user_id))
 
 def unsubscribe(user_id, group_id):
     if not user_id:
@@ -93,6 +101,22 @@ def unsubscribe(user_id, group_id):
     # TODO
     pass
 
+def get_applications(group_id):
+    '''
+    Selects all applicants to a newgroups 
+    '''
+    query = """
+    SELECT * FROM group_applications WHERE group_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (group_id))
+        res = cursor.fetchall()
+    for i in res:
+        (name, email) = get_name_and_email(i['user_id'])
+        i['name'] = name
+        i['email'] = email
+    return res
+    
 def send_email(data):
    """Sends email to newsgroup."""
 

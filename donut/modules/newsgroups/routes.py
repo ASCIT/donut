@@ -55,6 +55,9 @@ def view_group(group_id):
     fields = ['group_id', 'group_name', 'group_desc', 'anyone_can_send',
             'members_can_send', 'visible', 'admin_control_members']
     group_info = groups.get_group_data(group_id, fields)
+    applications = None    
+    if pos_actions and pos_actions['control']:
+        applications = helpers.get_applications(group_id)
     
     return flask.render_template(
             'group.html',
@@ -62,13 +65,14 @@ def view_group(group_id):
             member=groups.is_user_in_group(user_id, group_id),
             actions=pos_actions,
             messages=helpers.get_past_messages(group_id),
-            owners=helpers.get_owners(group_id))
+            owners=helpers.get_owners(group_id),
+            applications=applications)
 
 @blueprint.route('/newsgroups/viewgroup/apply/<group_id>', methods=['POST'])
 def apply_subscription(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
-    helpers.apply_subscription(flask.session['username'], group_id)
+    helpers.apply_subscription(auth_utils.get_user_id(flask.session['username']), group_id)
     flask.flash('Successfully applied for subscription')
     return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
 
@@ -109,3 +113,9 @@ def all_posts(group_id):
             group_id=group_id,
             group_name=group_name,
             messages=helpers.get_past_messages(group_id, 50))
+
+@blueprint.route('/_delete_application')
+def delete_application(user_id, group_id):
+    #TODO
+    return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
+
