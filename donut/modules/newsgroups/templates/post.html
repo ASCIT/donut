@@ -18,6 +18,16 @@
 	</div>
 	</tr>
 	<tr>
+        <div class="form-group">
+                <label for="poster">Post As</label>
+                <select class="form-control" id="poster" name="poster">
+                        {% for poster in posters %}
+                        <option value="{{ poster['pos_name'] }}">{{ poster["pos_name"] }}</option>
+                        {% endfor %}
+                </select>
+        </div>
+        </tr>
+	<tr>
 	<div class="form-group">
 		<td>
 		<label for="subj" class="required"> Subject: </label>

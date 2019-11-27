@@ -112,6 +112,7 @@ def send_email(data):
        email_utils.newsgroup_send_email(
                emails, 
                data['group_name'],
+               data['poster'],
                data['subject'], 
                data['msg'])
        return True
@@ -121,16 +122,16 @@ def send_email(data):
 def insert_email(user_id, data):
     query = """
     INSERT INTO newsgroup_posts 
-    (group_id, subject, message, user_id)
-    VALUES (%s, %s, %s, %s)
+    (group_id, subject, message, post_as, user_id)
+    VALUES (%s, %s, %s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, (data['group'], data['subject'], 
-           data['msg'], user_id))
+           data['msg'], data['poster'], user_id))
 
 def get_post(post_id):
     query = """
-    SELECT group_name, group_id, subject, message, user_id, time_sent 
+    SELECT group_name, group_id, subject, message, post_as, user_id, time_sent 
     FROM newsgroup_posts
     NATURAL JOIN groups
     WHERE newsgroup_post_id=%s
@@ -139,4 +140,31 @@ def get_post(post_id):
     with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, post_id)
        res = cursor.fetchone()
+    return res
+
+def get_owners(group_id):
+    query = """
+    SELECT user_id 
+    FROM positions NATURAL JOIN position_holders 
+    WHERE positions.control=1
+    AND positions.group_id=%s
+    """
+    res = None
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, group_id)
+        res = cursor.fetchall()
+    return res
+
+def post_as(group_id, user_id):
+    query = """
+    SELECT pos_name, pos_id 
+    FROM positions NATURAL JOIN position_holders
+    WHERE positions.group_id=%s
+    AND position_holders.user_id=%s
+    AND positions.send=1
+    """
+    res = None
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (group_id, user_id))
+        res = cursor.fetchall()
     return res

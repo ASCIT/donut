@@ -10,8 +10,8 @@
     <th>Subject</th>
   </tr>
 {% for message in messages %}
-          <td> {{message.time_sent}}</td>
-          <td> {{message.name}} </td>
+          <td> {{ message.time_sent }}</td>
+          <td> {{ message.name }} </td>
 	  <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
 {% endfor %}
 {% endblock %}

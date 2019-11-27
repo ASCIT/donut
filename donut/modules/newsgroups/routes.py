@@ -1,6 +1,7 @@
 import flask 
 from flask import jsonify
 from donut.modules.groups import helpers as groups
+from donut.modules.account import helpers as account
 from donut import auth_utils
 
 from . import blueprint, helpers
@@ -22,17 +23,21 @@ def post(group_id=None):
     return flask.render_template(
             'post.html',
             groups=helpers.get_can_send_groups(user_id),
-            group_selected=group_id)
+            group_selected=group_id,
+            posters=helpers.post_as(group_id, user_id))
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
 def post_message():
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    fields = ['group', 'subject', 'msg']
+    fields = ['group', 'subject', 'msg', 'poster']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
+    if not data['poster']:
+        user = account.get_user_data(user_id)
+        data['poster'] = ' '.join([user['first_name'], user['last_name']])
     data['group_name'] = groups.get_group_data(data['group'], ['group_name'])['group_name']
     if helpers.send_email(data):
         flask.flash('Email sent')
@@ -57,7 +62,7 @@ def view_group(group_id):
             member=groups.is_user_in_group(user_id, group_id),
             actions=pos_actions,
             messages=helpers.get_past_messages(group_id),
-            owners=['TODO'])
+            owners=helpers.get_owners(group_id))
 
 @blueprint.route('/newsgroups/viewgroup/apply/<group_id>', methods=['POST'])
 def apply_subscription(group_id):
