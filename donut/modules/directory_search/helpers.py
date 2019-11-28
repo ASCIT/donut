@@ -1,8 +1,9 @@
 import flask
 import pymysql.cursors
-from donut.auth_utils import get_permissions, get_user_id
+from donut.auth_utils import check_permission, get_permissions, get_user_id
 from donut.constants import Gender
 from donut.default_permissions import Permissions
+from donut.modules.directory_search.permissions import Directory_Permissions
 
 
 def get_hidden_fields(viewer_name, viewee_id):
@@ -12,7 +13,8 @@ def get_hidden_fields(viewer_name, viewee_id):
     """
     if viewer_name is not None:
         is_me = get_user_id(viewer_name) == viewee_id
-        if is_me or Permissions.ADMIN in get_permissions(viewer_name):
+        if is_me or check_permission(
+                viewer_name, Directory_Permissions.HIDDEN_SEARCH_FIELDS):
             return set()
     return set(['uid', 'birthday', 'phone_string'])
 
