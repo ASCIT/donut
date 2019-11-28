@@ -19,19 +19,25 @@ PUNCTUATION = r'[,.\-_!;:/\\]'
 EDITION = r'^(\d+|international)$'
 ISBN_10 = r'^\d{9}[x\d]$'
 ISBN_13 = r'^\d{13}$'
-# matches prices of the form ****.**, ****, and .**
-# examples:
-# first capture group:
-# 123.98
-# 123
-# second capture group:
-# 0.98
-# .98
-PRICE = r'^([1-9]\d*(\.\d{2})?|0?\.\d{2})$'
 IMGUR_IMAGE = r'^https?://i\.imgur\.com/[a-z\d]+\.(jpg|png|gif)'
 IMGUR_POST = r'^https?://imgur\.com/([a-z\d]+)$'
+"""
+Matches prices of the form ****.**, ****, and .**
+examples:
+first capture group:
+123.98
+123
+second capture group:
+0.98
+.98
+"""
+PRICE = r'^([1-9]\d*(\.\d{2})?|0?\.\d{2})$'
 
 ALL_CATEGORY = 'all'
+SEARCH_FIELDS = ('item_id', 'cat_title', 'item_title', 'textbook_title',
+                 'item_price', 'user_id', 'item_timestamp')
+MANAGE_FIELDS = ('item_id', 'item_title', 'textbook_title', 'item_price',
+                 'item_timestamp', 'cat_title', 'item_active')
 
 
 def render_with_top_marketplace_bar(template_url, **kwargs):
@@ -50,7 +56,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
         The result of render_template(): Whatever magic Flask does to render the
                                          final page.
     """
-    # Get category titles.
+    # Get category titles
     categories = table_fetch('marketplace_categories')
     categories.insert(0,
                       {'cat_id': ALL_CATEGORY,
@@ -65,7 +71,7 @@ def render_with_top_marketplace_bar(template_url, **kwargs):
 def can_manage(item):
     """
     Returns whether the currently logged-in user can manage a given item.
-    Item may be {'user_id': str} or an item_id.
+    Item may be {'user_id': int} or an item_id.
     """
 
     user_id = table_fetch(
@@ -82,8 +88,6 @@ def can_manage(item):
 ###############
 # MANAGE PAGE #
 ###############
-MANAGE_FIELDS = ('item_id', 'item_title', 'textbook_title', 'item_price',
-                 'item_timestamp', 'cat_title', 'item_active')
 
 
 def set_active_status(item_id, is_active):
@@ -97,7 +101,7 @@ def set_active_status(item_id, is_active):
 
 def get_my_items():
     """
-    Handles the generation of the table of managed items.
+    Generates the table of items managed by the current user.
     """
 
     return table_fetch(
@@ -113,26 +117,23 @@ def get_my_items():
 ###############
 # SEARCH PAGE #
 ###############
-SEARCH_FIELDS = ('item_id', 'cat_title', 'item_title', 'textbook_title',
-                 'item_price', 'user_id', 'item_timestamp')
 
 
 def generate_search_table(attrs, query):
     """
     Arguments:
         attrs: A map of fields to values that make up conditions on the fields.
-               For example, {'cat_id':1} will only return results for which the
+               For example, {'cat_id': 1} will only return results for which the
                category id is 1.
 
-        query: The query we want to filter our results by.  If '', no
-               filtering happens.
+        query: The query string used to filter the results, or '' for no filtering.
     """
 
     fields = SEARCH_FIELDS
 
     if query:
         # Also add cat_id, textbook_author and textbook_isbn to the end so
-        # that we can use those fields to query by.
+        # that we can use those fields to query by
         fields += ('textbook_author', 'textbook_isbn')
 
     result = table_fetch(
@@ -145,7 +146,7 @@ def generate_search_table(attrs, query):
         attrs=attrs)
 
     if query:
-        # Filter by query.
+        # Filter by query
         result = search_datalist(result, query)
 
     # Format the data, parsing the timestamps, converting the ids to actual
@@ -168,6 +169,8 @@ def search_datalist(items, query):
     """
     Searches in items to create a new list of items,
     sorted first by relevance and then by date created.
+    The query is split into words and ISBNs and each item is scored
+    based on how many words are in its title and whether it matches an ISBN.
     """
     query_tokens = tokenize_query(query)
     perfect_matches = []
@@ -179,33 +182,35 @@ def search_datalist(items, query):
 
     for item in items:
         if item['cat_title'] == 'Textbooks':
-            # if it's a textbook, include the author's name and the
+            # If it's a textbook, include the author's name and the
             # book title in the item tokens
             item_tokens = tokenize_query(item['textbook_title'])
             item_tokens.extend(tokenize_query(item['textbook_author']))
 
-            # does the isbn match any of the query's isbns?
+            # Does the isbn match any of the query's isbns?
             is_isbn_match = any(isbn == item['textbook_isbn']
                                 for isbn in query_isbns)
         else:
-            # only include the item title
+            # Only include the item title
             item_tokens = tokenize_query(item['item_title'])
             is_isbn_match = False
 
         score = perfect_score if is_isbn_match else \
             get_matches(query_tokens, item_tokens)
 
+        # Store the item's score and add it to the list of (im)perfect matches
         if score:
             item['score'] = score
 
             (perfect_matches if score == perfect_score else imperfect_matches) \
                 .append(item)
 
-    # if we have any perfect matches, don't include the imperfect ones
+    # If we have any perfect matches, don't include the imperfect ones.
+    # The sort by highest-scoring and newest first.
     items = sorted(
         perfect_matches or imperfect_matches,
         key=lambda item: (item['score'], item['item_timestamp']),
-        reverse=True)  # highest score and newest first
+        reverse=True)
     for item in items:
         del item['score']
     return items
@@ -213,7 +218,7 @@ def search_datalist(items, query):
 
 def get_matches(l1, l2):
     """
-    Returns the number of matches between list 1 and list 2.
+    Returns the number of items in both list 1 and list 2.
     """
     if len(l1) > len(l2):
         l1, l2 = l2, l1
@@ -226,17 +231,17 @@ def tokenize_query(query):
     """
     Turns a string with a query into a list of tokens that represent the query.
     """
-    # Validate ISBNs before we remove hyphens.
+    # Validate ISBNs before we remove hyphens
     tokens = []
     query_tokens = []
     for token in query.split():
         (tokens if validate_isbn(token) else query_tokens).append(token)
 
-    # Remove punctuation.
+    # Remove punctuation
     query_tokens = re.sub(PUNCTUATION, ' ', ' '.join(query_tokens)).split()
 
-    # If any of the words in query are in our SKIP_WORDS, don't add them
-    # to tokens.
+    # If any of the words in query are in our SKIP_WORDS,
+    # don't add them to tokens
     for token in query_tokens:
         token = token.lower()
         if token not in SKIP_WORDS:
@@ -256,26 +261,24 @@ def validate_isbn(isbn):
         valid: Whether or not the isbn is valid (a boolean).
     """
     # Hyphens are annoying but there should never be one at start or end,
-    # nor should there be two in a row.
+    # nor should there be two in a row
     if isbn[0] == '-' or isbn[-1] == '-' or '--' in isbn:
         return False
 
-    # Now that we've done that we can remove them.
+    # Now that we've done that we can remove them
     isbn = isbn.replace('-', '')
 
-    # Regexes shamelessly copypasted.
-    # The ISBN-10 can have an x at the end (but the ISBN-13 can't).
     if re.match(ISBN_10, isbn, re.IGNORECASE):
-        # Check the check digit.
+        # Check the check digit
         total = 0
         for i, char in enumerate(isbn):
-            digit = 10 if char.lower() == 'x' else int(char)  # x has value 10.
+            digit = 10 if char.lower() == 'x' else int(char)  # x has value 10
             weight = 10 - i
             total += digit * weight
         return total % 11 == 0
 
     if re.match(ISBN_13, isbn, re.IGNORECASE):
-        # Check the check digit.
+        # Check the check digit
         total = 0
         for i, char in enumerate(isbn):
             weight = 3 if i % 2 else 1
@@ -289,7 +292,7 @@ def validate_isbn(isbn):
 def process_edition(edition):
     """
     Turns a string with an edition in it into a processed string.
-    Turns '1.0' into '1st', '2017.0' into '2017', and 'International'
+    Turns '1' into '1st', '2017' into '2017', and 'International'
     into 'International'.  So it doesn't do a whole lot, but what it
     does do, it does well.
 
@@ -302,9 +305,9 @@ def process_edition(edition):
     try:
         edition = int(edition)
         if edition < 100:
-            # It's probably an edition, not a year.
+            # It's probably an edition, not a year
 
-            # If the tens digit is 1, it's always 'th'.
+            # If the tens digit is 1, it's always 'th'
             if (edition // 10) % 10 == 1:
                 return str(edition) + 'th'
             if edition % 10 == 1:
@@ -332,12 +335,12 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
         tables: The table(s) to query.  Ex: 'marketplace_items', or
                 'marketplace_items NATURAL LEFT JOIN
                 marketplace_textbooks'.
-        fields: The fields to return. If None specified, then default_fields
-                are used.
+        one:    Whether to look for a single result (instead of all matching results).
+        fields: The fields to return. If None, then all fields are returned.
         attrs:  The attributes of the members to filter for.
     Returns:
         result: The fields and corresponding values of members with desired
-                attributes. In the form of a list of lists.
+                attributes. A dict if one == True, a list of dicts if one == False.
     """
     s = 'SELECT ' + ', '.join(fields or ('*', ))
     s += ' FROM ' + tables
@@ -364,23 +367,30 @@ def table_fetch(tables, one=False, fields=None, attrs={}):
 # SELL PAGE #
 #############
 def validate_edition(edition):
+    """Returns whether a string is a valid edition"""
     return re.match(EDITION, edition, re.IGNORECASE) is not None
 
 
 def validate_price(price):
+    """Returns whether a string is a valid price"""
     return re.match(PRICE, price) is not None
 
 
 def validate_image(image):
+    """Validates an Imgur image URL and normalizes it"""
     if re.match(IMGUR_IMAGE, image, re.IGNORECASE):
         return image
+
+    # If URL is to a post rather than an image, convert it
     post_match = re.match(IMGUR_POST, image, re.IGNORECASE)
     if post_match:
         return f'https://i.imgur.com/{post_match.group(1)}.png'
+
     return None
 
 
 def insert_images(item_id, item):
+    """Add all of item's image links to marketplace_images"""
     query = 'INSERT INTO marketplace_images (item_id, img_link) VALUES (%s, %s)'
     with flask.g.pymysql_db.cursor() as cursor:
         for image in item['images']:
@@ -389,12 +399,8 @@ def insert_images(item_id, item):
 
 def create_new_listing(item):
     """
-    Inserts into the database!
-
-    Arguments:
-        item: a dict with the item's fields
-    Returns:
-        the item_id
+    Inserts an item into the database!
+    Returns the inserted row's item_id
     """
     query = """
         INSERT INTO marketplace_items (
@@ -418,7 +424,7 @@ def create_new_listing(item):
 
 def update_current_listing(item_id, item):
     """
-    Changes items in the database!
+    Modifies the fields of an item in the database!
 
     Arguments:
         item_id: the id of the item to update
@@ -449,17 +455,10 @@ def update_current_listing(item_id, item):
 
 def add_textbook(title, author):
     """
-    Adds a textbook to the database, with title <title> and author
-    <author>.
-
-    Arguments:
-        title: The title.
-        author: The author.
-
-    Returns:
-        The id of the new textbook
+    Adds a textbook to the database, with the given title and author.
+    Returns the id of the new textbook.
     """
-    # check if the textbook exists
+    # Check if the textbook already exists
     query = """
         SELECT textbook_id
         FROM marketplace_textbooks
@@ -469,9 +468,10 @@ def add_textbook(title, author):
         cursor.execute(query, (title, author))
         result = cursor.fetchone()
         if result:
-            # the textbook already exists
+            # Reused the existing textbook
             return result['textbook_id']
 
+    # Insert the textbook
     query = """
         INSERT INTO marketplace_textbooks (textbook_title, textbook_author)
         VALUES (%s, %s)
@@ -501,6 +501,7 @@ def get_category_name_from_id(cat_id):
 
 
 def get_image_links(item_id):
+    """Returns the URLs of all the images for the item with the given item_id"""
     return table_fetch(
         'marketplace_images',
         fields=('img_link', ),
@@ -508,6 +509,7 @@ def get_image_links(item_id):
 
 
 def try_int(x):
+    """Converts the input to an int, or returns None if conversion fails"""
     if x is None:
         return x
 

@@ -140,8 +140,14 @@ function uploadFromFile(imageNum)
   // Set the file reader so that it calls the upload image function when
   // the read is finished.
   reader.onload = function(e) {
+    var data = e.target.result;
+    if (data.length > 1e7) {
+      handleImageUploadError("Image must be smaller than 10 MB");
+      return;
+    }
+
     // Convert binary data to base 64 and then upload it.
-    uploadImage(btoa(e.target.result), imageNum, "base64");
+    uploadImage(btoa(data), imageNum, "base64");
   };
 
   reader.readAsBinaryString(imageFile);
@@ -166,7 +172,6 @@ function uploadImage(imageData, imageNum, uploadType)
     dataType: "json",
     success: function(response) {
       // Call the event handler with an additional argument.
-      console.log(response);
       handleUploadResponse(response, imageNum);
     }
   });

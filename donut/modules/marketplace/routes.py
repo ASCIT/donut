@@ -18,7 +18,7 @@ VIEW_FIELDS = ('textbook_id', 'cat_title', 'user_id', 'item_title',
                'item_timestamp', 'item_active', 'textbook_edition',
                'textbook_isbn', 'textbook_title', 'textbook_author')
 
-ALLOWED_SELL_STATES = set(('new', 'edit'))
+ALLOWED_SELL_STATES = ('new', 'edit')
 SELL_FIELDS = ('textbook_id', 'item_id', 'cat_id', 'user_id', 'item_title',
                'item_details', 'item_condition', 'item_price', 'item_active',
                'textbook_edition', 'textbook_isbn')
@@ -31,8 +31,7 @@ def marketplace():
 
     return helpers.render_with_top_marketplace_bar(
         'marketplace.html', cat_id=0)
-    # cat_id = 0 indicates that the select object should be set to 'all
-    # categories', which is the default
+    # cat_id = 0 makes the category selection default to 'all categories'
 
 
 @blueprint.route('/marketplace/search')
@@ -45,7 +44,7 @@ def query():
         flask.abort(404)
     query = flask.request.args.get('q', '')
 
-    # Create a dict of the passed in attributes which are filterable
+    # Create a dict of the passed-in attributes which are filterable
     attrs = {
         attr: value
         for attr, value in flask.request.args.items() if attr in SEARCH_ATTRS
@@ -56,12 +55,9 @@ def query():
             attrs['cat_id'] = int(category_id)
         except ValueError:
             flask.abort(404)
-        # only pass in the cat_id to get_marketplace_items_list_data if it's not
-        # 'all', because cat_id (and everything in attrs) goes into a WHERE
-        # clause, and not specifying is the same as selecting all.
+        # Pass in the cat_id to generate_search_table() if it's not 'all'
 
     items = helpers.generate_search_table(attrs, query)
-
     return helpers.render_with_top_marketplace_bar(
         'search.html', items=items, cat_id=category_id)
 
@@ -80,7 +76,7 @@ def view_item(item_id):
         fields=VIEW_FIELDS,
         attrs={'item_id': item_id})
 
-    # make sure the item_id is a valid item, i.e. data is nonempty
+    # Make sure the item_id is a valid item, i.e. data is nonempty
     if item is None:
         flask.abort(404)
 
@@ -89,10 +85,10 @@ def view_item(item_id):
     if edition:
         item['textbook_edition'] = helpers.process_edition(edition)
 
-    # grab the stored image links
+    # Grab the stored image links
     image_links = helpers.get_image_links(item_id)
 
-    # notify if the item is inactive
+    # Notify if the item is inactive
     if not item['item_active']:
         flask.flash('This item has been archived!')
 
@@ -108,7 +104,7 @@ def view_item(item_id):
 @blueprint.route('/marketplace/manage')
 def manage():
     if 'username' not in flask.session:
-        # they're not logged in, kick them out
+        # They're not logged in, kick them out
         flask.flash('Login required to access that page.')
         flask.session['next'] = flask.url_for('.manage')
         return helpers.render_with_top_marketplace_bar('requires_login.html')
@@ -141,7 +137,7 @@ def unarchive(item_id):
 def sell():
     username = flask.session.get('username')
     if username is None:
-        # they're not logged in, kick them out
+        # They're not logged in, kick them out
         flask.flash('Login required to access that page.')
         flask.session['next'] = flask.url_for('.sell')
         return helpers.render_with_top_marketplace_bar('requires_login.html')
@@ -151,9 +147,8 @@ def sell():
 
     # STATES
     # ------
-    # blank: defaults to new
-    # new:   making a new listing
-    # edit:  editing an old listing
+    # new (default): making a new listing
+    # edit: editing an old listing
 
     state = flask.request.args.get('state', 'new')
     if state not in ALLOWED_SELL_STATES:
@@ -184,7 +179,7 @@ def sell():
             fields=SELL_FIELDS,
             attrs={'item_id': item_id})
         if not item:
-            # no data? the item_id must be wrong
+            # No data? the item_id must be wrong
             flask.flash('Invalid item')
             return flask.redirect(flask.url_for('.marketplace'))
 
@@ -192,13 +187,15 @@ def sell():
     else:
         item = {'images': []}
 
-    # make sure the current user is the one who posted the item
+    # Make sure the current user is the one who posted the item
     if editing and not helpers.can_manage(item_id):
         flask.flash('You do not have permission to edit this item')
         return flask.redirect(flask.url_for('.marketplace'))
 
+    # This route is used for both GET and POST;
+    # only try to create/update the item if this is a POST
     if saving:
-        errors = []
+        errors = []  # collect all validation errors
         cat_title = helpers.get_category_name_from_id(item['cat_id'])
         if not cat_title:
             errors.append('Invalid category')
