@@ -7,15 +7,12 @@ def get_past_messages(group_id, limit=5):
     """Returns a list of past sent messages"""
 
     query = """
-    SELECT newsgroup_post_id, subject, message, time_sent, user_id 
-    FROM newsgroup_posts WHERE group_id=%s LIMIT %s
+    SELECT newsgroup_post_id, subject, message, time_sent, user_id, post_as
+    FROM newsgroup_posts WHERE group_id=%s ORDER BY time_sent DESC LIMIT %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, limit))
         res = cursor.fetchall()
-    # Generate who sent the message
-    for i in res:
-        i['name'] = get_name_and_email(i['user_id'])[0]
     return res
 
 def get_newsgroups():
@@ -34,7 +31,7 @@ def get_my_newsgroups(user_id):
     """Gets list of user is a member of."""
 
     query = '''
-    SELECT group_name, group_id 
+    SELECT DISTINCT group_name, group_id 
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
     WHERE user_id=%s
@@ -49,7 +46,7 @@ def get_can_send_groups(user_id):
     """Gets groups that user is allowed to post to."""
 
     query = '''
-    SELECT group_name, group_id
+    SELECT DISTINCT group_name, group_id
     FROM groups NATURAL JOIN positions
     NATURAL JOIN position_holders
     WHERE user_id=%s 
@@ -149,12 +146,12 @@ def send_email(data):
 def insert_email(user_id, data):
     query = """
     INSERT INTO newsgroup_posts 
-    (group_id, subject, message, post_as, user_id)
+    (group_id, subject, message, user_id, post_as)
     VALUES (%s, %s, %s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, (data['group'], data['subject'], 
-           data['msg'], data['poster'], user_id))
+           data['msg'], user_id, data['poster']))
 
 def get_post(post_id):
     query = """
@@ -182,7 +179,7 @@ def get_owners(group_id):
         res = cursor.fetchall()
     return res
 
-def post_as(group_id, user_id):
+def get_my_positions(group_id, user_id):
     query = """
     SELECT pos_name, pos_id 
     FROM positions NATURAL JOIN position_holders

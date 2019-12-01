@@ -20,11 +20,12 @@ def post(group_id=None):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
+    if not group_id:
+        group_id = flask.request.form.get('group')
     return flask.render_template(
             'post.html',
             groups=helpers.get_can_send_groups(user_id),
-            group_selected=group_id,
-            posters=helpers.post_as(group_id, user_id))
+            group_selected=group_id)
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
 def post_message():
@@ -119,3 +120,9 @@ def delete_application(user_id, group_id):
     #TODO
     return flask.redirect(flask.url_for('newsgroups.view_group', group_id=group_id))
 
+@blueprint.route('/newsgroups/positions/<int:group>')
+def my_positions(group):
+    if 'username' not in flask.session:
+        return flask.abort(403)
+    user_id = auth_utils.get_user_id(flask.session['username'])
+    return flask.jsonify(helpers.get_my_positions(group, user_id))
