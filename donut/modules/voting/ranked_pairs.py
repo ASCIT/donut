@@ -14,8 +14,8 @@ def winners(responses):
     ]
     """
     all_candidates = set(vote for response in responses for vote in response)
-    tallies = { # mapping of pairs (A, B) of candidates
-        pair: 0 # to numbers of responders who ranked A above B
+    tallies = {  # mapping of pairs (A, B) of candidates
+        pair: 0  # to numbers of responders who ranked A above B
         for pair in product(all_candidates, repeat=2)
     }
     for response in responses:

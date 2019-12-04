@@ -294,20 +294,41 @@ def test_process_params_error(client):
         del params[delete_param]
         assert_message(b'Invalid form data', params)
     for date_field in ['start_date', 'end_date']:
-        assert_message(b'Invalid form data', {**default_params, date_field: '123'})
+        assert_message(b'Invalid form data', {
+            **default_params, date_field: '123'
+        })
     for hour_field in ['start_hour', 'end_hour']:
-        assert_message(b'Invalid form data', {**default_params, hour_field: 'abc'})
-        assert_message(b'Invalid form data', {**default_params, hour_field: '0'})
-        assert_message(b'Invalid form data', {**default_params, hour_field: '13'})
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: 'abc'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: '0'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, hour_field: '13'
+        })
     for minute_field in ['start_minute', 'end_minute']:
-        assert_message(b'Invalid form data', {**default_params, minute_field: 'abc'})
-        assert_message(b'Invalid form data', {**default_params, minute_field: '-1'})
-        assert_message(b'Invalid form data', {**default_params, minute_field: '60'})
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: 'abc'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: '-1'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, minute_field: '60'
+        })
     for period_field in ['start_period', 'end_period']:
-        assert_message(b'Invalid form data', {**default_params, period_field: 'a'})
-        assert_message(b'Invalid form data', {**default_params, period_field: ''})
+        assert_message(b'Invalid form data', {
+            **default_params, period_field: 'a'
+        })
+        assert_message(b'Invalid form data', {
+            **default_params, period_field: ''
+        })
     assert_message(b'Invalid form data', {**default_params, 'group': 'a'})
-    assert_message(b'Start must be before end', {**default_params, 'start_date': '2018-05-09', 'end_date': '2018-05-08'})
+    assert_message(b'Start must be before end', {
+        **default_params, 'start_date': '2018-05-09',
+        'end_date': '2018-05-08'
+    })
     rv = client.post(
         flask.url_for('voting.make_survey'),
         data=default_params,

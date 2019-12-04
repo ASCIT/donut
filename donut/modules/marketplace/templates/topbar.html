@@ -1,0 +1,47 @@
+<div class="container">
+    <script src="{{ url_for('static', filename='js/sorttable.js') }}"></script>
+    <div class="col-md-4 col-md-offset-4">
+        <div class="jumbotron" style="text-align: center">
+            <h2>Marketplace</h2>
+            <div class="nav nav-pills nav-justified" style="border-top: 2px solid black;">
+                <a href="{{ url_for('.marketplace') }}">Home</a>
+                <br>
+                <a href="{{ url_for('.manage') }}">Manage your listings</a>
+                <br>
+                <a href="{{ url_for('.sell', state='new') }}" method='post'>Sell an item</a>
+            </div>
+            <div class="row mp-nav-div" style="border-top: 2px solid black;border-bottom: 2px solid black;margin:5px 0px;font-size: 17px">
+                <div class="mp-nav" style="display:flex; flex-wrap: wrap; text-align: center;">
+                    {% for cat in cats %}
+                        <a href="{{ url_for('.query', cat=cat['cat_id']) }}" style="margin: auto;">
+                            {{ cat['cat_title'] }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+            <div>
+                <form action="{{ url_for('.query') }}">
+                    <div class="form-group">
+                        <label for="q">Search for an item</label>
+                        <input class="form-control" placeholder="Enter search terms" name="q" id="q" autofocus />
+                    </div>
+                    <div class="form-group">
+                        <label for="cat">Category</label>
+                        <select class="form-control" name="cat" id="cat">
+                            {% for cat in cats %}
+                                <option
+                                    {% if cat_id == cat['cat_id'] %} selected {% endif %}
+                                    value="{{ cat['cat_id'] }}"
+                                >
+                                    {{ cat['cat_title'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

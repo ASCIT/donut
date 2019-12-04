@@ -1,39 +1,38 @@
 {% extends "layout.html" %}
 {% block page %}
+{% include "topbar.html" %}
 
-<div class="container theme-showcase jumbotron">
 <h4>
-    Found {{ datalist|length }} results.
+    Found {{ items|length }} result{% if items|length != 1 %}s{% endif %}.
 </h4>
-{% if datalist %}
-    <div class="pos-left">
-        <table class="table table-condensed table-hover sortable" frame=void rules=rows>
-            <thead>
+{% if items %}
+    <table class="table table-condensed table-hover sortable" frame=void rules=rows>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Seller</th>
+                <th>Date</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- display data in one main table -->
+            {% for item in items %}
                 <tr>
-                    {% for i in headers %}
-                        <th>
-                            <b>{{i}}</b>
-                        </th>
-                    {% endfor %}
+                    <td>
+                        <a href="{{ item['url'] }}">{{ item['item_title'] }}</a>
+                    </td>
+                    <td>${{ item['item_price'] }}</td>
+                    <td>
+                        <a href="{{ item['user_url'] }}">{{ item['user_name'] }}</a>
+                    </td>
+                    <td>{{ item['item_timestamp'] }}</td>
+                    <td>{{ item['cat_title'] }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                <!-- display data in one main table -->
-                {% for i in range(datalist|length) %}
-                    <tr>
-                        {% for j in range(datalist[i]|length) %}
-                            <td>
-                                {% if links[i][j] != 0 %} <a href={{ links[i][j] }}> {% endif %}
-                                {{ datalist[i][j] }}
-                                {% if links[i][j] != 0 %} </a> {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endif %}
-</div>
 
 {% endblock %}

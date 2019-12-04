@@ -1,6 +1,5 @@
 import flask
 from flask_bootstrap import Bootstrap
-import sqlalchemy
 import pymysql.cursors
 import os
 import pdb
@@ -62,6 +61,7 @@ def init(environment_name):
     app.config["DB_USER"] = environment.db_user
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
+    app.config["IMGUR_API"] = environment.imgur_api
     app.config["UPLOAD_WEBPAGES"] = 'modules/uploads/uploaded_files/pages'
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
     # Maximum file upload size, in bytes.
@@ -75,14 +75,10 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
-    if 'DB_URI' in app.config:
-        engine = sqlalchemy.create_engine(
-            app.config['DB_URI'], convert_unicode=True)
-        flask.g.db = engine.connect()
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
-        connection = pymysql.connect(
+        flask.g.pymysql_db = pymysql.connect(
             host='localhost',
             database=app.config['DB_NAME'],
             user=app.config['DB_USER'],
@@ -91,7 +87,6 @@ def before_request():
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)
-        flask.g.pymysql_db = connection
 
 
 @app.teardown_request

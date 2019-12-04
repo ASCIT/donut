@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "topbar.html" %}
+
+<div class="col-md-8 col-md-offset-2" style="float: none">
+  <h3>Manage your listings</h3>
+  {% if items %}
+    <p>Your listings</p>
+    <table class="table table-condensed table-hover sortable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Change status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <a href="{{ url_for('.view_item', item_id=item['item_id']) }}">
+                {{ item['item_title'] or item['textbook_title'] }}
+              </a>
+            </td>
+            <td>${{ item['item_price'] }}</td>
+            <td>{{ item['item_timestamp'].strftime('%m/%d/%y') }}</td>
+            <td>{{ item['cat_title'] }}</td>
+            <td>
+              {% if item['item_active'] %}
+                <a
+                  class="btn btn-danger"
+                  href="{{ url_for('.archive', item_id=item['item_id']) }}"
+                >
+                  Archive
+                </a>
+              {% else %}
+                <a
+                  class="btn btn-success"
+                  href="{{ url_for('.unarchive', item_id=item['item_id']) }}"
+                >
+                  Unarchive
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    You haven't listed any items on the marketplace.
+  {% endif %}
+</div>
+{% endblock %}

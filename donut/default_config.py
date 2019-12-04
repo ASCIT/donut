@@ -11,4 +11,8 @@ TEST = environment.Environment(
     db_password="public",
     debug=True,
     testing=True,
-    secret_key="1234567890")
+    secret_key="1234567890",
+    imgur_api={
+        "id": "b579f690cacf867",
+        "secret": "****************************************"
+    })
