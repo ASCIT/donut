@@ -58,6 +58,7 @@ def init(environment_name):
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
     app.config["SECRET_KEY"] = environment.secret_key
+    app.config["RESTRICTED_IPS"] = environment.restricted_ips
     app.config["DB_USER"] = environment.db_user
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
