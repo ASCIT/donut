@@ -45,8 +45,8 @@ def test_marketplace_view_item(client):
 
 def test_marketplace_manage(client):
     rv = client.get(flask.url_for('marketplace.manage'))
-    assert rv.status_code == 200
-    assert b'This page requires you to login' in rv.data
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for('auth.login')
 
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
@@ -98,8 +98,8 @@ def test_marketplace_manage(client):
 
 def test_marketplace_sell(client):
     rv = client.get(flask.url_for('marketplace.sell'))
-    assert rv.status_code == 200
-    assert b'This page requires you to login' in rv.data
+    assert rv.status_code == 302
+    assert rv.location == flask.url_for('auth.login')
 
     with client.session_transaction() as sess:
         sess['username'] = 'csander'

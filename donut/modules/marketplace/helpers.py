@@ -3,7 +3,6 @@ import re
 
 from donut.modules.core.helpers import get_member_data, get_name_and_email
 from donut.auth_utils import get_user_id, check_permission
-from donut.default_permissions import Permissions
 
 # taken from donut-legacy, which was apparently taken from a CS11
 # C++ assignment by dkong
@@ -74,15 +73,17 @@ def can_manage(item):
     Item may be {'user_id': int} or an item_id.
     """
 
+    username = flask.session.get('username')
+    if not username:
+        # Must be logged in to manage
+        return False
+
     user_id = table_fetch(
         'marketplace_items',
         one=True,
         fields=('user_id', ),
         attrs={'item_id': item}) if type(item) == int else item['user_id']
-
-    username = flask.session.get('username')
-    return username and (get_user_id(username) == user_id
-                         or check_permission(username, Permissions.ADMIN))
+    return get_user_id(username) == user_id or check_permission(username, None)
 
 
 ###############
