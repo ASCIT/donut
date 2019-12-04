@@ -16,4 +16,4 @@ TEST = environment.Environment(
         "id": "b579f690cacf867",
         "secret": "****************************************"
     },
-    restricted_ips=r"^12\.34\.")
+    restricted_ips=r"127\.0\.0\.1")

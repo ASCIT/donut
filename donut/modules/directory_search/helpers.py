@@ -16,7 +16,7 @@ def get_hidden_fields(viewer_name, viewee_id):
         if is_me or check_permission(
                 viewer_name, Directory_Permissions.HIDDEN_SEARCH_FIELDS):
             return set()
-    return set(['uid', 'birthday', 'phone_string'])
+    return set(['uid', 'birthday', 'phone_string', 'hometown_string'])
 
 
 def get_user(user_id):
@@ -157,9 +157,6 @@ def execute_search(**kwargs):
     if kwargs['grad_year']:
         query += ' AND graduation_year = %s'
         substitution_arguments.append(kwargs['grad_year'])
-    if kwargs['state']:
-        query += ' AND state = %s'
-        substitution_arguments.append(kwargs['state'])
     query += ' ORDER BY LOWER(last_name), LOWER(full_name)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, substitution_arguments)
@@ -199,7 +196,3 @@ def get_residences():
 
 def get_grad_years():
     return members_unique_values('graduation_year', False)
-
-
-def get_states():
-    return members_unique_values('state', True)

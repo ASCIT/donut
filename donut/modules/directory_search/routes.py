@@ -17,8 +17,7 @@ def directory_search():
         houses=helpers.get_houses(),
         options=helpers.get_options(),
         residences=helpers.get_residences(),
-        grad_years=helpers.get_grad_years(),
-        states=helpers.get_states())
+        grad_years=helpers.get_grad_years())
 
 
 @blueprint.route('/1/users/<int:user_id>')
@@ -88,14 +87,12 @@ def search():
         grad_year = int(grad_year)
     else:
         grad_year = None
-    state = form['state'] or None
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
         grad_year=grad_year,
-        state=state,
         username=form['username'],
         email=form['email'])
     if len(users) == 1:  #1 result
