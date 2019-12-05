@@ -5,6 +5,7 @@ authentication and authorization, including logins and permissions.
 
 import hashlib
 import binascii
+import re
 import string
 import pymysql.cursors
 import flask
@@ -325,7 +326,7 @@ def get_permissions(username):
     if not user_id: return set()
     positions = groups.get_positions_held(user_id)
     query = """
-    SELECT permission_id FROM position_permissions WHERE pos_id in 
+    SELECT permission_id FROM position_permissions WHERE pos_id in
     (%s)""" % (', '.join(['%s'] * len(positions)))
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, positions)
@@ -339,3 +340,13 @@ def check_permission(username, permission_id):
     """
     permissions = get_permissions(username)
     return permission_id in permissions or Permissions.ADMIN in permissions
+
+
+def is_caltech_user():
+    """
+    Returns whether a user is logged in or accessing Donut from the Caltech internet.
+    Used to restrict access to directory and marketplace to Caltech.
+    """
+    ip_match = flask.current_app.config["RESTRICTED_IPS"]
+    return 'username' in flask.session or \
+        re.search(ip_match, flask.request.remote_addr) is not None

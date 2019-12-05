@@ -3,7 +3,7 @@ import json
 
 from donut.modules.marketplace import blueprint, helpers
 from donut.modules.core.helpers import get_name_and_email
-from donut.auth_utils import get_user_id
+from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
 
 MAX_IMAGES = 5
 
@@ -39,6 +39,9 @@ def query():
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
 
+    if not is_caltech_user():
+        return login_redirect()
+
     category_id = flask.request.args.get('cat')
     if category_id is None:
         flask.abort(404)
@@ -65,6 +68,9 @@ def query():
 @blueprint.route('/marketplace/view_item/<int:item_id>')
 def view_item(item_id):
     """View additional details about item <item_id>"""
+
+    if not is_caltech_user():
+        return login_redirect()
 
     item = helpers.table_fetch(
         """
@@ -105,9 +111,7 @@ def view_item(item_id):
 def manage():
     if 'username' not in flask.session:
         # They're not logged in, kick them out
-        flask.flash('Login required to access that page.')
-        flask.session['next'] = flask.url_for('.manage')
-        return helpers.render_with_top_marketplace_bar('requires_login.html')
+        return login_redirect()
 
     return helpers.render_with_top_marketplace_bar(
         'manage_items.html', items=helpers.get_my_items())
@@ -138,9 +142,7 @@ def sell():
     username = flask.session.get('username')
     if username is None:
         # They're not logged in, kick them out
-        flask.flash('Login required to access that page.')
-        flask.session['next'] = flask.url_for('.sell')
-        return helpers.render_with_top_marketplace_bar('requires_login.html')
+        return login_redirect()
 
     # Extract item id
     item_id = helpers.try_int(flask.request.args.get('item_id'))

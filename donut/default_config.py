@@ -15,4 +15,5 @@ TEST = environment.Environment(
     imgur_api={
         "id": "b579f690cacf867",
         "secret": "****************************************"
-    })
+    },
+    restricted_ips=r"127\.0\.0\.1")

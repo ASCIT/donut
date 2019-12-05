@@ -3,23 +3,28 @@ import json
 import mimetypes
 from flask import jsonify, redirect
 
-from donut.auth_utils import get_user_id
+from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
 from donut.modules.directory_search import blueprint, helpers
 
 
 @blueprint.route('/directory')
 def directory_search():
+    if not is_caltech_user():
+        return login_redirect()
+
     return flask.render_template(
         'directory_search.html',
         houses=helpers.get_houses(),
         options=helpers.get_options(),
         residences=helpers.get_residences(),
-        grad_years=helpers.get_grad_years(),
-        states=helpers.get_states())
+        grad_years=helpers.get_grad_years())
 
 
 @blueprint.route('/1/users/<int:user_id>')
 def view_user(user_id):
+    if not is_caltech_user():
+        return login_redirect()
+
     user = helpers.get_user(user_id)
     is_me = 'username' in flask.session and get_user_id(
         flask.session['username']) == user_id
@@ -35,6 +40,9 @@ def view_user(user_id):
 
 @blueprint.route('/1/users/<int:user_id>/image')
 def get_image(user_id):
+    if not is_caltech_user():
+        flask.abort(401)
+
     extension, image = helpers.get_image(user_id)
     response = flask.make_response(image)
     response.headers.set('Content-Type',
@@ -44,11 +52,17 @@ def get_image(user_id):
 
 @blueprint.route('/1/users/search/<name_query>')
 def search_by_name(name_query):
+    if not is_caltech_user():
+        flask.abort(401)
+
     return jsonify(helpers.get_users_by_name_query(name_query))
 
 
 @blueprint.route('/1/users', methods=['POST'])
 def search():
+    if not is_caltech_user():
+        flask.abort(401)
+
     form = flask.request.form
     name = form['name']
     if name.strip() == '':
@@ -73,14 +87,12 @@ def search():
         grad_year = int(grad_year)
     else:
         grad_year = None
-    state = form['state'] or None
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
         grad_year=grad_year,
-        state=state,
         username=form['username'],
         email=form['email'])
     if len(users) == 1:  #1 result
