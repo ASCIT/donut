@@ -4,9 +4,10 @@ from email.mime.text import MIMEText
 
 def send_email(to, msg, subject, use_prefix=True):
     """
-  Sends an email to a user. Expects 'to' to be a comma separated string of
-  emails, and for 'msg' and 'subject' to be strings.
-  """
+    Sends an email to a user. Expects 'to' to be a comma separated string of
+    emails, and for 'msg' and 'subject' to be strings.
+    """
+    
     msg = MIMEText(msg)
 
     if use_prefix and '[ASCIT Donut]' not in subject:
@@ -19,7 +20,12 @@ def send_email(to, msg, subject, use_prefix=True):
     with smtplib.SMTP('localhost') as s:
         s.sendmail('auto@donut.caltech.edu', [to], msg.as_string())
 
-def newsgroup_send_email(recipients, group, poster, msg, subject):
+def newsgroup_send_email(recipients, group, poster, subject, msg):
+    """
+    Sends an email to a newsgroup with recipients hidden. recipients is a list of emails.
+    group is the newsgroup name. poster is the position/person of the sender.
+    """
+
     msg = MIMEText(msg)
     msg['Subject'] = subject
     msg['From'] = poster + '@donut.caltech.edu'

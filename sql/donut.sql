@@ -140,7 +140,7 @@ CREATE TABLE newsgroup_posts (
     group_id                INT          NOT NULL, -- Which group was it to
     subject                 TEXT         NOT NULL, 
     message                 TEXT         NOT NULL,
-    post_as		    TEXT         DEFAULT NULL,
+    post_as		    VARCHAR(32)  DEFAULT NULL,
     user_id                 INT          NOT NULL, -- Who sent this message
     time_sent               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP, -- When were messages sent
     PRIMARY KEY (newsgroup_post_id), 

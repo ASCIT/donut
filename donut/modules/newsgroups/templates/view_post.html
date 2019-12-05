@@ -9,6 +9,7 @@
 	<a href={{ url_for('newsgroups.view_group', group_id=post.group_id) }}>{{ post.group_name }}</a>
 		</h3>
 		<h3>Date: {{ post.time_sent }}</h3>
+		<h3>Subject: {{ post.subject }}</h3>
 		<h3>Message:</h3>
 		<h4>{{ post.message }}</h4>
 {% endblock %}

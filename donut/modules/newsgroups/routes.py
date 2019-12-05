@@ -36,10 +36,12 @@ def post_message():
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
+    data['group_name'] = groups.get_group_data(data['group'], ['group_name'])['group_name']
     if not data['poster']:
         user = account.get_user_data(user_id)
         data['poster'] = ' '.join([user['first_name'], user['last_name']])
-    data['group_name'] = groups.get_group_data(data['group'], ['group_name'])['group_name']
+    else:
+        data['poster'] = ' '.join((data['group_name'], data['poster']))
     if helpers.send_email(data):
         flask.flash('Email sent')
         helpers.insert_email(user_id, data)

@@ -12,8 +12,7 @@ def get_past_messages(group_id, limit=5):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, limit))
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
 
 def get_newsgroups():
     """Gets all newsgroups."""
@@ -24,11 +23,10 @@ def get_newsgroups():
     '''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
 
 def get_my_newsgroups(user_id):
-    """Gets list of user is a member of."""
+    """Gets groups user is a member of."""
 
     query = '''
     SELECT DISTINCT group_name, group_id 
@@ -39,8 +37,7 @@ def get_my_newsgroups(user_id):
     '''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [user_id])
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
 
 def get_can_send_groups(user_id):
     """Gets groups that user is allowed to post to."""
@@ -58,11 +55,9 @@ def get_can_send_groups(user_id):
     WHERE groups.newsgroups=1
     AND groups.anyone_can_send=1
     '''
-    res = None
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id])
-        res = cursor.fetchall()
-    return res
+        cursor.execute(query, user_id)
+        return cursor.fetchall()
 
 def get_user_actions(user_id, group_id):
     """Gets allowed actions for user."""
@@ -77,8 +72,7 @@ def get_user_actions(user_id, group_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, group_id))
-        res = cursor.fetchone()
-    return res
+        return cursor.fetchone()
 
 def apply_subscription(user_id, group_id):
     '''
@@ -160,6 +154,8 @@ def send_email(data):
        return False
 
 def insert_email(user_id, data):
+    """Insert email into db."""
+
     query = """
     INSERT INTO newsgroup_posts 
     (group_id, subject, message, user_id, post_as)
@@ -176,26 +172,26 @@ def get_post(post_id):
     NATURAL JOIN groups
     WHERE newsgroup_post_id=%s
     """
-    res = None
     with flask.g.pymysql_db.cursor() as cursor:
        cursor.execute(query, post_id)
-       res = cursor.fetchone()
-    return res
+       return cursor.fetchone()
 
 def get_owners(group_id):
+    """Get users with control access to group."""
+
     query = """
-    SELECT user_id 
+    SELECT user_id, pos_name 
     FROM positions NATURAL JOIN position_holders 
     WHERE positions.control=1
     AND positions.group_id=%s
     """
-    res = None
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, group_id)
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
 
 def get_my_positions(group_id, user_id):
+    """Get positions user holds in a group."""
+
     query = """
     SELECT pos_name, pos_id 
     FROM positions NATURAL JOIN position_holders
@@ -203,8 +199,6 @@ def get_my_positions(group_id, user_id):
     AND position_holders.user_id=%s
     AND positions.send=1
     """
-    res = None
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, user_id))
-        res = cursor.fetchall()
-    return res
+        return cursor.fetchall()
