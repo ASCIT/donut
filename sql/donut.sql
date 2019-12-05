@@ -219,5 +219,6 @@ CREATE TABLE group_applications (
     group_id        INT NOT NULL, 
     PRIMARY KEY (group_app_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
-    FOREIGN KEY (group_id) REFERENCES groups(group_id)
+    FOREIGN KEY (group_id) REFERENCES groups(group_id),
+    UNIQUE(user_id, group_id)
 )

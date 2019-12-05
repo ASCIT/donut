@@ -84,10 +84,9 @@ def apply_subscription(user_id, group_id):
     '''
     Inserts into groups table with the position "Applicant"
     '''
-    # TODO: Make sure each is unique!
     query = """
     INSERT INTO group_applications(group_id, user_id)
-    VALUES (%s, %s)
+    VALUES (%s, %s) ON DUPLICATE KEY update user_id=user_id
     """    
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, user_id))
@@ -95,8 +94,14 @@ def apply_subscription(user_id, group_id):
 def unsubscribe(user_id, group_id):
     if not user_id:
         return None
-    # TODO
-    pass
+    query = """
+    DELETE FROM position_holders 
+    WHERE user_id = %s AND pos_id IN (
+    SELECT pos_id FROM positions NATURAL JOIN 
+    position_holders WHERE user_id = %s AND group_id = %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, user_id, group_id))
 
 def get_applications(group_id):
     '''
@@ -113,6 +118,17 @@ def get_applications(group_id):
         i['name'] = name
         i['email'] = email
     return res
+
+def remove_application(user_id, group_id):
+    '''
+    Admin has denied a person for their newgroup membership. 
+    '''
+    query = """
+    DELETE FROM group_application 
+    WHERE user_id = %s AND group_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, group_id))
     
 def send_email(data):
    """Sends email to newsgroup."""
