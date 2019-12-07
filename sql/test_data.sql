@@ -65,11 +65,11 @@ INSERT INTO marketplace_categories(cat_title) VALUES
 INSERT INTO marketplace_items(cat_id, user_id, item_title, item_details, item_condition, item_price) VALUES
     (1, 1, 'A table', "It's a pretty cool table, I guess", 'Good', 5.99);
 
-INSERT INTO users(user_id, username) VALUES
-    (1, "dqu"),
-    (2, "reng"),
-    (3, "csander"),
-    (4, "ruddock_pres");
+INSERT INTO users(user_id, username, password_hash) VALUES
+    (1, "dqu", ""),
+    (2, "reng", ""),
+    (3, "csander", ""),
+    (4, "ruddock_pres", "");
 
 INSERT INTO groups(group_id, group_name, type) VALUES
     (1, 'Donut Devteam', ''),

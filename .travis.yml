@@ -8,7 +8,7 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_aa0580535ea1_key -iv $encrypted_aa0580535ea1_iv -in calendar.json.enc -out calendar.json -d
 install: "pip install -r requirements.txt"
 addons:
-  mariadb: 10.1
+  mariadb: "10.4"
 before_script:
   - mysql -u root -e "SET GLOBAL max_connections = 1000;"
   - mysql -u root < sql/setup.sql
