@@ -1,6 +1,7 @@
 -- TODO: Add CASCADEs
 -- TODO: Better comments
 
+DROP TABLE IF EXISTS news;
 DROP TABLE IF EXISTS position_relations;
 DROP VIEW IF EXISTS group_house_membership;
 DROP VIEW IF EXISTS group_houses;
@@ -146,7 +147,7 @@ CREATE TABLE positions (
                                        -- emails from this group
 
     PRIMARY KEY (pos_id),
-    FOREIGN KEY (group_id) 
+    FOREIGN KEY (group_id)
         REFERENCES groups(group_id)
         ON DELETE CASCADE
 );
@@ -159,7 +160,7 @@ CREATE TABLE position_holders (
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (pos_id) 
+    FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
         ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES members(user_id)
@@ -189,4 +190,12 @@ CREATE TABLE position_relations (
     PRIMARY KEY (pos_id_from, pos_id_to),
     FOREIGN KEY (pos_id_from) REFERENCES positions(pos_id),
     FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id)
-)
+);
+
+-- News items to show on the homepage
+CREATE TABLE news (
+    news_id     INT  NOT NULL AUTO_INCREMENT,
+    news_date   DATE NOT NULL DEFAULT CURRENT_DATE,
+    news_text   TEXT NOT NULL,
+    PRIMARY KEY (news_id)
+);

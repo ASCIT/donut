@@ -350,3 +350,11 @@ def is_caltech_user():
     ip_match = flask.current_app.config["RESTRICTED_IPS"]
     return 'username' in flask.session or \
         re.search(ip_match, flask.request.remote_addr) is not None
+
+
+def is_admin():
+    """
+    Returns whether the current user is an admin
+    """
+    username = flask.session.get('username')
+    return username and check_permission(username, None)
