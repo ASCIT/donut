@@ -46,7 +46,7 @@ CREATE TABLE members (
     address            VARCHAR(255) DEFAULT NULL,
     city               VARCHAR(64)  DEFAULT NULL,
     state              VARCHAR(64)  DEFAULT NULL,
-    zip                VARCHAR(9)   DEFAULT NULL,
+    zip                VARCHAR(10)  DEFAULT NULL,
     country            VARCHAR(64)  DEFAULT NULL,
     create_account_key CHAR(32)     DEFAULT NULL,
     PRIMARY KEY (user_id),
@@ -146,7 +146,7 @@ CREATE TABLE positions (
                                        -- emails from this group
 
     PRIMARY KEY (pos_id),
-    FOREIGN KEY (group_id) 
+    FOREIGN KEY (group_id)
         REFERENCES groups(group_id)
         ON DELETE CASCADE
 );
@@ -159,7 +159,7 @@ CREATE TABLE position_holders (
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
     PRIMARY KEY (hold_id),
-    FOREIGN KEY (pos_id) 
+    FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
         ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES members(user_id)
