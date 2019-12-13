@@ -12,7 +12,7 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
-from donut.modules import account, auth, marketplace, core, courses, directory_search, editor, groups, newsgroups, rooms, uploads, voting
+from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, newsgroups, rooms, uploads, voting
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
