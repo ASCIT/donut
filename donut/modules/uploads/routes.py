@@ -3,7 +3,6 @@ import os
 from werkzeug import secure_filename
 from donut.modules.uploads import blueprint, helpers
 
-
 @blueprint.route('/lib/<path:url>')
 def display(url):
     '''

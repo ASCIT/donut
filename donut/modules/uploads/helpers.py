@@ -3,6 +3,7 @@ import os
 import glob
 from donut.modules.uploads.upload_permission import UploadPermissions
 from donut.auth_utils import check_permission, check_login
+from donut.modules.editor import helpers as editor_helpers
 
 ALLOWED_EXTENSIONS = set(
     ['docx', 'doc', 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -12,17 +13,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
 def read_page(url):
-    '''
-    Reads in content from a markdown file
-    '''
-    root = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config["UPLOAD_WEBPAGES"])
-    path = os.path.join(root, url + '.md')
-    if not os.path.isfile(path):
-        return None
-    with open(path) as f:
-        return f.read()
-
+    return editor_helpers.read_markdown(url)
 
 def allowed_file(filename):
     '''
