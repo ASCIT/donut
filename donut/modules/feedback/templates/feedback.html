@@ -5,12 +5,15 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-        <img src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+	<div class="half-float-left medium-text">
+	<p style="white-space: pre-line;"> {{ msg }} </p>
         {% if summary %}
         <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
         {% endif %}
-	<p style="white-space: pre-line;"> {{ msg }} </p>
-	<div class="col-md-8 col-md-offset-2">
+	</div>
+
+	<div class="half-float-right">
+	<div>
           <div class="row">
             <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
               <table id="feedback" class="table">
@@ -41,13 +44,14 @@
               </table>
               <div class="row">
                 <div class="text-center">
-                  <input class="btn" type="submit" value="Submit" />
+                  <input class="btn btn-primary" type="submit" value="Submit" />
                 </div>
               </div>
             </form>
           </div>
         </div>
       </div>
+    </div>
 
 </div>
 

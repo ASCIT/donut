@@ -45,7 +45,10 @@
   </div>
   <div class='panel panel-primary' id='requirements-modal'>
     <div class='panel-heading'>
-      <div class='panel-title'>Core Requirements</div>
+      <div class='panel-title' style="display: inline;">Core Requirements</div>
+        <button class='btn btn-danger' style="position: absolute; right: 5px; top: 5px;" id='close-requirements'>
+          X
+        </button>
     </div>
     <div class='panel-body'>
       486 units
@@ -97,11 +100,6 @@
       <div class='progress'>
         <div class='progress-bar progress-bar-success' id='pe'></div>
       </div>
-    </div>
-    <div class='panel-footer'>
-      <button class='btn btn-danger' id='close-requirements'>
-        Close
-      </button>
     </div>
   </div>
 {% endblock %}
