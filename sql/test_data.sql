@@ -74,8 +74,7 @@ INSERT INTO users(user_id, username, password_hash) VALUES
 INSERT INTO groups(group_id, group_name, type, newsgroups, anyone_can_send) VALUES
     (1, 'Donut Devteam', '', 1, 0),
     (2, 'Ruddock House', 'house', 0, 0),
-    (3, 'IHC', 'committee', 1, 0),
-    (4, 'BoD', 'committee', 1, 1);
+    (3, 'IHC', 'committee', 1, 0);
 
 INSERT INTO positions(group_id, pos_id, pos_name, send, control, receive) VALUES
     (1, 1, 'Head', 1, 1, 1),
