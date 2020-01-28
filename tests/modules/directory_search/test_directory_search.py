@@ -135,8 +135,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([1, 2, 3])
+                   grad_year=None)) == set([1, 2, 3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='san',
@@ -145,8 +144,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([3])
+                   grad_year=None)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -155,8 +153,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -165,8 +162,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([1])
+                   grad_year=None)) == set([1])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -175,8 +171,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -185,8 +180,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([2, 3])
+                   grad_year=None)) == set([2, 3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -195,8 +189,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -205,8 +198,7 @@ def test_search(client):
                    house_id=2,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([3])
+                   grad_year=None)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -215,8 +207,7 @@ def test_search(client):
                    house_id=100,
                    option_id=None,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -225,8 +216,7 @@ def test_search(client):
                    house_id=None,
                    option_id=1,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([3])
+                   grad_year=None)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -235,8 +225,7 @@ def test_search(client):
                    house_id=None,
                    option_id=2,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set([3])
+                   grad_year=None)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -245,8 +234,7 @@ def test_search(client):
                    house_id=None,
                    option_id=100,
                    building_id=None,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -255,8 +243,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=1,
-                   grad_year=None,
-                   state=None)) == set([3])
+                   grad_year=None)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -265,8 +252,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=10,
-                   grad_year=None,
-                   state=None)) == set()
+                   grad_year=None)) == set()
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -275,8 +261,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=2021,
-                   state=None)) == set([3])
+                   grad_year=2021)) == set([3])
     assert set(user['user_id']
                for user in helpers.execute_search(
                    email='',
@@ -285,28 +270,7 @@ def test_search(client):
                    house_id=None,
                    option_id=None,
                    building_id=None,
-                   grad_year=2020,
-                   state=None)) == set()
-    assert set(user['user_id']
-               for user in helpers.execute_search(
-                   email='',
-                   username='',
-                   name=None,
-                   house_id=None,
-                   option_id=None,
-                   building_id=None,
-                   grad_year=None,
-                   state='MA')) == set([3])
-    assert set(user['user_id']
-               for user in helpers.execute_search(
-                   email='',
-                   username='',
-                   name=None,
-                   house_id=None,
-                   option_id=None,
-                   building_id=None,
-                   grad_year=None,
-                   state='CA')) == set()
+                   grad_year=2020)) == set()
 
 
 def test_value_lists(client):
@@ -322,7 +286,6 @@ def test_value_lists(client):
         'option_name': 'MechE'
     }]
     assert helpers.get_grad_years() == [2021]
-    assert helpers.get_states() == ['MA']
 
 
 def test_preferred_name(client):
@@ -415,7 +378,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -428,7 +390,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -443,7 +404,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -458,7 +418,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -471,7 +430,6 @@ def test_search(client):
             'option': '1',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -486,7 +444,6 @@ def test_search(client):
             'option': '100',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -499,7 +456,6 @@ def test_search(client):
             'option': '',
             'residence': '1',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -514,7 +470,6 @@ def test_search(client):
             'option': '',
             'residence': '100',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -527,7 +482,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '2021',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -542,7 +496,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '2019',
-            'state': '',
             'username': '',
             'email': ''
         })
@@ -555,35 +508,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': 'MA',
-            'username': '',
-            'email': ''
-        })
-    assert res.status_code == 302
-    assert res.headers['location'] == flask.url_for(
-        'directory_search.view_user', user_id=3)
-    res = client.post(
-        flask.url_for('directory_search.search'),
-        data={
-            'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
-            'state': 'IA',
-            'username': '',
-            'email': ''
-        })
-    assert res.status_code == 200  #no results
-    res = client.post(
-        flask.url_for('directory_search.search'),
-        data={
-            'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
-            'state': '',
             'username': 'qu',
             'email': ''
         })
@@ -598,7 +522,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': 'abc',
             'email': ''
         })
@@ -611,7 +534,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': 'reng'
         })
@@ -626,7 +548,6 @@ def test_search(client):
             'option': '',
             'residence': '',
             'graduation': '',
-            'state': '',
             'username': '',
             'email': 'xyz'
         })

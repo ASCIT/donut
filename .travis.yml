@@ -1,9 +1,11 @@
 language: python
 python:
   - "3.6"
+dist: trusty
 services: mysql
 before_install:
-    sudo apt-get install libmariadbclient-dev
+  - sudo apt-get install libmariadbclient-dev
+  - openssl aes-256-cbc -K $encrypted_aa0580535ea1_key -iv $encrypted_aa0580535ea1_iv -in calendar.json.enc -out calendar.json -d
 install: "pip install -r requirements.txt"
 addons:
   mariadb: 10.1

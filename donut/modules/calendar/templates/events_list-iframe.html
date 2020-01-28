@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('calendar.static', filename='style.css')}}>
+{% endblock %}
+{% block navbar %}{% endblock %}
+{% block scripts %}
+  {{super()}}
+  <script src={{ url_for('calendar.static', filename='list_script.js', _external = True)}}></script>
+{% endblock %}
+{% block content %}
+<base target="_parent" />
+<div class ="col-md-8 col-md-offset-2" id="listing">
+  <div id='failover_message'>
+    Using a cached version of events from donut's databases. To force a sync with google calendars, 
+    <a href={{ url_for('calendar.sync')}}>click this link</a>
+  </div>
+      <table id="searchTable" class="table">
+        <tr> 
+          <div class="form-group">
+            <td class="searchTable">
+              <label for="name">Event Name:</label>
+            </td>
+            <td class="searchTable"><input type="text" id="query" name="query" class="form-control" /></td>
+            <td>              <input class="btn" type="submit" value="Submit" /></td>
+          </div>
+        </tr>
+      </table>
+<table class="table" id="searchResTable">
+<tr>
+<td>    
+    <div id="searchResDiv">
+      <table id="resultsTable">
+        <tr>
+          <td class='resultCell'>
+            <label>Future events</label>
+          </td>
+        </tr>
+        <tr class='resultRow'>
+          <td class='resultCell'>
+          <div id="future">
+          </div>
+          </td>
+        </tr>
+        <tr>
+          <td class='resultCell'>
+            <label>Past events</label>
+          </td>
+        </tr>
+        <tr class='resultRow'>
+          <td class='resultCell'>
+          <div id="past">
+          </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+</td>
+<td>
+  <div class="container" id="extendInfo">
+    {% if permissions['Any'] %}
+      <form method="POST" action="{{ url_for('calendar.calendar_add_events', update=True) }}">
+    {% endif %}
+
+      <div class="form-group searchInfoUpdate">
+          <label for="name" class="required">Event Name:</label>
+{% if permissions['Any'] %}
+       <input id="eventName_edit" type="text" name="name" class="form-control" required />
+{% else %}
+          <label id="eventName" for="name"></label>
+{% endif %}
+      </div>
+        <div class="form-group searchInfoUpdate">
+            <label for="tag" class="required">Tag:</label>
+            <label id="tag"></label>
+            <input type="hidden" id="htag" class="form-control" name="tag"></input>
+        </div>
+          <div class="form-group searchInfoUpdate">
+		    <label for="date" class="required" id="start_time">Date:</label>
+{% if permissions['Any'] %}
+            <input type="hidden" id="calEventId" class="form-control" name="eventId"></input>
+              <input
+                type="date"
+                class="form-control"
+                name="start_date"
+                id="start_date"
+                required
+              />
+          </div>
+          <label for="start_hour" class="required">Start time</label>
+		  <div class="input-group searchInfoUpdate">
+            <input
+                type="number"
+                class="form-control"
+                name="start_hour"
+                id="start_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+            />
+            <span class="input-group-addon">:</span>
+            <input
+                type="number"  
+                class="form-control"
+                name="start_minute"     
+                id="start_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+            />
+{% else %}
+        </div>
+        <label id="eventStartTime"></label>
+{% endif %}
+
+          </div>
+          <div class="form-group searchInfoUpdate">
+{% if permissions['Any'] %}
+            <label for="date" class="required">End Date </label>
+            <input
+                type="date"
+                class="form-control"
+                name="end_date"
+                id="end_date"
+                required
+            />
+          </div>
+          <label for="end_hour" class="required">Start time</label>
+          <div class="input-group searchInfoUpdate">
+            <input
+                type="number"
+                class="form-control"
+                name="end_hour"
+                id="end_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+            />
+            <span class="input-group-addon">:</span>
+            <input
+                type="number"
+                class="form-control"
+                name="end_minute"
+                id="end_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+            />
+
+{% else %}
+        </div>
+        <label id="eventEndTime"></label>
+{% endif %}
+          </div>
+        <div class="form-group searchInfoUpdate">
+            <label for="location">Location:</label>
+            {% if permissions['Any'] %}
+            <input type="text" id="eventLocation_edit" name="location" class="form-control"/>
+            {% else %}
+            <label id="eventLocation" class="infoText" ></label>
+            {% endif %}
+        </div>
+        <div class="form-group searchInfoUpdate">
+            <label for="name" class="required">Description:</label>
+            {% if permissions['Any'] %}
+            <textarea class="form-control" id="eventDescription_edit" name="description" rows="2" required ></textarea>
+            {% else %}
+            <label id="eventDescription"></label>
+            {% endif %}
+        </div>
+      <div class="row">
+        <div class="text-center">
+          <button type="submit" value="Update" target="_parent"> Update </button>
+          <button type=button class="deleteEvent" value="Delete"> Delete </button>
+        </div>
+      </div>
+    </form>
+    </div>
+</td>
+</tr>
+</table>
+</div>
+{% endblock %}

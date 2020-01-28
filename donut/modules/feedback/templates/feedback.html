@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <img src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+        {% if summary %}
+        <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
+        {% endif %}
+	<p style="white-space: pre-line;"> {{ msg }} </p>
+	<div class="col-md-8 col-md-offset-2">
+          <div class="row">
+            <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
+              <table id="feedback" class="table">
+                <tr>
+                  <div class="form-group">
+                  <td class="feedback">Name: </td>
+                  <td class="feedback"><input type="text" name="name" class="form-control" /></td>
+                  </div>
+                </tr>
+                <tr>
+                  <div class="form-group">
+                    <td class="feedback">Reply Email(s) separated by commas: </td>
+                    <td class="feedback"><input type="email" name="email" class="form-control" /></td>
+                  </div>
+                </tr>
+                <tr>
+                  <div class="form-group">
+                    <td class="feedback">Subject*: </td>
+                    <td class="feedback"><input type="text" name="subject" class="form-control" required /></td>
+                  </div>
+                </tr>
+                <tr>
+                  <div class="form-group">
+                    <td class="feedback">Feedback*: </td>
+                    <td class="feedback"><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
+                  </div>
+                </tr>
+              </table>
+              <div class="row">
+                <div class="text-center">
+                  <input class="btn" type="submit" value="Submit" />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+</div>
+
+{% endblock %}

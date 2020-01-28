@@ -31,9 +31,10 @@ def test_get_member_list_data(client):
 
 
 def test_get_name_and_email(client):
-    name, email = get_name_and_email(1)
-    assert name == "David Qu"
-    assert email == "davidqu12345@gmail.com"
+    assert get_name_and_email(1) == {
+        "full_name": "David Qu",
+        "email": "davidqu12345@gmail.com"
+    }
 
 
 def test_get_group_list_of_member(client):

@@ -1,92 +1,101 @@
 {% extends "layout.html" %}
 {% block page %}
+{% include "topbar.html" %}
 
-<div class="container theme-showcase jumbotron">
-    <h3>
-        Viewing item:
-        {% if cat_title=="Textbooks" %}
-        {{stored["textbook_title"]}}
-        {% else %}
-        {{stored["item_title"]}}
-        {% endif %}
-    </h3>
+{% set is_textbook = item['cat_title'] == 'Textbooks' %}
+{% set title = item['textbook_title' if is_textbook else 'item_title'] %}
 
-    <!-- TODO: when logins and privs are implemented, put "edit this item" here -->
-
-    <br>
-    <table>
-        <thead>
-            <tr style="hidden">
-                <td style="width:90px"></td>
-                <td style="width:400px"></td>
-            </tr>
-        </thead>
-        <tr>
-            <td>Category:</td>
-            <td>{{ cat_title }}</td>
-        </tr>
-        {% if cat_title == "Textbooks" %}
-            <tr>
-                <td>Title:</td>
-                <td> {{stored["textbook_title"]}} </td>
-            </tr>
-            <tr>
-                <td>Author:</td>
-                <td> {{stored["textbook_author"]}} </td>
-            </tr>
-            <tr>
-                <td>Edition:</td>
-                <td> {{stored["textbook_edition"]}} </td>
-            </tr>
-            <tr>
-                <td>ISBN:</td>
-                <td> {{stored["textbook_isbn"]}} </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td>Title:</td>
-                <td> {{stored["item_title"]}} </td>
-            </tr>
-        {% endif %}
-
-        <tr>
-            <td>Condition:</td>
-            <td> {{stored["item_condition"]}} </td>
-        </tr>
-
-        <tr>
-            <td>Price:</td>
-            <td> {{stored["item_price"]}} </td>
-        </tr>
-
-        <tr>
-            <td>Details:</td>
-            <td> {{stored["item_details"]}} </td>
-        </tr>
-    </table>
-    <br>
-    <br>
+<h3>Viewing item: {{ title }}</h3>
+{% if can_edit %}
     <h4>
-        Seller details:
+        <a href="{{ url_for('.sell', state='edit', item_id=item_id) }}">
+            Edit this listing
+        </a>
     </h4>
-    <table style="margin-left: auto;margin-right: auto;text-align:left">
-        <thead>
-            <tr style="hidden">
-                <td style="width:90px"></td>
-                <td style="width:400px"></td>
-            </tr>
-        </thead>
-        <tr>
-            <td>Name:</td>
-            <!-- TODO: update when stalker is working -->
-            <td> <a href={{url_for("core.get_members", user_id=stored["user_id"])}}> {{stored["full_name"]}} </a> </td>
-        </tr>
-        <tr>
-            <td>Email:</td>
-            <td> <a href="mailto:{{stored['email']}}"> {{stored["email"]}} </a> </td>
-        </tr>
-    </table>
-</div>
-<br>
+{% endif %}
 
+<table class="table">
+    <tr>
+        <th>Category</th>
+        <td>{{ item['cat_title'] }}</td>
+    </tr>
+    <tr>
+        <th>Title</th>
+        <td>{{ title }}</td>
+    </tr>
+    {% if is_textbook %}
+        <tr>
+            <th>Author</th>
+            <td>{{ item['textbook_author'] }}</td>
+        </tr>
+        {% if item['textbook_edition'] %}
+            <tr>
+                <th>Edition</th>
+                <td>{{ item['textbook_edition'] }}</td>
+            </tr>
+        {% endif %}
+        {% if item['textbook_isbn'] %}
+            <tr>
+                <th>ISBN</th>
+                <td>{{ item['textbook_isbn'] }}</td>
+            </tr>
+        {% endif %}
+    {% endif %}
+    <tr>
+        <th>Condition</th>
+        <td>{{ item['item_condition'] }}</td>
+    </tr>
+    <tr>
+        <th>Price</th>
+        <td>${{ item['item_price'] }}</td>
+    </tr>
+    {% if item['item_details'] %}
+        <tr>
+            <th>Details</th>
+            <td>{{ item['item_details'] }}</td>
+        </tr>
+    {% endif %}
+    {% if image_links %}
+        <tr>
+            <th>Images</th>
+            <td>
+                {% for link in image_links %}
+                    <img class="item-image" src="{{ link }}" />
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+</table>
+
+<h4>Seller details</h4>
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <td>
+            <a href="{{ url_for('directory_search.view_user', user_id=item['user_id']) }}">
+                {{ user['full_name'] }}
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>
+            <a href="mailto:{{ user['email'] }}">
+                {{ user['email'] }}
+            </a>
+        </td>
+    </tr>
+</table>
+{% endblock %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        td {
+            width: 100%;
+        }
+        .item-image {
+            max-width: 500px;
+            max-height: 500px;
+        }
+    </style>
 {% endblock %}

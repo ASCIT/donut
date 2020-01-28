@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+{% block page %}
+{% set admin = 'ADMIN' in perms %}
+<div class="jumbotron">
+    <div class="row">
+        <div class="col-md-8">
+              {% if admin or 'SUMMARY' in perms%}
+                  <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
+              {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>Feedback Summary</h3>
+                </div>
+                <div class="panel-body" id="summary-panel">
+                    <p>Subject: {{ complaint['subject'] }} </p>
+                    <p>Status: {{ complaint['status'] }} </p>
+                    {% if admin or 'VIEW_EMAILS' in perms or 'ADD_REMOVE_EMAIL' in perms %}
+                        {% if not complaint['emails'] %}
+                            <p>No emails subscribed to this complaint </p>
+                        {% else %}
+                            <p>Subscribed emails: </p>
+                            <form method="POST" id="remove-email" action="{{ url_for('feedback.feedback_remove_email', id=complaint['uuid'], group=group) }}">
+                                {% for email in complaint['emails'] %}
+                                    <input type="checkbox" value="{{email}}" name="emails"> {{email}} <br>
+                                {% endfor %}
+                                <input class="btn btn-primary" id="remove-email-btn" type="submit" value="Remove" {% if not admin and 'ADD_REMOVE_EMAIL' not in perms %} disabled {% endif %}/>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% if admin or 'TOGGLE_READ' in perms %}
+                    <button class="btn btn-primary" id="markRead">Mark as read</button>
+                    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
+                {% endif %}
+           </div>
+        </div>
+        <div class="col-md-4">
+            {% if admin or 'ADD_REMOVE_EMAIL' in perms %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Add an email</h4>
+                    </div>
+                    <div class="panel-body">
+                        <form method="POST" id="add-email" action="{{ url_for('feedback.feedback_add_email', id=complaint['uuid'], group=group) }}">
+                            <div class="form-group">
+                                <p>Email: </p>
+                                <input class="form-control" type="email" name="email" />
+                            </div>
+                            <input class="btn btn-primary" id="add-email-btn" type="submit" value="Add" />
+                        </form>
+                    </div>
+                    <div class="row">
+                    </div>
+                </div> 
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div>
+                    <table class="table table-bordered" id="messageList">
+                        <thead class="thead-default">
+                            <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
+                        </thead>
+                        {% for message in complaint['messages'] %}
+                        <tr> 
+                            <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th> 
+                            <th>{{ message['poster'] }}</th> 
+                            <td>{{ message['message'] }}</td>
+                        </tr>
+                        {% endfor %}
+                   </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <p>Add a comment<p>
+                    </div>
+                    <div class="panel-body">
+                        <form method="POST" id="addMessage" action="{{ url_for('feedback.feedback_add_msg', id=complaint['uuid'], group=group) }}">
+                            <div class="form-group">
+                                <p>Name: </p>
+                                <input class="form-control" type="text" name="poster" />
+                            </div>
+                            <div class="form-group">
+                                <p>Message: </p>
+                                <textarea class="form-control" name="message" rows="10" required></textarea>
+                            </div>
+                            <input class="btn btn-primary" id="submitBtn" type="submit" value="Submit" />
+                        </form>
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+ 
+ $(document).ready(function() {
+     {% if complaint['status'] == 'new_msg' %}
+         $('#markUnread').hide();
+     {% else %}
+         $('#markRead').hide();
+     {% endif %} 
+     $('#markRead').click(function() {
+	 $.ajax({
+	     url: "{{ url_for('feedback.feedback_mark_read', id=complaint['uuid'], group=group) }}",
+             type: 'GET',
+             success: function(){
+                 $('#markRead').hide();
+                 $('#markUnread').show();
+                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
+             },
+             error: function(response){
+                alert("An error occurred");
+             }
+         });
+     });
+     $('#markUnread').click(function() {
+         $.ajax({
+             url: "{{ url_for('feedback.feedback_mark_unread', id=complaint['uuid'], group=group) }}",
+             type: 'GET',
+             success: function(){
+                 $('#markUnread').hide();
+                 $('#markRead').show();
+                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
+             },
+             error: function(response){
+                alert("An error occurred");
+             }
+         });
+     });
+ });
+ 
+</script>
+
+{% endblock %}

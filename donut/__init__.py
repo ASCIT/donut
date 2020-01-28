@@ -1,6 +1,5 @@
 import flask
 from flask_bootstrap import Bootstrap
-import sqlalchemy
 import pymysql.cursors
 import os
 import pdb
@@ -13,7 +12,7 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
-from donut.modules import account, auth, marketplace, core, courses, directory_search, editor, groups, rooms, uploads, voting
+from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, rooms, uploads, voting
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -22,10 +21,12 @@ Bootstrap(app)  # enable Bootstrap in Flask
 app.register_blueprint(account.blueprint)
 app.register_blueprint(auth.blueprint)
 app.register_blueprint(marketplace.blueprint)
+app.register_blueprint(calendar.blueprint)
 app.register_blueprint(core.blueprint)
 app.register_blueprint(courses.blueprint)
 app.register_blueprint(directory_search.blueprint)
 app.register_blueprint(groups.blueprint)
+app.register_blueprint(feedback.blueprint)
 app.register_blueprint(editor.blueprint)
 app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
@@ -57,9 +58,11 @@ def init(environment_name):
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
     app.config["SECRET_KEY"] = environment.secret_key
+    app.config["RESTRICTED_IPS"] = environment.restricted_ips
     app.config["DB_USER"] = environment.db_user
     app.config["DB_PASSWORD"] = environment.db_password
     app.config["DB_NAME"] = environment.db_name
+    app.config["IMGUR_API"] = environment.imgur_api
     app.config["UPLOAD_WEBPAGES"] = 'modules/uploads/uploaded_files/pages'
     app.config["UPLOAD_FOLDER"] = 'modules/uploads/uploaded_files'
     # Maximum file upload size, in bytes.
@@ -73,14 +76,10 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
-    if 'DB_URI' in app.config:
-        engine = sqlalchemy.create_engine(
-            app.config['DB_URI'], convert_unicode=True)
-        flask.g.db = engine.connect()
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
-        connection = pymysql.connect(
+        flask.g.pymysql_db = pymysql.connect(
             host='localhost',
             database=app.config['DB_NAME'],
             user=app.config['DB_USER'],
@@ -89,7 +88,6 @@ def before_request():
             autocommit=True,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)
-        flask.g.pymysql_db = connection
 
 
 @app.teardown_request

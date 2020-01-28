@@ -2,6 +2,27 @@ import flask
 import json
 
 from donut.modules.marketplace import blueprint, helpers
+from donut.modules.core.helpers import get_name_and_email
+from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
+
+MAX_IMAGES = 5
+
+SEARCH_ATTRS = set(
+    ('item_id', 'cat_id', 'user_id', 'item_title', 'item_details',
+     'item_images', 'item_condition', 'item_price', 'item_timestamp',
+     'item_active', 'textbook_id', 'textbook_isbn', 'textbook_edition',
+     'textbook_title'))
+
+VIEW_FIELDS = ('textbook_id', 'cat_title', 'user_id', 'item_title',
+               'item_details', 'item_condition', 'item_price',
+               'item_timestamp', 'item_active', 'textbook_edition',
+               'textbook_isbn', 'textbook_title', 'textbook_author')
+
+ALLOWED_SELL_STATES = ('new', 'edit')
+SELL_FIELDS = ('textbook_id', 'item_id', 'cat_id', 'user_id', 'item_title',
+               'item_details', 'item_condition', 'item_price', 'item_active',
+               'textbook_edition', 'textbook_isbn')
+CONDITIONS = ('New', 'Very Good', 'Good', 'Acceptable', 'Poor')
 
 
 @blueprint.route('/marketplace')
@@ -10,34 +31,7 @@ def marketplace():
 
     return helpers.render_with_top_marketplace_bar(
         'marketplace.html', cat_id=0)
-    # cat_id = 0 indicates that the select object should be set to "all
-    # categories", which is the default
-
-
-@blueprint.route('/marketplace/view')
-def category():
-    """Display all results in that category, with no query."""
-
-    category_id = flask.request.args["cat"]
-
-    fields = []
-    if helpers.get_category_name_from_id(category_id) == "Textbooks":
-        fields = [
-            "textbook_title", "textbook_author", "textbook_edition",
-            "item_price", "user_id", "item_timestamp"
-        ]
-    else:
-        fields = ["item_title", "item_price", "user_id", "item_timestamp"]
-
-    (datalist, headers, links) = helpers.generate_search_table(
-        fields=fields, attrs={"cat_id": category_id})
-
-    return helpers.render_with_top_marketplace_bar(
-        'search.html',
-        datalist=datalist,
-        cat_id=category_id,
-        headers=headers,
-        links=links)
+    # cat_id = 0 makes the category selection default to 'all categories'
 
 
 @blueprint.route('/marketplace/search')
@@ -45,399 +39,244 @@ def query():
     """Displays all results for the query in category category_id, which can be
        'all' if no category is selected."""
 
-    category_id = flask.request.args["cat"]
-    query = flask.request.args["q"]
+    if not is_caltech_user():
+        return login_redirect()
 
-    fields = [
-        "cat_id", "item_title", "textbook_title", "item_price", "user_id",
-        "item_timestamp"
-    ]
-    # Create a dict of the passed in attributes which are filterable
-    filterable_attrs = [
-        "item_id", "cat_id", "user_id", "item_title", "item_details",
-        "item_images", "item_condition", "item_price", "item_timestamp",
-        "item_active", "textbook_id", "textbook_isbn", "textbook_edition",
-        "textbook_title"
-    ]
+    category_id = flask.request.args.get('cat')
+    if category_id is None:
+        flask.abort(404)
+    query = flask.request.args.get('q', '')
+
+    # Create a dict of the passed-in attributes which are filterable
     attrs = {
-        tup: flask.request.args[tup]
-        for tup in flask.request.args if tup in filterable_attrs
+        attr: value
+        for attr, value in flask.request.args.items() if attr in SEARCH_ATTRS
     }
-    if category_id == "all":
-        category_id = 0
-    else:
-        attrs["cat_id"] = category_id
-        # only pass in the cat_id to get_marketplace_items_list_data if it's not
-        # "all", because cat_id (and everything in attrs) goes into a WHERE
-        # clause, and not specifying is the same as selecting all.
+    attrs['item_active'] = True
+    if category_id != helpers.ALL_CATEGORY:
+        try:
+            attrs['cat_id'] = int(category_id)
+        except ValueError:
+            flask.abort(404)
+        # Pass in the cat_id to generate_search_table() if it's not 'all'
 
-    # now, the category id had better be a number
-    try:
-        cat_id_num = int(category_id)
-        (datalist, headers, links) = helpers.generate_search_table(
-            fields=fields, attrs=attrs, query=query)
-
-        return helpers.render_with_top_marketplace_bar(
-            'search.html',
-            datalist=datalist,
-            cat_id=cat_id_num,
-            headers=headers,
-            links=links)
-
-    except ValueError:
-        # not a number? something's wrong
-        return flask.render_template('404.html')
+    items = helpers.generate_search_table(attrs, query)
+    return helpers.render_with_top_marketplace_bar(
+        'search.html', items=items, cat_id=category_id)
 
 
-@blueprint.route('/marketplace/view_item')
-def view_item():
-    """View additional details about item <item_id>, passed through flask.request.args."""
+@blueprint.route('/marketplace/view_item/<int:item_id>')
+def view_item(item_id):
+    """View additional details about item <item_id>"""
 
-    if "item_id" not in flask.request.args:
-        return flask.render_template('404.html')
+    if not is_caltech_user():
+        return login_redirect()
 
-    # make sure item_id is a number
-    item_id = None
-    try:
-        item_id = int(flask.request.args["item_id"])
-    except ValueError:
-        return flask.render_template('404.html')
+    item = helpers.table_fetch(
+        """
+            marketplace_items NATURAL LEFT JOIN
+            marketplace_textbooks NATURAL JOIN
+            marketplace_categories
+        """,
+        one=True,
+        fields=VIEW_FIELDS,
+        attrs={'item_id': item_id})
 
-    stored = {}
-    stored_fields = [
-        "textbook_id", "item_id", "cat_id", "user_id", "item_title",
-        "item_details", "item_condition", "item_price", "item_timestamp",
-        "item_active", "textbook_edition", "textbook_isbn", "textbook_title",
-        "textbook_author"
-    ]
-    data = helpers.get_table_list_data(
-        ['marketplace_items',
-         'marketplace_textbooks'], stored_fields, {'item_id': item_id})[0]
-    for i in range(len(data)):
-        stored[stored_fields[i]] = data[i]
+    # Make sure the item_id is a valid item, i.e. data is nonempty
+    if item is None:
+        flask.abort(404)
 
-    # cat_title from cat_id
-    cat_id_map = {
-        sublist[0]: sublist[1]
-        for sublist in helpers.get_table_list_data("marketplace_categories",
-                                                   ["cat_id", "cat_title"])
-    }
-    cat_title = cat_id_map[stored["cat_id"]]
+    # Display textbook edition
+    edition = item['textbook_edition']
+    if edition:
+        item['textbook_edition'] = helpers.process_edition(edition)
 
-    # full_name and email from user_id
-    from donut.modules.core.helpers import get_name_and_email
-    (stored['full_name'],
-     stored['email']) = get_name_and_email(stored['user_id'])
+    # Grab the stored image links
+    image_links = helpers.get_image_links(item_id)
 
-    # if any field is None, replace it with "" to display more cleanly
-    for field in stored:
-        if stored[field] == None:
-            stored[field] = ""
+    # Notify if the item is inactive
+    if not item['item_active']:
+        flask.flash('This item has been archived!')
 
     return helpers.render_with_top_marketplace_bar(
-        'view_item.html', stored=stored, cat_title=cat_title)
+        'view_item.html',
+        item_id=item_id,
+        item=item,
+        image_links=image_links,
+        user=get_name_and_email(item['user_id']),
+        can_edit=helpers.can_manage(item))
+
+
+@blueprint.route('/marketplace/manage')
+def manage():
+    if 'username' not in flask.session:
+        # They're not logged in, kick them out
+        return login_redirect()
+
+    return helpers.render_with_top_marketplace_bar(
+        'manage_items.html', items=helpers.get_my_items())
+
+
+@blueprint.route('/marketplace/archive/<int:item_id>')
+def archive(item_id):
+    if not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to archive this item.')
+        return flask.redirect(flask.url_for('.marketplace'))
+
+    helpers.set_active_status(item_id, False)
+    return flask.redirect(flask.url_for('.manage'))
+
+
+@blueprint.route('/marketplace/unarchive/<int:item_id>')
+def unarchive(item_id):
+    if not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to unarchive this item.')
+        return flask.redirect(flask.url_for('.marketplace'))
+
+    helpers.set_active_status(item_id, True)
+    return flask.redirect(flask.url_for('.manage'))
 
 
 @blueprint.route('/marketplace/sell', methods=['GET', 'POST'])
 def sell():
-    # if the data or the page in general has errors, we don't let the user continue to the next page
-    has_errors = False
-    # PAGES
-    # -----
-    # 1:  Select a category (default first page)
-    # 10: Select a textbook (special, appears between pages 1 and 2 if the category is 'Textbooks')
-    # 2:  Input information about the listing
-    # 3:  Confirm that info is correct
-    # 4:  Add data to database, show success message
+    username = flask.session.get('username')
+    if username is None:
+        # They're not logged in, kick them out
+        return login_redirect()
 
-    page = 1  # default is first page; category select page
-    if "page" in flask.request.form:
-        # but if we pass it in, get it
-        page = int(flask.request.form["page"])
-
-    if not page in [1, 10, 2, 3, 4]:
-        flask.flash('Invalid page')
-        has_errors = True
+    # Extract item id
+    item_id = helpers.try_int(flask.request.args.get('item_id'))
 
     # STATES
     # ------
-    # blank: defaults to new
-    # new:   making a new listing
-    # edit:  editing an old listing
+    # new (default): making a new listing
+    # edit: editing an old listing
 
-    state = 'new'  # if state isn't in request.args, it's new
-    if "state" in flask.request.args:
-        # but if it's there, get it
-        state = flask.request.args["state"]
-
-    if not state in ["new", "edit"]:
+    state = flask.request.args.get('state', 'new')
+    if state not in ALLOWED_SELL_STATES:
         flask.flash('Invalid state')
-        has_errors = True
+        return flask.redirect(flask.url_for('.sell'))
 
-    item_id = None
-    stored = {}
-    stored_fields = [
-        "textbook_id", "item_id", "cat_id", "user_id", "item_title",
-        "item_details", "item_condition", "item_price", "item_timestamp",
-        "item_active", "textbook_edition", "textbook_isbn", "textbook_title",
-        "textbook_author"
-    ]
-    for field in stored_fields:
-        stored[field] = ""
-
-    if state == 'edit':
-        if 'item_id' not in flask.request.args:
+    saving = flask.request.method == 'POST'
+    editing = state == 'edit'
+    if saving:
+        form = flask.request.form
+        item = {
+            'cat_id': helpers.try_int(form.get('cat')),
+            'textbook_id': helpers.try_int(form.get('textbook_id')),
+            'textbook_title': form.get('textbook_title'),
+            'textbook_author': form.get('textbook_author'),
+            'textbook_edition': form.get('textbook_edition'),
+            'textbook_isbn': form.get('textbook_isbn'),
+            'item_title': form.get('item_title'),
+            'item_condition': form.get('item_condition'),
+            'item_price': form.get('item_price'),
+            'item_details': form.get('item_details'),
+            'images': [image for image in form.getlist('images') if image]
+        }
+    elif editing:
+        item = helpers.table_fetch(
+            'marketplace_items',
+            one=True,
+            fields=SELL_FIELDS,
+            attrs={'item_id': item_id})
+        if not item:
+            # No data? the item_id must be wrong
             flask.flash('Invalid item')
-            has_errors = True
-        else:
-            item_id = int(flask.request.args['item_id'])
-            data = helpers.get_table_list_data([
-                'marketplace_items', 'marketplace_textbooks'
-            ], stored_fields, {'item_id': item_id})[0]
-            for i in range(len(data)):
-                stored[stored_fields[i]] = data[i]
+            return flask.redirect(flask.url_for('.marketplace'))
 
-    # prev_page is used for the back button
-    prev_page = None
-    if "prev_page" in flask.request.form:
-        prev_page = int(flask.request.form["prev_page"])
-        if not prev_page in [1, 10, 2, 3, 4]:
-            flask.flash('Invalid page')
-            has_errors = True
-
-    # category_id is used to specify which category is active
-    # get_table_list_data always returns a list of lists
-    # turn the resulting 2d list into a map from cat_id to cat_title
-    cat_id_map = {
-        sublist[0]: sublist[1]
-        for sublist in helpers.get_table_list_data("marketplace_categories",
-                                                   ["cat_id", "cat_title"])
-    }
-    cat_title = None
-    if "cat_id" in flask.request.form:
-        # flask.request.form should override the database if the user selects a new category
-        stored["cat_id"] = int(flask.request.form["cat_id"])
-        if stored["cat_id"] not in cat_id_map:
-            flask.flash('Invalid category')
-            has_errors = True
-        else:
-            # get the category title from the id using the map
-            cat_title = cat_id_map[stored["cat_id"]]
-
-    # if we're past page 1, we need category to be selected
-    if page > 1 and stored["cat_id"] == None:
-        flask.flash('Category must be selected')
-        has_errors = True
-
-    # action is used if we need to perform an action on the server-side
-    if "action" in flask.request.form:
-        if flask.request.form["action"] == "add-textbook":
-            # only called on the textbook_select page; page 10
-            if page != 10:
-                flask.flash('Invalid action')
-                has_errors = True
-            else:
-                textbook_title = flask.request.form["textbook_title"]
-                textbook_author = flask.request.form["textbook_author"]
-                if textbook_title == "" or textbook_author == "":
-                    flask.flash(
-                        "Textbook title and textbook author can't be blank.")
-                    has_errors = True
-                elif not helpers.add_textbook(textbook_title, textbook_author):
-                    # add_textbook returns false if it fails
-                    flask.flash('Textbook already exists!')
-                    has_errors = True
-
-    if has_errors:
-        # there's an error, so we can't change the page like the (continue or back) button would've done
-        page = prev_page
+        item['images'] = helpers.get_image_links(item_id)
     else:
-        # nothing's wrong, so increment the page
-        # if the category is textbooks, insert a page between pages 1 and 2
-        if prev_page != None and cat_title == "Textbooks":
-            # if the user was on page 1 and hit continue, or on page 2 and hit back, send them to 10 instead
-            if (page == 2 and prev_page == 1) or (page == 1
-                                                  and prev_page == 2):
-                page = 10
+        item = {'images': []}
 
-    if page >= 2 and page <= 4 and cat_title == "Textbooks":
-        if "textbook_id" not in flask.request.form or flask.request.form["textbook_id"] == "":
-            flask.flash("You need to select a textbook.")
-            # go back to the textbook select page
-            page = 10
+    # Make sure the current user is the one who posted the item
+    if editing and not helpers.can_manage(item_id):
+        flask.flash('You do not have permission to edit this item')
+        return flask.redirect(flask.url_for('.marketplace'))
+
+    # This route is used for both GET and POST;
+    # only try to create/update the item if this is a POST
+    if saving:
+        errors = []  # collect all validation errors
+        cat_title = helpers.get_category_name_from_id(item['cat_id'])
+        if not cat_title:
+            errors.append('Invalid category')
+        is_textbook = cat_title == 'Textbooks'
+        if is_textbook:
+            textbook_id = item['textbook_id']
+            if textbook_id:
+                textbook = helpers.table_fetch(
+                    'marketplace_textbooks',
+                    one=True,
+                    attrs={'textbook_id': textbook_id})
+                if not textbook:
+                    errors.append('Invalid textbook')
+            else:
+                if not item['textbook_title']:
+                    errors.append('Missing textbook title')
+                if not item['textbook_author']:
+                    errors.append('Missing textbook author')
+            edition = item['textbook_edition']
+            if edition and not helpers.validate_edition(edition):
+                errors.append('Invalid textbook edition')
+            isbn = item['textbook_isbn']
+            if isbn:
+                if helpers.validate_isbn(isbn):
+                    item['textbook_isbn'] = isbn.replace('-', '')
+                else:
+                    errors.append('Invalid textbook ISBN')
+            item['item_title'] = None
         else:
-            # make sure that the textbook_id is valid
-            textbook_result = helpers.get_table_list_data(
-                "marketplace_textbooks",
-                attrs={"textbook_id": flask.request.form["textbook_id"]})
-            if len(textbook_result) == 0:
-                flask.flash("Invalid textbook.")
-                page = 10
+            if not item['item_title']:
+                errors.append('Missing item title')
+            item['textbook_id'] = None
+            item['textbook_edition'] = None
+            item['textbook_isbn'] = None
+        if not item['item_condition']:
+            errors.append('Missing condition')
+        price = item['item_price']
+        if not (price and helpers.validate_price(price)):
+            errors.append('Invalid price')
+        images = item['images']
+        for i, image in enumerate(images):
+            image = helpers.validate_image(image)
+            if image:
+                images[i] = image
+            else:
+                errors.append('Invalid image')
 
-    # don't allow the user to continue if any data is malformed or essential data is missing
-    errors = []
-    if page in [3, 4]:
-        errors += helpers.validate_data()
-        if len(errors) != 0:
-            page = 2
-
-    if page == 1:
-        # generate the hidden values
-        hidden = helpers.generate_hidden_form_elements(['cat_id'])
-        hidden.append(['prev_page', page])
-
-        return helpers.render_with_top_marketplace_bar(
-            'sell/sell_1.html',
-            page=page,
-            state=state,
-            category_id=stored['cat_id'],
-            hidden=hidden)
-
-    elif page == 10:
-        # get a list of textbooks to select from
-        textbooks = helpers.get_table_list_data("marketplace_textbooks", [
-            "textbook_id", "textbook_title", "textbook_author"
-        ])
-        textbook_id = flask.request.form.get("textbook_id", None)
-
-        # generate the hidden values
-        hidden = helpers.generate_hidden_form_elements(
-            ['item_title', 'textbook_id'])
-        hidden.append(['prev_page', page])
-
-        return helpers.render_with_top_marketplace_bar(
-            'sell/sell_10.html',
-            page=page,
-            state=state,
-            textbooks=textbooks,
-            old_textbook_id=textbook_id,
-            hidden=hidden)
-
-    elif page == 2:
-        # get correct stored values
-        for field in stored_fields:
-            if field == "textbook_id" and cat_title == "Textbooks":
-                # we also want to put textbook_title and textbook_author in stored,
-                # but they won't be in request.form
-                # so we get them here
-                textbook_id = flask.request.form["textbook_id"]
-                textbook_info = helpers.get_table_list_data(
-                    "marketplace_textbooks",
-                    ["textbook_title",
-                     "textbook_author"], {"textbook_id": textbook_id})
-                (stored["textbook_title"],
-                 stored["textbook_author"]) = textbook_info[0]
-            if field in flask.request.form:
-                stored[field] = flask.request.form[field]
-
-        # generate the hidden values
-        hidden = []
-        if cat_title == 'Textbooks':
-            # we need to pass textbook_id, but almost nothing else
-            hidden = helpers.generate_hidden_form_elements([
-                'textbook_edition', 'textbook_isbn', 'item_title',
-                'item_condition', 'item_price', 'item_details'
-            ])
+        if errors:
+            # Display all errors and don't submit
+            for error in errors:
+                flask.flash(error)
         else:
-            hidden = helpers.generate_hidden_form_elements([
-                'textbook_id', 'textbook_edition', 'textbook_isbn',
-                'item_title', 'item_condition', 'item_price', 'item_details'
-            ])
-        hidden.append(['prev_page', page])
+            if is_textbook and not textbook_id:
+                item['textbook_id'] = helpers.add_textbook(
+                    item['textbook_title'], item['textbook_author'])
+            if editing:
+                helpers.update_current_listing(item_id, item)
+                flask.flash('Updated!')
+            else:
+                item['user_id'] = get_user_id(username)
+                item_id = helpers.create_new_listing(item)
+                flask.flash('Posted!')
+            return flask.redirect(flask.url_for('.view_item', item_id=item_id))
 
-        return helpers.render_with_top_marketplace_bar(
-            'sell/sell_2.html',
-            page=page,
-            state=state,
-            cat_title=cat_title,
-            stored=stored,
-            errors=errors,
-            hidden=hidden)
+    # Otherwise, they have not submitted anything, so render the form
+    item['images'] += [''] * (MAX_IMAGES - len(item['images']))
 
-    elif page == 3:
-
-        for field in stored_fields:
-            if field == "textbook_id" and cat_title == "Textbooks":
-                # we also want to put textbook_title and textbook_author in stored,
-                # but they won't be in request.form
-                # so we get them here
-                textbook_id = flask.request.form["textbook_id"]
-                textbook_info = helpers.get_table_list_data(
-                    "marketplace_textbooks",
-                    ["textbook_title",
-                     "textbook_author"], {"textbook_id": textbook_id})
-                (stored["textbook_title"],
-                 stored["textbook_author"]) = textbook_info[0]
-            if field in flask.request.form:
-                stored[field] = flask.request.form[field]
-
-        # generate the hidden values
-        hidden = []
-        if cat_title == 'Textbooks':
-            hidden = helpers.generate_hidden_form_elements(['item_title'])
-        else:
-            hidden = helpers.generate_hidden_form_elements(
-                ['textbook_id', 'textbook_edition', 'textbook_isbn'])
-        hidden.append(['prev_page', page])
-        return helpers.render_with_top_marketplace_bar(
-            'sell/sell_3.html',
-            page=page,
-            state=state,
-            cat_title=cat_title,
-            stored=stored,
-            hidden=hidden)
-
-    elif page == 4:
-        for field in stored_fields:
-            if field == "textbook_id" and cat_title == "Textbooks":
-                # we also want to put textbook_title and textbook_author in stored,
-                # but they won't be in request.form
-                # so we get them here
-                textbook_id = flask.request.form["textbook_id"]
-                textbook_info = helpers.get_table_list_data(
-                    "marketplace_textbooks",
-                    ["textbook_title",
-                     "textbook_author"], {"textbook_id": textbook_id})
-                # get_table_list_data returns a list of lists, so grab the inner list using [0]
-                (stored["textbook_title"],
-                 stored["textbook_author"]) = textbook_info[0]
-            if field in flask.request.form:
-                stored[field] = flask.request.form[field]
-
-        stored[
-            "user_id"] = 1  # TODO: once logins and that sort of stuff works, get the actual user id
-        # if we are creating a new item listing, insert it into the database.
-        # otherwise, if we are editing an item that already exists, we need
-        # to update the listing.
-        stored["cat_title"] = cat_title
-        if (state == "new"):
-            result = helpers.create_new_listing(stored)
-        else:
-            # TODO
-            result = helpers.update_current_listing(item_id, stored)
-
-        return helpers.render_with_top_marketplace_bar(
-            'sell/sell_4.html', result=result)
-
-
-@blueprint.route('/1/marketplace_items')
-def get_marketplace_items_list():
-    """GET /1/marketplace_items/"""
-
-    # Create a dict of the passed in attributes which are filterable
-    filterable_attrs = [
-        "item_id", "cat_id", "user_id", "item_title", "item_details",
-        "item_images", "item_condition", "item_price", "item_timestamp",
-        "item_active", "textbook_id", "textbook_isbn", "textbook_edition"
-    ]
-    attrs = {
-        tup: flask.request.args[tup]
-        for tup in flask.request.args if tup in filterable_attrs
-    }
-    # Get the fields to return if they were passed in
-    fields = None
-    if "fields" in flask.request.args:
-        fields = [f.strip() for f in flask.request.args["fields"].split(',')]
-
-    return json.dumps(
-        helpers.get_marketplace_items_list_data(fields=fields, attrs=attrs))
+    categories = helpers.table_fetch('marketplace_categories')
+    textbooks_cat, = (cat['cat_id'] for cat in categories
+                      if cat['cat_title'] == 'Textbooks')
+    textbooks = helpers.table_fetch('marketplace_textbooks')
+    return helpers.render_with_top_marketplace_bar(
+        'sell.html',
+        state=state,
+        item_id=item_id,
+        item=item,
+        MAX_IMAGES=MAX_IMAGES,
+        imgur_id=flask.current_app.config['IMGUR_API']['id'],
+        categories=categories,
+        textbooks=textbooks,
+        textbooks_cat=textbooks_cat,
+        conditions=CONDITIONS)
