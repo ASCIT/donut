@@ -48,8 +48,8 @@ INSERT INTO members(
     '203'
 );
 INSERT INTO members(uid, last_name, first_name, email) VALUES
-    ('2045251', 'Yu', 'Sean', 'ssyu@caltech.edu');
-
+    ('2045251', 'Yu', 'Sean', 'ssyu@caltech.edu'),
+    ('2077933', 'Lin', 'Rachel', 'rlin@caltech.edu');
 
 INSERT INTO member_options(user_id, option_id, option_type) VALUES
     (3, 1, 'Major'),
@@ -69,10 +69,11 @@ INSERT INTO users(user_id, username, password_hash) VALUES
     (1, "dqu", ""),
     (2, "reng", ""),
     (3, "csander", ""),
-    (4, "ruddock_pres", "");
+    (4, "ruddock_pres", ""),
+    (5, "rlin", "");
 
 INSERT INTO groups(group_id, group_name, type, newsgroups, anyone_can_send) VALUES
-    (1, 'Donut Devteam', '', 1, 0),
+    (1, 'Donut Devteam', '', 1, 1),
     (2, 'Ruddock House', 'house', 0, 0),
     (3, 'IHC', 'committee', 1, 0);
 
@@ -89,8 +90,8 @@ INSERT INTO position_holders(pos_id, user_id) VALUES
     (3, 3),
     (4, 4),
     (4, 2),
-    (5, 4);
-
+    (5, 4),
+    (5, 5);
 
 INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES
     (4, 5);

@@ -3,6 +3,7 @@ import flask
 import smtplib
 from donut.modules.core.helpers import get_name_and_email
 
+
 def get_past_messages(group_id, limit=5):
     """Returns a list of past sent messages"""
 
@@ -14,6 +15,7 @@ def get_past_messages(group_id, limit=5):
         cursor.execute(query, (group_id, limit))
         return cursor.fetchall()
 
+
 def get_newsgroups():
     """Gets all newsgroups."""
 
@@ -24,6 +26,7 @@ def get_newsgroups():
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
+
 
 def get_my_newsgroups(user_id):
     """Gets groups user is a member of."""
@@ -38,6 +41,7 @@ def get_my_newsgroups(user_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, user_id)
         return cursor.fetchall()
+
 
 def get_can_send_groups(user_id):
     """Gets groups that user is allowed to post to."""
@@ -59,6 +63,7 @@ def get_can_send_groups(user_id):
         cursor.execute(query, user_id)
         return cursor.fetchall()
 
+
 def get_user_actions(user_id, group_id):
     """Gets allowed actions for user."""
 
@@ -74,6 +79,7 @@ def get_user_actions(user_id, group_id):
         cursor.execute(query, (user_id, group_id))
         return cursor.fetchone()
 
+
 def apply_subscription(user_id, group_id):
     '''
     Inserts into groups table with the position "Applicant"
@@ -81,9 +87,10 @@ def apply_subscription(user_id, group_id):
     query = """
     INSERT INTO group_applications(group_id, user_id)
     VALUES (%s, %s) ON DUPLICATE KEY update user_id=user_id
-    """    
+    """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, user_id))
+
 
 def unsubscribe(user_id, group_id):
     if not user_id:
@@ -97,6 +104,7 @@ def unsubscribe(user_id, group_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, user_id, group_id))
 
+
 def get_applications(group_id):
     '''
     Selects all applicants to a newgroups 
@@ -108,26 +116,28 @@ def get_applications(group_id):
         cursor.execute(query, (group_id))
         res = cursor.fetchall()
     for i in res:
-        (name, email) = get_name_and_email(i['user_id'])
-        i['name'] = name
-        i['email'] = email
+        data = get_name_and_email(i['user_id'])
+        i['name'] = data['full_name']
+        i['email'] = data['email']
     return res
+
 
 def remove_application(user_id, group_id):
     '''
     Admin has denied a person for their newgroup membership. 
     '''
     query = """
-    DELETE FROM group_application 
+    DELETE FROM group_applications 
     WHERE user_id = %s AND group_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, group_id))
-    
-def send_email(data):
-   """Sends email to newsgroup."""
 
-   query = """
+
+def send_email(data):
+    """Sends email to newsgroup."""
+
+    query = """
    SELECT DISTINCT members.email
    FROM positions p 
    LEFT JOIN position_relations pr ON p.pos_id=pr.pos_id_to
@@ -136,22 +146,20 @@ def send_email(data):
    NATURAL JOIN members
    WHERE group_id=%s AND p.receive=1
    """
-   emails = None
-   with flask.g.pymysql_db.cursor() as cursor:
-       cursor.execute(query, data['group'])
-       emails = [item['email'] for item in cursor.fetchall()]
-   if not emails:
-       return True
-   try:
-       email_utils.newsgroup_send_email(
-               emails, 
-               data['group_name'],
-               data['poster'],
-               data['subject'], 
-               data['msg'])
-       return True
-   except smtplib.SMTPException:
-       return False
+    emails = None
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, data['group'])
+        emails = [item['email'] for item in cursor.fetchall()]
+    if not emails:
+        return True
+    try:
+        email_utils.newsgroup_send_email(emails, data['group_name'],
+                                         data['poster'], data['subject'],
+                                         data['msg'])
+        return True
+    except smtplib.SMTPException:
+        return False
+
 
 def insert_email(user_id, data):
     """Insert email into db."""
@@ -162,8 +170,9 @@ def insert_email(user_id, data):
     VALUES (%s, %s, %s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
-       cursor.execute(query, (data['group'], data['subject'], 
-           data['msg'], user_id, data['poster']))
+        cursor.execute(query, (data['group'], data['subject'], data['msg'],
+                               user_id, data['poster']))
+
 
 def get_post(post_id):
     query = """
@@ -173,8 +182,9 @@ def get_post(post_id):
     WHERE newsgroup_post_id=%s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-       cursor.execute(query, post_id)
-       return cursor.fetchone()
+        cursor.execute(query, post_id)
+        return cursor.fetchone()
+
 
 def get_owners(group_id):
     """Get users with control access to group."""
@@ -188,6 +198,7 @@ def get_owners(group_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, group_id)
         return cursor.fetchall()
+
 
 def get_my_positions(group_id, user_id):
     """Get positions user holds in a group."""
