@@ -160,3 +160,22 @@ def set_member_field(user_id, field, value):
     query = 'UPDATE members SET `' + field + '` = %s WHERE user_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [value, user_id])
+
+
+def get_news():
+    query = 'SELECT * FROM news ORDER BY news_id DESC'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query)
+        return cursor.fetchall()
+
+
+def add_news(news):
+    query = 'INSERT INTO news(news_text) VALUES (%s)'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, news)
+
+
+def delete_news(news_id):
+    query = 'DELETE FROM news WHERE news_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, news_id)
