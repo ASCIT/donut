@@ -2,7 +2,7 @@ from donut import email_utils
 import flask
 import smtplib
 from donut.modules.core.helpers import get_name_and_email
-
+from donut.modules.groups import helpers as groups
 
 def get_past_messages(group_id, limit=5):
     """Returns a list of past sent messages"""
@@ -28,37 +28,24 @@ def get_newsgroups():
         return cursor.fetchall()
 
 
-def get_my_newsgroups(user_id):
-    """Gets groups user is a member of."""
+def get_my_newsgroups(user_id, send=False):
+    """Gets groups user is a member of (includes indirectly).
+    If send is true, only gets newsgroups user can send to
+    """
 
-    query = '''
-    SELECT DISTINCT group_name, group_id 
-    FROM position_holders NATURAL JOIN positions
-    NATURAL JOIN groups
-    WHERE user_id=%s
-    AND groups.newsgroups=1
-    '''
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, user_id)
-        return cursor.fetchall()
-
-
-def get_can_send_groups(user_id):
-    """Gets groups that user is allowed to post to."""
-
-    query = '''
-    SELECT DISTINCT group_name, group_id
-    FROM groups NATURAL JOIN positions
-    NATURAL JOIN position_holders
-    WHERE user_id=%s 
-    AND groups.newsgroups=1
-    AND positions.send=1
-    UNION DISTINCT
-    SELECT group_name, group_id
-    FROM groups 
-    WHERE groups.newsgroups=1
-    AND groups.anyone_can_send=1
-    '''
+    query = '''SELECT DISTINCT g.group_name, g.group_id
+    FROM positions p LEFT JOIN position_relations pr
+    ON p.pos_id=pr.pos_id_to
+    INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR
+    pr.pos_id_from=ph.pos_id
+    INNER JOIN groups g ON p.group_id=g.group_id
+    WHERE ph.user_id=%s AND g.newsgroups=1'''
+    if send:
+        query += ''' AND p.send=1 
+        UNION DISTINCT SELECT group_name, group_id
+        FROM groups 
+        WHERE groups.newsgroups=1
+        AND groups.anyone_can_send=1'''
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, user_id)
         return cursor.fetchall()
@@ -71,10 +58,11 @@ def get_user_actions(user_id, group_id):
         return None
     query = """
     SELECT p.send AS send, p.control AS control, p.receive AS receive
-    FROM groups NATURAL JOIN positions p 
-    NATURAL JOIN position_holders
-    WHERE user_id=%s AND groups.group_id=%s
-    """
+    FROM positions p LEFT JOIN position_relations pr
+    ON p.pos_id=pr.pos_id_to
+    INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR
+    pr.pos_id_from=ph.pos_id
+    WHERE ph.user_id=%s AND p.group_id=%s"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, group_id))
         return cursor.fetchone()
@@ -96,11 +84,16 @@ def unsubscribe(user_id, group_id):
     if not user_id:
         return None
     query = """
-    DELETE FROM position_holders 
+    UPDATE position_holders 
+    SET receive = 0
     WHERE user_id = %s AND pos_id IN (
-    SELECT pos_id FROM positions NATURAL JOIN 
-    position_holders WHERE user_id = %s AND group_id = %s)
+    SELECT p.pos_id FROM positions p LEFT JOIN position_relations pr
+    ON p.pos_id=pr.pos_id_to
+    INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR
+    pr.pos_id_from=ph.pos_id
+    WHERE ph.user_id=%s AND p.group_id=%s)
     """
+    query += POSITIONS_QUERY + ')'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, user_id, group_id))
 
@@ -144,18 +137,16 @@ def send_email(data):
    INNER JOIN position_holders ph 
    ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
    NATURAL JOIN members
-   WHERE group_id=%s AND p.receive=1
+   WHERE group_id=%s AND p.receive=1 AND ph.receive=1
    """
     emails = None
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, data['group'])
-        emails = [item['email'] for item in cursor.fetchall()]
+        emails = ','.join([item['email'] for item in cursor.fetchall()])
     if not emails:
         return True
     try:
-        email_utils.newsgroup_send_email(emails, data['group_name'],
-                                         data['poster'], data['subject'],
-                                         data['msg'])
+        email_utils.send_email(emails, data['msg'], data['subject'], group=data['group'])
         return True
     except smtplib.SMTPException:
         return False
@@ -200,8 +191,8 @@ def get_owners(group_id):
         return cursor.fetchall()
 
 
-def get_my_positions(group_id, user_id):
-    """Get positions user holds in a group."""
+def get_posting_positions(group_id, user_id):
+    """Get positions user can send as in a group."""
 
     query = """
     SELECT pos_name, pos_id 

@@ -16,6 +16,7 @@ DROP VIEW IF EXISTS members_full_name;
 DROP TABLE IF EXISTS members;
 DROP TABLE IF EXISTS buildings;
 DROP TABLE IF EXISTS newsgroup_posts;
+DROP TABLE IF EXISTS group_applications;
 
 -- Residential Buildings
 CREATE TABLE buildings (
@@ -173,6 +174,7 @@ CREATE TABLE position_holders (
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
+    receive    BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
     PRIMARY KEY (hold_id),
     FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
@@ -214,11 +216,9 @@ CREATE TABLE news (
     PRIMARY KEY (news_id)
 );
 CREATE TABLE group_applications (
-    group_app_id    INT NOT NULL AUTO_INCREMENT,
     user_id         INT NOT NULL, 
     group_id        INT NOT NULL, 
-    PRIMARY KEY (group_app_id),
+    PRIMARY KEY (user_id, group_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
-    FOREIGN KEY (group_id) REFERENCES groups(group_id),
-    UNIQUE(user_id, group_id)
+    FOREIGN KEY (group_id) REFERENCES groups(group_id)
 )

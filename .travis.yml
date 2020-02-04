@@ -2,8 +2,6 @@ language: python
 python:
   - "3.6"
 dist: bionic
-=======
-dist: bionic 
 services: mysql
 before_install:
   - openssl aes-256-cbc -K $encrypted_aa0580535ea1_key -iv $encrypted_aa0580535ea1_iv -in calendar.json.enc -out calendar.json -d

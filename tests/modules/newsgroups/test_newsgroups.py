@@ -22,7 +22,7 @@ def test_get_my_newsgroups(client):
 
 
 def test_get_can_send_groups(client):
-    assert helpers.get_can_send_groups(5) == [{
+    assert helpers.get_my_newsgroups(5, True) == [{
         'group_name': 'IHC',
         'group_id': 3
     }, {
@@ -30,18 +30,18 @@ def test_get_can_send_groups(client):
         'group_id': 1
     }]
 
-    assert helpers.get_can_send_groups(100) == [{
+    assert helpers.get_my_newsgroups(100, True) == [{
         'group_name': 'Donut Devteam',
         'group_id': 1
     }]
 
 
 def test_get_my_positions(client):
-    assert helpers.get_my_positions(3, 5) == [{
+    assert helpers.get_posting_positions(3, 5) == [{
         'pos_name': 'Member',
         'pos_id': 5
     }]
-    assert helpers.get_my_positions(3, 1) == ()
+    assert helpers.get_posting_positions(3, 1) == ()
 
 
 def test_get_user_actions(client):
@@ -79,7 +79,6 @@ def test_email_newsgroup(client):
 def test_subscriptions(client):
     helpers.apply_subscription(5, 1)
     assert helpers.get_applications(1) == [{
-        'group_app_id': 1,
         'user_id': 5,
         'group_id': 1,
         'name': 'Rachel Lin',

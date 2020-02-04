@@ -2,6 +2,7 @@ import flask
 from flask import jsonify
 from donut.modules.groups import helpers as groups
 from donut.modules.account import helpers as account
+from donut.modules.core.helpers import get_name_and_email
 from donut import auth_utils
 
 from . import blueprint, helpers
@@ -25,7 +26,7 @@ def post(group_id=None):
         group_id = flask.request.form.get('group')
     return flask.render_template(
         'post.html',
-        groups=helpers.get_can_send_groups(user_id),
+        groups=helpers.get_my_newsgroups(user_id, True),
         group_selected=group_id)
 
 
@@ -41,8 +42,7 @@ def post_message():
     data['group_name'] = groups.get_group_data(data['group'],
                                                ['group_name'])['group_name']
     if not data['poster']:
-        user = account.get_user_data(user_id)
-        data['poster'] = ' '.join([user['first_name'], user['last_name']])
+        data['poster'] = get_name_and_email(user_id)['full_name'] 
     else:
         data['poster'] = ' '.join((data['group_name'], data['poster']))
     if helpers.send_email(data):
@@ -131,14 +131,14 @@ def all_posts(group_id):
 
 @blueprint.route('/_delete_application')
 def delete_application(user_id, group_id):
-    #TODO
+    helpers.remove_application(user_id, group_id)
     return flask.redirect(
         flask.url_for('newsgroups.view_group', group_id=group_id))
 
 
 @blueprint.route('/newsgroups/positions/<int:group>')
-def my_positions(group):
+def posting_positions(group):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    return flask.jsonify(helpers.get_my_positions(group, user_id))
+    return flask.jsonify(helpers.get_posting_positions(group, user_id))
