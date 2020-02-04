@@ -59,6 +59,16 @@ def set_event_dict(db_event):
     db_event['organizer'] = {'displayName': db_event['calendar_tag']}
 
 
+def parse_time(time_str):
+    # We need time to be in the format of  2020-02-03 03:33:00
+    # However, google returns  2020-02-03T03:33:00-08:00
+    # since time zone is set already, i think getting rid o fhte -08:00
+    # is fine.
+    if time_str.count('-') > 2:
+        time_str = time_str[:time_str.rfind('-')]
+    return time_str
+
+
 def get_events_backup(begin_month=datetime.datetime.now().month,
                       begin_year=datetime.datetime.now().year,
                       end_month=datetime.datetime.now().month,
@@ -198,6 +208,8 @@ def sync_data(begin_month=datetime.datetime.now().month,
                 'start'] else i['start']['date']
             end_time = i['end']['dateTime'] if 'dateTime' in i['end'] else i[
                 'end']['date']
+            end_time = parse_time(end_time)
+            begin_time = parse_time(begin_time)
             insert_event_to_db(calendar_tag, google_event_id, event_summary,
                                event_description, event_location, begin_time,
                                end_time)
