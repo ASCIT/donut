@@ -9,11 +9,7 @@ from zipfile import ZipFile
 
 from donut.pymysql_connection import make_db
 
-EXTENSIONS = {
-    'jpg': 'jpg',
-    'jpeg': 'jpg',
-    'png': 'png'
-}
+EXTENSIONS = {'jpg': 'jpg', 'jpeg': 'jpg', 'png': 'png'}
 GET_USER_ID_QUERY = 'SELECT user_id FROM members WHERE uid = %s'
 INSERT_QUERY = """
     INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s)

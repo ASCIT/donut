@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Imports the Registrar Office"s exports of current students for the
+Imports the Registrar Office's exports of current students for the
 year. This adds in new students for the moment, and does not remove
 graduated students.
 
