@@ -88,9 +88,9 @@ insert_member_query = """
         country
     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON DUPLICATE KEY UPDATE
-        msc = msc,
-        preferred_name = preferred_name,
-        graduation_year = graduation_year
+        msc = VALUES(msc),
+        preferred_name = VALUES(preferred_name),
+        graduation_year = VALUES(graduation_year)
 """
 get_user_id_query = "SELECT user_id FROM members WHERE uid = %s"
 add_option_query = "INSERT INTO options(option_name) VALUES (%s)"
