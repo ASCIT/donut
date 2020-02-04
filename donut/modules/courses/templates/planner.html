@@ -46,7 +46,7 @@
   <div class='panel panel-primary' id='requirements-modal'>
     <div class='panel-heading'>
       <div class='panel-title' style="display: inline;">Core Requirements</div>
-        <button class='btn btn-danger' style="position: absolute; right: 5px; top: 5px; background-color: #444; border: none; padding-left: 10px; padding-right: 10px; padding-top: 0px; padding-bottom: 0px; font-size: 24px;" id='close-requirements'>
+        <button class='btn btn-danger' id='close-requirements'>
 		×
         </button>
     </div>
@@ -58,7 +58,7 @@
 
       Ma 1abc
       <div class='progress'>
-        <div class='progress-bar progress-bar-success' id='ma1'></div>
+         <div class='progress-bar progress-bar-success' id='ma1'></div>
       </div>
 
       Ph 1abc
@@ -179,6 +179,18 @@
     }
     .list-group-item {
       margin-bottom: 1px;
+    }
+    #close-requirements {
+      position: absolute; 
+      right: 5px; 
+      top: 5px; 
+      background-color: #444; 
+      border: none; 
+      padding-left: 10px; 
+      padding-right: 10px; 
+      padding-top: 0px; 
+      padding-bottom: 0px; 
+      font-size: 24px;
     }
   </style>
 {% endblock %}

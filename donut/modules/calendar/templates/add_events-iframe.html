@@ -7,14 +7,14 @@
          <input type="text" name="name" class="form-control" required />
         </div>
         <div class="form-group">
-            <label for="tag" class="required">Tag:</label>
+            <label for="tag" class="required spread-label">Tag:</label>
 
             {% for item in permissions if permissions[item] and item != 'Any'%}
                 <label class="checkbox-inline"><input type="checkbox" name="tag" value="{{ item }}">{{ item }}</label>
             {% endfor %}
         </div>
           <div class="form-group">
-		    <label for="date" class="required">Date</label>
+		    <label for="date" class="required spread-label">Start Date:</label>
               <input
                 type="date"
                 class="form-control"
@@ -24,7 +24,7 @@
                 {% if date is not none %}value={{ date }}{% endif %}
               />
           </div>
-          <label for="start_hour" class="required">Start time</label>
+          <label for="start_hour" class="required spread-label">Start Time:</label>
 		  <div class="input-group">
             <input
                 type="number"
@@ -52,7 +52,7 @@
             </span>
           </div>
           <div class="form-group">
-            <label for="date" class="required">End Date </label>
+            <label for="date" class="required spread-label">End Date:</label>
             <input
                 type="date"
                 class="form-control"
@@ -62,7 +62,7 @@
                 {% if date is not none %}value={{ date }}{% endif %}
             />
           </div>
-          <label for="end_hour" class="required">Start time</label>
+          <label for="end_hour" class="required spread-label">End Time:</label>
           <div class="input-group">
             <input
                 type="number"
@@ -90,16 +90,16 @@
             </span>
           </div>
           <div class="form-group">
-            <label for="location">Location:</label>
+            <label for="location" class="spread-label">Location:</label>
             <input type="text" name="location" class="form-control"/>
           </div>
         <div class="form-group">
-            <label for="description" class="required">Description:</label>
+            <label for="description" class="required spread-label">Description:</label>
             <textarea class="form-control" name="description" rows="5" required ></textarea>
         </div>
       <div class="row">
         <div class="text-center">
-          <input class="btn" type="submit" value="Submit" />
+          <input class="btn btn-primary" type="submit" value="Submit" />
         </div>
       </div>
     </form>

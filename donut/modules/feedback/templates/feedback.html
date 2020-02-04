@@ -31,13 +31,13 @@
                 </tr>
                 <tr>
                   <div class="form-group">
-                    <td class="feedback">Subject*: </td>
+                    <td class="feedback required">Subject: </td>
                     <td class="feedback"><input type="text" name="subject" class="form-control" required /></td>
                   </div>
                 </tr>
                 <tr>
                   <div class="form-group">
-                    <td class="feedback">Feedback*: </td>
+			  <td class="feedback required">Feedback: </td>
                     <td class="feedback"><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
                   </div>
                 </tr>
@@ -55,4 +55,14 @@
 
 </div>
 
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <style>
+    .required:after {
+      content: "*";
+      color: red;
+    }
+  </style>
 {% endblock %}
