@@ -15,6 +15,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 def read_page(url):
     return editor_helpers.read_markdown(url)
 
+
 def allowed_file(filename):
     '''
     Checks for allowed file extensions.

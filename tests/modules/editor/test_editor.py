@@ -27,10 +27,15 @@ def test_text_editor_page(client):
         sess['username'] = 'dqu'
     with app.test_request_context():
         flask.session['username'] = 'dqu'
+        helpers.create_page_in_database(
+            "Some really really really interesting title",
+            "nothing to see here")
         helpers.change_lock_status(
             "Some really really really interesting title", False)
         assert not helpers.is_locked(
             "Some really really really interesting title")
+        helpers.create_page_in_database("Some less interesting title",
+                                        "or is there")
         helpers.change_lock_status("Some less interesting title", True)
         assert helpers.is_locked("Some less interesting title")
         helpers.change_lock_status("default", True, default=True)
@@ -45,16 +50,8 @@ def test_text_editor_page(client):
 
 
 def test_path_related_funciton(client):
-    helpers.remove_link("TEST TITLE")
-    helpers.remove_link("ANOTHER Title")
-    links = helpers.get_links()
-    titles = [title for title, _ in links.items()]
-    assert "TEST TITLE" not in ' '.join(titles)
-    assert "ANOTHER Title" not in ' '.join(titles)
 
-    helpers.write_markdown("BLAHBLAH", "TEST TITLE")
-    root = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config["UPLOAD_WEBPAGES"])
+    helpers.create_page_in_database("TEST_TITLE", "BLAHBLAH")
     assert helpers.get_links() != []
 
     assert helpers.check_duplicate("TEST TITLE")
@@ -62,7 +59,7 @@ def test_path_related_funciton(client):
 
     links = helpers.get_links()
     titles = [title for title, _ in links.items()]
-    assert "TEST TITLE" in ' '.join(titles)
+    assert "TEST_TITLE" in ' '.join(titles)
     with app.test_request_context():
         flask.session['username'] = 'dqu'
         helpers.change_lock_status("TEST TITLE", True)
@@ -70,17 +67,16 @@ def test_path_related_funciton(client):
 
         helpers.change_lock_status("TEST TITLE", False)
         assert not helpers.is_locked("TEST TITLE")
-
     client.get(
         flask.url_for('uploads.display', url="TEST_TITLE")).status_code == 200
     helpers.rename_title('TEST_TITLE', 'ANOTHER_Title')
 
     links = helpers.get_links()
     titles = [title for title, _ in links.items()]
-    assert "TEST TITLE" not in ' '.join(titles)
-    assert "ANOTHER Title" in ' '.join(titles)
+    assert "TEST_TITLE" not in ' '.join(titles)
+    assert "ANOTHER_Title" in ' '.join(titles)
 
     client.get(flask.url_for('uploads.display',
                              url="ANOTHER Title")).status_code == 200
     assert "BLAHBLAH" == helpers.read_markdown('ANOTHER_Title')
-    helpers.remove_link("ANOTHER_Title")
+    helpers.remove_file_from_db("ANOTHER_Title")

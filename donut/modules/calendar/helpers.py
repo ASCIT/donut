@@ -134,7 +134,7 @@ def insert_event_to_db(calendar_tag,
             event_summary, event_description, event_location, begin_time,
             end_time
         ])
-    print("ok?")
+
 
 def delete_event_from_db(google_id):
     '''

@@ -339,6 +339,7 @@ def is_user_in_group(user_id, group_id):
         cursor.execute(query, [user_id, group_id])
         return cursor.fetchone() is not None
 
+
 def get_group_id(group_name):
     """
     Returns the group_id for a group 
@@ -350,4 +351,3 @@ def get_group_id(group_name):
         cursor.execute(query, group_name)
     res = cursor.fetchone()
     return None if res is None else res['group_id']
-
