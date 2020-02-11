@@ -1,5 +1,6 @@
 cov-core==1.15.0
 coverage==3.7.1
+werkzeug==0.16.*
 Flask==1.0.2
 flask_bootstrap==3.3.7.0
 itsdangerous==0.24
