@@ -42,7 +42,7 @@ def post_message():
     data['group_name'] = groups.get_group_data(data['group'],
                                                ['group_name'])['group_name']
     if not data['poster']:
-        data['poster'] = get_name_and_email(user_id)['full_name'] 
+        data['poster'] = get_name_and_email(user_id)['full_name']
     else:
         data['poster'] = ' '.join((data['group_name'], data['poster']))
     if helpers.send_email(data):

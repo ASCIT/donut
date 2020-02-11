@@ -23,9 +23,13 @@
 {% if group['visible'] %}
 <h4> Anyone can learn that this group exists. </h4>
 {% endif %}
-<h1> Receive: {{ actions["receive"] }} </h1>
-<h1> Control: {{ actions["control"] }} </h1>
-{% if actions["control"] %}
+{% if actions["receive"] %}
+<h4> You are subscribed. </h4>
+{% else %} 
+<h4> You are not subscribed. </h4>
+{% endif %}
+{% if actions["control"] %} 
+<h4> You have admin control. </h4>
   <h4> Applications </h4>
   <table style="width:100%">
       <tr>
@@ -39,9 +43,9 @@
           <td> {{applicant.email}} </td>
           <td> <a href={{ url_for('campus_positions')}}>Add to Group</a> </td>
           <td> <a href={{ url_for('newsgroups.delete_application', user_id=applicant.user_id, group_id=group['group_id']) }}>Dismiss</a> </td>
-         </tr>
+        </tr>
       {% endfor %}
-    </table>
+  </table>
 {% endif %}
 {% if actions['send'] or group['anyone_can_send'] %}
 <br>
@@ -49,23 +53,23 @@
 {% endif %}
 <h2> Group Owners </h2>
 {% for owner in owners %}
-<a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.pos_name }}</a><br>
+  <a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.pos_name }}</a><br>
 {% endfor %}
 <h4> Recent Messages </h4>
-    <table style="width:100%">
-  <tr>
-    <th>Date</th>
-    <th>From</th>
-    <th>Subject</th>
-  </tr>
-{% for message in messages %}
-<tr>
-          <td> {{ message.time_sent }}</td>
-          <td> <a href={{ url_for('directory_search.view_user', user_id=message.user_id) }}>{{ message.post_as }}</a> </td>
-	  <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
-</tr>
-{% endfor %}
-    </table>
+  <table style="width:100%">
+    <tr>
+      <th>Date</th>
+      <th>From</th>
+      <th>Subject</th>
+    </tr>
+  {% for message in messages %}
+    <tr>
+       <td> {{ message.time_sent }}</td>
+       <td> <a href={{ url_for('directory_search.view_user', user_id=message.user_id) }}>{{ message.post_as }}</a> </td>
+       <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
+    </tr>
+  {% endfor %}
+  </table>
 <a href={{ url_for('newsgroups.all_posts', group_id=group['group_id']) }}>View All</a>
 {% endif %}
 {% endblock %}

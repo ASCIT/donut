@@ -26,13 +26,17 @@ def test_get_can_send_groups(client):
         'group_name': 'IHC',
         'group_id': 3
     }, {
-        'group_name': 'Donut Devteam',
-        'group_id': 1
+        'group_name':
+        'Donut Devteam',
+        'group_id':
+        1
     }]
 
     assert helpers.get_my_newsgroups(100, True) == [{
-        'group_name': 'Donut Devteam',
-        'group_id': 1
+        'group_name':
+        'Donut Devteam',
+        'group_id':
+        1
     }]
 
 

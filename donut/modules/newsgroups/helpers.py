@@ -4,6 +4,7 @@ import smtplib
 from donut.modules.core.helpers import get_name_and_email
 from donut.modules.groups import helpers as groups
 
+
 def get_past_messages(group_id, limit=5):
     """Returns a list of past sent messages"""
 
@@ -146,7 +147,8 @@ def send_email(data):
     if not emails:
         return True
     try:
-        email_utils.send_email(emails, data['msg'], data['subject'], group=data['group'])
+        email_utils.send_email(
+            emails, data['msg'], data['subject'], group=data['group'])
         return True
     except smtplib.SMTPException:
         return False

@@ -33,6 +33,7 @@ app.register_blueprint(uploads.blueprint)
 app.register_blueprint(voting.blueprint)
 app.register_blueprint(newsgroups.blueprint)
 
+
 def init(environment_name):
     """Initializes the application with configuration variables and routes.
 
