@@ -47,7 +47,7 @@ CREATE TABLE members (
     address            VARCHAR(255) DEFAULT NULL,
     city               VARCHAR(64)  DEFAULT NULL,
     state              VARCHAR(64)  DEFAULT NULL,
-    zip                VARCHAR(9)   DEFAULT NULL,
+    zip                VARCHAR(10)  DEFAULT NULL,
     country            VARCHAR(64)  DEFAULT NULL,
     create_account_key CHAR(32)     DEFAULT NULL,
     PRIMARY KEY (user_id),

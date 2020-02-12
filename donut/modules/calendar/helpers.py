@@ -9,9 +9,10 @@ from google.oauth2 import service_account
 from donut.modules.calendar.permissions import calendar_permissions
 from donut import auth_utils
 import json
+from os import path
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = 'calendar.json'
+SERVICE_ACCOUNT_FILE = path.dirname(__file__) + '/../../../calendar.json'
 creds = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
@@ -75,18 +76,18 @@ def get_events_backup(begin_month=datetime.datetime.now().month,
                       end_year=datetime.datetime.now().year + 2,
                       all_data=False):
     '''
-    Gets events from our db. Backup from google calendars data. 
+    Gets events from our db. Backup from google calendars data.
     '''
     if 'username' not in flask.session:
         return []
     if all_data:
         query = """
-            SELECT * FROM calendar_events 
+            SELECT * FROM calendar_events
             ORDER BY begin_time
         """
     else:
         query = """
-            SELECT * FROM calendar_events 
+            SELECT * FROM calendar_events
             WHERE %s <= end_time AND begin_time <= %s
             ORDER BY begin_time
         """
@@ -113,16 +114,16 @@ def insert_event_to_db(calendar_tag,
                        end_time,
                        username=None):
     '''
-    Inserts events to our db. If the event already exists (by looking 
-    for the google id) then update. 
+    Inserts events to our db. If the event already exists (by looking
+    for the google id) then update.
     '''
     insert = '''
-        INSERT INTO calendar_events (user_id, calendar_tag, 
-        google_event_id, summary, description, 
+        INSERT INTO calendar_events (user_id, calendar_tag,
+        google_event_id, summary, description,
         location, begin_time, end_time) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE
-        user_id = VALUES(user_id), 
-        summary=VALUES(summary), 
+        user_id = VALUES(user_id),
+        summary=VALUES(summary),
         description=VALUES(description),
         location=VALUES(location),
         begin_time=VALUES(begin_time),
@@ -156,18 +157,18 @@ def sync_data(begin_month=datetime.datetime.now().month,
     """
     Syncs data from google calendars to our own DB. The user
     may edit things on their google calendars page, and therefore
-    our db data may not always be up to date with google's. 
-    Any changes to our db data is always also made to google's 
-    but not vice versa 
+    our db data may not always be up to date with google's.
+    Any changes to our db data is always also made to google's
+    but not vice versa
     This function is called manually, since always syncing data
     before serving the page may not be feasible --
     we have many calendars so every time we are requesting many
     requests. After about 2 reloads in ~<30 seconds, google starts
     throttling us and it will take upwards of minutes before either
-    timing out or the requests are finished. 
+    timing out or the requests are finished.
 
     This function syncs either a period or all data, if all_data is set
-    to true. 
+    to true.
     """
     if 'username' not in flask.session:
         return []
@@ -186,7 +187,7 @@ def sync_data(begin_month=datetime.datetime.now().month,
         # First, get the events from the database
         if all_data:
             query = """
-                    SELECT * FROM calendar_events 
+                    SELECT * FROM calendar_events
                     ORDER BY begin_time
                 """
             with flask.g.pymysql_db.cursor() as cursor:
@@ -231,7 +232,7 @@ def get_events(begin_month=datetime.datetime.now().month,
                end_year=datetime.datetime.now().year + 2,
                all_data=False):
     """
-    Gets events from the beginning to the end from google. 
+    Gets events from the beginning to the end from google.
     """
     if 'username' not in flask.session:
         return []
@@ -274,14 +275,14 @@ def add_event(name,
               location='',
               event_id=""):
     """
-    Adds or updates events. If we are updating the event, 
-    we need to have the event_id. 
+    Adds or updates events. If we are updating the event,
+    we need to have the event_id.
     name: name of event
     description: description of event
     calendar_tag: a list of calendar tags for an event. Only
         a single value for updates
     begin_time: in format YYYY-MM-DDThh:mm:00Z
-    end_time: as above. 
+    end_time: as above.
     update: bool for it we are adding events or updating them
     location: not required; location for event
     """
@@ -358,7 +359,7 @@ def share_calendar(calendars, email, permission_level):
 
             query = """
                 INSERT INTO calendar_logs (user_id, calendar_id, calendar_gmail, user_gmail, acl_id, request_time, request_permission) VALUES
-                (%s, %s, %s, %s, %s, NOW(), %s) 
+                (%s, %s, %s, %s, %s, NOW(), %s)
                 """
             with flask.g.pymysql_db.cursor() as cursor:
                 cursor.execute(
@@ -382,8 +383,8 @@ def delete(cal_event_id, cal_name):
 
 
 def get_permission():
-    ''' 
-    Returns permissions list related to calendars 
+    '''
+    Returns permissions list related to calendars
     '''
     perms = {}
     # If they have edit permissions on anything, the events pages and stuff
