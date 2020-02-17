@@ -1,7 +1,7 @@
 import flask
 from flask import jsonify
 from donut import app
-from donut.auth_utils import get_user_id
+from donut.auth_utils import get_user_id, is_admin
 from donut.constants import CONTACTS
 from donut.modules.core import helpers
 from donut.modules import groups
@@ -9,7 +9,8 @@ from donut.modules import groups
 
 @app.route('/')
 def home():
-    return flask.render_template('donut.html')
+    news = helpers.get_news()
+    return flask.render_template('donut.html', news=news, is_admin=is_admin())
 
 
 @app.route('/contact')
@@ -41,3 +42,23 @@ def campus_positions():
         approved_group_ids=approved_group_ids,
         approved_group_names=approved_group_names,
         all_positions=all_positions)
+
+
+@app.route('/news', methods=('POST', ))
+def add_news():
+    if not is_admin():
+        flask.abort(403)
+
+    news = flask.request.form.get('news')
+    if news:
+        helpers.add_news(news)
+    return flask.redirect(flask.url_for('.home'))
+
+
+@app.route('/news/<int:news_id>/delete', methods=('POST', ))
+def delete_news(news_id):
+    if not is_admin():
+        flask.abort(403)
+
+    helpers.delete_news(news_id)
+    return flask.redirect(flask.url_for('.home'))

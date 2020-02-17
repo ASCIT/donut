@@ -1,6 +1,7 @@
 donut/config.py
 donut/config_py3.py
 donut/modules/directory_search/utils/*.csv
+donut/modules/directory_search/utils/images.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -68,7 +69,7 @@ target/
 # Mac OSX
 .DS_Store
 
-# Files related to uploading	
+# Files related to uploading
 donut/modules/uploads/uploaded_files
 donut/modules/uploads/static/*.md
 
