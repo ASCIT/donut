@@ -101,8 +101,7 @@ def delete_page():
     if filename != None and helpers.check_edit_page_permission():
         helpers.remove_file_from_db(filename)
 
-    return flask.redirect(
-        flask.url_for('editor.page_list', subdir="all_pages"))
+    return flask.redirect(flask.url_for('editor.page_list'))
 
 
 @blueprint.route('/list_of_pages')

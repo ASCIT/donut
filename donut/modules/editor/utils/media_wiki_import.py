@@ -50,23 +50,14 @@ def format_text(text):
         text = text.replace(i, i.replace("=", "#"))
 
     # Find all links and replace them -- purposefully missing @
-    matches = re.findall(
-        r"\[[\&\~\?\%\+0-9a-zA-Z.\./\-_:\#\= ]* [\'0-9a-zA-Z.\./\-_:\# ]*\]",
-        text,
-        flags=0)
-    for i in matches:
-        link = i.replace("[", "").replace("]", "")
-        # External link
-        if re.match(r"https?://", link):
-            link_pieces = link.split(" ")
-            text = text.replace(i, '[' + " ".join(link_pieces[1:]).strip() +
-                                "]" + "(" + link_pieces[0].strip() + ")")
+    text = re.sub(
+        r"\[(https?://[\&\~\?\%\+0-9a-zA-Z.\./\-_:\#\=\+;,]*) ([^\|\]]*)\]",
+        r"[\2](\1)", text)
 
     # Donut's internal links
     matches = re.findall(
         r"\[\[[\%\+0-9a-zA-Z.\./\-_:\#\= ]*\|?[0-9a-zA-Z.\./\-_:\# ]*\]\]",
-        text,
-        flags=0)
+        text)
     for i in matches:
         link = i.replace("[", "").replace("]", "")
         link_piece = link.split("|")
@@ -78,28 +69,19 @@ def format_text(text):
         else:
             text = text.replace(i, '[' + link_piece[1].strip() + ']' + '(' +
                                 link_piece[0].strip().replace(" ", "_") + ')')
-    # Make bullet points
-    text = text.replace("*", "* ")
 
-    # Nested loops
-    text = text.replace("* * ", "    * ")
+    for i in range(4, 0, -1):
+        text = text.replace("*" * i, "\t" * (i - 1) + "* ")
 
     # Bolded first --> ''' -> **
-    text = text.replace("\'\'\'", "**")
+    text = text.replace("'''", "**")
 
     # Italics
-    text = text.replace("\'\'", "*")
-
-    # There's some css --- restore them
-    text = text.replace("style#", "style=")
+    text = text.replace("''", "*")
 
     # Reformat emails
-    matches = re.findall(r"\[mailto:[0-9a-zA-Z.\@ \'\-]*\]", text)
-    for i in matches:
-        link = i.replace("[", "").replace("]", "")
-        link_pieces = link.split(" ")
-        text = text.replace(i, '[' + link_pieces[1].strip() + "]" + "(" +
-                            link_pieces[0].strip() + ")")
+    text = re.sub(r"\[(mailto:[0-9a-zA-Z.\@'\-]*) ([^\]]*)\]", r"[\2](\1)",
+                  text)
 
     # Reformat the tables
     matches = re.findall(
@@ -125,6 +107,9 @@ def format_text(text):
     # Some people actually typed this out
     text = text.replace("<p>", "")
     text = text.replace("</p>", "")
+    # Get rid of table of contents settings
+    text = text.replace("__NOTOC__\n", "")
+
     text = text.encode()
 
     return text

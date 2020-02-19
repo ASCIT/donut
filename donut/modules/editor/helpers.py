@@ -4,7 +4,6 @@ import glob
 import re
 import pymysql.cursors
 from donut import auth_utils
-from donut.modules import groups
 from donut.modules.editor.edit_permission import EditPermission
 # In seconds
 TIMEOUT = 60 * 3
@@ -136,23 +135,6 @@ def get_links():
         for key in res
     }
     return results
-
-
-### TODO: this functino literally has no purpose but I need to remember to get rid of it.
-def remove_link(filename):
-    remove_file_from_db(filename)
-
-
-def get_glob(clean_links=True):
-    """
-    Grabs the list of files from a preset path. 
-    """
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_WEBPAGES'])
-    filenames = glob.glob(path + '/*')
-    if clean_links:
-        filenames = clean_file_names(path, filenames)
-    return (filenames, path)
 
 
 def clean_file_names(path, links):
