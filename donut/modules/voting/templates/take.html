@@ -44,7 +44,7 @@
   function addChoice() {
     var $this = $(this)
     var element = $this.closest('.element')
-    var chosenList = element.find('.chosen')
+    var chosenTable = element.find('.chosen')
     var userId = $this.attr('user-id')
     if (userId) { //a writein
       var choice = $this.find('p').text()
@@ -62,10 +62,10 @@
     var displayedChoice = $('<span>').addClass('choice-text').text(choice)
     if (choiceId) displayedChoice.attr('choice-id', choiceId)
     else if (userId) displayedChoice.attr('user-id', userId)
-    chosenList.append(
-      $('<li>').addClass('list-group-item').append(
+    chosenTable.append(
+      $('<tr>').append($('<td>').append(
         displayedChoice,
-        $('<div>').addClass('btn-group space-right').append(
+        $('<div>').addClass('btn-group vote-controls').append(
           $('<button>').addClass('btn btn-default').click(removeChoice(userId)).append(
             $('<span>').addClass('glyphicon glyphicon-minus')
           ),
@@ -76,37 +76,43 @@
             $('<span>').addClass('glyphicon glyphicon-triangle-bottom')
           )
         )
-      )
+      ))
     )
   }
   function removeChoice(writein) {
     return function() {
       var $this = $(this)
-      var listGroupItem = $this.closest('.list-group-item')
+      var rankCell = $this.closest('td')
+      var rank = rankCell.closest('tr')
       if (!writein) {
-        var displayedChoice = listGroupItem.find('span')
+        var displayedChoice = rankCell.find('span')
         $this.closest('.element').find('.choices')
           .prepend(candidateInput({ //add back to choices list
             choice: displayedChoice.text(),
             id: displayedChoice.attr('choice-id')
           }))
       }
-      listGroupItem.remove()
+      rankCell.remove()
+      if (rank.is(':empty')) rank.remove()
     }
   }
   function moveUp() {
     var $this = $(this)
-    var listGroupItem = $this.closest('.list-group-item')
-    var previousItem = listGroupItem.prev()
-    if (!previousItem.length) return
-    listGroupItem.insertBefore(previousItem)
+    var rankCell = $this.closest('td')
+    var rank = rankCell.closest('tr')
+    var previousRank = rank.prev()
+    if (!previousRank.length) previousRank = $('<tr>').insertBefore(rank)
+    previousRank.append(rankCell)
+    if (rank.is(':empty')) rank.remove()
   }
   function moveDown() {
     var $this = $(this)
-    var listGroupItem = $this.closest('.list-group-item')
-    var nextItem = listGroupItem.next()
-    if (!nextItem.length) return
-    listGroupItem.insertAfter(nextItem)
+    var rankCell = $this.closest('td')
+    var rank = rankCell.closest('tr')
+    var nextRank = rank.next()
+    if (!nextRank.length) nextRank = $('<tr>').insertAfter(rank)
+    nextRank.append(rankCell)
+    if (rank.is(':empty')) rank.remove()
   }
   function electedPositionChoice(input) {
     return $('<div>').addClass('form-group').append(
@@ -242,7 +248,7 @@
               choicesDiv,
               $('<div>').addClass('col-md-6').append(
                 $('<h5>').text('Chosen:'),
-                $('<ul>').addClass('list-group chosen')
+                $('<table>').addClass('table chosen')
               )
             )
           )
@@ -279,6 +285,12 @@
     button[user-id] > p { /* override jumbotron p styles */
       font-size: 15px;
       margin-bottom: 0;
+    }
+    .vote-controls {
+      padding-left: 10px;
+    }
+    .vote-controls button {
+      padding: 0;
     }
   </style>
 {% endblock %}
