@@ -15,23 +15,22 @@ from donut.modules.voting import helpers, routes, ranked_pairs
 # Ranked pairs
 def test_ranked_pairs():
     # Example taken from en.wikipedia.org/wiki/Ranked_pairs
-    MEMPHIS = 'Memphis'
-    NASHVILLE = 'Nashville'
-    CHATTANOOGA = 'Chattanooga'
-    KNOXVILLE = 'Knoxville'
-    responses = [[MEMPHIS, NASHVILLE, CHATTANOOGA, KNOXVILLE]] * 42
-    responses += [[NASHVILLE, CHATTANOOGA, KNOXVILLE, MEMPHIS]] * 26
-    responses += [[CHATTANOOGA, KNOXVILLE, NASHVILLE, MEMPHIS]] * 15
-    responses += [[KNOXVILLE, CHATTANOOGA, NASHVILLE, MEMPHIS]] * 17
-    correct_winners = [NASHVILLE, CHATTANOOGA, KNOXVILLE, MEMPHIS]
-    correct_winners = correct_winners[:ranked_pairs.WINNERS_TO_LIST]
-    assert ranked_pairs.winners(responses) == correct_winners
+    M = 'Memphis'
+    N = 'Nashville'
+    C = 'Chattanooga'
+    K = 'Knoxville'
+    responses = (((M, ), (N, ), (C, ), (K, )), ) * 42
+    responses += (((N, ), (C, ), (K, ), (M, )), ) * 26
+    responses += (((C, ), (K, ), (N, ), (M, )), ) * 15
+    responses += (((K, ), (C, ), (N, ), (M, )), ) * 17
+    assert ranked_pairs.winners(responses) == [N, C, K, M]
 
     # Test incomplete lists
-    assert ranked_pairs.winners([['A'], ['B'], ['A']]) == ['A', 'B']
+    assert ranked_pairs.winners([[['A']], [['B']], [['A']]]) == ['A', 'B']
 
-    # Test duplicate entries
-    assert ranked_pairs.winners([['A', 'B', 'A', 'A']]) == ['A', 'B']
+    # Test ties
+    responses = [[['A'], ['B', 'C'], ['D']], [['A', 'D', 'C'], ['B']]]
+    assert ranked_pairs.winners(responses) == ['A', 'C', 'B', 'D']
 
 
 # Helpers
