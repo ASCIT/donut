@@ -1,21 +1,23 @@
+from email.message import EmailMessage
 import smtplib
-from email.mime.text import MIMEText
+"""The domain to send emails from"""
+DOMAIN = 'beta.donut.caltech.edu'
+"""The username @ the domain to send emails as"""
+SENDER = 'auto'
 
 
 def send_email(to, msg, subject, use_prefix=True):
     """
-  Sends an email to a user. Expects 'to' to be a comma separated string of
-  emails, and for 'msg' and 'subject' to be strings.
-  """
-    msg = MIMEText(msg)
+    Sends an email to a user.
+    'to' should be an email or list of emails.
+    'msg' and 'subject' must be strings.
+    """
 
-    if use_prefix and '[ASCIT Donut]' not in subject:
-        subject = '[ASCIT Donut] ' + subject
+    message = EmailMessage()
+    message.set_content(msg)
+    message['Subject'] = '[ASCIT Donut] ' + subject if use_prefix else subject
+    message['From'] = SENDER + '@' + DOMAIN
+    message['To'] = ', '.join(to) if type(to) in (list, tuple) else to
 
-    msg['Subject'] = subject
-    msg['From'] = 'auto@donut.caltech.edu'
-    msg['To'] = to
-
-    s = smtplib.SMTP('localhost')
-    s.sendmail('auto@donut.caltech.edu', [to], msg.as_string())
-    s.quit()
+    with smtplib.SMTP('localhost') as smtp:
+        smtp.send_message(message)
