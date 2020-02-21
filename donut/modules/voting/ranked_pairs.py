@@ -1,33 +1,29 @@
-from collections import OrderedDict
-from itertools import product
-
-WINNERS_TO_LIST = 3
+from itertools import chain, combinations, product
 
 
 def winners(responses):
     """
     Returns the list of ranked-pairs winners based on responses.
     Takes as input a list of rankings, e.g. [
-        ['A', 'B', 'NO'], # A then B then NO
-        ['C', 'A'],       # A then C
-        ['NO']            # NO
+        [['A'], ['B'], ['NO']], # A, then B, then NO, then C
+        [['A', 'C'], ['B']],    # A or C, then B, then NO
+        [['NO']]                # NO, then A or B or C
     ]
     """
-    all_candidates = set(vote for response in responses for vote in response)
+    all_candidates = set(vote
+                         for response in responses for rank in response
+                         for vote in rank)
     tallies = {  # mapping of pairs (A, B) of candidates
         pair: 0  # to numbers of responders who ranked A above B
         for pair in product(all_candidates, repeat=2)
     }
     for response in responses:
-        response_dict = OrderedDict.fromkeys(response)
-        response = list(response_dict)
-        for i, A in enumerate(response[:-1]):
-            for B in response[i + 1:]:
-                tallies[A, B] += 1
-        for candidate in all_candidates:  # assume voter put all unpicked candidates lower
-            if candidate not in response_dict:
-                for vote in response:
-                    tallies[vote, candidate] += 1
+        ranked = set(vote for rank in response for vote in rank)
+        ranks = chain(response, (all_candidates - ranked, ))
+        for rank_A, rank_B in combinations(ranks, 2):
+            for A in rank_A:
+                for B in rank_B:
+                    tallies[A, B] += 1
 
     def tally_ranking(pair):
         """
@@ -48,5 +44,4 @@ def winners(responses):
                 for t in lower[B]:  #  and          B > ... > t
                     lower[s].add(t)  # then s > ... > t
                     higher[t].add(s)
-    winners = sorted(all_candidates, key=lambda A: len(higher[A]))
-    return winners[:WINNERS_TO_LIST]
+    return sorted(all_candidates, key=lambda A: len(higher[A]))
