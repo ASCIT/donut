@@ -284,7 +284,9 @@ def test_process_params_error(client):
         assert rv.status_code == 200
         assert message in rv.data
 
-    assert_message(b'Not logged in', default_params)
+    rv = client.post(
+        flask.url_for('voting.make_survey'), follow_redirects=False)
+    assert rv.status_code == 403
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     for delete_param in default_params:
@@ -586,9 +588,10 @@ def test_take(client):
 
 
 def test_make_form(client):
+    with client.session_transaction() as sess:
+        sess['username'] = 'ruddock_pres'
     rv = client.get(flask.url_for('voting.make_survey_form'))
-    assert rv.status_code == 200
-    assert b'Please log in to create a survey' in rv.data
+    assert rv.status_code == 403
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     rv = client.get(flask.url_for('voting.make_survey_form'))
@@ -601,6 +604,10 @@ def test_manage(client):
     assert rv.status_code == 200
     assert b'Please log in to manage your surveys' in rv.data
     with client.session_transaction() as sess:
+        sess['username'] = 'ruddock_pres'
+    rv = client.get(flask.url_for('voting.my_surveys'))
+    assert rv.status_code == 403
+    with client.session_transaction() as sess:
         sess['username'] = 'csander'
     rv = client.get(flask.url_for('voting.my_surveys'))
     assert rv.status_code == 200
@@ -612,19 +619,20 @@ def test_edit_questions(client):
     rv = client.get(
         flask.url_for(
             'voting.edit_questions', access_key='invalid-access-key'))
+    assert rv.status_code == 403
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(
+        flask.url_for(
+            'voting.edit_questions', access_key='invalid-access-key'))
     assert rv.status_code == 200
     assert b'Invalid access key' in rv.data
     assert b'Editing survey questions' not in rv.data
+    with client.session_transaction() as sess:
+        sess['username'] = 'reng'
     access_key = list(
         helpers.get_visible_surveys(helpers.get_user_id('csander')))[0][
             'access_key']
-    rv = client.get(
-        flask.url_for('voting.edit_questions', access_key=access_key))
-    assert rv.status_code == 200
-    assert b'You are not the creator of this survey' in rv.data
-    assert b'Editing survey questions' not in rv.data
-    with client.session_transaction() as sess:
-        sess['username'] = 'dqu'
     rv = client.get(
         flask.url_for('voting.edit_questions', access_key=access_key))
     assert rv.status_code == 200
@@ -692,11 +700,14 @@ def test_edit_params(client):
     # Test that (some) restrictions are applied
     rv = client.get(
         flask.url_for('voting.edit_params', access_key='invalid-access-key'))
+    assert rv.status_code == 403
+    with client.session_transaction() as sess:
+        sess['username'] = 'csander'
+    rv = client.get(
+        flask.url_for('voting.edit_params', access_key='invalid-access-key'))
     assert rv.status_code == 200
     assert b'Invalid access key' in rv.data
     assert b'Editing survey' not in rv.data
-    with client.session_transaction() as sess:
-        sess['username'] = 'csander'
     # Test successful case
     access_key = list(
         helpers.get_visible_surveys(helpers.get_user_id('csander')))[0][
@@ -731,12 +742,18 @@ def test_edit_params(client):
     assert b'New description' in rv.data  # assert that description has changed
     # Error cases for saving params
     with client.session_transaction() as sess:
-        del sess['username']
+        sess['username'] = 'reng'
     rv = client.post(
         flask.url_for('voting.save_params', access_key=access_key),
         follow_redirects=False)
     assert rv.status_code == 200
     assert b'You are not the creator of this survey' in rv.data
+    with client.session_transaction() as sess:
+        del sess['username']
+    rv = client.post(
+        flask.url_for('voting.save_params', access_key=access_key),
+        follow_redirects=False)
+    assert rv.status_code == 403
 
 
 def test_close(client):
@@ -794,6 +811,11 @@ def test_close(client):
 
 def test_delete(client):
     # Test error cases
+    rv = client.delete(
+        flask.url_for('voting.delete_survey', access_key='invalid-access-key'))
+    assert rv.status_code == 403
+    with client.session_transaction() as sess:
+        sess['username'] = 'reng'
     rv = client.delete(
         flask.url_for('voting.delete_survey', access_key='invalid-access-key'))
     assert rv.status_code == 200
@@ -1344,6 +1366,13 @@ def test_results(client):
     assert rv.status_code == 200
     assert b'You are not permitted to see the results at this time' in rv.data
     # Test releasing error conditions
+    rv = client.get(
+        flask.url_for(
+            'voting.release_results', access_key='invalid-access-key'),
+        follow_redirects=False)
+    assert rv.status_code == 403
+    with client.session_transaction() as sess:
+        sess['username'] = 'reng'
     rv = client.get(
         flask.url_for(
             'voting.release_results', access_key='invalid-access-key'),

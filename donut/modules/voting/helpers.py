@@ -3,11 +3,12 @@ from datetime import datetime
 from itertools import chain, groupby
 import json
 import flask
-from donut.auth_utils import get_user_id
+from donut.auth_utils import check_permission, get_user_id
 from donut.misc_utils import generate_random_string
 from donut.modules.groups.helpers import get_group_list_data, is_user_in_group
 from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
+from .permissions import Permissions
 from .ranked_pairs import winners
 
 ACCESS_KEY_LENGTH = 64
@@ -133,6 +134,10 @@ def invalid_choice_id(question_id, choice_id):
 
 
 def process_params_request(editing, survey_id=None, access_key=None):
+    if not check_permission(
+            flask.session.get('username'), Permissions.SURVEYS):
+        flask.abort(403)
+
     form = flask.request.form
 
     def creation_error(message):
@@ -311,10 +316,12 @@ def restrict_take_access(survey):
 
 
 def restrict_edit_access(survey, allow_after_close):
+    username = flask.session.get('username')
+    if not check_permission(username, Permissions.SURVEYS):
+        flask.abort(403)
     if not survey:
         return 'Invalid access key'
-    user_id = get_user_id(flask.session.get('username'))
-    if user_id != survey['creator']:
+    if get_user_id(username) != survey['creator']:
         return 'You are not the creator of this survey'
     if not allow_after_close and survey['end_time'] < datetime.now():
         return 'Cannot modify a survey after it has closed'

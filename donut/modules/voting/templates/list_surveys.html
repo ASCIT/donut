@@ -2,14 +2,16 @@
 {% block page %}
   <div class='row'>
     <div class='jumbotron col-md-8 col-md-offset-2' id='main'>
-      <div class='btn-group'>
-        <a href='{{ url_for("voting.make_survey_form") }}' class='btn btn-default'>
-          New Survey
-        </a>
-        <a href='{{ url_for("voting.my_surveys") }}' class='btn btn-default'>
-          My Surveys
-        </a>
-      </div>
+      {% if has_surveys_perm %}
+        <div class='btn-group'>
+          <a href='{{ url_for("voting.make_survey_form") }}' class='btn btn-default'>
+            New Survey
+          </a>
+          <a href='{{ url_for("voting.my_surveys") }}' class='btn btn-default'>
+            My Surveys
+          </a>
+        </div>
+      {% endif %}
 
       <div class='row'>
         <div class='col-md-6'>
