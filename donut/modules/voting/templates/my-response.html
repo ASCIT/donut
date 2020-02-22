@@ -44,12 +44,13 @@
             <div>{{ question['response'] }}</div>
           {% elif question['type'] == question_types['Elected position'] %}
             <ul class="list-group">
-              {% for vote in question['response'] %}
-                <li class="list-group-item">
-                    <div>{{ vote }}</div>
-                </li>
-              {% endfor %}
-              {% if not question['response'] %}
+              {% if question['response'] %}
+                {% for vote in question['response'] %}
+                  <li class="list-group-item">
+                      <div>{{ loop.index }}. {{ ', '.join(vote) }}</div>
+                  </li>
+                {% endfor %}
+              {% else %}
                 <li class="list-group-item">
                     <div>Abstained</div>
                 </li>

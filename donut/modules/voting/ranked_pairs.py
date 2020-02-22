@@ -35,9 +35,9 @@ def winners(responses):
 
     possible_pairs = sorted(tallies, key=tally_ranking)
     # Vertices reachable from A in win graph
-    lower = {A: set([A]) for A in all_candidates}
+    lower = {A: set((A, )) for A in all_candidates}
     # Vertices A is reachable from in win graph
-    higher = {A: set([A]) for A in all_candidates}
+    higher = {A: set((A, )) for A in all_candidates}
     for A, B in possible_pairs:
         if A not in lower[B]:  # if we don't already have B > A, set A > B
             for s in higher[A]:  #     if s > ... > A

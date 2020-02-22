@@ -100,8 +100,8 @@
             <ul class="list-group">
               {% for response in question['responses'] %}
                 <li class="list-group-item">
-                  {% for vote in response %}
-                    <div>{{ vote }}</div>
+                  {% for rank in response %}
+                    <div>{{ ', '.join(rank) }}</div>
                   {% endfor %}
                 </li>
               {% endfor %}

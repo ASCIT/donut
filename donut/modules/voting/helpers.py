@@ -15,6 +15,8 @@ AM_OR_PM = set(['A', 'P'])
 YYYY_MM_DD = '%Y-%m-%d'
 NO = 'NO'
 ALREADY_COMPLETED = 'Already completed'
+# The number of results to list for elected positions
+WINNERS_TO_LIST = 3
 
 
 def get_groups():
@@ -341,6 +343,24 @@ def some_responses_for_survey(survey_id):
         return cursor.fetchone() is not None
 
 
+def get_name(candidate):
+    if candidate is None:
+        return NO
+
+    if type(candidate) is not int:
+        raise Exception('Unrecognized elected position vote')
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        if candidate < 0:  # user_id
+            query = 'SELECT full_name FROM members_full_name WHERE user_id = %s'
+            cursor.execute(query, -candidate)
+            return cursor.fetchone()['full_name']
+        else:
+            query = 'SELECT choice FROM survey_question_choices WHERE choice_id = %s'
+            cursor.execute(query, candidate)
+            return cursor.fetchone()['choice']
+
+
 def get_responses(survey_id, user_id=None):
     questions_query = """
         SELECT question_id, title, description, type_id AS type, list_order, choices
@@ -359,50 +379,42 @@ def get_responses(survey_id, user_id=None):
         FROM survey_questions NATURAL JOIN survey_responses
         WHERE question_id = %s
     """
-    if user_id: responses_query += ' AND user_id = %s'
-    name_query = 'SELECT full_name FROM members_full_name WHERE user_id = %s'
+    if user_id:
+        responses_query += ' AND user_id = %s'
+        user_id_params = (user_id, )
+    else:
+        user_id_params = ()
     elected_position = get_question_types()['Elected position']
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(questions_query, [survey_id])
+        cursor.execute(questions_query, survey_id)
         questions = cursor.fetchall()
         for question in questions:
+            question_id = question['question_id']
             if question['choices']:
-                cursor.execute(choices_query, [question['question_id']])
+                cursor.execute(choices_query, question_id)
                 question['choices'] = {
                     choice['choice_id']: choice['choice']
                     for choice in cursor.fetchall()
                 }
 
-            def resolve_name(vote):
-                if vote is None: return NO
-                if type(vote) is int:
-                    if vote < 0:  # user_id
-                        cursor.execute(name_query, [-vote])
-                        return cursor.fetchone()['full_name']
-                    else:
-                        return question['choices'][vote]
-                raise Exception('Unrecognized elected position vote')
-
-            cursor.execute(responses_query,
-                           [question['question_id']] + ([user_id]
-                                                        if user_id else []))
+            cursor.execute(responses_query, (question_id, ) + user_id_params)
             responses = [
                 json.loads(res['response']) for res in cursor.fetchall()
             ]
             if question['type'] == elected_position:
-                responses = [
-                    list(map(resolve_name, res)) for res in responses if res
-                ]
+                for response in responses:
+                    if response:  # skip abstentions
+                        for rank in response:
+                            for i, candidate in enumerate(rank):
+                                rank[i] = get_name(candidate)
             question['responses'] = responses
         return questions
 
 
 def get_results(survey_id):
     question_types = get_question_types()
-    count_types = set([
-        question_types['Dropdown'], question_types['Short text'],
-        question_types['Long text']
-    ])
+    count_types = set(question_types[type_name]
+                      for type_name in ('Dropdown', 'Short text', 'Long text'))
     questions = get_responses(survey_id)
     for question in questions:
         question_type = question['type']
@@ -412,5 +424,5 @@ def get_results(survey_id):
         elif question_type == question_types['Checkboxes']:
             question['results'] = Counter(chain(*responses)).most_common()
         elif question_type == question_types['Elected position']:
-            question['results'] = winners(responses)
+            question['results'] = winners(responses)[:WINNERS_TO_LIST]
     return questions

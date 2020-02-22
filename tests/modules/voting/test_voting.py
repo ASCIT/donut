@@ -1,5 +1,5 @@
 """
-Tests donut/modules/rooms/
+Tests donut/modules/voting
 """
 from datetime import date, datetime, timedelta
 import json
@@ -29,7 +29,7 @@ def test_ranked_pairs():
     assert ranked_pairs.winners([[['A']], [['B']], [['A']]]) == ['A', 'B']
 
     # Test ties
-    responses = [[['A'], ['B', 'C'], ['D']], [['A', 'D', 'C'], ['B']]]
+    responses = [[['A'], ['B', 'C'], ['D']], [['A', 'C'], ['B', 'D']]]
     assert ranked_pairs.winners(responses) == ['A', 'C', 'B', 'D']
 
 
@@ -421,7 +421,7 @@ def test_respond(client):
         flask.session['username'] = 'csander'
         helpers.set_responses([1, 2, 3, 4, 5], [
             '2', '"asdf"', '[4, 6]', '"Lorem ipsum dolor sit amet"',
-            '[7, -1, 9, -2, null]'
+            '[[7], [-1], [9], [-2], [null]]'
         ])
     assert helpers.some_responses_for_survey(1)
     assert helpers.get_results(1) == [{
@@ -490,14 +490,14 @@ def test_respond(client):
             8: 're',
             9: 'me'
         },
-        'responses': [[7, -1, 9, -2, None]],
+        'responses': [[[7], [-1], [9], [-2], [None]]],
         'results': ['do', 'David Qu', 'me'],
-        'responses': [['do', 'David Qu', 'me', 'Robert Eng', 'NO']]
+        'responses': [[['do'], ['David Qu'], ['me'], ['Robert Eng'], ['NO']]]
     }]
     with app.test_request_context():
         flask.session['username'] = 'dqu'
         # Invalid elected position response
-        helpers.set_responses([5], ['["abc"]'])
+        helpers.set_responses([5], ['[["abc"]]'])
     with pytest.raises(
             Exception, message='Unrecognized elected position vote'):
         helpers.get_results(1)
@@ -1065,6 +1065,98 @@ def test_submit(client):
         'success': False,
         'message': 'Invalid text response'
     }
+    for position_response in ('NO', [True], [[1]]):
+        rv = client.post(
+            flask.url_for('voting.submit', access_key=access_key),
+            data=json.dumps({
+                'uid':
+                '2078141',
+                'birthday':
+                '1999-05-08',
+                'responses': [{
+                    'question': 8,
+                    'response': 13
+                }, {
+                    'question': 9,
+                    'response': 'shorty'
+                }, {
+                    'question': 10,
+                    'response': [15, 17]
+                }, {
+                    'question': 11,
+                    'response': 'looooooooong'
+                }, {
+                    'question': 12,
+                    'response': position_response
+                }]
+            }))
+        assert rv.status_code == 200
+        assert json.loads(rv.data) == {
+            'success': False,
+            'message': 'Invalid response to elected position'
+        }
+    for position_choice in ({'choice_id': 2}, {'user_id': -100}):
+        rv = client.post(
+            flask.url_for('voting.submit', access_key=access_key),
+            data=json.dumps({
+                'uid':
+                '2078141',
+                'birthday':
+                '1999-05-08',
+                'responses': [{
+                    'question': 8,
+                    'response': 13
+                }, {
+                    'question': 9,
+                    'response': 'shorty'
+                }, {
+                    'question': 10,
+                    'response': [15, 17]
+                }, {
+                    'question': 11,
+                    'response': 'looooooooong'
+                }, {
+                    'question': 12,
+                    'response': [[position_choice]]
+                }]
+            }))
+        assert rv.status_code == 200
+        assert json.loads(rv.data) == {
+            'success': False,
+            'message': 'Invalid choice for elected position'
+        }
+    duplicate_responses = ([[{'choice_id': 19}, {'choice_id': 19}]], )
+    duplicate_responses += ([[None], [{'user_id': 3}], [None]], )
+    for position_response in duplicate_responses:
+        rv = client.post(
+            flask.url_for('voting.submit', access_key=access_key),
+            data=json.dumps({
+                'uid':
+                '2078141',
+                'birthday':
+                '1999-05-08',
+                'responses': [{
+                    'question': 8,
+                    'response': 13
+                }, {
+                    'question': 9,
+                    'response': 'shorty'
+                }, {
+                    'question': 10,
+                    'response': [15, 17]
+                }, {
+                    'question': 11,
+                    'response': 'looooooooong'
+                }, {
+                    'question': 12,
+                    'response': position_response
+                }]
+            }))
+        assert rv.status_code == 200
+        assert json.loads(rv.data) == {
+            'success': False,
+            'message': 'Candidate ranked twice for elected position'
+        }
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
         data="""
@@ -1076,107 +1168,7 @@ def test_submit(client):
                     {"question":9,"response":"shorty"},
                     {"question":10,"response":[15,17]},
                     {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":"NO"}
-                ]
-            }
-        """)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Invalid response to elected position'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data="""
-            {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
-                "responses":[
-                    {"question":8,"response":13},
-                    {"question":9,"response":"shorty"},
-                    {"question":10,"response":[15,17]},
-                    {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[true]}
-                ]
-            }
-        """)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Invalid response to elected position'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data="""
-            {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
-                "responses":[
-                    {"question":8,"response":13},
-                    {"question":9,"response":"shorty"},
-                    {"question":10,"response":[15,17]},
-                    {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[{}]}
-                ]
-            }
-        """)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Invalid response to elected position'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data="""
-            {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
-                "responses":[
-                    {"question":8,"response":13},
-                    {"question":9,"response":"shorty"},
-                    {"question":10,"response":[15,17]},
-                    {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[{"choice_id":2}]}
-                ]
-            }
-        """)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Invalid choice for elected position'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data="""
-            {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
-                "responses":[
-                    {"question":8,"response":13},
-                    {"question":9,"response":"shorty"},
-                    {"question":10,"response":[15,17]},
-                    {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[{"user_id":-100}]}
-                ]
-            }
-        """)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Invalid write-in for elected position'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data="""
-            {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
-                "responses":[
-                    {"question":8,"response":13},
-                    {"question":9,"response":"shorty"},
-                    {"question":10,"response":[15,17]},
-                    {"question":11,"response":"looooooooong"},
-                    {"question":12,"response":[{"user_id":3},{"choice_id":19},{"user_id":2},null]}
+                    {"question":12,"response":[[{"user_id":3}],[{"choice_id":19},{"user_id":2}],[null]]}
                 ]
             }
         """)
@@ -1245,7 +1237,7 @@ def test_submit(client):
                 19: 're',
                 20: 'me'
             },
-            'responses': [['Belac Sander', 're', 'Robert Eng', 'NO']]
+            'responses': [[['Belac Sander'], ['re', 'Robert Eng'], ['NO']]]
         }]
 
     rv = client.get(flask.url_for('voting.take_survey', access_key=access_key))

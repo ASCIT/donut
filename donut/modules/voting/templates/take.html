@@ -97,18 +97,16 @@
     }
   }
   function moveUp() {
-    var $this = $(this)
-    var rankCell = $this.closest('td')
-    var rank = rankCell.closest('tr')
+    var rankCell = $(this).closest('td')
+    var rank = rankCell.parent()
     var previousRank = rank.prev()
     if (!previousRank.length) previousRank = $('<tr>').insertBefore(rank)
     previousRank.append(rankCell)
     if (rank.is(':empty')) rank.remove()
   }
   function moveDown() {
-    var $this = $(this)
-    var rankCell = $this.closest('td')
-    var rank = rankCell.closest('tr')
+    var rankCell = $(this).closest('td')
+    var rank = rankCell.parent()
     var nextRank = rank.next()
     if (!nextRank.length) nextRank = $('<tr>').insertAfter(rank)
     nextRank.append(rankCell)
@@ -146,15 +144,18 @@
           break
         case QUESTION_TYPES['Elected position']:
           var response = []
-          var chosen = element.find('.chosen .list-group-item span.choice-text')
-          chosen.each(function() {
-            var $this = $(this)
-            var choiceId = $this.attr('choice-id'), userId = $this.attr('user-id')
-            response.push(
-              choiceId
-                ? {choice_id: Number(choiceId)}
-                : userId ? {user_id: Number(userId)} : null
-            )
+          element.find('.chosen tr').each(function() {
+            var rank = []
+            $(this).find('.choice-text').each(function() {
+              var $this = $(this)
+              var choiceId = $this.attr('choice-id'), userId = $this.attr('user-id')
+              rank.push(
+                choiceId
+                  ? {choice_id: Number(choiceId)}
+                  : userId ? {user_id: Number(userId)} : null
+              )
+            })
+            response.push(rank)
           })
           break
         case QUESTION_TYPES.Checkboxes:
