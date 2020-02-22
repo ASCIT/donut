@@ -388,7 +388,6 @@ td {
 /* Some padding and orange-ifying for textboxes. */
 .jumbotron form input {
   margin-top: 1%;
-  border: 1px orange solid;
   border-radius: 5px;
   margin-right: 10px;
 }
@@ -397,7 +396,7 @@ td {
   border: 1px orange solid;
 }
 
-.jumbotron form textarea {
+.jumbotron form textarea:focus {
   border: 1px orange solid;
 }
 
