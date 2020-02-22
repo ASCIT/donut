@@ -3,8 +3,9 @@
 
 <div class="container theme-showcase" role="main">
   <div class="jumbotron">
-    <embed src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; display: block">
+        <embed src="{{  url_for('static', filename='images/svgdonut.svg')  }}" alt="d(O)nut" title="d(O)nut" style="margin: auto; width: 60%; display: block">
 
+    <div class="half-float-right">
     {% if is_admin %}
       <form action="{{ url_for('.add_news') }}" method="POST">
         <div class="form-group">
@@ -38,6 +39,9 @@
         </ul>
       </div>
     {% endif %}
+    </div>
+
+    <div class="half-float-left">
 
     <p>Welcome to Donut, the official website of the Associated Students of the California Institute of Technology. We provide unique services on behalf of the student body in an effort to better communication and make services accessible to all students.</p>
 
@@ -50,5 +54,6 @@
       Sincerely, <br>
       Donut Devteam
     </p>
+    </div>
   </div>
 {% endblock %}
