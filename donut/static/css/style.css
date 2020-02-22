@@ -1,5 +1,8 @@
+@font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
+
 /* Include Open Sans, courtesy of Google. */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
+
 
 /* Make sure that widths and heights are all done the same way.  */
 *,
@@ -39,9 +42,19 @@ body {
   padding-top: 3%;
   font-family: 'Open Sans', 'sans-serif';
   font-weight: 400;
+  height: 100%;
   -webkit-font-smoothing: antialiased;
-  position: relative;
-  min-height: 100%;
+}
+
+/* Guarantees some elegant formatting with regard to the rest of the
+ * page.
+ */
+body:before {
+  content: "";
+  height: 100%;
+  float: left;
+  width: 0;
+  margin-top: -32767px;
 }
 
 /* Creates a dark orange hover effect on links. */
@@ -69,15 +82,40 @@ a {
   color: #FF8C00;
 }
 
-/* Make sure the button is completely visible when hovered. */
-button:hover {
-  opacity: 1;
+/* Adds a red asterik after required form elements to specify that
+ * they are, in fact, required.
+ */
+label.required:after {
+  content:"*";
+  color:red;
 }
 
-/* Fade buttons slightly when not hovered. */
-button {
-  transition: opacity 0.5s;
-  opacity: 0.9;
+/* Just some slight padding around radio buttons. */
+input[type=checkbox], input[type=radio] {
+  position: relative;
+  top: 2px;
+  left: 3px;
+}
+
+/* All the wonderful main title formatting. */
+.jumbotron h1 {
+  -webkit-filter: drop-shadow(1px 1px 0 white)
+            drop-shadow(-1px 1px 0 white)
+            drop-shadow(1px -1px 0 white)
+            drop-shadow(-1px -1px 0 white);
+
+  filter: drop-shadow(1px 1px 0 white) 
+            drop-shadow(-1px 1px 0 white)
+            drop-shadow(1px -1px 0 white)
+            drop-shadow(-1px -1px 0 white);
+
+  font-size: 94px;
+  text-align: center;
+  font-family: 'donutfont';
+  color: #f5903b; 
+  z-index: 9999;
+  margin: auto; 
+  display: block;
 }
 
 /* All inputs should have an orange border with light spacing around
@@ -127,6 +165,23 @@ label.required:after {
 /* Tables should have separated borders. */
 table {
   border-collapse: separate;
+  border: 0px;
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+/* Better than them being centered. */
+td {
+  text-align: left;
+}
+
+/* When we need something to be center regardless of other elements. */
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 /*****************************************************************************/
@@ -135,11 +190,16 @@ table {
  * divs, unless otherwise specified in the commentary.                       */
 /*****************************************************************************/
 
+/* For small screens, primarily mobile when we don't want to load a video. */
+.bg-image {
+  background: url(../images/background_image.jpg) center center no-repeat;
+  background-size: 100% 100%;
+}
 
 /* This is the primary button class. Gives the button a white background
  * with an orange border and a slight bottom margin for spacing
  */
-.btn-default {
+.btn {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
   -o-transition: all 0.5s;
@@ -163,7 +223,7 @@ table {
 }
 
 /* When the primary button class is hovered, give it an orange background. */
-.btn-default:hover {
+.btn:hover {
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
   -o-transition: all 0.5s;
@@ -175,6 +235,40 @@ table {
   margin-bottom: 5%;
 }
 
+/* Buttons are orange. */
+.btn:focus {
+  background-color: orange;
+  border-color: orange;
+}
+
+/* Except here when they have a white border for contrast. */
+.btn:active {
+  background-color: orange;
+  border-color: #FFF;
+}
+
+/* And back to orange. */
+.btn-primary:hover {
+  border-color: orange;
+}
+
+/* A strange case, but still orange. */
+.btn-primary:active:focus {
+  background-color: orange;
+  border-color: #FFF;
+}
+
+/* Yep, still orange. */
+.btn-primary:focus {
+  background-color: orange;
+  border-color: orange;
+}
+
+/* Guess what? We really like the color orange. */
+.btn-primary:active {
+  background-color: orange;
+}
+
 /* A centering class for divs in larger divs. */
 .center {
   margin-left: 25%;
@@ -183,19 +277,9 @@ table {
   width: 50%;
 }
 
-input[type=checkbox], input[type=radio] {
-  position: relative;
-  top: 2px;
-  left: 3px;
-}
-
+/* Make sure this survey element spans the page for readability. */
 .candidate {
   width: 100%;
-}
-
-/* The main container should only span 90% of the width of the page. */
-.container {
-  width: 90%;
 }
 
 /* Right-half class for a div of a split, two-column page. */
@@ -251,11 +335,46 @@ input[type=checkbox], input[type=radio] {
 
 /* END FORM ELEMENTS */
 
+/* When we need to have a container spanning half the page width on the
+ * right.
+ */
+.half-float-right {
+  width: 50%;
+  float: right;
+  display: inline-block;
+  margin: 0;
+}
+
+/* When we need to have a container spanning half the page width on the
+ * left.
+ */
+.half-float-left {
+  width: 45%;
+  float: left;
+  display: inline-block;
+  margin: 0;
+}
+
+/* Gives us some leeway in formatting inputs. */
+.input {
+  display: flex;
+}
+
+
 /* Main wrapper class for all elements in the body. */
 .jumbotron {
   background-color: #FFF;
   text-align: justify;
   padding-top: 30px;
+  font-family: 'Open Sans', 'sans-serif';
+}
+
+/* The main wrapper for everything to keep it tidy. */
+#homepage-jumbotron {
+  padding-top: 20%;
+  background-color: #1c1d25;
+  height: 100%;
+  width: 100%;
 }
 
 /* In case we transition to an SVG for the title, this will make
@@ -266,24 +385,80 @@ input[type=checkbox], input[type=radio] {
   width: 60%;
 }
 
-/* For better mobile and desktop positioning of lists. */
-.jumbotron ul:not(.list-group) {
-  padding: 10px;
+/* Some padding and orange-ifying for textboxes. */
+.jumbotron form input {
+  margin-top: 1%;
+  border: 1px orange solid;
+  border-radius: 5px;
+  margin-right: 10px;
 }
 
-/* Class for making paragraph text large. */
-.large-text p {
-  font-size: 150%;
+.jumbotron form input:focus {
+  border: 1px orange solid;
 }
 
-/* Class for making paragraph text a medium size. */
-.medium-text p {
-  font-size: 120%;
+.jumbotron form textarea {
+  border: 1px orange solid;
 }
 
-/* Class for making paragraph text small. */
-.small-text p {
-  font-size: 90%;
+/* Padding inside the footer specifically for the copyright not to overlap
+ * anything.
+ */
+#copyright {
+  padding: 15px;
+}
+
+/* Some padding to avoid anything overlapping the header. */
+#header {
+  margin-bottom: 50px;
+}
+
+.jumbotron form textarea:focus {
+  border: 1px orange solid;
+}
+
+/* Magic that lets us have a video that spans the page perfectly. */
+.jumbotron .background-video {
+  position: absolute;
+  right: 0;
+  bottom: -10%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -100;
+  background-size: cover;
+  overflow: hidden;
+}
+
+/* For thin text, primarily body text or footnotes. */
+.jumbotron .light-text p {
+  font-weight: 300;
+}
+
+/* For standard text, primarily body text or subheaders. */
+.jumbotron .normal-text p {
+  font-weight: 400;
+}
+
+/* For thick text, primarily headers. */
+.jumbotron .heavy-text p {
+  font-weight: 600;
+}
+
+/* For large text, primarily headers. */
+.jumbotron .large-text p {
+  font-size: 1.5em;
+}
+
+/* For medium text, primarily body text or subheaders. */
+.jumbotron .medium-text p {
+  font-size: 1.25em;
+}
+
+/* For small text, primarily body text. */
+.jumbotron .small-text p {
+  font-size: 1em;
 }
 
 /* Class for large line spacing between paragraph lines. */
@@ -315,6 +490,14 @@ input[type=checkbox], input[type=radio] {
   background: linear-gradient(to right, orange, #d96924);
 }
 
+/* Very specifically orange. */
+.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+  color: #fff;
+  background-color: orange;
+  border-color: orange;
+}
+
+/* BEGIN MOBILE CSS */
 /* In case an element doesn't need a border. This will remove it. */
 .no-border {
   border: none;
@@ -324,6 +507,15 @@ input[type=checkbox], input[type=radio] {
 .message {
   text-align: center;
   font-weight: 600;
+}
+
+.panel-primary>.panel-heading {
+  background-color: orange;
+  border-color: orange;
+}
+
+.panel-primary {
+  border-color: orange;
 }
 
 /* Class for centering text. */
@@ -341,7 +533,56 @@ input[type=checkbox], input[type=radio] {
   text-align: right;
 }
 
-/* Creates a row-like element. These are intended to stack atop one another
+.tabs {
+  margin-bottom: 10px;
+}
+
+.tab-content {
+  padding-bottom: 100px;
+}
+
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+/* Donut graphic animation for mobile. */
+#background-donut {
+  -webkit-animation: rotating 10s linear infinite;
+  -moz-animation: rotating 10s linear infinite;
+  -ms-animation: rotating 10s linear infinite;
+  -o-animation: rotating 10s linear infinite;
+  animation: rotating 10s linear infinite; 
+
+  width: 12vw;
+  margin-bottom: 10px;
+}
+
+/* Creates a row-like element. These are intended to stack atop one another 
  * vertically.
  */
 .row {
@@ -378,7 +619,7 @@ input[type=checkbox], input[type=radio] {
  * should not be used for general styling or anything of the like. Odds are, *
  * you won't need them for anything!                                         */
 /*****************************************************************************/
-
+ 
 
 /* Content needs to span the width of its parent. */
 #content {
@@ -394,11 +635,10 @@ input[type=checkbox], input[type=radio] {
  * copyright notice.
  */
 #footer {
-  width: 100%;
-  text-align: right;
-  z-index: 9999;
-  bottom: 0;
-  position: absolute;
+  width: 50%;
+  z-index: 0;
+  position: relative;
+  height: 20px;
 }
 
 /* The copyright should be small and pretty much invisible. We don't want it
@@ -410,6 +650,7 @@ input[type=checkbox], input[type=radio] {
   font-size: 10px;
 }
 
+/* Avoids bullet points  where we don't want them. */
 #question_container {
   list-style-type: none;
 }
@@ -423,7 +664,98 @@ input[type=checkbox], input[type=radio] {
 
 /* BEGIN MOBILE CSS */
 
-@media only screen and (min-device-width: 200px) and (max-device-width: 600px) and (orientation: portrait) {
+@media only screen and (orientation: landscape) {
+
+  /* Background image for mobile to replace video. */
+  .bg-image {
+    background: url(../images/background_image.jpg) center center no-repeat;
+    background-size: 200% 100%;
+    z-index: -1;
+  }
+
+  /* Make sure the main container spans the whole page. */
+  .container {
+    width: 100%;
+  }
+
+  /* Dim overlay for homepage background to make text more visible. */
+  .dim {
+    opacity: 0.1;
+    background-color: #1c1d25;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* To make sure that the screen is covered with the background image. */
+  .bg-cover {
+    height: 835px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /*.jumbotron h1 {
+    font-size: 60px;
+  }*/
+
+  /* Avoids issues with strange background transitions. */
+  #homepage-jumbotron {
+    background-color: transparent;
+    height: auto;
+  }
+}
+
+@media only screen and (min-width: 900px) {
+  /* For large screens that need to see the background image. */
+  .bg-image {
+    background-size: 100% 100%;   
+    display: none;
+  }
+}
+
+@media only screen and (min-width: 900px) and (orientation: portrait) {
+  /* Positioning the video for sufficiently large screens. */
+  .jumbotron .background-video {
+    bottom: 0;
+  }
+}
+
+@media only screen and (min-width: 600px) and (max-width: 899px) {
+  /* For tablets, format the background image to be reasonably scaled. */
+  .bg-image {
+    background-size: 150% 100%;
+    display: block;
+  }
+}
+
+@media only screen and (min-width: 200px) and (max-width: 900px) and (orientation: portrait) {
+
+
+  /* For small screens, make sure the background image is reasonably scaled. */
+  .bg-image {
+    background: url(../images/background_image.jpg) center center no-repeat;
+    background-size: 350% 100%;
+  }
+
+  #background-donut {
+    width: 40vw;
+    margin-bottom: 30px;
+  }
+
+  /* Dim overlay for homepage background to make text more visible. */
+  .dim {
+    opacity: 0.2;
+    background-color: #1c1d25;
+  }
+
+  .bg-cover {
+    height: 835px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 
   /* Any split column pages need to be treated as though they are blocked such
    * that they are on top of one another.
@@ -441,6 +773,15 @@ input[type=checkbox], input[type=radio] {
     display: block;
   }
 
+  #copyright {
+    color: #EEE;
+  }
+
+  #homepage-jumbotron {
+    background-color: transparent;
+    height: auto;
+  }
+
   /* Buttons should have their font-size be visible on mobile. */
   .jumbotron button {
     font-size: 2vh;
@@ -450,6 +791,11 @@ input[type=checkbox], input[type=radio] {
   .jumbotron embed {
     padding-bottom: 5%;
     width: 100%;
+  }
+
+  .jumbotron h1 {
+    font-size: 400%;
+    -webkit-text-stroke: 1px #f5903b;
   }
 
   /* Make sure unformatted paragraphs are visible on mobile. */
@@ -469,6 +815,11 @@ input[type=checkbox], input[type=radio] {
     margin-top: 5%;
     border: 1px orange solid;
     border-radius: 5px;
+  }
+
+  .navbar-fixed-bottom .navbar-collapse, .navbar-fixed-top .navbar-collapse {
+    height: 1024px;
+    max-height: 1024px;
   }
 
   /* Get rid of this to avoid overlap with other elements. */
@@ -528,7 +879,7 @@ input[type=checkbox], input[type=radio] {
   #navbar button {
     font-size: 2vh;
     position: absolute;
-    left: 7%;
+    left: 3.5%;
   }
 
   /* Space list elements in the navbar such that they don't overlap. */
@@ -545,24 +896,6 @@ input[type=checkbox], input[type=radio] {
     margin-top: 5%;
     font-size: 2vh;
   }
-
-  /* Make sure content spans the width of the page. */
-  #content {
-    width: 100%;
-  }
-
-  /* Make sure the footer is fixed and at the bottom of the page. */
-  #footer {
-    position: fixed;
-    bottom: 0;
-  }
-
-  /* The copyright should still be small, but left-aligned not right. */
-  #copyright {
-    font-size: 1vh;
-    text-align: left;
- }
 }
 
 /* END MOBILE CSS */
-

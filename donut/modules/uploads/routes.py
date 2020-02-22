@@ -1,6 +1,6 @@
 import flask
 import os
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from donut.modules.uploads import blueprint, helpers
 
 
