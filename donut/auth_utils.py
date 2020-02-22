@@ -325,6 +325,7 @@ def get_permissions(username):
     user_id = get_user_id(username)
     if not user_id: return set()
     positions = groups.get_positions_held(user_id)
+    if not positions: return set()
     query = """
     SELECT permission_id FROM position_permissions WHERE pos_id in
     (%s)""" % (', '.join(['%s'] * len(positions)))

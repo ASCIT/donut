@@ -3,16 +3,21 @@ import json
 import flask
 
 from . import blueprint, helpers
+from .permissions import Permissions
+from donut.auth_utils import check_permission
 from donut.modules.core.helpers import get_member_data
 
 
 @blueprint.route('/1/surveys')
 def list_surveys():
-    user_id = helpers.get_user_id(flask.session.get('username'))
+    username = flask.session.get('username')
+    user_id = helpers.get_user_id(username)
+    has_surveys_perm = check_permission(username, Permissions.SURVEYS)
     active_surveys = helpers.get_visible_surveys(user_id)
     closed_surveys = helpers.get_closed_surveys(user_id)
     return flask.render_template(
         'list_surveys.html',
+        has_surveys_perm=has_surveys_perm,
         active_surveys=active_surveys,
         closed_surveys=closed_surveys)
 
@@ -45,6 +50,10 @@ def take_survey(access_key):
 
 @blueprint.route('/1/surveys/make')
 def make_survey_form():
+    if not check_permission(
+            flask.session.get('username'), Permissions.SURVEYS):
+        flask.abort(403)
+
     return flask.render_template(
         'survey_params.html', groups=helpers.get_groups())
 
@@ -58,6 +67,8 @@ def make_survey():
 def my_surveys():
     if 'username' not in flask.session:
         return flask.render_template('manage.html', logged_in=False)
+    if not check_permission(flask.session['username'], Permissions.SURVEYS):
+        flask.abort(403)
 
     user_id = helpers.get_user_id(flask.session['username'])
     my_surveys = helpers.get_my_surveys(user_id)
@@ -273,6 +284,10 @@ def show_results(access_key):
 
 @blueprint.route('/1/surveys/<access_key>/release')
 def release_results(access_key):
+    if not check_permission(
+            flask.session.get('username'), Permissions.SURVEYS):
+        flask.abort(403)
+
     survey = helpers.get_survey_data(access_key)
     if not survey:
         flask.flash('Invalid access key')
