@@ -18,6 +18,7 @@ CREATE TABLE surveys (
     creator        INT,                         -- user id of survey creator
 
     PRIMARY KEY(survey_id),
+    UNIQUE (access_key),
     FOREIGN KEY(group_id) REFERENCES groups(group_id) ON DELETE SET NULL,
     FOREIGN KEY(creator) REFERENCES members(user_id) ON DELETE SET NULL
 );

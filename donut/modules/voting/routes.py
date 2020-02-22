@@ -202,26 +202,35 @@ def submit(access_key):
             if type(value) != list:
                 return error('Invalid response to elected position')
             response_json = []
-            for order_value in value:
-                if order_value is None: response_json.append(None)
-                else:
-                    if type(order_value) != dict:
+            ranked_set = set()
+            ranked_count = 0
+            for rank in value:
+                if type(rank) != list:
+                    return error('Invalid response to elected position')
+                rank_json = []
+                for candidate in rank:
+                    if candidate is None:  # No
+                        rank_json.append(None)
+                        continue
+
+                    if type(candidate) != dict:
                         return error('Invalid response to elected position')
-                    choice_id = order_value.get('choice_id')
+                    choice_id = candidate.get('choice_id')
                     if choice_id is None:
-                        user_id = order_value.get('user_id')
-                        if user_id is None:
-                            return error(
-                                'Invalid response to elected position')
-                        else:
-                            if get_member_data(user_id, ['user_id']) == {}:
-                                return error(
-                                    'Invalid write-in for elected position')
-                            response_json.append(-user_id)
+                        user_id = candidate.get('user_id')
+                        if user_id is None or not get_member_data(
+                                user_id, ['user_id']):
+                            return error('Invalid choice for elected position')
+                        rank_json.append(-user_id)
                     else:
                         if helpers.invalid_choice_id(question_id, choice_id):
                             return error('Invalid choice for elected position')
-                        response_json.append(choice_id)
+                        rank_json.append(choice_id)
+                response_json.append(rank_json)
+                ranked_set |= set(map(helpers.get_name, rank_json))
+                ranked_count += len(rank)
+                if len(ranked_set) < ranked_count:
+                    return error('Candidate ranked twice for elected position')
         elif type_id == question_types['Checkboxes']:
             if type(value) != list:
                 return error('Invalid response to checkboxes')
