@@ -182,5 +182,5 @@ function deleteEvent(event)
 }
 
 $(function(){
-    $('.btn[value="Submit"]').click(getData);
+    $('.btn[value="Search"]').click(getData);
 });
