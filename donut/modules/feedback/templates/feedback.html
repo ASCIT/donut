@@ -5,41 +5,51 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-	<div class="half-float-left medium-text">
-	<p style="white-space: pre-line;"> {{ msg }} </p>
+      <div class="half-float-left medium-text">
+        <p style="white-space: pre-line;"> {{ msg }} </p>
         {% if summary %}
         <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
         {% endif %}
-	</div>
+      </div>
 
-	<div class="half-float-right">
-	<div>
+      <div class="half-float-right">
+        <div>
           <div class="row">
             <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
-              <table id="feedback" class="table">
+              <table class="table">
                 <tr>
-                  <div class="form-group">
-                  <td class="feedback">Name: </td>
-                  <td class="feedback"><input type="text" name="name" class="form-control" /></td>
-                  </div>
+                  <td>
+                    <label for="name">Name:</label>
+                  </td>
+                  <td>
+                    <input id="name" name="name" class="form-control" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <label for="email">Reply Email(s) separated by commas:</label>
+                  </td>
+                  <td>
+                    <input type="email" id="email" name="email" class="form-control" />
+                  </td>
                 </tr>
                 <tr>
                   <div class="form-group">
-                    <td class="feedback">Reply Email(s) separated by commas: </td>
-                    <td class="feedback"><input type="email" name="email" class="form-control" /></td>
+                    <td>
+                      <label class="required" for="subject">Subject:</label>
+                    </td>
+                    <td>
+                      <input id="subject" name="subject" class="form-control" required />
+                    </td>
                   </div>
                 </tr>
                 <tr>
-                  <div class="form-group">
-                    <td class="feedback required">Subject: </td>
-                    <td class="feedback"><input type="text" name="subject" class="form-control" required /></td>
-                  </div>
-                </tr>
-                <tr>
-                  <div class="form-group">
-			  <td class="feedback required">Feedback: </td>
-                    <td class="feedback"><textarea class="form-control" name="msg" rows="10" required ></textarea></td>
-                  </div>
+                  <td>
+                    <label class="required" for="msg">Feedback:</label>
+                  </td>
+                  <td>
+                    <textarea class="form-control" id="msg" name="msg" rows="10" required></textarea>
+                  </td>
                 </tr>
               </table>
               <div class="row">
@@ -55,14 +65,4 @@
 
 </div>
 
-{% endblock %}
-
-{% block styles %}
-  {{ super() }}
-  <style>
-    .required:after {
-      content: "*";
-      color: red;
-    }
-  </style>
 {% endblock %}
