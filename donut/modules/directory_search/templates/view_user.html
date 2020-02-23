@@ -14,9 +14,9 @@
 			{% else %}
 			<div>
 			{% endif %}
-			{% if is_me %}
-				<a href='{{ url_for("core.edit_user") }}'><button class="btn btn-primary">Update</button></a>
-			{% endif %}
+				{% if is_me %}
+					<a class='btn btn-primary' href='{{ url_for("core.edit_user") }}'>Update</a>
+				{% endif %}
 
 				<ul class='list-group list-group-root'>
 					{% if user['username'] and 'username' not in hidden_fields %}

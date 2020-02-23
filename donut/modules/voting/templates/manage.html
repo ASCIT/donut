@@ -7,36 +7,36 @@
         <h3 style="display: inline; vertical-align: top">My surveys</h3>
         <div class='list-group'>
           {% if my_surveys %}
-          {% for survey in my_surveys %}
-            <a
-              class='list-group-item'
-              accesskey='{{ survey["access_key"] }}'
-              href='{{ url_for("voting.edit_questions", access_key=survey["access_key"]) }}'
-            >
-              <h4 class='list-group-item-heading'>
-                {{ survey['title'] }}
-              </h4>
-              {% if survey['description'] %}
-                <p class='list-group-item-text'>{{ survey['description'] }}</p>
-              {% endif %}
-              <p class='list-group-item-text'>
-                {% if survey['unopened'] %}
-                  Opens on
-                  {{ survey['start_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
-                  <br />
+            {% for survey in my_surveys %}
+              <a
+                class='list-group-item'
+                accesskey='{{ survey["access_key"] }}'
+                href='{{ url_for("voting.edit_questions", access_key=survey["access_key"]) }}'
+              >
+                <h4 class='list-group-item-heading'>
+                  {{ survey['title'] }}
+                </h4>
+                {% if survey['description'] %}
+                  <p class='list-group-item-text'>{{ survey['description'] }}</p>
                 {% endif %}
-                {% if survey['closed'] %}Closed on{% else %}Open until{% endif %}
-                {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
-              </p>
-              {% if not (survey['closed'] or survey['unopened']) %}
-                <button class='btn btn-warning close-survey'>Close survey</button>
-              {% endif %}
-              <button class='btn btn-danger delete'>Delete survey</button>
-            </a>
-          {% endfor %}
-	  {% else %}
-	  <p>You have no surveys to manage!</p>
-	  {% endif %}
+                <p class='list-group-item-text'>
+                  {% if survey['unopened'] %}
+                    Opens on
+                    {{ survey['start_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                    <br />
+                  {% endif %}
+                  {% if survey['closed'] %}Closed on{% else %}Open until{% endif %}
+                  {{ survey['end_time'].strftime('%A, %B %d, %Y at %-I:%M %p') }}.
+                </p>
+                {% if not (survey['closed'] or survey['unopened']) %}
+                  <button class='btn btn-warning close-survey'>Close survey</button>
+                {% endif %}
+                <button class='btn btn-danger delete'>Delete survey</button>
+              </a>
+            {% endfor %}
+          {% else %}
+            <p>You have no surveys to manage!</p>
+          {% endif %}
         </div>
       {% else %}
         <h2>Please log in to manage your surveys</h2>

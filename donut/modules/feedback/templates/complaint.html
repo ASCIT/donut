@@ -48,12 +48,12 @@
                     </div>
                     <div class="row">
                     </div>
-                </div> 
+                </div>
             {% endif %}
         </div>
-              {% if admin or 'SUMMARY' in perms%}
-                  <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
-              {% endif %}
+        {% if admin or 'SUMMARY' in perms%}
+            <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
+        {% endif %}
 
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
@@ -63,9 +63,9 @@
                             <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
                         </thead>
                         {% for message in complaint['messages'] %}
-                        <tr> 
-                            <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th> 
-                            <th>{{ message['poster'] }}</th> 
+                        <tr>
+                            <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th>
+                            <th>{{ message['poster'] }}</th>
                             <td>{{ message['message'] }}</td>
                         </tr>
                         {% endfor %}
@@ -98,13 +98,13 @@
 {% block scripts %}
 {{ super() }}
 <script>
- 
+
  $(document).ready(function() {
      {% if complaint['status'] == 'new_msg' %}
          $('#markUnread').hide();
      {% else %}
          $('#markRead').hide();
-     {% endif %} 
+     {% endif %}
      $('#markRead').click(function() {
 	 $.ajax({
 	     url: "{{ url_for('feedback.feedback_mark_read', id=complaint['uuid'], group=group) }}",
@@ -134,7 +134,7 @@
          });
      });
  });
- 
+
 </script>
 
 {% endblock %}
