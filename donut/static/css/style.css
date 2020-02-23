@@ -1,8 +1,7 @@
-@font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
-
 /* Include Open Sans, courtesy of Google. */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
 
+@font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
 
 /* Make sure that widths and heights are all done the same way.  */
 *,
