@@ -218,7 +218,7 @@ td {
   -o-transition: all 0.5s;
   transition: all 0.5s;
 
-  margin-bottom: 5%;
+  margin-bottom: 5px;
 }
 
 /* When the primary button class is hovered, give it an orange background. */
@@ -231,7 +231,7 @@ td {
   background-color: orange;
   color: #FFF;
   border-color: orange;
-  margin-bottom: 5%;
+  margin-bottom: 5px;
 }
 
 /* Buttons are orange. */
