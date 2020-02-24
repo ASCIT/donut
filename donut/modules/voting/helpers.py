@@ -16,8 +16,6 @@ AM_OR_PM = set(['A', 'P'])
 YYYY_MM_DD = '%Y-%m-%d'
 NO = 'NO'
 ALREADY_COMPLETED = 'Already completed'
-# The number of results to list for elected positions
-WINNERS_TO_LIST = 3
 
 
 def get_groups():
@@ -431,5 +429,5 @@ def get_results(survey_id):
         elif question_type == question_types['Checkboxes']:
             question['results'] = Counter(chain(*responses)).most_common()
         elif question_type == question_types['Elected position']:
-            question['results'] = winners(responses)[:WINNERS_TO_LIST]
+            question['results'] = winners(responses)
     return questions
