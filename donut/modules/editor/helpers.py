@@ -129,7 +129,7 @@ def get_links():
     query = """SELECT title FROM webpage_files"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [])
-    res = cursor.fetchall()
+        res = cursor.fetchall()
     results = {
         key['title']: flask.url_for('uploads.display', url=key['title'])
         for key in res
