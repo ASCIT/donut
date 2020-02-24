@@ -338,3 +338,16 @@ def is_user_in_group(user_id, group_id):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [user_id, group_id])
         return cursor.fetchone() is not None
+
+
+def get_group_id(group_name):
+    """
+    Returns the group_id for a group 
+    """
+    query = """
+    SELECT group_id FROM groups WHERE group_name = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, group_name)
+    res = cursor.fetchone()
+    return None if res is None else res['group_id']

@@ -38,11 +38,11 @@ def test_get_links(client):
     titles = [title for title, _ in links.items()]
     assert "SOME.title" in ''.join(titles)
 
-    editor_helpers.write_markdown("BLEH", "ANOTHER_TITLE")
-    assert "BLEH" == helpers.read_page("ANOTHER_TITLE")
+    editor_helpers.create_page_in_database("ANOTHER_TITLE", "Bleh")
+    assert "Bleh" == helpers.read_page("ANOTHER_TITLE")
     assert None == helpers.read_page("This no exist")
 
-    editor_helpers.remove_link("ANOTHER TITLE")
+    editor_helpers.remove_file_from_db("ANOTHER TITLE")
     helpers.remove_link("SOME.title.jpg")
     links = helpers.get_links()
     titles = []

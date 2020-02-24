@@ -1,6 +1,6 @@
 function convert(input) {
   var target = $("#content"),
-      converter = new showdown.Converter(),
+      converter = new showdown.Converter({strikethrough: true, tables: true}),
       html = converter.makeHtml(input);
   target.html(html);
 }

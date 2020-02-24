@@ -23,7 +23,7 @@ function preview() {
       title = $('#text_title').val(),
       target = $('#preview'),
       target_title = $('#preview_title'),
-      converter = new showdown.Converter({strikethrough: true}),
+      converter = new showdown.Converter({strikethrough: true, tables: true}),
       html = converter.makeHtml(text);
   target.html(html);
   target_title.text(title);

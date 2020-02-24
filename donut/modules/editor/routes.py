@@ -12,18 +12,16 @@ def editor():
     existing pages
     '''
     input_text = ""
-    title = "TITLE"
-    inputt = flask.request.args.get('title')
-    if inputt != None:
-        input_text = helpers.read_markdown(inputt)
-        title = flask.request.args.get('title')
+    title = flask.request.args.get('title')
+    if title != None:
+        input_text = helpers.read_markdown(title)
         load_default = False
     else:
+        title = "New Page"
         load_default = True
     if helpers.is_locked(
             title, load_default) or not helpers.check_edit_page_permission():
         return flask.abort(403)
-
     helpers.change_lock_status(title, True, load_default)
     return flask.render_template(
         'editor_page.html', input_text=input_text, title=title)
@@ -73,7 +71,7 @@ def save():
     title = flask.request.form['title']
     markdown = markdown.replace('<', '&lt;').replace('>', '&gt;')
     if helpers.check_edit_page_permission():
-        helpers.write_markdown(markdown, title)
+        helpers.create_page_in_database(title, markdown)
         return flask.jsonify({
             'url': flask.url_for('uploads.display', url=title)
         })
@@ -101,12 +99,12 @@ def delete_page():
     """
     filename = flask.request.args.get('filename')
     if filename != None and helpers.check_edit_page_permission():
-        helpers.remove_link(filename)
+        helpers.remove_file_from_db(filename)
 
     return flask.redirect(flask.url_for('editor.page_list'))
 
 
-@blueprint.route('/pages/list_of_pages')
+@blueprint.route('/list_of_pages')
 def page_list():
     '''
     Returns a list of all created pages

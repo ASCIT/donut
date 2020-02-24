@@ -14,18 +14,18 @@ def change_lock_status(title, new_lock_status, default=False, forced=False):
     This is called when a user starts or stops editing a
     page
     """
+    title = title.replace(" ", "_")
     if default:
         return
-    #if this function is called from
+    # If this function is called from
     # is_locked due to the page being expired...
     if forced:
         update_lock_query(title, new_lock_status)
         return
     # This is mainly because there were pages already created that weren't in
     # the database.
-    create_page_in_database(title)
     uid = auth_utils.get_user_id(flask.session['username'])
-    query = """SELECT last_edit_uid FROM webpage_files_locks WHERE title = %s"""
+    query = """SELECT last_edit_uid FROM webpage_files WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
         res = cursor.fetchone()
@@ -39,8 +39,11 @@ def update_lock_query(title, new_lock_status):
     """
     Query for updating lock status
     """
+    title = title.replace(" ", "_")
     query = """
-    UPDATE webpage_files_locks SET locked = %s, last_edit_time = NOW(), last_edit_uid = %s WHERE title = %s
+    UPDATE webpage_files 
+        SET locked = %s, last_edit_time = NOW(), last_edit_uid = %s 
+        WHERE title = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(
@@ -55,14 +58,16 @@ def is_locked(title, default=False):
     """
     if default:
         return False
-    create_page_in_database(title)
-
+    title = title.replace(" ", "_")
     query = """
-    SELECT locked, TIMESTAMPDIFF(SECOND, last_edit_time, NOW()) as expired FROM webpage_files_locks WHERE title = %s
+    SELECT locked, TIMESTAMPDIFF(SECOND, last_edit_time, NOW()) as expired 
+        FROM webpage_files WHERE title = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, title)
         res = cursor.fetchone()
+    if res == None:
+        return False
 
     # Locking the file times out after 3 minutes (since we are
     # updating the last access time every 1 minute, and we generously account for
@@ -73,44 +78,40 @@ def is_locked(title, default=False):
     return res['locked']
 
 
-def create_page_in_database(title):
+def create_page_in_database(title, content):
     """
     There are some pages that exist but do not have entries in the 
     database. 
     """
+    title = title.replace(" ", "_")
     query = """
-    INSERT INTO webpage_files_locks (title) VALUES (%s) ON DUPLICATE KEY UPDATE locked = locked
+    INSERT INTO webpage_files (title, content) VALUES (%s, %s) ON DUPLICATE KEY UPDATE locked = locked, content = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, title)
+        cursor.execute(query, [title, content, content])
 
 
 def rename_title(old_filename, new_filename):
     """
     Changes the file name of an html file
-    Need to look for paths
     """
-    old_path = os.path.join(flask.current_app.root_path,
-                            flask.current_app.config["UPLOAD_WEBPAGES"],
-                            old_filename + '.md')
-    new_path = os.path.join(flask.current_app.root_path,
-                            flask.current_app.config["UPLOAD_WEBPAGES"],
-                            new_filename + '.md')
-
-    remove_file_from_db(old_filename)
-
-    if os.path.exists(old_path) and not os.path.exists(new_path):
-        os.rename(old_path, new_path)
+    old_filename = old_filename.replace(" ", "_")
+    new_filename = new_filename.replace(" ", "_")
+    query = """
+    UPDATE webpage_files SET title = %s WHERE title = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [new_filename, old_filename])
 
 
-def read_markdown(name):
-    '''
-    Reads in the mark down text from a file.
-    '''
-
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_WEBPAGES'])
-    return read_file(os.path.join(path, name + '.md'))
+def read_markdown(title):
+    title = title.replace(" ", "_")
+    query = """SELECT content FROM webpage_files 
+    WHERE title = %s"""
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [title])
+        res = cursor.fetchone()
+    return res['content'] if res != None else None
 
 
 def read_file(path):
@@ -125,40 +126,15 @@ def read_file(path):
 
 
 def get_links():
-    '''
-    Get links for all created webpages
-    '''
-    links, root = get_glob()
-    results = {}
-    for filename in links:
-        link = flask.url_for('uploads.display', url=filename)
-        results[filename] = link
+    query = """SELECT title FROM webpage_files"""
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [])
+        res = cursor.fetchall()
+    results = {
+        key['title']: flask.url_for('uploads.display', url=key['title'])
+        for key in res
+    }
     return results
-
-
-def remove_link(filename):
-    '''
-    Get rid of matching filenames
-    '''
-    filename = filename.replace("_", " ")
-    links, path = get_glob(clean_links=False)
-    for i in links:
-        name = i.replace(path + '/', '').replace('.md', '').replace("_", " ")
-        if filename == name:
-            os.remove(i)
-    remove_file_from_db(filename)
-
-
-def get_glob(clean_links=True):
-    """
-    Grabs the list of files from a preset path. 
-    """
-    path = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config['UPLOAD_WEBPAGES'])
-    filenames = glob.glob(path + '/*')
-    if clean_links:
-        filenames = clean_file_names(path, filenames)
-    return (filenames, path)
 
 
 def clean_file_names(path, links):
@@ -175,7 +151,8 @@ def remove_file_from_db(filename):
     """
     Removes the information for a file from the db
     """
-    query = """DELETE FROM webpage_files_locks WHERE title = %s"""
+    filename = filename.replace(' ', '_')
+    query = """DELETE FROM webpage_files WHERE title = %s"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, filename)
 
@@ -184,13 +161,12 @@ def check_duplicate(filename):
     """
     Check to see if there are duplicate file names
     """
-    links, path = get_glob()
-    filename = filename.replace('_', ' ')
-
-    for name in links:
-        if filename == name:
-            return True
-    return False
+    filename = filename.replace(' ', '_')
+    query = """SELECT title FROM webpage_files WHERE title = %s"""
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [filename])
+        res = cursor.fetchone()
+    return False if res is None else True
 
 
 def check_title(title):
@@ -208,19 +184,3 @@ def check_edit_page_permission():
     """
     return auth_utils.check_login() and auth_utils.check_permission(
         flask.session['username'], EditPermission.ABLE)
-
-
-def write_markdown(markdown, title):
-    """
-    Creates an html file that was just created,
-    as well as the routes for flask
-    """
-    root = os.path.join(flask.current_app.root_path,
-                        flask.current_app.config["UPLOAD_WEBPAGES"])
-
-    title = title.replace(' ', '_')
-    path = os.path.join(root, title + ".md")
-    create_page_in_database(title)
-    # Writing to the new html file
-    with open(path, 'w') as f:
-        f.write(markdown)
