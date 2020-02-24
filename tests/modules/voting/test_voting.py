@@ -493,7 +493,7 @@ def test_respond(client):
             9: 'me'
         },
         'responses': [[[7], [-1], [9], [-2], [None]]],
-        'results': ['do', 'David Qu', 'me'],
+        'results': ['do', 'David Qu', 'me', 'Robert Eng', 'NO'],
         'responses': [[['do'], ['David Qu'], ['me'], ['Robert Eng'], ['NO']]]
     }]
     with app.test_request_context():
