@@ -34,15 +34,14 @@ def add_reservation(room, username, reason, start, end):
 
 
 def get_all_reservations(rooms, start, end):
-    if not rooms:
-        rooms = [room["room_id"] for room in get_rooms()]
     query = """
         SELECT reservation_id, location, start_time, end_time
         FROM room_reservations NATURAL JOIN rooms
         WHERE %s <= end_time AND start_time <= %s
-        AND room_id IN (""" + ",".join(["%s"] * len(rooms)) + """)
-        ORDER BY start_time
     """
+    if rooms:
+        query += " AND room_id IN (" + ",".join("%s" for room in rooms) + ")"
+    query += " ORDER BY start_time"
     with flask.g.pymysql_db.cursor() as cursor:
         values = [start, end + timedelta(days=1)]
         values.extend(rooms)
