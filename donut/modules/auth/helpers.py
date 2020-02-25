@@ -60,7 +60,7 @@ def handle_forgotten_password(username, email):
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [username])
         result = cursor.fetchone()
-
+    email = email.lower()
     if result is not None and email == result['email']:
         name = result['first_name']
         user_id = result['user_id']
