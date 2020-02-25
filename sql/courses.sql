@@ -42,7 +42,8 @@ CREATE TABLE sections (
     times           VARCHAR(100)  NOT NULL, -- e.g. MWF 13:00 - 13:55
     locations       VARCHAR(100)  NOT NULL, -- e.g. 213 ANB
     PRIMARY KEY (course_id, section_number),
-    FOREIGN KEY (course_id) REFERENCES courses(course_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+        ON DELETE CASCADE,
     FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id),
     FOREIGN KEY (grades_type_id) REFERENCES grades_types(grades_type_id)
 );
@@ -54,6 +55,7 @@ CREATE TABLE planner_courses (
     PRIMARY KEY (user_id, course_id, planner_year),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE scheduler_sections (
@@ -64,4 +66,5 @@ CREATE TABLE scheduler_sections (
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (course_id, section_number)
         REFERENCES sections(course_id, section_number)
+        ON DELETE CASCADE
 );
