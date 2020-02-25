@@ -34,12 +34,14 @@ def create_account(create_account_key):
     """Checks the key. If valid, displays the create account page."""
     user_id = auth_utils.check_create_account_key(create_account_key)
     if user_id is None:
+        flask.current_app.logger.warn(
+            f'Invalid create_account_key: {create_account_key}')
         flask.flash("Invalid request. Please check your link and try again.")
         return flask.redirect(flask.url_for("home"))
 
     user_data = helpers.get_user_data(user_id)
     if user_data is None:
-        flask.flash("An unexpected error occurred. Please find an IMSS rep.")
+        flask.flash("An unexpected error occurred. Please contact DevTeam.")
         return flask.redirect(flask.url_for("home"))
     return flask.render_template(
         "create_account.html", user_data=user_data, key=create_account_key)
@@ -51,6 +53,8 @@ def create_account_submit(create_account_key):
     user_id = auth_utils.check_create_account_key(create_account_key)
     if user_id is None:
         # Key is invalid.
+        flask.current_app.logger.warn(
+            f'Invalid create_account_key: {create_account_key}')
         flask.flash("Someone's been naughty.")
         return flask.redirect(flask.url_for("home"))
     username = flask.request.form.get("username", None)
@@ -61,11 +65,15 @@ def create_account_submit(create_account_key):
         or password is None \
         or password2 is None \
         or birthday is None:
+        flask.current_app.logger.warn(
+            f'Invalid create account form for user ID {user_id}')
         flask.flash("Invalid request.")
         return flask.redirect(flask.url_for("home"))
 
     if helpers.handle_create_account(user_id, username, password, password2,
                                      birthday):
+        flask.current_app.logger.info(
+            f'Created account with username {username} for user ID {user_id}')
         flask.flash("Account successfully created.")
         return flask.redirect(flask.url_for("home"))
     else:
