@@ -32,7 +32,7 @@
                             <li><a href="{{ url_for('courses.scheduler') }}">Course Scheduler</a></li>
                             <li><a href="{{ url_for('directory_search.directory_search') }}">Directory</a></li>
                             <li><a href="{{ url_for('feedback.feedback', group='donut') }}">Donut Feedback</a></li>
-			                <li><a href=" {{url_for('marketplace.marketplace') }} ">Marketplace</a></li>
+                            <li><a href=" {{url_for('marketplace.marketplace') }} ">Marketplace</a></li>
                             <li><a href="#">Newsgroups</a></li>
                             <li><a href="{{ url_for('rooms.rooms_home') }}">Room Reservations</a></li>
                             <li><a href="{{ url_for('voting.list_surveys') }}">Surveys and Voting</a></li>
@@ -55,6 +55,7 @@
                             <li><a href="https://bigt.caltech.edu">Big T</a></li>
                             <li><a href="https://caltechtotem.github.io/">Totem</a></li>
                         </ul>
+                    {% if 'username' not in session %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
@@ -62,7 +63,6 @@
                             <li><a href="{{ url_for('auth.forgot_password') }}">Recover Password</a></li>
                         </ul>
                     </li>
-                    {% if 'username' not in session %}
                     <li>
                         <form action="{{ url_for('auth.login') }}">
                             <button class="btn no-border pull-right navbar-btn">Log In</button>
