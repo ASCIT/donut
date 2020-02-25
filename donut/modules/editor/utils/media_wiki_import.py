@@ -50,10 +50,8 @@ def format_text(text):
         text = text.replace(i, i.replace("=", "#"))
 
     #[[Image:Everyone's the same size.png |500px]]
-    # Images use a slightly different url. 
-    matches = re.findall(
-        r"\[\[Image\:[^\]]*\|?[0-9a-zA-Z.]*[px]?\]\]",
-        text)
+    # Images use a slightly different url.
+    matches = re.findall(r"\[\[Image\:[^\]]*\|?[0-9a-zA-Z.]*[px]?\]\]", text)
     for i in matches:
         link = i.replace("[", "").replace("]", "")
         link = link.replace("Image:", "")
@@ -65,9 +63,10 @@ def format_text(text):
         # LOL all the images are gonna be squares this is stupid @showdown
         else:
             size = link_piece[1].strip()[:-2]
-            text = text.replace(i, '![' + link_piece[0].strip() + '](uploaded_file' +
-                                link_piece[0].strip().replace(" ", "_") +" ="+size+"x"+size+ ')')
-
+            text = text.replace(
+                i, '![' + link_piece[0].strip() + '](uploaded_file' +
+                link_piece[0].strip().replace(
+                    " ", "_") + " =" + size + "x" + size + ')')
 
     # Find all links and replace them -- purposefully missing @
     text = re.sub(
@@ -88,12 +87,14 @@ def format_text(text):
             link_piece[0] = link_piece[0].replace("Media:", "")
         # Text is same as link title
         if len(link_piece) == 1:
-            text = text.replace(i, '[' + link_piece[0] + ']' + '(' + file_uploads+
-                                link_piece[0].strip().replace(" ", "_") + ')')
+            text = text.replace(
+                i, '[' + link_piece[0] + ']' + '(' + file_uploads +
+                link_piece[0].strip().replace(" ", "_") + ')')
         # The text is different from the link title.
         else:
-            text = text.replace(i, '[' + link_piece[1].strip() + ']' + '(' +file_uploads+
-                                link_piece[0].strip().replace(" ", "_") + ')')
+            text = text.replace(
+                i, '[' + link_piece[1].strip() + ']' + '(' + file_uploads +
+                link_piece[0].strip().replace(" ", "_") + ')')
 
     for i in range(4, 0, -1):
         text = text.replace("*" * i, "\t" * (i - 1) + "* ")
