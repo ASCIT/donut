@@ -94,7 +94,6 @@ def unsubscribe(user_id, group_id):
     pr.pos_id_from=ph.pos_id
     WHERE ph.user_id=%s AND p.group_id=%s)
     """
-    query += POSITIONS_QUERY + ')'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, user_id, group_id))
 

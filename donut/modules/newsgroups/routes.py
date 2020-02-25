@@ -35,10 +35,13 @@ def post_message():
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    fields = ['group', 'subject', 'msg', 'poster']
+    fields = ['group_id', 'subject', 'msg', 'poster']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
+    actions = helpers.get_user_actions(user_id, data['group'])
+    if not actions['send']:
+        return flask.abort(403)
     data['group_name'] = groups.get_group_data(data['group'],
                                                ['group_name'])['group_name']
     if not data['poster']:
@@ -112,7 +115,10 @@ def mygroups():
 def view_post(post_id):
     if 'username' not in flask.session:
         return flask.abort(403)
+    user_id = auth_utils.get_user_id(flask.session['username'])
     post = helpers.get_post(post_id)
+    if not groups.is_user_in_group(user_id, post['group_id']):
+        return flask.abort(403)
     return flask.render_template('view_post.html', post=post)
 
 
@@ -121,6 +127,8 @@ def all_posts(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
+    if not groups.is_user_in_group(user_id, group_id):
+        return flask.abort(403)
     group_name = groups.get_group_data(group_id, ['group_name'])['group_name']
     return flask.render_template(
         'all_posts.html',
@@ -131,6 +139,9 @@ def all_posts(group_id):
 
 @blueprint.route('/_delete_application')
 def delete_application(user_id, group_id):
+    actions = helpers.get_user_actions(user_id, group_id)
+    if not actions['control']:
+        return flask.abort(403)
     helpers.remove_application(user_id, group_id)
     return flask.redirect(
         flask.url_for('newsgroups.view_group', group_id=group_id))
