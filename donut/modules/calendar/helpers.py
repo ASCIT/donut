@@ -102,7 +102,8 @@ def get_events_backup(begin_month=datetime.datetime.now().month,
         db_events = cursor.fetchall()
     for i in db_events:
         set_event_dict(i)
-    return db_events
+
+    return [] if db_events == () else db_events
 
 
 def insert_event_to_db(calendar_tag,
@@ -247,8 +248,9 @@ def get_events(begin_month=datetime.datetime.now().month,
         all_events = []
         if all_data:
             min_time = '0001-01-01T00:00:00Z'
-            max_time = '9999-12-31T00:00:00Z'
-
+            # Only search google calendar api for events two year into the future.
+            max_time = (datetime.datetime.now() + datetime.timedelta(
+                days=365 * 2)).strftime("%Y-%m-%dT%H:%M:%SZ")
         for value in cal_id.values():
             next_page = True
             while next_page:

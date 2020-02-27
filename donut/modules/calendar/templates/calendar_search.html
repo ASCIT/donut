@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('calendar.static', filename='style.css')}}>
+{% endblock %}
+{% block scripts %}
+  {{super()}}
+  <script src={{ url_for('calendar.static', filename='list_script.js', _external = True)}}></script>
+{% endblock %}
+{% block content %}
+<base target="_parent" />
+<div class = "jumbotron col-md-8 col-md-offset-2 fullHeight">
+  <div class = "container fullHeight">
+    <a href="{{url_for('calendar.calendar')}}" class = "btn btn-primary back">&lt;</a>
+    <div class = "text-center">
+      <h3>Events Search</h3>
+    </div>
+    <div class ="row" id="listing">
+      <div class="form-group searchBar col-md-8 col-md-offset-2">
+        <label for="name"><span class="glyphicon glyphicon-search"></span></label>
+        <input type="text" id="query" name="query" class="form-control searchInput" />
+        <input class="btn btn-primary" type="submit" value="Search" />
+      </div>
+      <div id='failover_message'>
+        <span id="last_update_message">Using a cached version of events from donut's databases from {0}</span>. To force a sync with google calendars,
+        <a href={{ url_for('calendar.sync')}}>click this link</a>
+      </div>
+      <div class="col-md-12" id="searchCheckBox">
+        {% for item in ['ASCIT', 'Avery', 'Bechtel', 'Blacker', 'Dabney', 'Fleming', 'Lloyd', 'Page', 'Ricketts', 'Ruddock', 'Other', 'Athletics']%}
+          <label class="checkbox-inline"><input type="checkbox" name="display_tag" value="{{ item }}"/>{{ item }}<span class="dot" id="{{item}}"></span></label>
+        {% endfor %}
+      </div>
+      <div class="col-md-6 fullHeight">
+        <label>Future events</label>
+        <div id="future">
+        </div>
+        <label>Past events</label>
+        <div id="past">
+        </div>
+      </div>
+      <div class="col-md-6 extendInfoCol">
+        <span class="close">&times;</span>
+
+        <div class="container" id="extendInfo">
+          {% if permissions['Any'] %}
+            <form method="POST" action="{{ url_for('calendar.calendar_add_events', update=True) }}">
+          {% endif %}
+          <div class="form-group searchInfoUpdate">
+            <label for="name" class="required">Event Name:</label>
+            {% if permissions['Any'] %}
+              <input id="eventName_edit" type="text" name="name" class="editable form-control" required />
+            {% else %}
+              <label id="eventName" for="name" class="noneditable"></label>
+            {% endif %}
+          </div>
+          <div class="form-group searchInfoUpdate">
+            <label for="tag" class="required">Tag:</label>
+            <label id="tag"></label>
+            <input type="hidden" id="htag" class="form-control" name="tag"></input>
+          </div>
+          {% if permissions['Any'] %}
+          <div class="form-group searchInfoUpdate editable">
+		      <label for="date" class="required" id="start_time">Date:</label>
+              <input type="hidden" id="calEventId" class="form-control" name="eventId"></input>
+              <input
+                type="date"
+                class="form-control"
+                name="start_date"
+                id="start_date"
+                required
+              />
+          </div>
+           <div class="form-group searchInfoUpdate editable">
+            <label for="start_hour" class="required">Start time</label>
+		    <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                name="start_hour"
+                id="start_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+              />
+              <span class="input-group-addon">:</span>
+              <input
+                type="number"  
+                class="form-control"
+                name="start_minute"     
+                id="start_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+              />
+        </div>
+      </div>
+      {% else %}
+        <div class="form-group searchInfoUpdate form-inline noneditable">
+        <label>Start: </label>
+        <label id="eventStartTime"></label>
+        </div>
+      {% endif %}
+      {% if permissions['Any'] %}
+        <div class="form-group searchInfoUpdate editable">
+            <label for="date" class="required">End Date </label>
+            <input
+                type="date"
+                class="form-control"
+                name="end_date"
+                id="end_date"
+                required
+            />
+          </div>
+           <div class="form-group searchInfoUpdate editable">
+            <label for="end_hour" class="required">End time</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                name="end_hour"
+                id="end_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+              />
+              <span class="input-group-addon">:</span>
+              <input
+                type="number"
+                class="form-control"
+                name="end_minute"
+                id="end_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+              />
+          </div>
+        </div>
+      {% else %}
+          <div class="form-group searchInfoUpdate noneditable">
+            <label> End: </label>
+            <label id="eventEndTime"></label>
+          </div>
+      {% endif %}
+        <div class="form-group searchInfoUpdate ">
+            <label for="location">Location:</label>
+            {% if permissions['Any'] %}
+              <input type="text" id="eventLocation_edit" name="location" class="form-control editable"/>
+            {% else %}
+              <label id="eventLocation" class="infoText noneditable" ></label>
+            {% endif %}
+        </div>
+        <div class="form-group searchInfoUpdate">
+            <label for="name" class="required">Description:</label>
+            {% if permissions['Any'] %}
+              <textarea class="form-control editable" id="eventDescription_edit" name="description" rows="4" required ></textarea>
+            {% else %}
+              <label id="eventDescription" class="noneditable"></label>
+            {% endif %}
+        </div>
+      <div class="row">
+        <div class="text-center editable">
+          <button type="submit" class="btn btn-primary" value="Update" target="_parent"> Update </button>
+          <button type=button class="btn btn-primary deleteEvent" value="Delete"> Delete </button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
