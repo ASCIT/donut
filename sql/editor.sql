@@ -7,7 +7,7 @@ CREATE TABLE webpage_files
     title VARCHAR(100) NOT NULL UNIQUE, 
 	last_edit_uid INTEGER, 
 	locked BOOL DEFAULT FALSE, 
-	last_edit_time TIMESTAMP DEFAULT NOW(),       
+	last_edit_time DATETIME DEFAULT NOW(),       
 	content  TEXT DEFAULT "", 
     primary key(webpage_id)
 );
