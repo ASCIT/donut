@@ -37,27 +37,24 @@ def login_submit():
     if username is not None and password is not None:
         user_id = helpers.authenticate(username, password)
         if user_id is not None:
-            permissions = auth_utils.get_permissions(username)
-
-            # We need to check if the user has masking permissions.
-            mask_perm = auth_utils.check_permission(username, Permissions.MASK)
-
             if mask is not None:
-                if mask_perm:
-                    # But check to make sure the mask exists.
-                    if not auth_utils.get_user_id(mask):
-                        flask.flash('That person does not exist to mask.')
-                        return flask.redirect(flask.url_for('auth.login'))
-
-                    # If the user has mask permissions, give them the mask.
-                    flask.session['username'] = mask
-                    permissions = auth_utils.get_permissions(mask)
-                else:
-                    # Else, refuse the attempt to masquerade.
+                # If the user doesn't have permission, refuse the attempt to masquerade.
+                if not auth_utils.check_permission(username, Permissions.MASK):
                     flask.flash('You do not have permission to masquerade.')
                     return flask.redirect(flask.url_for('auth.login'))
+
+                # Also check that the mask exists.
+                if not auth_utils.get_user_id(mask):
+                    flask.flash('That person does not exist to mask.')
+                    return flask.redirect(flask.url_for('auth.login'))
+
+                # If the user has mask permissions, give them the mask.
+                flask.session['username'] = mask
+                flask.current_app.logger.info(
+                    f'User {username} is masquerading as {mask}')
             else:
                 flask.session['username'] = username
+                flask.current_app.logger.info(f'User logged in: {username}')
 
             # Update last login time
             auth_utils.update_last_login(username)
@@ -68,6 +65,8 @@ def login_submit():
                 return flask.redirect(redirect_to)
             else:
                 return flask.redirect(flask.url_for('home'))
+    flask.current_app.logger.warn(
+        f'Invalid login attempt for user: {username}')
     flask.flash('Incorrect username or password. Please try again!')
     return flask.redirect(flask.url_for('auth.login'))
 
@@ -117,6 +116,7 @@ def reset_password_submit(reset_key):
     username = auth_utils.check_reset_key(reset_key)
     if username is None:
         # Reset key was invalid.
+        flask.current_app.logger.warn(f'Invalid reset_key: {reset_key}')
         flask.flash("Someone's making it on the naughty list this year...")
         return flask.redirect(flask.url_for('auth.forgot_password'))
     new_password = flask.request.form.get('password', '')
@@ -132,5 +132,7 @@ def reset_password_submit(reset_key):
 
 @blueprint.route('/logout')
 def logout():
-    flask.session.pop('username', None)
+    username = flask.session.pop('username', None)
+    if username:
+        flask.current_app.logger.info(f'User logged out: {username}')
     return flask.redirect(flask.url_for('home'))
