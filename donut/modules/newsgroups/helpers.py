@@ -64,9 +64,20 @@ def get_user_actions(user_id, group_id):
     INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR
     pr.pos_id_from=ph.pos_id
     WHERE ph.user_id=%s AND p.group_id=%s"""
+    res = None
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, group_id))
-        return cursor.fetchone()
+        res = cursor.fetchall()
+    actions = {'send': False, 'control': False, 'receive': False}
+    if not res:
+        return actions
+    else:
+        for a in actions:
+            for pos in res:
+                if pos[a]:
+                    actions[a] = True
+                    break
+        return actions
 
 
 def apply_subscription(user_id, group_id):
@@ -182,10 +193,13 @@ def get_owners(group_id):
     """Get users with control access to group."""
 
     query = """
-    SELECT user_id, pos_name 
-    FROM positions NATURAL JOIN position_holders 
-    WHERE positions.control=1
-    AND positions.group_id=%s
+    SELECT ph.user_id, p.pos_name 
+    FROM positions p 
+    LEFT JOIN position_relations pr ON p.pos_id=pr.pos_id_to
+    INNER JOIN position_holders ph
+    ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
+    WHERE p.control=1
+    AND p.group_id=%s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, group_id)
@@ -196,11 +210,12 @@ def get_posting_positions(group_id, user_id):
     """Get positions user can send as in a group."""
 
     query = """
-    SELECT pos_name, pos_id 
-    FROM positions NATURAL JOIN position_holders
-    WHERE positions.group_id=%s
-    AND position_holders.user_id=%s
-    AND positions.send=1
+    SELECT p.pos_name, p.pos_id 
+    FROM positions p INNER JOIN position_holders ph 
+    ON p.pos_id=ph.pos_id
+    WHERE p.group_id=%s
+    AND ph.user_id=%s
+    AND p.send=1
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, user_id))

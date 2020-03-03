@@ -61,14 +61,14 @@ def view_group(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    pos_actions = helpers.get_user_actions(user_id, group_id)
+    actions = helpers.get_user_actions(user_id, group_id)
     fields = [
         'group_id', 'group_name', 'group_desc', 'anyone_can_send',
         'members_can_send', 'visible', 'admin_control_members'
     ]
     group_info = groups.get_group_data(group_id, fields)
     applications = None
-    if pos_actions and pos_actions['control']:
+    if actions['control']:
         applications = helpers.get_applications(group_id)
     messages = None
     member = groups.is_user_in_group(user_id, group_id)
@@ -78,7 +78,7 @@ def view_group(group_id):
         'group.html',
         group=group_info,
         member=member,
-        actions=pos_actions,
+        actions=actions,
         messages=messages,
         owners=helpers.get_owners(group_id),
         applications=applications)
