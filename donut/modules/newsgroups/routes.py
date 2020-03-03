@@ -35,7 +35,7 @@ def post_message():
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    fields = ['group_id', 'subject', 'msg', 'poster']
+    fields = ['group', 'subject', 'msg', 'poster']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
@@ -70,13 +70,16 @@ def view_group(group_id):
     applications = None
     if pos_actions and pos_actions['control']:
         applications = helpers.get_applications(group_id)
-
+    messages = None
+    member = groups.is_user_in_group(user_id, group_id)
+    if member:
+        messages = helpers.get_past_messages(group_id)
     return flask.render_template(
         'group.html',
         group=group_info,
-        member=groups.is_user_in_group(user_id, group_id),
+        member=member,
         actions=pos_actions,
-        messages=helpers.get_past_messages(group_id),
+        messages=messages,
         owners=helpers.get_owners(group_id),
         applications=applications)
 

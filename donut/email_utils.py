@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+
 def send_email(to, text, subject, use_prefix=True, group=None):
     """
     Sends an email to a user. Expects 'to' to be a comma separated string of
