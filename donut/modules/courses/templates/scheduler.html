@@ -319,34 +319,74 @@
     }
     function fitIntervals() {
       dayLists.each(function(_, day) {
-        var intervals = []
+        var intervals = [], intervalBounds = []
         $(day).children('.interval').each(function(_, element) {
           var $element = $(element)
-          intervals.push({
+          var interval = {
             element: $element,
             start: Number($element.attr('start')),
             end: Number($element.attr('end'))
+          }
+          intervals.push(interval)
+          intervalBounds.push({
+            time: interval.start,
+            start: true,
+            interval: interval
+          }, {
+            time: interval.end,
+            start: false
           })
         })
+
+        /*
+          Use the greedy interval scheduling algorithm
+          to schedule as many classes as possible.
+          Repeat as many times as needed in new columns to schedule all classes.
+        */
         intervals.sort(function(a, b) { return a.end - b.end })
         var intervalsToSchedule = intervals, remainingIntervals
         var lastEnd
-        for (var indent = 0; intervalsToSchedule.length; indent++) {
+        for (var column = 0; intervalsToSchedule.length; column++) {
           lastEnd = -Infinity
           remainingIntervals = []
           intervalsToSchedule.forEach(function(interval) {
             if (interval.start >= lastEnd) { // schedulable
-              interval.indent = indent
+              interval.column = column
               lastEnd = interval.end
             }
             else remainingIntervals.push(interval)
           })
           intervalsToSchedule = remainingIntervals
         }
+
+        // Break the classes into groups, separated by times when 0 classes are scheduled.
+        // For each group, determine the maximum number of overlapping columns.
+        var column = 0, maxColumn = 0
+        var intervalsInGroup = []
+        intervalBounds
+          // Sort interval starts and ends by time, and then ends before starts
+          .sort(function(a, b) { return a.time - b.time || a.start - b.start })
+          .forEach(function(bound) {
+            if (bound.start) {
+              maxColumn = Math.max(++column, maxColumn)
+              intervalsInGroup.push(bound.interval)
+            }
+            else if (!--column) {
+              // We reached the end of this group of classes
+              intervalsInGroup.forEach(function(interval) {
+                interval.maxColumn = maxColumn
+              })
+              maxColumn = 0
+              intervalsInGroup = []
+            }
+          })
+
+        // Draw each interval to span one of the maxColumn columns
         intervals.forEach(function(interval) {
+          var widthPerColumn = 100 / interval.maxColumn
           interval.element.css({
-            width: String(100 / indent) + '%',
-            left: String(100 * interval.indent / indent) + '%'
+            width: String(widthPerColumn) + '%',
+            left: String(interval.column * widthPerColumn) + '%'
           })
         })
       })
