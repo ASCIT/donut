@@ -180,10 +180,12 @@ def add_user_to_db(cursor, student, option_ids, house_pos_ids):
         student["STATE"] or None,
         student["ZIP"] or None,
         student["COUNTRY"] or None, ))
+    user_id = cursor.lastrowid
+    if not user_id:
+        cursor.execute(get_user_id_query, uid)
+        user_id = cursor.fetchone()["user_id"]
 
     # Update options
-    cursor.execute(get_user_id_query, uid)
-    user_id = cursor.fetchone()["user_id"]
     cursor.execute(delete_options_query, user_id)
     for option in (student["OPTION"], student["OPTION2"]):
         if option and option != "Undeclared":
@@ -205,9 +207,8 @@ def add_user_to_db(cursor, student, option_ids, house_pos_ids):
         if not cursor.fetchone():
             cursor.execute(add_house_membership_query, (user_id, pos_id))
     else:
-        position_ids = ", ".join(str(id) for id in house_pos_ids.values())
-        cursor.execute(end_house_membership_query + " (" + position_ids + ")",
-                       user_id)
+        pos_ids = ", ".join(map(str, house_pos_ids.values()))
+        cursor.execute(f'{end_house_membership_query} ({pos_ids})', user_id)
 
 
 parse_gender = lambda gender: \
