@@ -21,6 +21,8 @@
   {% else %}
     Please log in to see Caltech students' events!
   {% endif %}
+  <button type="button" class="next-month btn btn-primary">⇨</button>
+  <button type="button" class="prev-month btn btn-primary">⇦</button>
   <table id="cal" class="table table-bordered">
     <tr class="calendarHeaders">
       <th>S</th>
@@ -39,13 +41,10 @@
   <label for="jumpto" class="required" id="start_time">Jump to:
   <input type="number" class="jumpto_month" max="12" placeholder="MM"/> </input>
   <input type="number" class="jumpto_year" min="1970" max="2036" placeholder="YYYY"/> </input>
-  <button type="button" class="jumpto">Go</button>
+  <button type="button" class="jumpto btn btn-primary">Go</button>
 </label>
   
-  <div>
-<button type="button" class="prev-month">Prev</button>
-<button type="button" class="next-month">Next</button>
-  </div>
+
   <div id="extraInfo_triangle">
   </div>
   <div class='container' id="extraInfo">

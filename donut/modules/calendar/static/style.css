@@ -142,3 +142,26 @@ body{
 button {
     margin:7px;
 }
+
+.spread-label {
+    margin-bottom: 0px;
+    margin-top: 15px;
+}
+
+.next-month {
+    margin-bottom: 5px;
+    margin-top: 0px;
+    top: 5px;
+    margin-right: 0px;
+    position: absolute;
+    right: 0;
+}
+
+.prev-month {
+    margin-bottom: 5px;
+    margin-top: 0px;
+    top: 5px;
+    margin-right: 0px;
+    position: absolute;
+    right: 50px;
+}

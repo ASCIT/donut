@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block page %}
   {% include "topbar.html" %}
-  <div class="col-md-6 col-md-offset-3" style="float: none">
+  <div class="half-float-left" style="float: none">
     <h3>
       {% if state == 'new' %} Create a new {% else %} Modify an existing {% endif %}
       item
@@ -110,7 +110,7 @@
       <div class="form-group">
         <label class="required" for="condition">Condition</label>
         <select class="form-control" name="item_condition" id="condition">
-          <option value="">Chose one...</option>
+          <option value="">Choose one...</option>
           {% for condition in conditions %}
             <option
               value="{{ condition }}"
@@ -129,6 +129,7 @@
             class="form-control"
             name="item_price"
             id="price"
+            type="number"
             value="{{ item.get('item_price', '') }}"
           />
         </div>

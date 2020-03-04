@@ -2,6 +2,7 @@
 {% block page %}
 {% include "topbar.html" %}
 
+<div class="half-float-right">
 <h4>
     Found {{ items|length }} result{% if items|length != 1 %}s{% endif %}.
 </h4>
@@ -34,5 +35,6 @@
         </tbody>
     </table>
 {% endif %}
+</div>
 
 {% endblock %}

@@ -8,15 +8,16 @@
 				{{ user['preferred_name'] or user['first_name'] }}
 				{{ user['middle_name'] or '' }}
 				{{ user['last_name'] }}
-				{% if is_me %}
-					<a href='{{ url_for("core.edit_user") }}' style='float: right; padding-right: 20px'>Update</a>
-				{% endif %}
 			</h2>
 			{% if user['image'] %}
 			<div style="margin-left: -15px;" class='pos-left col-md-8'>
 			{% else %}
 			<div>
 			{% endif %}
+				{% if is_me %}
+					<a class='btn btn-primary' href='{{ url_for("core.edit_user") }}'>Update</a>
+				{% endif %}
+
 				<ul class='list-group list-group-root'>
 					{% if user['username'] and 'username' not in hidden_fields %}
 						<li class='list-group-item'>
