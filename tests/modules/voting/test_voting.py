@@ -500,9 +500,9 @@ def test_respond(client):
         flask.session['username'] = 'dqu'
         # Invalid elected position response
         helpers.set_responses([5], ['[["abc"]]'])
-    with pytest.raises(
-            Exception, message='Unrecognized elected position vote'):
+    with pytest.raises(Exception) as e:
         helpers.get_results(1)
+    assert e.value.args == ('Unrecognized elected position vote', )
 
 
 def test_restrict_access(client):
