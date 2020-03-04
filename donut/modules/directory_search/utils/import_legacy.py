@@ -10,6 +10,8 @@ import os
 from donut.pymysql_connection import make_db
 from donut.constants import Gender
 
+HOVSES = set(('Blacker', 'Dabney', 'Fleming', 'Ricketts'))
+
 
 def read_csv(table_name):
     """
@@ -36,24 +38,24 @@ get_gender = lambda gender_string: \
     None
 
 
-def import_tables(db):
+def import_tables(cursor):
     members = read_inums()
     read_undergrads(members)
     read_phones(members)
     read_people(members)
     read_home_addresses(members)
-    buildings = import_buildings(db)
+    buildings = import_buildings(cursor)
     read_campus_addresses(members, buildings)
-    import_members(db, members)
+    import_members(cursor, members)
 
-    options = import_options(db)
-    import_member_options(db, members, options)
+    options = import_options(cursor)
+    import_member_options(cursor, members, options)
 
-    houses = import_houses(db)
+    houses = import_houses(cursor)
     membership_types = read_membership_types()
-    import_memberships(db, members, houses, membership_types)
+    import_memberships(cursor, members, houses, membership_types)
 
-    import_images(db, members)
+    import_images(cursor, members)
 
 
 def read_inums():
@@ -132,7 +134,7 @@ def read_home_addresses(members):
             member['country'] = country
 
 
-def import_buildings(db):
+def import_buildings(cursor):
     query = 'INSERT INTO buildings (building_name) VALUES (%s)'
     buildings = {}  # map of legacy building IDs to new IDs
     building_names = {}  # map of building names to new IDs
@@ -145,11 +147,10 @@ def import_buildings(db):
             buildings[old_id] = new_id
             continue
 
-        with db.cursor() as cursor:
-            cursor.execute(query, name)
-            new_id = cursor.lastrowid
-            buildings[old_id] = new_id
-            building_names[name] = new_id
+        cursor.execute(query, name)
+        new_id = cursor.lastrowid
+        buildings[old_id] = new_id
+        building_names[name] = new_id
     return buildings
 
 
@@ -171,7 +172,7 @@ def read_campus_addresses(members, buildings):
             member['msc'] = int(number)
 
 
-def import_members(db, members):
+def import_members(cursor, members):
     for member in members.values():
         for value in member.values():
             value_type = type(value)
@@ -181,22 +182,20 @@ def import_members(db, members):
         keys = ', '.join(member)
         values = ', '.join('%s' for key in member)
         query = 'INSERT INTO members (' + keys + ') VALUES (' + values + ')'
-        with db.cursor() as cursor:
-            cursor.execute(query, tuple(member.values()))
-            member['user_id'] = cursor.lastrowid
+        cursor.execute(query, tuple(member.values()))
+        member['user_id'] = cursor.lastrowid
 
 
-def import_options(db):
+def import_options(cursor):
     query = 'INSERT INTO options (option_name) VALUES (%s)'
     options = {}  # map of legacy option IDs to new IDs
     for option in read_csv('undergrad_options'):
-        with db.cursor() as cursor:
-            cursor.execute(query, option['name'])
-            options[option['id']] = cursor.lastrowid
+        cursor.execute(query, option['name'])
+        options[option['id']] = cursor.lastrowid
     return options
 
 
-def import_member_options(db, members, options):
+def import_member_options(cursor, members, options):
     query = """
         INSERT INTO member_options (user_id, option_id, option_type)
         VALUES (%s, %s, 'Major')
@@ -204,17 +203,20 @@ def import_member_options(db, members, options):
     for option_member in read_csv('undergrad_option_objectives'):
         user_id = members[option_member['inum']]['user_id']
         option_id = options[option_member['option_id']]
-        with db.cursor() as cursor:
-            cursor.execute(query, (user_id, option_id))
+        cursor.execute(query, (user_id, option_id))
 
 
-def import_houses(db):
-    query = "INSERT INTO groups (group_name, type) VALUES (%s, 'house')"
+def import_houses(cursor):
+    query = """
+        INSERT INTO groups (group_name, group_desc, type)
+        VALUES (%s, %s, 'house')
+    """
     houses = {}  # map of legacy house IDs to new IDs
     for house in read_csv('hovses'):
-        with db.cursor() as cursor:
-            cursor.execute(query, house['name'] + ' House')
-            houses[house['id']] = cursor.lastrowid
+        name = house['name']
+        cursor.execute(query, (name, name + (' Hovse'
+                                             if name in HOVSES else ' House')))
+        houses[house['id']] = cursor.lastrowid
     return houses
 
 
@@ -224,7 +226,7 @@ read_membership_types = lambda: {
 }
 
 
-def import_memberships(db, members, houses, membership_types):
+def import_memberships(cursor, members, houses, membership_types):
     group_query = 'SELECT group_id FROM groups WHERE group_name = %s LIMIT 1'
     position_query = """
         SELECT pos_id FROM positions
@@ -240,10 +242,9 @@ def import_memberships(db, members, houses, membership_types):
         position_key = (group_id, membership_name)
         pos_id = pos_ids.get(position_key)
         if not pos_id:
-            with db.cursor() as cursor:
-                # Add new membership position
-                cursor.execute(insert_position_query, position_key)
-                pos_id = cursor.lastrowid
+            # Add new membership position
+            cursor.execute(insert_position_query, position_key)
+            pos_id = cursor.lastrowid
             pos_ids[position_key] = pos_id
         return pos_id
 
@@ -256,11 +257,10 @@ def import_memberships(db, members, houses, membership_types):
         membership_type = house_member['membership_type']
         pos_id = get_pos_id(houses[house_id],
                             membership_types[membership_type])
-        with db.cursor() as cursor:
-            cursor.execute(query, (pos_id, member['user_id']))
+        cursor.execute(query, (pos_id, member['user_id']))
 
 
-def import_images(db, members):
+def import_images(cursor, members):
     # The legacy database has duplicate images; we take the latest one
     query = """
         INSERT INTO images (user_id, extension, image) VALUES (%s, %s, %s)
@@ -285,8 +285,7 @@ def import_images(db, members):
         except FileNotFoundError:
             continue
 
-        with db.cursor() as cursor:
-            cursor.execute(query, (member['user_id'], extension, contents))
+        cursor.execute(query, (member['user_id'], extension, contents))
     os.system('rm -r images')
 
 
@@ -301,7 +300,8 @@ if __name__ == '__main__':
     db = make_db(args.env)
     try:
         db.begin()
-        import_tables(db)
+        with db.cursor() as cursor:
+            import_tables(cursor)
         db.commit()
     finally:
         db.close()
