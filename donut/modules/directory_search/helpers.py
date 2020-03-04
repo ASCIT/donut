@@ -158,6 +158,12 @@ def execute_search(**kwargs):
         query += ' AND graduation_year = %s'
         substitution_arguments.append(kwargs['grad_year'])
     query += ' ORDER BY LOWER(last_name), LOWER(full_name)'
+    if 'offset' in kwargs:
+        query += ' LIMIT %s, %s'
+        substitution_arguments.append(kwargs['offset'])
+        substitution_arguments.append(kwargs['per_page'])
+    else:
+        query = 'SELECT COUNT(*) AS cnt FROM (' + query + ') sub'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, substitution_arguments)
         return cursor.fetchall()

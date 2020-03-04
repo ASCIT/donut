@@ -6,6 +6,8 @@ from flask import jsonify, redirect
 from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
 from donut.modules.directory_search import blueprint, helpers
 
+PER_PAGE = 20
+
 
 @blueprint.route('/directory')
 def directory_search():
@@ -58,35 +60,41 @@ def search_by_name(name_query):
     return jsonify(helpers.get_users_by_name_query(name_query))
 
 
-@blueprint.route('/1/users', methods=['POST'])
+@blueprint.route('/1/users', methods=['GET', 'POST'])
 def search():
     if not is_caltech_user():
         flask.abort(401)
 
-    form = flask.request.form
+    if flask.request.method == 'POST':
+        form = flask.request.form
+        page = 1
+    else:
+        form = flask.request.args
+        page = int(form['page'])
     name = form['name']
     if name.strip() == '':
         name = None
-    house_id = form['house']
+    house_id = form['house_id']
     if house_id:
         house_id = int(house_id)
     else:
         house_id = None
-    option_id = form['option']
+    option_id = form['option_id']
     if option_id:
         option_id = int(option_id)
     else:
         option_id = None
-    building_id = form['residence']
+    building_id = form['building_id']
     if building_id:
         building_id = int(building_id)
     else:
         building_id = None
-    grad_year = form['graduation']
+    grad_year = form['grad_year']
     if grad_year:
         grad_year = int(grad_year)
     else:
         grad_year = None
+    offset = (page - 1) * PER_PAGE
     users = helpers.execute_search(
         name=name,
         house_id=house_id,
@@ -94,12 +102,40 @@ def search():
         building_id=building_id,
         grad_year=grad_year,
         username=form['username'],
-        email=form['email'])
+        email=form['email'],
+        offset=offset,
+        per_page=PER_PAGE)
+    if flask.request.method == 'POST':
+        total = int(
+            helpers.execute_search(
+                name=name,
+                house_id=house_id,
+                option_id=option_id,
+                building_id=building_id,
+                grad_year=grad_year,
+                username=form['username'],
+                email=form['email'])[0]['cnt'])
+        num_pgs = total // PER_PAGE + (total % PER_PAGE > 0)
+    else:
+        total = form['total']
+        num_pgs = int(form['num_pgs'])
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
-
     show_images = 'show_images' in form
+
     return flask.render_template(
-        'search_results.html', users=users, show_images=show_images)
+        'search_results.html',
+        users=users,
+        show_images=show_images,
+        total=total,
+        num_pgs=num_pgs,
+        page=page,
+        name=form['name'],
+        house_id=form['house_id'],
+        option_id=form['option_id'],
+        building_id=form['building_id'],
+        grad_year=form['grad_year'],
+        username=form['username'],
+        email=form['email'])
