@@ -112,7 +112,7 @@ CREATE TABLE users (
 -- Examples: Blacker Hovse, IHC, CRC, ug-list, ug-2020
 CREATE TABLE groups (
     group_id                INT          NOT NULL AUTO_INCREMENT,
-    group_name              VARCHAR(32)  NOT NULL,
+    group_name              VARCHAR(64)  NOT NULL,
     group_desc              VARCHAR(255) DEFAULT NULL,
     type                    VARCHAR(255) NOT NULL,
     newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
