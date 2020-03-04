@@ -4,43 +4,56 @@ from donut.modules.calendar import helpers
 from donut.modules.calendar import blueprint
 import datetime
 
+last_update_time = datetime.datetime(year=1970, month=1, day=1)
+
 
 @blueprint.route('/calendar')
 def calendar():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     return flask.render_template(
         'calendar.html', permissions=helpers.get_permission())
 
 
 @blueprint.route('/calendar/add_events')
 def add_events():
-    return flask.render_template(
-        'add_events-iframe.html', permissions=helpers.get_permission())
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
 
-
-@blueprint.route('/calendar/display')
-def display():
     return flask.render_template(
-        'display-iframe.html', permissions=helpers.get_permission())
+        'add_events.html', permissions=helpers.get_permission())
 
 
 @blueprint.route('/calendar/share_cal')
 def share_cal():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     return flask.render_template(
-        'share_cal-iframe.html', permissions=helpers.get_permission())
+        'share_cal.html', permissions=helpers.get_permission())
 
 
-@blueprint.route('/calendar/events_list')
-def events_list():
+@blueprint.route('/calendar/search')
+def calendar_search():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     return flask.render_template(
-        'events_list-iframe.html', permissions=helpers.get_permission())
+        'calendar_search.html', permissions=helpers.get_permission())
 
 
 @blueprint.route('/calendar/sync')
 def sync():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     res = helpers.sync_data(all_data=True)
     error_message = helpers.check_if_error(res)
     if error_message:
         flask.flash(error_message)
+    global last_update_time
+    last_update_time = datetime.datetime.now()
     return flask.render_template(
         'calendar.html', permissions=helpers.get_permission())
 
@@ -56,15 +69,28 @@ def get_all_events():
 
 @blueprint.route('/1/calendar_all_events_backup', methods=['POST'])
 def get_all_events_backup():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     res = helpers.get_events_backup(all_data=True)
     error_message = helpers.check_if_error(res)
     if error_message:
         return flask.jsonify({'err': error_message})
-    return flask.jsonify({'events': res})
+    return flask.jsonify({
+        'events':
+        res,
+        'permissions':
+        helpers.get_permission(),
+        'last_update_time':
+        last_update_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+    })
 
 
 @blueprint.route('/1/calendar_events', methods=['POST'])
 def get_events():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     res = helpers.sync_data(1, flask.request.form['year'], 12,
                             flask.request.form['year'])
     error_message = helpers.check_if_error(res)
@@ -75,17 +101,27 @@ def get_events():
 
 @blueprint.route('/1/calendar_events_backup', methods=['POST'])
 def get_events_backup():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
 
     res = helpers.get_events_backup(1, flask.request.form['year'], 12,
                                     flask.request.form['year'])
     error_message = helpers.check_if_error(res)
     if error_message:
         return flask.jsonify({'err': error_message})
-    return flask.jsonify({'events': res})
+    return flask.jsonify({
+        'events':
+        res,
+        'last_update_time':
+        last_update_time.strftime("%Y-%m-%dT%H:%M:%SZ")
+    })
 
 
 @blueprint.route('/calendar/share_cal', methods=['POST'])
 def calendar_share_cal():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     fields = ['email', 'tag', 'access_level']
     for field in fields:
         if None == flask.request.form.get(field):
@@ -107,6 +143,9 @@ def calendar_share_cal():
 
 @blueprint.route('/1/calendar/delete_event', methods=['POST'])
 def calendar_delete():
+    if not auth_utils.is_caltech_user():
+        return login_redirect()
+
     return flask.jsonify({
         'deleted':
         helpers.delete(flask.request.form['id'], flask.request.form['tag'])
@@ -134,9 +173,11 @@ def calendar_add_events(update=0):
     start_year, start_month, start_day = map(int, start_date.split('-'))
     end_year, end_month, end_day = map(int, end_date.split('-'))
 
-    begin_datetime = datetime.datetime(start_year, start_month, start_day)
-    end_datetime = datetime.datetime(end_year, end_month, end_day)
-    if begin_datetime >= end_datetime:
+    begin_datetime = datetime.datetime(start_year, start_month, start_day,
+                                       int(start_hour), int(start_time))
+    end_datetime = datetime.datetime(end_year, end_month, end_day,
+                                     int(end_hour), int(end_time))
+    if begin_datetime > end_datetime:
         flask.flash('Invalid times', 'error')
         return flask.redirect(flask.url_for('calendar.calendar'))
 

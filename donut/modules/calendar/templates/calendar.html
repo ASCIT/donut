@@ -3,43 +3,195 @@
   {{super()}}
   <link rel="stylesheet" href={{ url_for('calendar.static', filename='style.css')}}>
 {% endblock %}
+{% block scripts %}
+  {{super()}}
+  <script src={{ url_for('calendar.static', filename='script.js', _external = True)}}></script>
+{% endblock %}
 {% block page %}
-  <div class="jumbotron col-md-8 col-md-offset-2" id="tab-content" style="float: none; padding-bottom: 5px; height: 150%">
-    <ul class="nav nav-tabs nav-justified">
-      <li class="active">
-        <a href="#display" aria-controls="display" role="tab" data-toggle="tab">
-            Show Calendar
-        </a>
-      </li>
-     <li>
-        <a href="#events_list" aria-controls="events_list" role="tab" data-toggle="tab">
-            Event List
-        </a>
-      </li>
-      <li>
-        <a href="#add_events" aria-controls="add_events" role="tab" data-toggle="tab">
-            Add Event
-        </a>
-      </li>
-      <li>
-        <a href="#share_cal" aria-controls="share_cal" role="tab" data-toggle="tab">
-            Share Calendar
-        </a>
-      </li>
-    </ul>
-    <div class="tab-content">
-      <div class="tab-pane active" id="display">
-        {% include "display.html" %}
+<meta name="viewport" content="width=device-width" />
+  {% if 'username' in session %}
+  <div class="jumbotron col-md-10 col-md-offset-1 fullHeight noPadding">
+    <div class="month-year text-center">
+      <h4></h4>
+    </div>
+    {% if permissions['Any'] %}
+      <a href="{{url_for('calendar.add_events')}}" type = "button" class="btn btn-primary addEvents">+ Event</a>
+    {% endif %}
+    {% if "username" in session %}
+      <div id='failover_message'>
+
+        <span id="last_update_message">Using a cached version of events from donut's databases from {0}</span>. To force a sync with google calendars, 
+        <a href={{ url_for('calendar.sync')}}>click this link</a>
       </div>
-      <div class="tab-pane" id="events_list">
-        {% include "events_list.html" %}
+    {% else %}
+      Please log in to see Caltech students' events!
+    {% endif %} 
+    <button type="button" class="next-month btn btn-primary">⇨</button>
+    <button type="button" class="prev-month btn btn-primary">⇦</button>
+    <div class="row">
+      <div class="col-md-1">
+        {% for item in ['ASCIT', 'Avery', 'Bechtel', 'Blacker', 'Dabney', 'Fleming', 'Lloyd', 'Page', 'Ricketts', 'Ruddock', 'Other', 'Athletics']%}
+          <label class="checkbox-inline"><input type="checkbox" name="display_tag" value="{{ item }}"/>{{ item }}<span class="dot" id="{{item}}"></span></label>
+        {% endfor %}
       </div>
-      <div class="tab-pane" id="add_events">
-        {% include "add_events-iframe.html" %}
-      </div>
-      <div class="tab-pane" id="share_cal">
-        {% include "share_cal.html" %}
-      </div>
+    <div class="col-md-11 fullHeight noPadding">
+      <table id="cal" class="table table-bordered">
+        <tr class="calendarHeaders">
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tues</th>
+          <th>Wed</th>
+          <th>Thurs</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </table>
     </div>
   </div>
+  <div class="jump">
+    <a href="{{url_for('calendar.share_cal')}}" type = "button" class="btn btn-primary share"><span class="glyphicon glyphicon-share"></span> calendar</a>
+    <input type="number" class="jumpto_month" min="1" max="12" placeholder="MM"/> </input>
+    <input type="number" class="jumpto_year" min="1970" max="2036" placeholder="YYYY"/> </input>
+    <button type="button" class="jumpto btn btn-primary">Go</button>
+  </div> 
+  <a href="{{url_for('calendar.calendar_search')}}" type = "button" class="btn btn-primary search">Search</a>
+  <div class='container' id="extraInfo">
+    <span class="close">&times;</span>
+    {% if permissions['Any'] %}
+      <form method="POST" action="{{ url_for('calendar.calendar_add_events', update=1) }}">
+    {% endif %}
+    <div class="form-group form-inline">
+      <label for="name" class="required">Event Name:</label>
+      {% if permissions['Any'] %}
+        <input id="eventName_edit" type="text" name="name" class="form-control" required />
+      {% else %}
+        <label id="eventName" class="infoText" for="name"></label>
+      {% endif %}
+    </div>
+    <div class="form-group">
+            <label for="tag" class="required">Tag:</label>
+            <label class="infoText" id="tag"></label>
+            <input type="hidden" id="htag" class="form-control" name="tag"></input>
+    </div>
+    {% if permissions['Any'] %}
+      <div class="form-group form-inline">
+        <div class="halfWidth">
+          <input type="hidden" id="calEventId" class="form-control" name="eventId"></input>
+          <label for="date" class="required">Start Date </label>
+          <input
+                type="date"
+                class="form-control"
+                name="start_date"
+                id="start_date"
+                required
+           />
+         </div>
+         <div class="halfWidth">
+           <label for="start_hour" class="required">Start time</label>
+		   <div class="input-group">
+             <input
+                type="number"
+                class="form-control"
+                name="start_hour"
+                id="start_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+             />
+             <span class="input-group-addon">:</span>
+             <input
+                type="number"  
+                class="form-control"
+                name="start_minute"     
+                id="start_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+              />
+            </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="form-group">
+        <label>Start time : </label>
+        <label id="eventStartTime" class="infoText" ></label>
+      </div>
+    {% endif %}
+    {% if permissions['Any'] %}
+       <div class="form-group form-inline">     
+          <div class="halfWidth">
+            <label for="date" class="required">End Date </label>
+            <input
+                type="date"
+                class="form-control"
+                name="end_date"
+                id="end_date"
+                required
+            />
+          </div>
+          <div class="halfWidth">
+          <label for="end_hour" class="required">End time</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                name="end_hour"
+                id="end_hour"
+                required
+                min="1"
+                placeholder="4"
+                max="24"
+              />
+              <span class="input-group-addon">:</span>
+              <input
+                type="number"
+                class="form-control"
+                name="end_minute"
+                id="end_minute"
+                required
+                min="0"
+                placeholder="00"
+                max="59"
+              />
+             </div>
+          </div>
+        </div>
+    {% else %}
+        <div class="form-group">
+          <label>End time : </label>
+          <label class="infoText" id="eventEndTime"></label>
+        </div>
+    {% endif %}
+        <div class="form-group">
+            <label for="location">Location:</label>
+            {% if permissions['Any'] %}
+            <input type="text" id="eventLocation_edit" name="location" class="form-control"/>
+            {% else %}
+            <label id="eventLocation" class="infoText" ></label>
+            {% endif %}
+        </div>        
+        <div class="form-group">
+            <label for="name" class="required">Description:</label>
+            {% if permissions['Any'] %}
+            <textarea class="form-control" id="eventDescription_edit" name="description" rows="3" required ></textarea>
+            {% else %}
+            <label id="eventDescription" class="infoText"></label>
+            {% endif %}
+        </div>
+     {% if permissions['Any'] %}
+      <div class="row">
+        <div class="text-center">
+          <button type="submit" value="Update" class="btn btn-primary" target="_parent"> Update </button>
+          <button type=button class="btn btn-primary deleteEvent" value="Delete"> Delete </button>
+        </div>
+      </div>
+    {% endif %}
+    </form>
+  </div>
+</div>
+{%else%}
+Please login to see the calendar!
+{%endif%}
 {% endblock %}
