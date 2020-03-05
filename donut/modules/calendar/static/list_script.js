@@ -1,31 +1,30 @@
 var color_label = {
-  'Avery': "#ff7744",
-  'Lloyd': "#ffd974",
-  'Blacker': "#d3ff74",
-  'Page':'#a5bcff',
-  'Dabney':'#74ffa1',
-  'Fleming':'#ff74df',
-  'Ruddock':'#74deff',
-  'Ricketts':'#b974ff',
-  'Athletics':'#ff0000',
-  'Other':'#868686',
+  'ASCIT':"#FFC08E",
+  'Avery': "#FF9090",
+  'Bechtel': "#E2E2E2",
+  'Lloyd': "#FFF4A3",
+  'Blacker': "#909090",
+  'Page':'#92BCFF',
+  'Dabney':'#93DBA5',
+  'Fleming':'#FBADFF',
+  'Ruddock':'#4E99D6',
+  'Ricketts':'#C3A3FF',
+  'Athletics':'#A3F0FF',
+  'Other':'#D3FFA3',
 
 };
 function isFuture(curEvent)
 {
-
     var timeStr = curEvent.end.dateTime || curEvent.end.date;
-    var year = Number(timeStr.substring(0, 4))
-    var day = Number(timeStr.substring(8, 10));
-    var month = Number(timeStr.substring(5, 7));    
     var curDay = new Date();
-    var curEvent = new Date(timeStr);
+    var curEvent = new Date(timeStr.substring(0, timeStr.length-1)+"-08:00");
     return curEvent >= curDay;
 }
 
 function showEventInfo(event)
 {
   var data = event.data.data;
+  var permission = event.data.permission;
   $('#eventName').text(data.summary);
   $('#eventName_edit').val(data.summary);
  
@@ -59,23 +58,54 @@ function showEventInfo(event)
   $('#start_date').val(begin.substring(0, 10));
   $('#end_date').val(end.substring(0, 10));
   $('#extendInfo').show();
-  $(".deleteEvent").on('click',{eventID:data.id, tag:data.organizer.displayName}, deleteEvent);
-
+  if (permission)
+  {
+    $(".deleteEvent").unbind("click").on('click',{eventID:data.id, tag:data.organizer.displayName}, deleteEvent);
+    $(".editable").show();
+    $(".noneditable").hide();
+  }
+  else{
+    $(".editable").hide();
+    $(".noneditable").show();
+  }
+  $(".close").show();
+  $(".extendInfoCol").show();
 }
 
+// Returns a format in mm/dd/yy
+function formatDate(datestr) {
+  var curDate = datestr.substring(0, 10);
+  var year = curDate.substring(0, 4).substring(2);
+  var month = curDate.substring(5, 7);
+  var day = curDate.substring(8, 10);
+  return month + "/"+day+"/"+year;
+}
 // Show all searched event
-function renderAll(eventList, tag)
+function renderAll(eventList, tag, permissions)
 {
     $(tag + ':not(#extendInfo)').empty();
     eventList.forEach(function(curEvent) {
+    var dot = $('<label>').append($('<span>').addClass('dot').css('background-color', color_label[curEvent.organizer.displayName]));
+    var eventName = $('<label>').addClass('alignleft').text(curEvent.summary);
+    var eventStartDate = formatDate(curEvent.start.dateTime || curEvent.start.date);
+    var eventEndDate = formatDate(curEvent.end.dateTime || curEvent.end.date);
+    var eventDates = $('<label>').addClass('alignright').text(eventStartDate+" - "+eventEndDate);
     var divNode = $('<div>')
-        .css('background', color_label[curEvent.organizer.displayName])
         .addClass('searchEvents rounded')
+        .addClass(curEvent.organizer.displayName)
         .attr('id', curEvent.id)
-        .append($('<label>').text(curEvent.summary))
+        .append(dot)
+        .append(eventName)
+        .append(eventDates)
+        .append('<hr>')
         .click({data: curEvent, div: divNode}, showEventInfo)
         $(tag).append(divNode);
-        $("#"+curEvent.id).on('click',{data: curEvent, div:divNode}, showEventInfo);
+        var editable = false;
+        if (permissions[curEvent.organizer.displayName]) 
+        {
+          editable = true;
+        }
+        $("#"+curEvent.id).unbind("click").on('click',{data: curEvent, div:divNode, permission:editable}, showEventInfo);
     });
     if (!eventList.length)
     {
@@ -91,6 +121,7 @@ function search(data, query)
       var name = calEvent['summary'].toLowerCase();
       var description = (calEvent.description || '').toLowerCase();
       var score = 0;
+      var organizer = calEvent['organizer']['displayName'].toLowerCase();
       query.forEach(function(segment) {
         if(name.indexOf(segment)>-1)
         {
@@ -108,6 +139,15 @@ function search(data, query)
         {
           score += .25;
         }
+
+        if(organizer.indexOf(segment)>-1)
+        {
+          score += 1.25;
+        }
+        else if (organizer.replace(/\s+/g, '').includes(segment))
+        {
+          score += .75;
+        }
       })
       if (score)
       {
@@ -119,8 +159,8 @@ function search(data, query)
                        .map(function(eventScore) { return eventScore.calEvent });
   possibleEventsPast = possibleEventsPast.sort(function(a, b) { return b.score - a.score })
                        .map(function(eventScore) { return eventScore.calEvent });
-  renderAll(possibleEventsFuture, '#future');
-  renderAll(possibleEventsPast, '#past');
+  renderAll(possibleEventsFuture, '#future', data.permissions);
+  renderAll(possibleEventsPast, '#past',  data.permissions);
 }
 
 function getData()
@@ -134,28 +174,13 @@ function getData()
    var possibleEventsPast = [];
    // Get all possible events...
    $.ajax({
-      url: '/1/calendar_all_events',
+      url: '/1/calendar_all_events_backup',
       type: 'POST',
       success: function(data){
-        $('#failover_message').hide();
+        $('#failover_message').css('display', 'inline-table');
         search(data, query);
-      }, 
-      timeout:1000,
-      error: function(jqXHR, textStatus){
-        if(textStatus === 'timeout')
-        { 
-          $.ajax({
-              url: '/1/calendar_all_events_backup',
-              type: 'POST',
-              success:function(data){
-                if (!window.parent.location.href.includes('sync')){
-                    $('#failover_message').show();
-                }
-                search(data, query); 
-              }
-          });
-        }
-      }
+        $('#last_update_message').text($('#last_update_message').html().replace("{0}", data.last_update_time));
+      } 
     });
 }
 
@@ -179,8 +204,33 @@ function deleteEvent(event)
         }
       }
     });
+    $('#extendInfo').hide();
+}
+
+function toggle(tag, visibility){
+    $("div").each( function (){
+        if ($(this).hasClass(tag))
+        {
+            $(this).toggle(visibility);
+        }
+    });
 }
 
 $(function(){
-    $('.btn[value="Submit"]').click(getData);
+  $('.btn[value="Search"]').click(getData);
+    // Fill in colors for the calendars
+  for (var key in color_label) {
+    $("#"+key+".dot").css("background-color", color_label[key]);
+  }
+
+  // Bind visible checkboxes. 
+  $(':checkbox').change(function() {
+    toggle($(this).val(), this.checked);
+  });
+
+  $(':checkbox').prop('checked', true);
+
+  $('.close').click(function() {
+        $(this).parent().hide();
+  });
 });

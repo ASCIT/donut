@@ -4,10 +4,7 @@
 <div class="jumbotron">
     <div class="row">
         <div class="col-md-8">
-              {% if admin or 'SUMMARY' in perms%}
-                  <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
-              {% endif %}
-            <div class="panel panel-default">
+            <div style="margin-left: 10px;" class="panel panel-default">
                 <div class="panel-heading">
                     <h3>Feedback Summary</h3>
                 </div>
@@ -29,8 +26,8 @@
                     {% endif %}
                 </div>
                 {% if admin or 'TOGGLE_READ' in perms %}
-                    <button class="btn btn-primary" id="markRead">Mark as read</button>
-                    <button class="btn btn-primary" id="markUnread">Mark as unread</button>
+                    <button class="btn btn-primary" style="margin-left: 15px;" id="markRead">Mark as read</button>
+                    <button class="btn btn-primary" style="margin-left: 15px;" id="markUnread">Mark as unread</button>
                 {% endif %}
            </div>
         </div>
@@ -51,9 +48,13 @@
                     </div>
                     <div class="row">
                     </div>
-                </div> 
+                </div>
             {% endif %}
         </div>
+        {% if admin or 'SUMMARY' in perms%}
+            <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
+        {% endif %}
+
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 <div>
@@ -62,9 +63,9 @@
                             <tr> <th>Time Posted</th> <th>Name</th> <th>Message</th> </tr>
                         </thead>
                         {% for message in complaint['messages'] %}
-                        <tr> 
-                            <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th> 
-                            <th>{{ message['poster'] }}</th> 
+                        <tr>
+                            <th>{{ message['time'].strftime('%b %d %Y %-I:%M%p') }}</th>
+                            <th>{{ message['poster'] }}</th>
                             <td>{{ message['message'] }}</td>
                         </tr>
                         {% endfor %}
@@ -97,13 +98,13 @@
 {% block scripts %}
 {{ super() }}
 <script>
- 
+
  $(document).ready(function() {
      {% if complaint['status'] == 'new_msg' %}
          $('#markUnread').hide();
      {% else %}
          $('#markRead').hide();
-     {% endif %} 
+     {% endif %}
      $('#markRead').click(function() {
 	 $.ajax({
 	     url: "{{ url_for('feedback.feedback_mark_read', id=complaint['uuid'], group=group) }}",
@@ -133,7 +134,7 @@
          });
      });
  });
- 
+
 </script>
 
 {% endblock %}

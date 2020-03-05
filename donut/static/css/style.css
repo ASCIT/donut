@@ -1,8 +1,7 @@
-@font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
-
 /* Include Open Sans, courtesy of Google. */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
 
+@font-face { font-family: 'donutfont'; src:url('../fonts/donutfont.ttf'); }
 
 /* Make sure that widths and heights are all done the same way.  */
 *,
@@ -40,7 +39,7 @@ html {
 body {
   padding-bottom: 3%;
   padding-top: 3%;
-  font-family: 'Open Sans', 'sans-serif';
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
   font-weight: 400;
   height: 100%;
   -webkit-font-smoothing: antialiased;
@@ -104,7 +103,7 @@ input[type=checkbox], input[type=radio] {
             drop-shadow(1px -1px 0 white)
             drop-shadow(-1px -1px 0 white);
 
-  filter: drop-shadow(1px 1px 0 white) 
+  filter: drop-shadow(1px 1px 0 white)
             drop-shadow(-1px 1px 0 white)
             drop-shadow(1px -1px 0 white)
             drop-shadow(-1px -1px 0 white);
@@ -112,9 +111,9 @@ input[type=checkbox], input[type=radio] {
   font-size: 94px;
   text-align: center;
   font-family: 'donutfont';
-  color: #f5903b; 
+  color: #f5903b;
   z-index: 9999;
-  margin: auto; 
+  margin: auto;
   display: block;
 }
 
@@ -167,7 +166,6 @@ table {
   border-collapse: separate;
   border: 0px;
   width: 100%;
-  padding-bottom: 10px;
 }
 
 /* Better than them being centered. */
@@ -208,10 +206,10 @@ td {
   background-color: #FFF;
   color: #333;
   border-color: orange;
-  margin-bottom: 5%;
+  margin-bottom: 5px;
 }
 
-/* This is mirroring the btn-default. 
+/* This is mirroring the btn-default.
  */
 .btn-primary {
   -webkit-transition: all 0.5s;
@@ -219,7 +217,7 @@ td {
   -o-transition: all 0.5s;
   transition: all 0.5s;
 
-  margin-bottom: 5%;
+  margin-bottom: 5px;
 }
 
 /* When the primary button class is hovered, give it an orange background. */
@@ -232,7 +230,7 @@ td {
   background-color: orange;
   color: #FFF;
   border-color: orange;
-  margin-bottom: 5%;
+  margin-bottom: 5px;
 }
 
 /* Buttons are orange. */
@@ -292,10 +290,11 @@ td {
 
 /* Left-half class for a div of a split, two-column page. */
 .half-float-left {
-  width: 45%;
+  width: 50%;
   float: left;
   display: inline-block;
   margin: 0;
+  padding-right: 5%;
 }
 
 /* A class for giving an element a thin white border. */
@@ -333,27 +332,11 @@ td {
   margin-top: 0 !important;
 }
 
+.input-group-btn .btn {
+  margin: 0;
+}
+
 /* END FORM ELEMENTS */
-
-/* When we need to have a container spanning half the page width on the
- * right.
- */
-.half-float-right {
-  width: 50%;
-  float: right;
-  display: inline-block;
-  margin: 0;
-}
-
-/* When we need to have a container spanning half the page width on the
- * left.
- */
-.half-float-left {
-  width: 45%;
-  float: left;
-  display: inline-block;
-  margin: 0;
-}
 
 /* Gives us some leeway in formatting inputs. */
 .input {
@@ -366,7 +349,7 @@ td {
   background-color: #FFF;
   text-align: justify;
   padding-top: 30px;
-  font-family: 'Open Sans', 'sans-serif';
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
 }
 
 /* The main wrapper for everything to keep it tidy. */
@@ -388,7 +371,6 @@ td {
 /* Some padding and orange-ifying for textboxes. */
 .jumbotron form input {
   margin-top: 1%;
-  border: 1px orange solid;
   border-radius: 5px;
   margin-right: 10px;
 }
@@ -397,7 +379,7 @@ td {
   border: 1px orange solid;
 }
 
-.jumbotron form textarea {
+.jumbotron form textarea:focus {
   border: 1px orange solid;
 }
 
@@ -576,13 +558,13 @@ td {
   -moz-animation: rotating 10s linear infinite;
   -ms-animation: rotating 10s linear infinite;
   -o-animation: rotating 10s linear infinite;
-  animation: rotating 10s linear infinite; 
+  animation: rotating 10s linear infinite;
 
   width: 12vw;
   margin-bottom: 10px;
 }
 
-/* Creates a row-like element. These are intended to stack atop one another 
+/* Creates a row-like element. These are intended to stack atop one another
  * vertically.
  */
 .row {
@@ -619,7 +601,7 @@ td {
  * should not be used for general styling or anything of the like. Odds are, *
  * you won't need them for anything!                                         */
 /*****************************************************************************/
- 
+
 
 /* Content needs to span the width of its parent. */
 #content {
@@ -636,7 +618,7 @@ td {
  */
 #footer {
   width: 50%;
-  z-index: 0;
+  z-index: -1;
   position: relative;
   height: 20px;
 }
@@ -646,7 +628,7 @@ td {
  */
 #copyright {
   padding: 15px;
-  color: #EEE;
+  color: #666;
   font-size: 10px;
 }
 
@@ -709,7 +691,7 @@ td {
 @media only screen and (min-width: 900px) {
   /* For large screens that need to see the background image. */
   .bg-image {
-    background-size: 100% 100%;   
+    background-size: 100% 100%;
     display: none;
   }
 }

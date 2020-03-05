@@ -6,16 +6,18 @@ var weekDayName = 'SUN MON TUES WED THURS FRI'.split(' ');
 var events = {}
 var curYear = CURRENT_DATE.getFullYear();
 var colorLabel = {
-  'Avery': "#ff7744",
-  'Lloyd': "#ffd974",
-  'Blacker': "#d3ff74",
-  'Page':'#a5bcff',
-  'Dabney':'#74ffa1',
-  'Fleming':'#ff74df',
-  'Ruddock':'#74deff',
-  'Ricketts':'#b974ff',
-  'Athletics':'#ff0000',
-  'Other':'#868686',
+  'ASCIT':"#FFC08E",
+  'Avery': "#FF9090",
+  'Bechtel': "#E2E2E2", 
+  'Lloyd': "#FFF4A3",
+  'Blacker': "#909090",
+  'Page':'#92BCFF',
+  'Dabney':'#93DBA5',
+  'Fleming':'#FBADFF',
+  'Ruddock':'#4E99D6',
+  'Ricketts':'#C3A3FF',
+  'Athletics':'#A3F0FF',
+  'Other':'#D3FFA3',
 
 };
 
@@ -82,23 +84,17 @@ function showEventInfo(event)
 
 
   // Rendering fun....
-  var eleCenter = $('#extraInfo_triangle').width()/2;
-  if (event.clientX < $('#cal').width()/2)
+  var eleCenter = $('#cal').width()/2;
+  var offset = $('#cal').width() * 1/7;
+  if (event.clientX - offset < $('#cal').width()/2)
   {
-    $('#extraInfo_triangle').css("left", $('#cal').width()/2 - eleCenter);
-    $('#extraInfo').css("left", $('#cal').width()/2);  
-    $('#extraInfo_triangle').css({"box-shadow": "3px -3px 3px 0px rgba(0, 0, 0, 0.4)"});
-    $('#extraInfo_triangle').css({"border-color": "white white transparent transparent"});
+    $('#extraInfo').css("left", "auto");
+    $('#extraInfo').css("right", "0px");  
   }
   else {
-    $('#extraInfo').css("left", "0px");
-    $('#extraInfo_triangle').css("left", $('#cal').width()/2 - eleCenter);
-    $('#extraInfo_triangle').css({"box-shadow": "-3px 3px 3px 0px rgba(0, 0, 0, 0.4)"});
-    $('#extraInfo_triangle').css({"border-color": "transparent transparent white white"});
+     $('#extraInfo').css("right", "auto");
+    $('#extraInfo').css("left", offset+"px");
   }
-  $('#extraInfo_triangle').css("top", 
-        Math.min($('#extraInfo').height() -  $('#extraInfo_triangle').height(), event.clientY+ 5));
-  $('#extraInfo_triangle').fadeIn();
   $('#extraInfo').fadeIn();
 }
 
@@ -207,7 +203,7 @@ function getEvents(month, year){
         events[i] = [];
     }
     $.ajax({
-      url: '/1/calendar_events',
+      url: '/1/calendar_events_backup',
       type: 'POST',
       data:{
         year:year
@@ -218,36 +214,11 @@ function getEvents(month, year){
               alert(res.err);
           } else {
             process_events(res, month, year);
-            $('#failover_message').hide();
+            if (!window.parent.location.href.includes('sync')){
+              $('#failover_message').show();
+            }
+            $('#last_update_message').text($('#last_update_message').html().replace("{0}", res.last_update_time));
           }
-      },
-
-      // Perhaps the timeout is too long... But this is about the time where
-      // Half of the time it'll work and the other half wouldn't
-      timeout:3000, 
-      error: function(jqXHR, textStatus){
-        if(textStatus === 'timeout')
-        {     
-            // Access the backup
-            $.ajax({
-                url: '/1/calendar_events_backup',
-                type: 'POST',
-                data:{
-                    year:year
-                },
-                success:function(data){
-                    if (data.err)
-                    {
-                        alert(data.err);
-                    } else{
-                      if (!window.parent.location.href.includes('sync')){
-                          $('#failover_message').show();
-                      }
-                      process_events(data, month, year);
-                    } 
-                }
-            });
-        }
       }
     });
 
@@ -278,10 +249,15 @@ function renderCalendar(startDay, totalDays, currentDate) {
 
     // Generate new row when day is Saturday, but only if there are
     // additional days to render
-    if (currentDay === 0 && (i < totalDays)) {
+    if (currentDay === 0 && (i < totalDays) && i !== 0) {
       $week = getCalendarRow();
       currentRow++;
     }
+  }
+  // If we are not viewing on a mobile device
+  if ($(window).width() > 900)
+  {
+    $("#cal td").css("height", String(90/currentRow)+"%");
   }
 }
 
@@ -290,7 +266,6 @@ function clearCalendar() {
   var $trs = $('#cal tbody tr:not(.calendar, .calendarHeaders)');
   $trs.remove();
   $('#extraInfo').hide();
-  $('#extraInfo_triangle').hide();
   $('.month-year').empty();
 }
 
@@ -314,7 +289,7 @@ function myCalendar() {
   var counter = 1;
 
   var $ym = $('<h3>');
-
+  
   $ym.text(content[month] + ' ' + year);
   $ym.appendTo('.month-year');
 
@@ -345,6 +320,10 @@ function navigationHandler(dir) {
 }
 
 function jumptodate(){
+  if ($('.jumpto_month').val() === "" || $('.jumpto_year').val() === "")
+  {
+    return;
+  }
   // Indexed by 0 but humans index by 1
   d.setMonth($('.jumpto_month').val() - 1);
   // But year isn't...
@@ -366,6 +345,12 @@ $(document).ready(function() {
   });
   // Generate Calendar
   myCalendar();
+
+  // Fill in colors for the calendars
+  for (var key in colorLabel) {
+  $("#"+key+".dot").css("background-color", colorLabel[key]);
+
+  }
 
   // Bind visible checkboxes. 
   $(':checkbox').change(function() {
