@@ -20,7 +20,7 @@ def get_user_data(user_id):
         return cursor.fetchone()
 
 
-def handle_create_account(user_id, username, password, password2, birthday):
+def handle_create_account(user_id, username, password, password2):
     """Handles account creation.
   Creates account if all values provided are valid.
   Returns:
@@ -33,9 +33,6 @@ def handle_create_account(user_id, username, password, password2, birthday):
         is_valid = False
     if not validation_utils.validate_password(password, password2):
         is_valid = False
-    if not validation_utils.validate_date(birthday):
-        is_valid = False
-
     if not is_valid:
         return False
 
@@ -55,12 +52,11 @@ def handle_create_account(user_id, username, password, password2, birthday):
         # Set the birthday and invalidate the account creation key.
         query = """
       UPDATE members
-      SET birthday = %s,
-        create_account_key = NULL
+      SET create_account_key = NULL
       WHERE user_id = %s
       """
         with flask.g.pymysql_db.cursor() as cursor:
-            cursor.execute(query, [birthday, user_id])
+            cursor.execute(query, [user_id])
         flask.g.pymysql_db.commit()
     except Exception:
         flask.g.pymysql_db.rollback()
