@@ -1,52 +1,53 @@
 {% extends "layout.html" %}
 
 {% block page %}
-<h2>Create An Account</h2>
-<p style="color: red">All fields are required.</p>
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+    <div class="col-md-6 col-md-offset-3">
+    <h2>Create An Account</h2>
+      <p style="color: red">All fields are required.</p>
+      <form action="{{ url_for('account.create_account_submit', create_account_key=key) }}" method="post">
+        <div class="form">
 
-<form action="{{ url_for('account.create_account_submit', create_account_key=key) }}" method="post">
-  <p>Choose a username and password.</p>
-  <table class="form">
-    <tr>
-      <td>Username</td>
-      <td><input type="text" name="username" /></td>
-    </tr>
-    <tr>
-      <td>Password</td>
-      <td><input type="password" name="password" /></td>
-    </tr>
-    <tr>
-      <td>Confirm password</td>
-      <td><input type="password" name="password2" /></td>
-    </tr>
-  </table>
-  <p>Please fill in/verify your personal information.</p>
-  <table class="form">
-    <tr>
-      <td>First Name</td>
-      <td>{{ user_data['first_name'] }}</td>
-    </tr>
-    <tr>
-      <td>Last Name</td>
-      <td>{{ user_data['last_name'] }}</td>
-    </tr>
-    <tr>
-      <td>Matriculation Year</td>
-      <td>{{ user_data['entry_year'] }}</td>
-    </tr>
-    <tr>
-      <td>Graduation Year</td>
-      <td>{{ user_data['graduation_year'] }}</td>
-    </tr>
-    <tr>
-      <td>Email</td>
-      <td>{{ user_data['email'] }}</td>
-    </tr>
-    <tr>
-      <td>Birthday</td>
-      <td><input type="text" name="birthday" placeholder="YYYY-MM-DD" /></td>
-    </tr>
-  </table>
-  <button type="submit">Submit</button>
-</form>
+        <p>Choose a username and password.</p>
+          <div class="form-group">
+		    <label for="username" class="required">Username</label>           
+            <input type="text" name="username" class="form-control"/>
+          </div>
+          <div class="form-group">
+            <label for="password" class="required">Password</label>
+            <input type="password" name="password" class="form-control" />
+          </div>
+          <div>
+            <label class="required">Confirm password</label>
+            <input type="password" name="password2" class="form-control" />
+         </div>
+       </div>
+       <p>Please verify your personal information. Email team@hacktech.io for issues</p>
+       <div class="form">
+         <div class="form-group">
+           <label>First Name: </label>
+           <label>{{ user_data['first_name'] }}</label>
+         </div>
+         <div class="form-group">
+           <label>Last Name: </label>
+           <label>{{ user_data['last_name'] }}</label>
+         </div>
+         <div class="form-group">
+           <label>Matriculation Year: </label>
+           <label>{{ user_data['entry_year'] }}</label>
+         </div>
+         <div class="form-group">
+           <label>Graduation Year: </label>
+           <label>{{ user_data['graduation_year'] }}</label>
+         </div>
+         <div class="form-group">
+           <label>Email: </label>
+           <label>{{ user_data['email'] }}</label>
+         </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    </div>
+  </div>
+</div>
 {% endblock page %}
