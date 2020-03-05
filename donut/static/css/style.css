@@ -293,6 +293,7 @@ ul, ol {
   float: right;
   display: inline-block;
   margin: 0;
+  padding-left: 3%;
 }
 
 /* Left-half class for a div of a split, two-column page. */
@@ -301,7 +302,7 @@ ul, ol {
   float: left;
   display: inline-block;
   margin: 0;
-  padding-right: 5%;
+  padding-right: 3%;
 }
 
 /* A class for giving an element a thin white border. */
