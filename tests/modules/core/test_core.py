@@ -39,16 +39,16 @@ def test_get_name_and_email(client):
 
 def test_get_group_list_of_member(client):
     assert get_group_list_of_member(1) == [{
-        "control": 0,
+        "control": 1,
         "group_id": 1,
         "group_name": "Donut Devteam"
     }]
     assert get_group_list_of_member(2) == [{
-        "control": 0,
+        "control": 1,
         "group_id": 1,
         "group_name": "Donut Devteam"
     }, {
-        "control": 0,
+        "control": 1,
         "group_id": 2,
         "group_name": "Ruddock House"
     }, {

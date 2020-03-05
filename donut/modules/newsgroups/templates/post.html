@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+<h3 id='warning'></h3>
+<form method="POST" action={{ url_for("newsgroups.post_message") }}>
+	<table id="message" class="table">
+	<tr>
+	<div class="form-group">
+		<label for="group">Group</label>
+		<select class="form-control" id="group" name="group"> 
+			{% for group in groups %}
+			{% if group_selected == group["group_id"]|string %}
+			<option value="{{ group['group_id'] }}" selected>{{ group["group_name"] }}</option>
+			{% else %}
+			<option value="{{ group['group_id'] }}">{{ group["group_name"] }}</option>
+			{% endif %}
+			{% endfor %}
+		</select>
+	</div>
+	</tr>
+	<tr>
+        <div class="form-group">
+                <label for="poster">Post As</label>
+                <select class="form-control" id="poster" name="poster">
+                </select>
+        </div>
+        </tr>
+	<tr>
+	<div class="form-group">
+		<td>
+		<label for="subj" class="required"> Subject: </label>
+                 <input type="text" id="subj" name="subject" class="form-control" required /></td>
+        </div>
+	</tr>
+	<tr>
+                  <div class="form-group">
+			  <td>
+			  <label for="msg" class="required"> Message: </label>
+                    <textarea id="msg" class="form-control" name="msg" rows="10" required ></textarea></td>
+                  </div>
+               
+	</tr>
+	</table>
+	<div class="row">
+                <div class="text-center">
+                  <input class="btn" type="submit" value="Submit" />
+                </div>
+              </div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+	<script>
+		var groupSelect
+		var posList
+function displayWarning(message) {
+      $('#warning').text(message).show()
+    }
+		function loadGroup() {
+			posList.children().remove()
+			$.ajax({
+				type: 'GET',
+				url: '/newsgroups/positions/' + groupSelect.val(),
+				success: function(positions) {
+					displayPositions(positions)
+				},
+				error: function() {
+					displayWarning('Failed to load positions')
+				}
+			})
+		}
+		function displayPositions(positions) {
+			positions.forEach(function(pos) {
+				var posItem = $('<option></option>').text(pos.pos_name)
+				posList.append(posItem)
+			})
+		}
+
+$(document).ready(function() {
+	groupSelect = $('#group').change(loadGroup)
+	posList = $('#poster')
+	loadGroup()
+})
+</script>
+{% endblock %}

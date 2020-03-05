@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+{% if not group['visible'] and not member %}
+  <h1> Must be a member to view </h1>
+{% else %}
+  <h1> {{ group['group_name'] }} </h1>
+  <h2> {{ group['group_desc'] }} </h2>
+  {% if not member %}
+    <form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
+      <div class="form-group">
+	<input class="btn btn-primary" id="apply-btn" type="submit" value="Apply for Subscription"/>
+     </form>
+  {% endif %}
+  {% if group['anyone_can_send'] %}
+    <h4> Anyone can post to this group. </h4>
+  {% else %}
+    <h4> Posting is restricted to authorized members. </h4>
+  {% endif %}
+  {% if group['admin_control_members'] %}
+    <h4> Administrators control the membership of this group. </h4>
+  {% endif %}
+  {% if group['visible'] %}
+    <h4> Anyone can learn that this group exists. </h4>
+  {% endif %}
+  {% if actions["receive"] %}
+    <h4> You are subscribed. </h4>
+  {% else %} 
+    <h4> You are not subscribed. </h4>
+  {% endif %}
+  {% if actions["control"] %} 
+    <h4> You have admin control. </h4>
+    <h4> Applications </h4>
+    <table style="width:100%">
+      <tr>
+        <th>Applicant</th>
+        <th>Email</th>
+        <th>Subscription</th>
+      </tr>
+      {% for applicant in applications %}
+        <tr>
+          <td> {{applicant.name}}</td>
+          <td> {{applicant.email}} </td>
+          <td> <a href={{ url_for('campus_positions')}}>Add to Group</a> </td>
+          <td> <a href={{ url_for('newsgroups.delete_application', user_id=applicant.user_id, group_id=group['group_id']) }}>Dismiss</a> </td>
+        </tr>
+       {% endfor %}
+     </table>
+  {% endif %}
+  {% if actions['send'] or group['anyone_can_send'] %}
+    <br><a href={{ url_for('newsgroups.post', group_id=group['group_id']) }}>Send Message</a>
+  {% endif %}
+    <h2> Group Owners </h2>
+  {% for owner in owners %}
+    <a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.pos_name }}</a><br>
+  {% endfor %}
+  {% if member %}
+    <h4> Recent Messages </h4>
+    <table style="width:100%">
+      <tr>
+        <th>Date</th>
+        <th>From</th>
+        <th>Subject</th>
+       </tr>
+       {% for message in messages %}
+         <tr>
+           <td> {{ message.time_sent }}</td>
+           <td> <a href={{ url_for('directory_search.view_user', user_id=message.user_id) }}>{{ message.post_as }}</a> </td>
+           <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
+          </tr>
+        {% endfor %}
+    </table>
+    <a href={{ url_for('newsgroups.all_posts', group_id=group['group_id']) }}>View All</a>
+  {% else %}
+    <h4> Must be a member to view messages </h4>
+  {% endif %}
+{% endif %}
+{% endblock %}
