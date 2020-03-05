@@ -38,7 +38,7 @@ html {
  */
 body {
   padding-bottom: 3%;
-  padding-top: 3%;
+  padding-top: 46px;
   font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
   font-weight: 400;
   height: 100%;
@@ -166,6 +166,8 @@ table {
   border-collapse: separate;
   border: 0px;
   width: 100%;
+  font-size: 21px;
+  font-weight: 200;
 }
 
 /* Better than them being centered. */
@@ -173,6 +175,11 @@ td {
   text-align: left;
 }
 
+/* Same font size as everything else*/
+ul, ol {
+  font-size: 21px;
+  font-weight: 200;
+}
 /* When we need something to be center regardless of other elements. */
 .absolute-center {
   position: absolute;
@@ -390,11 +397,6 @@ td {
   padding: 15px;
 }
 
-/* Some padding to avoid anything overlapping the header. */
-#header {
-  margin-bottom: 50px;
-}
-
 .jumbotron form textarea:focus {
   border: 1px orange solid;
 }
@@ -610,7 +612,7 @@ td {
 
 /* Give the header some spacing to avoid overlap with other elements. */
 #header {
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 }
 
 /* The footer should always be at the bottom with right-aligned text for the

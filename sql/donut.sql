@@ -138,7 +138,7 @@ CREATE TABLE groups (
 CREATE TABLE positions (
     group_id INT         NOT NULL,
     pos_id   INT         NOT NULL AUTO_INCREMENT,
-    pos_name VARCHAR(32) NOT NULL,
+    pos_name VARCHAR(64) NOT NULL,
     send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
                                        -- can send emails to group
     control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position

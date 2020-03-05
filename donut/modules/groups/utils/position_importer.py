@@ -8,9 +8,9 @@ def import_file(env, filename):
     db = make_db(env)
     try:
         db.begin()
-        with open(filename, "r") as f:
-            reader = csv.DictReader(f, delimiter=",")
-            for i, line in enumerate(reader):
+        with open(filename) as f:
+            reader = csv.DictReader(f)
+            for line in reader:
                 uid = line['uid']
                 group_name = clean_names(line['org_name'])
                 pos_name = line['pos_name']
@@ -53,7 +53,7 @@ def get_group_id(group_name, db):
 
 
 def clean_names(group_name):
-    return group_name.replace("Hovse", "House")
+    return group_name.replace("Hovse", "").replace("House", "")
 
 
 def get_user_id_from_uid(uid, db):
@@ -69,9 +69,8 @@ def get_create_position_id(pos_name, group_id, control, db):
     res = get_position_id(pos_name, group_id, db)
     if res is None:
         with db.cursor() as cursor:
-            cursor.execute(insertion_query, [
-                group_id, pos_name, True if control == "t" else False
-            ])
+            cursor.execute(insertion_query,
+                           [group_id, pos_name, control == "t"])
         res = get_position_id(pos_name, group_id, db)
     return res['pos_id']
 
@@ -87,14 +86,16 @@ def get_position_id(pos_name, group_id, db):
 if __name__ == "__main__":
     # Parse input arguments
     parser = argparse.ArgumentParser(
-        description='Imports a list of past house members from the old db.')
-    # SELECT start_date, end_date,  pos_name , org_name, uid, control
+        description=
+        'Imports a list of past positions and groups from the old db.')
+    # COPY (SELECT start_date, end_date,  pos_name , org_name, uid, control
     # FROM position_holders NATURAL JOIN position_titles NATURAL JOIN
-    # position_organizations NATURAL JOIN inums NATURAL JOIN undergrads;
-
+    # position_organizations NATURAL JOIN inums NATURAL JOIN undergrads) group_info.csv
+    # CSV HEADER
     parser.add_argument(
         "-e", "--env", default="dev", help="Database to update")
-    parser.add_argument("file", help="Path to old media wiki xml")
+    parser.add_argument(
+        "file", help="Path to the out put of the query in the comments")
     args = parser.parse_args()
 
     import_file(args.env, args.file)
