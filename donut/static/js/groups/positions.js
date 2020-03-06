@@ -1,19 +1,20 @@
 var groupDict = {}; // Dict of groups
 var positionsDict = {}; // Dict of different types of positions
-var allPositions = []; // Complete list of all position-group-person pairs
-var counter = 0;
+var allPositions; // Complete list of all position-group-person pairs
+var controlGroupIds; // group_ids of groups that user has admin privileges for
 
 /*
  * Initailizes all relevant fields including all groups, positions,
  * position holders and groups with admin access.
  */
-function init(approvedGroupIds, approvedGroupNames,
-        allPos) {
-    filterPositions(allPos);
+function init(approvedGroupIds, approvedGroupNames, allPos) {
+    allPositions = allPos;
+    controlGroupIds = approvedGroupIds;
     getGroupList();
     collectPositions();
     populateTables();
     populateAdminGroups(approvedGroupIds, approvedGroupNames);
+    populatePositions();
 }
 
 /*
@@ -21,25 +22,12 @@ function init(approvedGroupIds, approvedGroupNames,
  */
 function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
     for (var i = 0; i < approvedGroupIds.length; i++) {
-        var newOption = '<option value=' + approvedGroupIds[i] + '>' +
-            approvedGroupNames[i] + '</option>'
-        $('#groupCreate option:last').after(newOption);
-        $('#groupDel option:last').after(newOption);
-        $('#groupPosHold option:last').after(newOption);
-    }
-}
-
-/*
- * filters out all positions that have expired/havent happened yet
- */
-function filterPositions(allPos) {
-    var today = new Date();
-    for (var i = 0; i < allPos.length; i++) {
-        var s = Date.parse(allPos[i].start_date);
-        var e = Date.parse(allPos[i].end_date);
-        if (s < today && today < e) {
-                allPositions.push(allPos[i])
-        }
+        var newOption = $('<option>')
+            .attr('value', approvedGroupIds[i])
+            .text(approvedGroupNames[i]);
+        $('#groupCreate').append(newOption);
+        $('#groupDel').append(newOption.clone());
+        $('#groupPosHold').append(newOption.clone());
     }
 }
 
@@ -48,59 +36,58 @@ function filterPositions(allPos) {
  * an option to the group select.
  */
 function getGroupList() {
-    for (var i = 0; i < allPositions.length; i++) {
-        var id = allPositions[i].group_id
-        if (groupDict[id] === undefined) {
-            groupDict[id] = allPositions[i].group_name;
-            var newOption = '<option value="' + id + '">'
-                                + allPositions[i].group_name + '</option>';
-            $('#groupSelect option:last').after(newOption);
-
+    allPositions.forEach(function(position) {
+        var id = position.group_id
+        if (!(id in groupDict)) {
+            groupDict[id] = position.group_name;
+            $('#groupSelect').append($('<option>')
+                .attr('value', id)
+                .text(position.group_name)
+            );
         }
-    }
+    })
 }
 
 /*
  * Collects all seperate instance of a position
  */
 function collectPositions() {
-    for (var j = 0; j < allPositions.length; j++) {
-        var id = allPositions[j].pos_id;
-        if (positionsDict[id] === undefined) {
-            positionsDict[id] = allPositions[j].pos_name;
-            var newOption = '<option value=' + id + '>'
-                        + allPositions[j].pos_name + '</option>';
-            $('#positionSelect option:last').after(newOption);
+    allPositions.forEach(function(position) {
+        var id = position.pos_id;
+        if (!(id in positionsDict)) {
+            positionsDict[id] = position.pos_name;
+            $('#positionSelect').append($('<option>')
+                .attr('value', id)
+                .text(position.group_name + ' - ' + position.pos_name)
+            );
         }
-    }
+    })
 }
 
 /*
  * Populates the position table with each instance of a positon
  */
 function populateTables() {
-    for (var i = 0; i < allPositions.length; i++) {
-        addRowToTable(allPositions[i]);
-    }
+    allPositions.forEach(addRowToTable);
 }
 
 /*
  * adds specified position as a row on the position table
- * @param {JSON} json specfiying a position
  */
 function addRowToTable(pos) {
-    var groupId = pos.group_id;
-    var posId =  pos.pos_id;
-    var studentName = pos.first_name + " " + pos.last_name;
-    var userId = pos.user_id;
-    var newRow = '<tr>'
-        + '<td> <a onclick=changeGroup(' + groupId + ')>'
-                            + groupDict[groupId] + '</a> </td>'
-        + '<td> <a onclick=changePosition(' + posId + ')>'
-                            + positionsDict[posId] + '</a> </td>'
-        + '<td> <a href=/1/users/' + userId + ">" + studentName + '</a> </td>'
-                + '</tr>';
-    $('#positionsTable tbody').append(newRow);
+    $('#positionsTable tbody').append($('<tr>').append(
+        $('<td>').append($('<a>')
+            .text(pos.group_name)
+            .click(function() { changeGroup(pos.group_id) })
+        ),
+        $('<td>').append($('<a>')
+            .text(pos.pos_name)
+            .click(function() { changePosition(pos.pos_id) })
+        ),
+        $('<td>').append(
+            $('<a>').attr('href', '/1/users/' + pos.user_id).text(pos.full_name)
+        )
+    ));
 }
 
 /*
@@ -109,16 +96,16 @@ function addRowToTable(pos) {
 function filterChange() {
     var groupIndex = parseInt($('#groupSelect').val());
     var posIndex = parseInt($('#positionSelect').val());
-    $('#positionsTable tbody > tr').remove();
-    for (var i = 0; i < allPositions.length; i++) {
-        if (groupIndex !== 0 && groupIndex !== allPositions[i].group_id) {
-            continue;
+    $('#positionsTable tbody tr').remove();
+    allPositions.forEach(function(position) {
+        // If a position is being filtered, ignore the group filter
+        if (posIndex
+            ? posIndex == position.pos_id
+            : (!groupIndex || groupIndex === position.group_id)
+        ) {
+            addRowToTable(position);
         }
-        if (posIndex !== 0 && posIndex !== allPositions[i].pos_id) {
-            continue;
-        }
-        addRowToTable(allPositions[i]);
-    }
+    });
 }
 
 function changeGroup(groupId) {
@@ -132,103 +119,100 @@ function changePosition(posName) {
 }
 
 /*
- * Called when a group is selected for the "delete position" tab.
- * Queries for all positions associated with the group
+ * Finds all positions in groups that user controls,
+ * and adds them to the positions dropdown.
+ * Also finds all holds for those positions and adds them to the holds dropdown.
  */
-function groupDelChange() {
-    var groupIndex = $('#groupDel').val();
-    $('#position').find('option').remove();
-    populateListOfPositions(groupIndex, '#position');
-}
-
-/*
- * Called when a group is selected for the "assign position holder" tab.
- * Queries for all positions associated with the group
- */
-function groupPosHoldChange() {
-    var groupIndex = $('#groupPosHold').val();
-    $('#posIdHold').find('option').remove();
-    populateListOfPositions(groupIndex, '#posIdHold');
-}
-
-/*
- * This method takes in a group id and a select element id and populates
- * the select element with a list of options representing all positions
- * associated with the group
- */
-function populateListOfPositions(groupIndex, posSelectId) {
-    var url = '/1/groups/' + groupIndex + '/positions/';
-    $.ajax({
-        url: url,
-        success: function(data){
-            for (var i = 0; i < data.length; i++) {
-                var newOption = '<option value=' + data[i].pos_id + '>' +
-                    data[i].pos_name + '</option>';
-                $(posSelectId).append(newOption);
+function populatePositions() {
+    var posSelect = $('#posIdHold');
+    posSelect.children().slice(1).remove();
+    $('#posHold').children().slice(1).remove();
+    controlGroupIds.forEach(function(groupId) {
+        $.ajax({
+            url: '/1/groups/' + groupId + '/positions',
+            success: function(data) {
+                data.forEach(function(position) {
+                    var posId = position.pos_id;
+                    var posName = groupDict[groupId] + ' - ' + position.pos_name;
+                    posSelect.append(
+                        $('<option>').attr('value', posId).text(posName)
+                    );
+                    populateHolders(posId, posName);
+                });
             }
+        });
+    });
+}
+
+function populateHolders(posId, posName) {
+    $.ajax({
+        url: '/1/positions/' + posId,
+        success: function(data) {
+            data.forEach(function(holder) {
+                $('#posHold').append($('<option>')
+                    .attr('value', holder.hold_id)
+                    .text(posName + ': ' + holder.full_name)
+                );
+            });
         }
     });
 }
 
-$(document).ready(function() {
-    // Setting up triggers for administration tasks
-    $('#submitPosBtn').click(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: '/1/positions/',
-            data: $("#posCreate").serialize(),
-            success: function(data) {
-                if(data.success) {
-                    $('#posCreate').trigger("reset");
-                    alert("Position created!");
-                }
+function submitPosForm() {
+    $.ajax({
+        type: 'POST',
+        url: '/1/positions',
+        data: $("#posCreate").serialize(),
+        success: function(data) {
+            if (data.success) {
+                alert("Position created!");
+                $('#posCreate').trigger("reset");
+                populatePositions();
             }
-        });
+            else alert('Failed to add position: ' + data.message);
+        }
     });
-    $('#delPosBtn').click(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: '/1/positions/delete/',
-            data: $("#posDelete").serialize(),
-            success: function(data) {
-                if(data.success) {
-                    setUpForms();
-                    alert("Position Deleted");
-                }
-            }
-        });
-    });
-    $('#submitPosHoldBtn').click(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: '/1/positions/' + $("#posIdHold").val() + '/',
-            data: $("#holdForm").serialize(),
-            success: function(data) {
-                if(data.success) {
-                    setUpForms();
-                    alert("Assigned Position!")
-                }
-            }
-        });
-    });
-});
+}
 
-/*
- * Function to be called to reset forms to default
- */
-function setUpForms() {
-    $('#posDelete').trigger("reset");
-    $('#holdForm').trigger("reset")
-    $('#position').find('option')
-                  .remove()
-                  .end()
-                  .append('<option>Select a Position</option>');
-    $('#posIdHold').find('option')
-                    .remove()
-                    .end()
-                    .append('<option>Select a Position</option>');
+function submitHoldForm() {
+    var posId = $("#posIdHold").val();
+    if (isNaN(posId)) {
+        alert('Please select a position to assign');
+        return;
+    }
 
+    $.ajax({
+        type: 'POST',
+        url: '/1/positions/' + posId,
+        data: $("#holdForm").serialize(),
+        success: function(data) {
+            if (data.success) {
+                alert("Assigned position!");
+                $('#holdForm').trigger("reset");
+                populatePositions();
+            }
+            else alert('Failed to add position holder: ' + data.message);
+        }
+    });
+}
+
+function submitRemoveHoldForm() {
+    var holdId = $('#posHold').val();
+    if (isNaN(holdId)) {
+        alert('Please select a position holder to remove');
+        return;
+    }
+
+    $.ajax({
+        type: 'DELETE',
+        url: '/1/position_holds/' + holdId,
+        success: function(data) {
+            if (data.success) {
+                alert('Removed position holder!');
+                $('#removeHoldForm').trigger("reset");
+                populatePositions();
+            }
+            else alert('Failed to remove position holder: ' + data.message);
+        }
+    });
 }

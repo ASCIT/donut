@@ -13,7 +13,6 @@ import flask
 from donut import constants
 from donut.default_permissions import Permissions
 from donut import misc_utils
-from donut.modules.groups import helpers as groups
 
 
 class PasswordHashParser:
@@ -324,13 +323,14 @@ def get_permissions(username):
     """
     user_id = get_user_id(username)
     if not user_id: return set()
-    positions = groups.get_positions_held(user_id)
-    if not positions: return set()
+
     query = """
-    SELECT permission_id FROM position_permissions WHERE pos_id in
-    (%s)""" % (', '.join(['%s'] * len(positions)))
+        SELECT DISTINCT permission_id
+        FROM current_position_holders NATURAL JOIN position_permissions
+        WHERE user_id = %s
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, positions)
+        cursor.execute(query, user_id)
         result = cursor.fetchall()
     return set(row['permission_id'] for row in result)
 
