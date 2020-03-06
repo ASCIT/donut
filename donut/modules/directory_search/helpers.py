@@ -63,10 +63,8 @@ def get_user(user_id):
             user['options'] = cursor.fetchall()
         groups_query = """
             SELECT group_name, pos_name
-            FROM position_holders NATURAL JOIN positions NATURAL JOIN groups
-            WHERE group_id NOT IN (SELECT group_id FROM group_houses)
-            AND (start_date IS NULL OR start_date < NOW())
-            AND (end_date IS NULL OR end_date > NOW())
+            FROM current_position_holders NATURAL JOIN positions NATURAL JOIN groups
+            WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)
             AND user_id = %s
         """
         with flask.g.pymysql_db.cursor() as cursor:
@@ -74,7 +72,7 @@ def get_user(user_id):
             user['positions'] = cursor.fetchall()
         houses_query = """
             SELECT group_name, pos_name
-            FROM group_house_membership NATURAL JOIN groups NATURAL JOIN positions
+            FROM house_positions NATURAL JOIN current_position_holders
             WHERE user_id = %s
         """
         with flask.g.pymysql_db.cursor() as cursor:
@@ -130,7 +128,7 @@ def execute_search(**kwargs):
             extension IS NOT NULL as image
         FROM members
             NATURAL JOIN members_full_name
-            NATURAL LEFT JOIN group_house_membership AS house
+            NATURAL LEFT JOIN (house_positions NATURAL JOIN current_position_holders)
             NATURAL LEFT JOIN member_options
             NATURAL LEFT JOIN buildings
             NATURAL LEFT JOIN users
@@ -146,7 +144,7 @@ def execute_search(**kwargs):
         query += ' AND ' + name_query
         substitution_arguments += name_search
     if kwargs['house_id']:
-        query += ' AND house.group_id = %s'
+        query += ' AND group_id = %s'
         substitution_arguments.append(kwargs['house_id'])
     if kwargs['option_id']:
         query += ' AND option_id = %s'
@@ -174,7 +172,7 @@ def members_unique_values(field, string):
 
 
 def get_houses():
-    query = 'SELECT * FROM group_houses ORDER BY group_name'
+    query = 'SELECT * FROM house_groups ORDER BY group_name'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()

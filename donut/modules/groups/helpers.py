@@ -181,10 +181,7 @@ def get_position_data(fields=None, include_houses=True, order_by=None):
         NATURAL JOIN groups
     """
     if not include_houses:
-        query += """
-            WHERE pos_id NOT IN
-            (SELECT pos_id FROM group_house_membership)
-        """
+        query += ' WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)'
     if order_by:
         if not all(field in fields for field in order_by):
             return "Invalid ORDER BY fields"

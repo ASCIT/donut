@@ -56,9 +56,7 @@ graduation_years = {
 
 get_options_query = "SELECT * FROM options"
 get_house_poss_query = """
-    SELECT group_name, pos_id
-    FROM group_houses NATURAL JOIN positions
-    WHERE pos_name = 'Full Member'
+    SELECT group_name, pos_id FROM house_positions WHERE pos_name = 'Full Member'
 """
 # The following values are updated on duplicate keys:
 # msc, preferred_name
