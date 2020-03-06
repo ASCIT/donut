@@ -221,15 +221,14 @@ CREATE VIEW current_position_holders AS (
     SELECT * FROM current_direct_position_holders
     UNION ALL
     SELECT
-        holders.hold_id,
-        relations.pos_id_to AS pos_id,
-        holders.user_id,
-        holders.start_date,
-        holders.end_date,
-        holders.subscribed
-    FROM current_direct_position_holders holders
-        JOIN position_relations relations
-        ON holders.pos_id = relations.pos_id_from
+        current_direct_position_holders.hold_id,
+        position_relations.pos_id_to AS pos_id,
+        current_direct_position_holders.user_id,
+        current_direct_position_holders.start_date,
+        current_direct_position_holders.end_date,
+        current_direct_position_holders.subscribed
+    FROM current_direct_position_holders
+        JOIN position_relations ON pos_id = pos_id_from
 );
 
 -- News items to show on the homepage

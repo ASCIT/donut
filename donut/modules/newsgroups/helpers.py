@@ -57,7 +57,7 @@ def get_user_actions(user_id, group_id):
     if not user_id:
         return None
     query = """
-        SELECT send, control, receive
+        SELECT send, control, receive AND subscribed AS receive
         FROM positions NATURAL JOIN current_position_holders
         WHERE user_id = %s AND group_id = %s
     """
