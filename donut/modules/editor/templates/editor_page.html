@@ -13,7 +13,7 @@
   <div class="col-md-12">
     <div class="jumbotron" id="display_area">
       <h1 id = "title" class="text-center">Editing</h1>
-<div class="col-md-6">
+      <div class="col-md-6 front">
       <div id="info">
         <p>
           See a list of all created pages
@@ -26,6 +26,10 @@
 	<p>
 	  You can upload a file <a href="{{ url_for('uploads.uploads') }}">here</a>.
 	</p>
+    <p>
+                  See a list of all uploaded pages
+          <a href="{{ url_for('uploads.uploaded_list')}}">here</a>.
+    </p>
 	<p>
 	  You can use numbers, characters, underscores, and periods in the titles. Titles may not be longer than 100 characters.
 	  Titles with underscores are interchangeable with titles with spaces (i.e., "This title" and "This_title"
@@ -36,7 +40,7 @@
       </div>
 
 </div>
-<div class="col-md-6">
+<div class="col-md-6 front">
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
       <br/>
       <button class="btn btn-primary" id="change_title">Change Title</button>
@@ -86,15 +90,15 @@
       <textarea id="source" rows="10" cols="20" width="80%">{{input_text}}
 
       </textarea>
-      <hr/>
+        <hr/>
       <button class="btn btn-primary" id="runBtn">Preview</button>
       <button class="btn btn-primary" id="save">Save Changes</button>
-      <header>
+
+    </div>
+    <hr/>
         <h1 id = "preview_title" class="text-center"></h1>
-      </header>
       <div id="preview" style="text-align: left">
       </div>
-    </div>
   </div>
 </div>
 </div>

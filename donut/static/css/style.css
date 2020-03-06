@@ -287,6 +287,9 @@ ul, ol {
   width: 100%;
 }
 
+.jumbopadding {
+  padding-top: 5%;
+}
 /* Right-half class for a div of a split, two-column page. */
 .half-float-right {
   width: 50%;
@@ -356,7 +359,7 @@ ul, ol {
 .jumbotron {
   background-color: #FFF;
   text-align: justify;
-  padding-top: 30px;
+  padding-top: 5%;
   font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
 }
 
@@ -640,6 +643,17 @@ ul, ol {
   list-style-type: none;
 }
 
+/* Let it match with other elements */
+#newsgroup-nav-bar {
+  padding-left:45px;
+  padding-right:45px;
+  padding-top: 60px;
+}
+
+#navbar ul, ol{
+  font-size: 14px;
+  font-weight: 500;
+}
 /*****************************************************************************/
 /* Below is all the formatting for mobile devices. Basically, it just takes  *
  * the classes you love and augments them a bit to make sure they look great *

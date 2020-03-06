@@ -76,7 +76,7 @@ def get_links():
     path = os.path.join(flask.current_app.root_path,
                         flask.current_app.config['UPLOAD_FOLDER'])
     links = glob.glob(path + '/*')
-
+    links.sort()
     processed_links = {}
     for link in links:
         filename = os.path.basename(link)

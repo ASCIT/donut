@@ -9,6 +9,17 @@ textarea {
   width: 80%;
 }
 
+.jumbotron h1 {
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
+  color: #000;
+  text-align: left;
+}
+
+.front {
+  z-index:1;
+  margin-top: 30px;
+}
+
 .btn {
   margin: 5px;
 }
@@ -27,4 +38,12 @@ textarea {
 
 #info {
   text-align: left;
+}
+
+#title{
+  text-align: center;
+}
+#preview_title {
+  z-index: 0;
+  text-align: center;
 }

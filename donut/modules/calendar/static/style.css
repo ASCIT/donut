@@ -8,6 +8,9 @@ body{
     margin-left: 0;
 }
 
+#calendar {
+    font-size: 14px;
+}
 #cal{
     height: 100%;
 }
@@ -173,7 +176,7 @@ hr {
 .addEvents {
     margin-bottom: 5px;
     margin-top: 0px;
-    top: 48px;
+    top: 101px;
     margin-right: 0px;
     position: absolute;
     right: 182px;
@@ -191,7 +194,7 @@ hr {
 .search {
     margin-bottom: 5px;
     margin-top: 0px;
-    top: 48px;
+    top: 101px;
     margin-right: 0px;
     position: absolute;
     right: 100px;
@@ -209,7 +212,7 @@ button {
 .next-month {
     margin-bottom: 5px;
     margin-top: 0px;
-    top: 48px;
+    top: 101px;
     margin-right: 0px;
     position: absolute;
     right: 0;
@@ -218,7 +221,7 @@ button {
 .prev-month {
     margin-bottom: 5px;
     margin-top: 0px;
-    top: 48px;
+    top: 101px;
     margin-right: 0px;
     position: absolute;
     right: 50px;
@@ -239,7 +242,7 @@ button {
 .jump {
     margin-bottom: 5px;
     margin-top: 0px;
-    top: 41px;
+    top: 94px;
     margin-right: 0px;
     position: absolute;
     left: 10px;
@@ -279,7 +282,7 @@ button {
 }
 
 .back {
-  top: 40px;
+  top: 90px;
   position: absolute;
 }
 
@@ -358,7 +361,7 @@ button {
   .addEvents{
     left: 5px;
     right: auto;
-    top: 46px;
+    top: 100px;
   }
   .search{
     position:initial;
