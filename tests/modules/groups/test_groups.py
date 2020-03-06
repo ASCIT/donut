@@ -37,7 +37,7 @@ def test_get_members_by_group(client):
     assert helpers.get_members_by_group(1)[1]["user_id"] == 2
     assert len(helpers.get_members_by_group(1)) == 2
     assert len(helpers.get_members_by_group(2)) == 3
-    assert len(helpers.get_members_by_group(3)) == 2
+    assert len(helpers.get_members_by_group(3)) == 3
 
 
 def test_get_group_positions_data(client):
@@ -53,17 +53,18 @@ def test_get_group_positions_data(client):
 
 def test_get_position_holders(client):
     res = helpers.get_position_holders(5)
-    assert len(res) == 2
-    assert set(row['first_name'] for row in res) == set(['Robert', 'Sean'])
+    assert len(res) == 3
+    assert set(row['first_name']
+               for row in res) == set(['Robert', 'Sean', 'Rachel'])
 
     res = helpers.get_position_holders(1)
     assert len(res) == 2
     assert set(row['first_name'] for row in res) == set(['Robert', 'David'])
 
     res = helpers.get_position_holders([1, 5])
-    assert len(res) == 3
+    assert len(res) == 4
     assert set(row['first_name']
-               for row in res) == set(['Robert', 'Sean', 'David'])
+               for row in res) == set(['Robert', 'Sean', 'David', 'Rachel'])
 
 
 def test_get_positions_held(client):
@@ -110,7 +111,7 @@ def test_get_position_data(client):
         "start_date": None,
         "end_date": None
     } in res
-    assert len(res) == 7
+    assert len(res) == 8
 
 
 def test_delete_position(client):

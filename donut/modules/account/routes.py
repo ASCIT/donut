@@ -60,18 +60,16 @@ def create_account_submit(create_account_key):
     username = flask.request.form.get("username", None)
     password = flask.request.form.get("password", None)
     password2 = flask.request.form.get("password2", None)
-    birthday = flask.request.form.get("birthday", None)
     if username is None \
         or password is None \
-        or password2 is None \
-        or birthday is None:
+        or password2 is None:
         flask.current_app.logger.warn(
             f'Invalid create account form for user ID {user_id}')
         flask.flash("Invalid request.")
         return flask.redirect(flask.url_for("home"))
 
-    if helpers.handle_create_account(user_id, username, password, password2,
-                                     birthday):
+    if helpers.handle_create_account(user_id, username, password, password2):
+        flask.session['username'] = username
         flask.current_app.logger.info(
             f'Created account with username {username} for user ID {user_id}')
         flask.flash("Account successfully created.")

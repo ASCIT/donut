@@ -122,6 +122,7 @@ def reset_password_submit(reset_key):
     new_password = flask.request.form.get('password', '')
     new_password2 = flask.request.form.get('password2', '')
     if helpers.handle_password_reset(username, new_password, new_password2):
+        flask.session['username'] = username
         flask.flash('Password reset was successful.')
         return flask.redirect(flask.url_for('auth.login'))
     else:

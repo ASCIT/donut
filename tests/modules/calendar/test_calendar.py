@@ -15,9 +15,7 @@ import os
 
 def test_plain_calendar_page(client):
     assert client.get(flask.url_for('calendar.add_events')).status_code == 200
-    rv = client.get(flask.url_for('calendar.calendar'))
-    assert b'Please log in to share to your calendar' in rv.data
-    assert rv.status_code == 200
+    assert client.get(flask.url_for('calendar.calendar')).status_code == 200
     assert client.get(flask.url_for('calendar.sync')).status_code == 200
     assert client.post(
         flask.url_for('calendar.get_all_events')).status_code == 200

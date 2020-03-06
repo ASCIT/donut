@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block page %}
+{% include "navbar.html" %}
+	{% for group in groups %}
+	<a href={{ url_for(".view_group", group_id=group["group_id"]) }}>{{ group["group_name"] }}</a>
+	<br>
+	{% endfor %}
+{% endblock %}
