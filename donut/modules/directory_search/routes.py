@@ -68,9 +68,13 @@ def search():
     if flask.request.method == 'POST':
         form = flask.request.form
         page = 1
+        per_page = 10
     else:
         form = flask.request.args
         page = int(form['page'])
+        total = int(form['total'])
+        per_page = int(form['per_page'])
+        num_pgs = int(form['num_pgs'])
     name = form['name']
     if name.strip() == '':
         name = None
@@ -94,48 +98,30 @@ def search():
         grad_year = int(grad_year)
     else:
         grad_year = None
-    offset = (page - 1) * PER_PAGE
-    users = helpers.execute_search(
-        name=name,
+    offset = (page - 1) * per_page
+    args = dict(name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
         grad_year=grad_year,
         username=form['username'],
-        email=form['email'],
-        offset=offset,
-        per_page=PER_PAGE)
+        email=form['email'])
     if flask.request.method == 'POST':
-        total = int(
-            helpers.execute_search(
-                name=name,
-                house_id=house_id,
-                option_id=option_id,
-                building_id=building_id,
-                grad_year=grad_year,
-                username=form['username'],
-                email=form['email'])[0]['cnt'])
-        num_pgs = total // PER_PAGE + (total % PER_PAGE > 0)
-    else:
-        total = form['total']
-        num_pgs = int(form['num_pgs'])
+        total = int(helpers.execute_search(**args))
+        num_pgs = total // per_page + (total % per_page > 0)
+    offset = (page - 1) * per_page
+    users = helpers.execute_search(**args, offset=offset, per_page=per_page)
     if len(users) == 1:  #1 result
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
     show_images = 'show_images' in form
-
+    query_info = { k: ('' if v is None else v) for k, v in args.items() }
     return flask.render_template(
         'search_results.html',
         users=users,
         show_images=show_images,
         total=total,
-        num_pgs=num_pgs,
+        per_page=per_page,
         page=page,
-        name=form['name'],
-        house_id=form['house_id'],
-        option_id=form['option_id'],
-        building_id=form['building_id'],
-        grad_year=form['grad_year'],
-        username=form['username'],
-        email=form['email'])
+        query_info=query_info)
