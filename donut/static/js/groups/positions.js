@@ -22,12 +22,10 @@ function init(approvedGroupIds, approvedGroupNames, allPos) {
  */
 function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
     for (var i = 0; i < approvedGroupIds.length; i++) {
-        var newOption = $('<option>')
+        $('#groupCreate').append($('<option>')
             .attr('value', approvedGroupIds[i])
-            .text(approvedGroupNames[i]);
-        $('#groupCreate').append(newOption);
-        $('#groupDel').append(newOption.clone());
-        $('#groupPosHold').append(newOption.clone());
+            .text(approvedGroupNames[i])
+        );
     }
 }
 
@@ -98,7 +96,7 @@ function filterChange() {
     var posIndex = parseInt($('#positionSelect').val());
     $('#positionsTable tbody tr').remove();
     allPositions.forEach(function(position) {
-        // If a position is being filtered, ignore the group filter
+        // If filtering by position, ignore the group filter
         if (posIndex
             ? posIndex == position.pos_id
             : (!groupIndex || groupIndex === position.group_id)

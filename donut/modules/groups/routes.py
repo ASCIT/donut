@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 import flask
 from flask import jsonify
 
@@ -102,7 +102,7 @@ def create_pos_holder(pos_id):
         end_date = datetime.strptime(end_date, YYYY_MM_DD)
     except:
         return jsonify({'success': False, 'message': 'Invalid end date'})
-    if end_date < datetime.now() or end_date < start_date:
+    if end_date.date() < date.today() or end_date < start_date:
         return jsonify({'success': False, 'message': 'End date is too early'})
     username = flask.session.get('username')
     group_id = helpers.get_position_group(pos_id)
