@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS news;
 DROP VIEW IF EXISTS current_position_holders;
 DROP VIEW IF EXISTS current_direct_position_holders;
 DROP TABLE IF EXISTS position_relations;
-DROP VIEW IF EXISTS group_house_membership;
-DROP VIEW IF EXISTS group_houses;
+DROP VIEW IF EXISTS house_positions;
+DROP VIEW IF EXISTS house_groups;
 DROP TABLE IF EXISTS position_holders;
 DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS groups;
@@ -185,21 +185,19 @@ CREATE TABLE position_holders (
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
--- House View
+-- Houses View
 -- Because houses are used so much, make a view separate from the groups
 -- table.
-CREATE VIEW group_houses AS (
+CREATE VIEW house_groups AS (
     SELECT group_id, group_name FROM groups WHERE type = 'house'
 );
-
--- House Members View
--- Because house membership is used so much, make a view separate from the
--- positions table.
-CREATE VIEW group_house_membership AS (
-    SELECT user_id, group_id, pos_id
-    FROM group_houses NATURAL JOIN positions NATURAL JOIN position_holders
-    WHERE UPPER(pos_name) = UPPER('Full Member')
-        OR UPPER(pos_name) = UPPER('Social Member')
+-- House Positions View
+-- House membership positions are special,
+-- so make a view separate from the positions table.
+CREATE VIEW house_positions AS (
+    SELECT group_id, group_name, pos_id, pos_name
+    FROM house_groups NATURAL JOIN positions
+    WHERE pos_name IN ('Full Member', 'Social Member')
 );
 
 -- Position to position table
