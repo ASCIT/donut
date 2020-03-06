@@ -1,10 +1,13 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+
 {% if not group['visible'] and not member %}
-  <h1> Must be a member to view </h1>
+  <h2> Must be a member to view </h2>
 {% else %}
-  <h1> {{ group['group_name'] }} </h1>
+  <h2> {{ group['group_name'] }} </h2>
   <h2> {{ group['group_desc'] }} </h2>
   {% if not member %}
     <form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
@@ -75,4 +78,6 @@
     <h4> Must be a member to view messages </h4>
   {% endif %}
 {% endif %}
+</div>
+</div>
 {% endblock %}

@@ -1,8 +1,4 @@
-.btn{
-  margin: 5px;
-}
-
-
-.dropdown:hover .dropdown-menu {
-  display: block;
+.jumbotron h1 {
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
+  color: #000;
 }

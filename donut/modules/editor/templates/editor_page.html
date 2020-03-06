@@ -10,9 +10,10 @@
 {% endblock %}
 {% block page %} 
 <div class="container theme-showcase" role="main">
-  <div class="col-md-24">
+  <div class="col-md-12">
     <div class="jumbotron" id="display_area">
       <h1 id = "title" class="text-center">Editing</h1>
+<div class="col-md-6">
       <div id="info">
         <p>
           See a list of all created pages
@@ -31,12 +32,14 @@
 	  are the same page). 
 	</p>
       </div>
-
       <div id='sucesss'>
       </div>
+
+</div>
+<div class="col-md-6">
       <textarea id="text_title" rows="1" cols="5" >{{title}}</textarea>
       <br/>
-      <button id="change_title">Change Title</button>
+      <button class="btn btn-primary" id="change_title">Change Title</button>
 
       <br/>
       <div class="btn-group">
@@ -84,8 +87,8 @@
 
       </textarea>
       <hr/>
-      <button id="runBtn">Preview</button>
-      <button id="save">Save Changes</button>
+      <button class="btn btn-primary" id="runBtn">Preview</button>
+      <button class="btn btn-primary" id="save">Save Changes</button>
       <header>
         <h1 id = "preview_title" class="text-center"></h1>
       </header>
@@ -93,5 +96,6 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}

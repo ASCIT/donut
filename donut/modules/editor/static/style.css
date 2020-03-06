@@ -5,7 +5,7 @@
 }
 
 textarea {
-  margin: 30px;
+  margin: 10px;
   width: 80%;
 }
 
@@ -22,5 +22,9 @@ textarea {
 }
 
 #preview{
+  text-align: left;
+}
+
+#info {
   text-align: left;
 }

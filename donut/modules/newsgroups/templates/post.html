@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
 <h3 id='warning'></h3>
 <form method="POST" action={{ url_for("newsgroups.post_message") }}>
 	<table id="message" class="table">
@@ -46,6 +48,8 @@
                   <input class="btn" type="submit" value="Submit" />
                 </div>
               </div>
+</div>
+</div>
 {% endblock %}
 {% block scripts %}
 {{ super() }}
