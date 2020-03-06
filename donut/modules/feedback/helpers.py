@@ -2,6 +2,7 @@ from donut import email_utils
 from donut.modules.feedback import email_templates
 import flask
 import pymysql.cursors
+from donut.modules.feedback.groups import groupInt
 
 
 def send_update_email(group, email, complaint_id):
@@ -29,17 +30,17 @@ def register_complaint(group, data, notification=True):
     if not (data and data['subject'] and data['msg']): return False
     # Register complaint
     query = """
-    INSERT INTO {}_complaint_info (subject, status, uuid) 
-    VALUES (%s, %s, UNHEX(REPLACE(UUID(), '-', '')))
-    """.format(group)
+    INSERT INTO complaint_info (org, subject, status, uuid) 
+    VALUES (%s, %s, %s, UNHEX(REPLACE(UUID(), '-', '')))
+    """
     status = 'new_msg'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (data['subject'], status))
+        cursor.execute(query, (groupInt[group], data['subject'], status))
         complaint_id = cursor.lastrowid
     # Add email to db if applicable
     if data['email']:
         for email in data['email'].split(','):
-            add_email(group, complaint_id, email.strip(), False)
+            add_email(groupInt[group], complaint_id, email.strip(), False)
     # Add message to database
     add_msg(group, complaint_id, data['msg'], data['name'], notification)
     return complaint_id
@@ -52,9 +53,9 @@ def add_email(group, complaint_id, email, notification=True):
     '''
     if not get_subject(group, complaint_id): return False
     query = """
-    INSERT INTO {}_complaint_emails (complaint_id, email)
+    INSERT INTO complaint_emails (complaint_id, email)
     VALUES (%s, %s)
-    """.format(group)
+    """
     with flask.g.pymysql_db.cursor() as cursor:
         try:
             cursor.execute(query, (complaint_id, email))
@@ -71,8 +72,7 @@ def remove_email(group, complaint_id, email):
     returns False if complaint_id is invalid
     '''
     if not get_subject(group, complaint_id): return False
-    query = 'DELETE FROM {}_complaint_emails WHERE complaint_id = %s AND email = %s'.format(
-        group)
+    query = 'DELETE FROM complaint_emails WHERE complaint_id = %s AND email = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, email))
     return True
@@ -89,20 +89,18 @@ def add_msg(group, complaint_id, message, poster, notification=True):
     if not get_subject(group, complaint_id): return False
     # Add the message
     query = """
-    INSERT INTO {}_complaint_messages (complaint_id, message, poster, time)
+    INSERT INTO complaint_messages (complaint_id, message, poster, time)
     VALUES (%s, %s, %s, NOW())
-    """.format(group)
+    """
     # Update the status to new_msg
-    query2 = 'UPDATE {}_complaint_info SET status = "new_msg" WHERE complaint_id = %s'.format(
-        group)
+    query2 = 'UPDATE complaint_info SET status = "new_msg" WHERE complaint_id = %s'
     if not poster:
         poster = '(anonymous)'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (complaint_id, message, poster))
         cursor.execute(query2, complaint_id)
     if notification:
-        query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(
-            group)
+        query = 'SELECT email FROM complaint_emails WHERE complaint_id = %s'
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(query, complaint_id)
             res = cursor.fetchall()
@@ -114,8 +112,7 @@ def get_link(group, complaint_id):
     '''
     Gets a (fully qualified) link to the view page for this complaint id
     '''
-    query = 'SELECT HEX(uuid) AS uuid FROM {}_complaint_info WHERE complaint_id = %s'.format(
-        group)
+    query = 'SELECT HEX(uuid) AS uuid FROM complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchone()
@@ -134,10 +131,9 @@ def get_id(group, uuid):
     Returns the complaint_id associated with a uuid
     or false if the uuid is not found
     '''
-    query = 'SELECT complaint_id FROM {}_complaint_info WHERE uuid = UNHEX(%s)'.format(
-        group)
+    query = 'SELECT complaint_id FROM complaint_info WHERE org = %s AND uuid = UNHEX(%s)'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, uuid)
+        cursor.execute(query, (groupInt[group], uuid))
         if not cursor.rowcount:
             return False
         return cursor.fetchone()['complaint_id']
@@ -149,11 +145,11 @@ def get_messages(group, complaint_id):
     in ascending order of timestamp
     '''
     query = """
-    SELECT time, poster, message, message_id FROM {}_complaint_messages 
+    SELECT time, poster, message, message_id FROM complaint_messages 
     WHERE complaint_id = %s ORDER BY time
     """.format(group)
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, complaint_id)
+        cursor.execute(query, (complaint_id))
         return cursor.fetchall()
 
 
@@ -161,8 +157,7 @@ def get_summary(group, complaint_id):
     '''
     Returns a dict with the following fields: subject, status
     '''
-    query = 'SELECT subject, status FROM {}_complaint_info WHERE complaint_id = %s'.format(
-        group)
+    query = 'SELECT subject, status FROM complaint_info WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         return cursor.fetchone()
@@ -191,8 +186,7 @@ def mark_read(group, complaint_id):
     '''
     if get_status(group, complaint_id) is None:
         return False
-    query = "UPDATE {}_complaint_info SET status = 'read' WHERE complaint_id = %s".format(
-        group)
+    query = "UPDATE complaint_info SET status = 'read' WHERE complaint_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -204,8 +198,7 @@ def mark_unread(group, complaint_id):
     '''
     if get_status(group, complaint_id) is None:
         return False
-    query = "UPDATE {}_complaint_info SET status = 'new_msg' WHERE complaint_id = %s".format(
-        group)
+    query = "UPDATE complaint_info SET status = 'new_msg' WHERE complaint_id = %s"
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
 
@@ -215,8 +208,7 @@ def get_emails(group, complaint_id):
     Returns a list of subscribed emails for this complaint (which may be empty)
     or an empty list if complaint_id is invalid
     '''
-    query = 'SELECT email FROM {}_complaint_emails WHERE complaint_id = %s'.format(
-        group)
+    query = 'SELECT email FROM complaint_emails WHERE complaint_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, complaint_id)
         res = cursor.fetchall()
@@ -249,15 +241,16 @@ def get_new_posts(group):
     query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject,
     post.status AS status, post.uuid AS uuid, comment.message AS message, 
     comment.poster AS poster, comment.time AS time 
-    FROM {0}_complaint_info post
-    NATURAL JOIN {0}_complaint_messages comment
+    FROM complaint_info post
+    NATURAL JOIN complaint_messages comment
     INNER JOIN (
     SELECT complaint_id, max(time) AS time 
-    FROM {0}_complaint_messages GROUP BY complaint_id
+    FROM complaint_messages 
+    GROUP BY complaint_id
     ) maxtime
     ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
-    WHERE post.status = 'new_msg' 
-    """.format(group)
+    WHERE post.org = %s AND post.status = 'new_msg' 
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query)
+        cursor.execute(query, groupInt[group])
         return cursor.fetchall()

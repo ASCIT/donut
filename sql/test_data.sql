@@ -100,46 +100,25 @@ INSERT INTO rooms(room_id, location, title, description) VALUES
     (1, 'SAC 23', 'ASCIT Screening Room', 'A room for watching DVDs and videos');
 
 /* bodfeedback */
-INSERT INTO bod_complaint_info(complaint_id, subject, status, uuid) VALUES
-    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
-    (2, 'Sub2', 'read', '2');
+INSERT INTO complaint_info(org, complaint_id, subject, status, uuid) VALUES
+    (1, 1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
+    (1, 2, 'Sub2', 'read', '2');
 
-INSERT INTO bod_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+INSERT INTO complaint_messages(complaint_id, time, message, poster, message_id) VALUES
     (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
     (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
     (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
 
-INSERT INTO bod_complaint_emails(complaint_id, email, email_id) VALUES
-    (1, 'test@example.com', 1),
-    (1, 'test2@example.com', 2);
+INSERT INTO complaint_emails(complaint_id, email) VALUES
+    (1, 'test@example.com'),
+    (1, 'test2@example.com');
 
 /* arcfeedback */
-INSERT INTO arc_complaint_info(complaint_id, subject, status, uuid) VALUES
-    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
-    (2, 'Sub2', 'read', '2');
+INSERT INTO complaint_info(org, complaint_id, subject, status, uuid) VALUES
+    (2, 3, 'Sub2', 'read', '3');
 
-INSERT INTO arc_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
-    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
-    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
-    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
-
-INSERT INTO arc_complaint_emails(complaint_id, email, email_id) VALUES
-    (1, 'test@example.com', 1),
-    (1, 'test2@example.com', 2);
-
-/* donutfeedback */
-INSERT INTO donut_complaint_info(complaint_id, subject, status, uuid) VALUES
-    (1, 'Sub1', 'new_msg', UNHEX('F034CB412C0411E997ED021EF4D6E881')),
-    (2, 'Sub2', 'read', '2');
-
-INSERT INTO donut_complaint_messages(complaint_id, time, message, poster, message_id) VALUES
-    (1, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 1),
-    (1, '2018-01-02 00:00:00', 'Sample Message 2', 'Davis', 2),
-    (2, '2018-01-03 00:00:00', 'This course is fun', 'Davis', 3);
-
-INSERT INTO donut_complaint_emails(complaint_id, email, email_id) VALUES
-    (1, 'test@example.com', 1),
-    (1, 'test2@example.com', 2);
+INSERT INTO complaint_messages(complaint_id, time, message, poster, message_id) VALUES
+    (3, '2018-01-01 00:00:00', 'Sample Message', 'Davis', 4);
 
 INSERT INTO permissions(permission_id, permission_type, resource_name,
        	    	        description) VALUES
