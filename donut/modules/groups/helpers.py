@@ -90,7 +90,7 @@ def get_position_holders(pos_id):
 def get_positions_held(user_id):
     ''' Returns a list of all position id's held (directly or indirectly)
     by the given user. If no positions are found, [] is returned. '''
-    query = 'SELECT pos_id FROM current_position_holders WHERE user_id = %s'
+    query = 'SELECT DISTINCT pos_id FROM current_position_holders WHERE user_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, user_id)
         res = cursor.fetchall()
@@ -180,6 +180,7 @@ def get_position_data(fields=None, include_houses=True, order_by=None):
         NATURAL JOIN members_full_name
         NATURAL JOIN groups
     """
+
     if not include_houses:
         query += ' WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)'
     if order_by:
@@ -300,11 +301,11 @@ def get_members_by_group(group_id):
         List where each element is a JSON representing the data of each
         person
     '''
-    query = "SELECT DISTINCT user_id FROM positions p LEFT JOIN "
-    query += "position_relations pr ON p.pos_id=pr.pos_id_to "
-    query += "INNER JOIN position_holders ph ON ph.pos_id=p.pos_id OR "
-    query += "pr.pos_id_from=ph.pos_id "
-    query += "WHERE group_id = %s"
+    query = """
+        SELECT DISTINCT user_id
+        FROM positions NATURAL JOIN current_position_holders
+        WHERE group_id = %s
+    """
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, [group_id])

@@ -53,32 +53,102 @@ def test_get_group_positions_data(client):
 
 def test_get_position_holders(client):
     res = helpers.get_position_holders(5)
-    assert len(res) == 3
-    assert set(row['first_name']
-               for row in res) == set(['Robert', 'Sean', 'Rachel'])
+    res = sorted(
+        res, key=lambda holder: (holder['user_id'], holder['hold_id']))
+    assert res == [{
+        'user_id': 2,
+        'full_name': 'Robert Eng',
+        'hold_id': 5,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 4,
+        'full_name': 'Sean Yu',
+        'hold_id': 4,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 4,
+        'full_name': 'Sean Yu',
+        'hold_id': 6,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 5,
+        'full_name': 'Rachel Lin',
+        'hold_id': 7,
+        'start_date': None,
+        'end_date': None
+    }]
 
     res = helpers.get_position_holders(1)
-    assert len(res) == 2
-    assert set(row['first_name'] for row in res) == set(['Robert', 'David'])
+    res = sorted(
+        res, key=lambda holder: (holder['user_id'], holder['hold_id']))
+    assert res == [{
+        'user_id': 1,
+        'full_name': 'David Qu',
+        'hold_id': 1,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 2,
+        'full_name': 'Robert Eng',
+        'hold_id': 2,
+        'start_date': None,
+        'end_date': None
+    }]
 
     res = helpers.get_position_holders([1, 5])
-    assert len(res) == 4
-    assert set(row['first_name']
-               for row in res) == set(['Robert', 'Sean', 'David', 'Rachel'])
+    res = sorted(
+        res, key=lambda holder: (holder['user_id'], holder['hold_id']))
+    assert res == [{
+        'user_id': 1,
+        'full_name': 'David Qu',
+        'hold_id': 1,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 2,
+        'full_name': 'Robert Eng',
+        'hold_id': 2,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 2,
+        'full_name': 'Robert Eng',
+        'hold_id': 5,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 4,
+        'full_name': 'Sean Yu',
+        'hold_id': 4,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 4,
+        'full_name': 'Sean Yu',
+        'hold_id': 6,
+        'start_date': None,
+        'end_date': None
+    }, {
+        'user_id': 5,
+        'full_name': 'Rachel Lin',
+        'hold_id': 7,
+        'start_date': None,
+        'end_date': None
+    }]
 
 
 def test_get_positions_held(client):
     res = helpers.get_positions_held(4)
-    assert len(res) == 2
-    assert 4 in res and 5 in res
+    assert sorted(res) == [4, 5]
 
     res = helpers.get_positions_held(2)
-    assert len(res) == 3
-    assert 1 in res and 4 in res and 5 in res
+    assert sorted(res) == [1, 4, 5]
 
     res = helpers.get_positions_held(1)
-    assert len(res) == 1
-    assert 1 in res
+    assert res == [1]
 
     res = helpers.get_positions_held(-1)
     assert res == []
@@ -93,23 +163,21 @@ def test_get_position_id(client):
 
 def test_get_position_data(client):
     res = helpers.get_position_data()
-    assert res[0]["first_name"] == "David"
-    assert res[0]["last_name"] == "Qu"
-    assert res[0]["group_name"] == "Donut Devteam"
-    assert res[0]["user_id"] == 1
-    assert res[0]["pos_name"] == "Head"
-    assert res[0]["group_id"] == 1
-    assert res[0]["pos_id"] == 1
     assert {
-        "first_name": "Robert",
-        "last_name": "Eng",
-        "group_name": "IHC",
+        "user_id": 1,
+        "full_name": "David Qu",
+        "group_id": 1,
+        "group_name": "Donut Devteam",
+        "pos_id": 1,
+        "pos_name": "Head"
+    } in res
+    assert {
         "user_id": 2,
-        "pos_name": "Member",
+        "full_name": "Robert Eng",
         "group_id": 3,
+        "group_name": "IHC",
         "pos_id": 5,
-        "start_date": None,
-        "end_date": None
+        "pos_name": "Member"
     } in res
     assert len(res) == 8
 
@@ -124,24 +192,21 @@ def test_get_group_data(client):
 
 
 def test_create_pos_holders(client):
-    helpers.create_position_holder(3, 3, "2018-02-22", "2019-02-22")
-    assert helpers.get_position_holders(3) == [{
-        "user_id": 3,
-        "first_name": "Caleb",
-        "last_name": "Sander",
-        "start_date": None,
-        "end_date": None
+    helpers.create_position_holder(3, 3, "2018-02-22", "3005-01-01")
+    res = helpers.get_position_holders(3)
+    res = sorted(res, key=lambda holder: holder['hold_id'])
+    assert res == [{
+        'user_id': 3,
+        'full_name': 'Belac Sander',
+        'hold_id': 3,
+        'start_date': None,
+        'end_date': None
     }, {
-        "user_id":
-        3,
-        "first_name":
-        "Caleb",
-        "last_name":
-        "Sander",
-        "start_date":
-        datetime.date(2018, 2, 22),
-        "end_date":
-        datetime.date(2019, 2, 22)
+        'user_id': 3,
+        'full_name': 'Belac Sander',
+        'hold_id': 8,
+        'start_date': datetime.date(2018, 2, 22),
+        'end_date': datetime.date(3005, 1, 1)
     }]
 
 

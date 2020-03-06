@@ -177,7 +177,7 @@ CREATE TABLE position_holders (
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
-    receive    BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
+    subscribed BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
     PRIMARY KEY (hold_id),
     FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
@@ -226,7 +226,7 @@ CREATE VIEW current_position_holders AS (
         holders.user_id,
         holders.start_date,
         holders.end_date,
-        holders.receive
+        holders.subscribed
     FROM current_direct_position_holders holders
         JOIN position_relations relations
         ON holders.pos_id = relations.pos_id_from
