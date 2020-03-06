@@ -70,14 +70,17 @@ def get_position_holders(pos_id):
                     position. Each element is a dict with key:value of
                     columnname:columnvalue
     """
-    if not isinstance(pos_id, list): pos_id = [pos_id]
-    format_string = ', '.join(['%s'] * len(pos_id))
-    fields = ["user_id", "first_name", "last_name", "start_date", "end_date"]
-    query = "SELECT DISTINCT " + ', '.join(fields) + " "
-    query += """FROM positions p LEFT JOIN position_relations pr
-             ON p.pos_id=pr.pos_id_to INNER JOIN position_holders ph
-             ON ph.pos_id=p.pos_id OR pr.pos_id_from=ph.pos_id
-             NATURAL JOIN members WHERE p.pos_id in (%s)""" % (format_string)
+    if isinstance(pos_id, list):
+        if not pos_id:
+            return []
+    else:
+        pos_id = [pos_id]
+
+    query = f"""
+        SELECT DISTINCT user_id, full_name, hold_id, start_date, end_date
+        FROM current_position_holders NATURAL JOIN members_full_name
+        WHERE pos_id IN ({', '.join('%s' for id in pos_id)})
+    """
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, pos_id)
@@ -87,16 +90,9 @@ def get_position_holders(pos_id):
 def get_positions_held(user_id):
     ''' Returns a list of all position id's held (directly or indirectly)
     by the given user. If no positions are found, [] is returned. '''
-    query = '''SELECT pos_id FROM position_holders ph
-               WHERE user_id = %s
-               UNION
-               SELECT pos_id FROM (
-               SELECT pos_id_to as pos_id FROM position_holders ph
-               JOIN position_relations pr
-               ON ph.pos_id = pr.pos_id_from WHERE user_id = %s
-               ) sub'''
+    query = 'SELECT pos_id FROM current_position_holders WHERE user_id = %s'
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (user_id, user_id))
+        cursor.execute(query, user_id)
         res = cursor.fetchall()
     return [row['pos_id'] for row in res]
 
@@ -146,7 +142,7 @@ def get_group_data(group_id, fields=None):
     return result or {}
 
 
-def get_position_data(fields=None):
+def get_position_data(fields=None, include_houses=True, order_by=None):
     """
     Queries database for all instances where an individual holds a position.
     This includes when person A directly holds position Y, or when person A
@@ -156,17 +152,18 @@ def get_position_data(fields=None):
     Arguments:
         fields:   The fields to return. If None are specified, then
                   default_fields are used
+        include_houses: Whether to include house membership positions
+        order_by: Fields to order the results by, in ascending order
     Returns:
         result    A list where each element is a dict corresponding to a person holding
                   a position. key:value pairs are columnname:columnevalue
     """
     all_returnable_fields = [
-        "user_id", "group_id", "pos_id", "first_name", "last_name",
-        "start_date", "end_date", "group_name", "pos_name"
+        "user_id", "full_name", "group_id", "group_name", "pos_id", "pos_name",
+        "start_date", "end_date"
     ]
     default_fields = [
-        "user_id", "group_id", "pos_id", "first_name", "last_name",
-        "start_date", "end_date", "group_name", "pos_name"
+        "user_id", "full_name", "group_id", "group_name", "pos_id", "pos_name"
     ]
 
     if fields is None:
@@ -176,21 +173,29 @@ def get_position_data(fields=None):
             return "Invalid field"
 
     # construct query
-    if "pos_id" in fields:
-        fields.remove("pos_id")
-        fields.append("p.pos_id")
-    query = "SELECT DISTINCT " + ', '.join(fields) + " "
-    query += """FROM positions p
-            LEFT JOIN position_relations pr ON p.pos_id=pr.pos_id_to
-            INNER JOIN position_holders ph ON ph.pos_id=pr.pos_id_from
-            OR ph.pos_id = p.pos_id NATURAL JOIN members NATURAL JOIN groups"""
+    query = f"""
+        SELECT DISTINCT {', '.join(fields)}
+        FROM positions
+        NATURAL JOIN current_position_holders
+        NATURAL JOIN members_full_name
+        NATURAL JOIN groups
+    """
+    if not include_houses:
+        query += """
+            WHERE pos_id NOT IN
+            (SELECT pos_id FROM group_house_membership)
+        """
+    if order_by:
+        if not all(field in fields for field in order_by):
+            return "Invalid ORDER BY fields"
+        query += " ORDER BY " + ', '.join(order_by)
 
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query)
         return cursor.fetchall()
 
 
-def add_position(group_id, pos_name):
+def add_position(group_id, pos_name, send=False, control=False, receive=True):
     '''
     Inserts new position into the database associated
     with the given group and with the given name
@@ -200,31 +205,13 @@ def add_position(group_id, pos_name):
         pos_name: name of the position to be created
     '''
     # Construct the statement
-    s = "INSERT INTO positions (group_id, pos_name) VALUES (%s, %s)"
+    s = """
+        INSERT INTO positions (group_id, pos_name, send, control, receive)
+        VALUES (%s, %s, %s, %s, %s)
+    """
     # Execute query
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s, (group_id, pos_name))
-
-
-def delete_position(pos_id):
-    '''
-    Deletes the position specified with the pos_id and all assocaited
-    position holders entries
-
-    Arguments:
-        pos_id: id of the position to be deleted
-    '''
-    # Construct statements
-    s = "DELETE FROM position_holders WHERE pos_id=%d"
-    s = s % pos_id
-    # Execute query
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
-    # Same as above but now delete from positions table
-    s = "DELETE FROM positions WHERE pos_id=%d"
-    s = s % pos_id
-    with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(s)
+        cursor.execute(s, (group_id, pos_name, send, control, receive))
 
 
 def create_position_holder(pos_id, user_id, start_date, end_date):
@@ -241,6 +228,20 @@ def create_position_holder(pos_id, user_id, start_date, end_date):
     end_date) VALUES (%s, %s, %s, %s)"""
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(s, (pos_id, user_id, start_date, end_date))
+
+
+def end_position_holder(hold_id):
+    """
+    Sets the end of the given position hold to yesterday,
+    thereby removing the user from the position.
+    """
+    query = """
+        UPDATE position_holders
+        SET end_date = SUBDATE(CURRENT_DATE, 1)
+        WHERE hold_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, hold_id)
 
 
 def create_group(group_name,
@@ -323,15 +324,8 @@ def is_user_in_group(user_id, group_id):
     Returns whether the given user holds any position in the given group
     """
     query = """
-        SELECT user_id
-        FROM position_holders NATURAL JOIN (
-            (SELECT pos_id, group_id FROM positions) UNION
-            (
-                SELECT group_id, pos_id_to AS pos_id
-                FROM positions JOIN position_relations
-                    ON pos_id = pos_id_from
-            )
-        ) tmp NATURAL JOIN groups
+        SELECT pos_id
+        FROM current_position_holders NATURAL JOIN positions
         WHERE user_id = %s AND group_id = %s
         LIMIT 1
     """
@@ -342,12 +336,54 @@ def is_user_in_group(user_id, group_id):
 
 def get_group_id(group_name):
     """
-    Returns the group_id for a group 
+    Returns the group_id for a group
     """
     query = """
     SELECT group_id FROM groups WHERE group_name = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, group_name)
-    res = cursor.fetchone()
+        res = cursor.fetchone()
     return None if res is None else res['group_id']
+
+
+def can_control(user_id, group_id):
+    """
+    Returns whether the given user has control privileges for the given group.
+    """
+    query = """
+        SELECT pos_id
+        FROM current_position_holders NATURAL JOIN positions
+        WHERE user_id = %s AND group_id = %s AND control = 1
+        LIMIT 1
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, group_id))
+        return cursor.fetchone() is not None
+
+
+def get_position_group(pos_id):
+    """
+    Returns the group_id of the group that the given position belongs to.
+    """
+    query = 'SELECT group_id FROM positions WHERE pos_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, pos_id)
+        position = cursor.fetchone()
+        return position and position['group_id']
+
+
+def get_hold_group(hold_id):
+    """
+    Returns the group_id of the group that
+    the given (direct) position hold belongs to.
+    """
+    query = """
+        SELECT group_id
+        FROM current_direct_position_holders NATURAL JOIN positions
+        WHERE hold_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, hold_id)
+        position = cursor.fetchone()
+        return position and position['group_id']
