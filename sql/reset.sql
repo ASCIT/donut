@@ -15,9 +15,7 @@ SOURCE sql/donut.sql
 SOURCE sql/directory.sql
 SOURCE sql/editor.sql
 SOURCE sql/marketplace.sql
-SOURCE sql/bodfeedback.sql
-SOURCE sql/arcfeedback.sql
-SOURCE sql/donutfeedback.sql
+SOURCE sql/feedback.sql
 SOURCE sql/rooms.sql
 SOURCE sql/permissions.sql
 SOURCE sql/voting.sql
