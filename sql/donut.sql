@@ -114,7 +114,7 @@ CREATE TABLE users (
 -- Examples: Blacker Hovse, IHC, CRC, ug-list, ug-2020
 CREATE TABLE groups (
     group_id                INT          NOT NULL AUTO_INCREMENT,
-    group_name              VARCHAR(32)  NOT NULL,
+    group_name              VARCHAR(64)  NOT NULL,
     group_desc              VARCHAR(255) DEFAULT NULL,
     type                    VARCHAR(255) NOT NULL,
     newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
@@ -153,7 +153,7 @@ CREATE TABLE newsgroup_posts (
 CREATE TABLE positions (
     group_id INT         NOT NULL,
     pos_id   INT         NOT NULL AUTO_INCREMENT,
-    pos_name VARCHAR(32) NOT NULL,
+    pos_name VARCHAR(64) NOT NULL,
     send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
                                        -- can send emails to group
     control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
