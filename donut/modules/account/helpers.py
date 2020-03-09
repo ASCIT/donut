@@ -63,6 +63,8 @@ def handle_create_account(user_id, username, password, password2):
         flask.flash(
             "An unexpected error occurred. Please contact devteam@donut.caltech.edu."
         )
+        flask.current_app.logger.exception("Error while creating account: \n" +
+                                           e)
         return False
     # Email the user.
     query = """

@@ -10,7 +10,7 @@ last_update_time = datetime.datetime(year=1970, month=1, day=1)
 @blueprint.route('/calendar')
 def calendar():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     return flask.render_template(
         'calendar.html', permissions=helpers.get_permission())
@@ -18,8 +18,8 @@ def calendar():
 
 @blueprint.route('/calendar/add_events')
 def add_events():
-    if not auth_utils.is_caltech_user():
-        return login_redirect()
+    if 'username' not in flask.session:
+        return auth_utils.login_redirect()
 
     return flask.render_template(
         'add_events.html', permissions=helpers.get_permission())
@@ -27,8 +27,8 @@ def add_events():
 
 @blueprint.route('/calendar/share_cal')
 def share_cal():
-    if not auth_utils.is_caltech_user():
-        return login_redirect()
+    if 'username' not in flask.session:
+        return auth_utils.login_redirect()
 
     return flask.render_template(
         'share_cal.html', permissions=helpers.get_permission())
@@ -37,7 +37,7 @@ def share_cal():
 @blueprint.route('/calendar/search')
 def calendar_search():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     return flask.render_template(
         'calendar_search.html', permissions=helpers.get_permission())
@@ -46,7 +46,7 @@ def calendar_search():
 @blueprint.route('/calendar/sync')
 def sync():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     res = helpers.sync_data(all_data=True)
     error_message = helpers.check_if_error(res)
@@ -60,6 +60,9 @@ def sync():
 
 @blueprint.route('/1/calendar_all_events', methods=['POST'])
 def get_all_events():
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
+
     res = helpers.sync_data(all_data=True)
     error_message = helpers.check_if_error(res)
     if error_message:
@@ -70,7 +73,7 @@ def get_all_events():
 @blueprint.route('/1/calendar_all_events_backup', methods=['POST'])
 def get_all_events_backup():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     res = helpers.get_events_backup(all_data=True)
     error_message = helpers.check_if_error(res)
@@ -89,7 +92,7 @@ def get_all_events_backup():
 @blueprint.route('/1/calendar_events', methods=['POST'])
 def get_events():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     res = helpers.sync_data(1, flask.request.form['year'], 12,
                             flask.request.form['year'])
@@ -102,7 +105,7 @@ def get_events():
 @blueprint.route('/1/calendar_events_backup', methods=['POST'])
 def get_events_backup():
     if not auth_utils.is_caltech_user():
-        return login_redirect()
+        return auth_utils.login_redirect()
 
     res = helpers.get_events_backup(1, flask.request.form['year'], 12,
                                     flask.request.form['year'])
@@ -119,8 +122,8 @@ def get_events_backup():
 
 @blueprint.route('/calendar/share_cal', methods=['POST'])
 def calendar_share_cal():
-    if not auth_utils.is_caltech_user():
-        return login_redirect()
+    if 'username' not in flask.session:
+        return auth_utils.login_redirect()
 
     fields = ['email', 'tag', 'access_level']
     for field in fields:
@@ -143,8 +146,8 @@ def calendar_share_cal():
 
 @blueprint.route('/1/calendar/delete_event', methods=['POST'])
 def calendar_delete():
-    if not auth_utils.is_caltech_user():
-        return login_redirect()
+    if 'username' not in flask.session:
+        return auth_utils.login_redirect()
 
     return flask.jsonify({
         'deleted':
@@ -154,6 +157,9 @@ def calendar_delete():
 
 @blueprint.route('/calendar/add_events/<int:update>', methods=['POST'])
 def calendar_add_events(update=0):
+    if 'username' not in flask.session:
+        return auth_utils.login_redirect()
+
     fields = [
         'name', 'description', 'start_date', 'start_hour', 'start_minute',
         'end_hour', 'end_minute', 'end_date', 'tag'
