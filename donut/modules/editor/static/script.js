@@ -26,7 +26,7 @@ function preview() {
       converter = new showdown.Converter({strikethrough: true, tables: true}),
       html = converter.makeHtml(text);
   target.html(html);
-  target_title.text(title.replace("_", " "));
+  target_title.text(title.replace(/_/g, " "));
 }
 
 // Changes the title of a file
