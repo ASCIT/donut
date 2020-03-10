@@ -40,7 +40,7 @@ def get_create_group_id(group_name, db):
     if res is None:
         with db.cursor() as cursor:
             cursor.execute(insertion_query, [group_name])
-            res = cursor.lastrowid()
+            res = cursor.lastrowid
     return res
 
 
@@ -71,7 +71,7 @@ def get_create_position_id(pos_name, group_id, control, db):
         with db.cursor() as cursor:
             cursor.execute(insertion_query,
                            [group_id, pos_name, control == "t"])
-            res = cursor.lastrowid()
+            res = cursor.lastrowid
     return res
 
 
