@@ -45,8 +45,8 @@ valid_permissions = {
                 calendar_permissions.RUDDOCK.value,
                 calendar_permissions.OTHER.value,
                 calendar_permissions.ATHLETICS.value,
-            # Surveys
-
+                # Surveys
+                voting_permissions.SURVEYS.value
             ],
         # View Bodfeedback summary, Edit Bodfeedback, View Bodfeedback emails
         False: [
