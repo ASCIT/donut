@@ -11,7 +11,6 @@ DROP TABLE IF EXISTS position_holders;
 DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS privacies;
 DROP TABLE IF EXISTS member_options;
 DROP TABLE IF EXISTS options;
 DROP VIEW IF EXISTS members_full_name;
@@ -83,17 +82,6 @@ CREATE TABLE member_options (
     PRIMARY KEY (user_id, option_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (option_id) REFERENCES options(option_id)
-);
-
--- Privacy Level of Member Info Table
--- Directory privacies for who can see data.
--- Default is Caltech?
-CREATE TABLE privacies (
-    priv_id     INT         NOT NULL AUTO_INCREMENT,
-    priv_name   VARCHAR(8)  NOT NULL,
-    priv_desc   VARCHAR(64) NOT NULL,
-    PRIMARY KEY (priv_id),
-    UNIQUE (priv_name)
 );
 
 -- Users Table

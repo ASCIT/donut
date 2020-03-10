@@ -3,6 +3,10 @@
   {{super()}}
   <script src={{ url_for('uploads.static', filename='script_uploading.js', _external = True)}}></script>
 {% endblock %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('uploads.static', filename='style.css')}}>
+{% endblock %}
 {% block page %}
 <div class="container">
   <div class="col-md-24">
@@ -26,7 +30,7 @@
       <form id="upload-file" method="post" enctype="multipart/form-data">
         <label for="file">Select a file</label>
         <input id="file" name="file" type="file"/>
-        <button id="submit_btn">Upload</button>
+        <button id="submit_btn" class="btn btn-primary">Upload</button>
       </form>
     </div>
   </div>

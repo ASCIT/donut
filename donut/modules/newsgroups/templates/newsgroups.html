@@ -1,8 +1,12 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
 	{% for group in groups %}
 	<a href={{ url_for(".view_group", group_id=group["group_id"]) }}>{{ group["group_name"] }}</a>
 	<br>
 	{% endfor %}
+</div>
+</div>
 {% endblock %}
