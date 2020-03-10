@@ -10,7 +10,7 @@ def send_email(to, text, subject, use_prefix=True, group=None):
     is not none, the email is sent to a newsgroup and the to emails are hidden.
     """
 
-    msg = MIMEText(msg)
+    msg = MIMEText(text, "html")
     if use_prefix and '[ASCIT Donut]' not in subject:
         subject = '[ASCIT Donut] ' + subject
 
