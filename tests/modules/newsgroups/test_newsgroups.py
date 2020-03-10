@@ -93,10 +93,12 @@ def test_subscriptions(client):
 
 
 def test_get_owners(client):
-    assert helpers.get_owners(2) == [{
-        'user_id': 4,
+    res = helpers.get_owners(2)
+    res = sorted(res, key=lambda owner: owner['user_id'])
+    assert res == [{
+        'user_id': 2,
         'pos_name': 'President'
     }, {
-        'user_id': 2,
+        'user_id': 4,
         'pos_name': 'President'
     }]

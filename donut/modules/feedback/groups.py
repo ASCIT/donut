@@ -1,3 +1,5 @@
+groupInt = {'bod': 1, 'arc': 2, 'donut': 3}
+
 msg1 = """ This is the {0} anonymous feedback form.
 Ever wanted to suggest something to the {0}, but didn't want to say it directly? Ever wanted to comment about how an event was run, or are curious about how to get involved? Well then, simply fill out the form below. The {0} would love to hear all of your suggestions
 

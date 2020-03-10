@@ -25,18 +25,15 @@ def campus_positions():
     also collect the total list of positions and pass it in'''
     approved_group_ids = []
     approved_group_names = []
-    if 'username' in flask.session:
-        user_id = get_user_id(flask.session['username'])
-        result = helpers.get_group_list_of_member(user_id)
-        for res in result:
-            if res["control"] == 1:
-                approved_group_ids.append(res["group_id"])
-                approved_group_names.append(res["group_name"])
-    all_positions = groups.helpers.get_position_data()
-    for pos in all_positions:
-        # Format the date information nicely
-        pos['start_date'] = str(pos['start_date'])
-        pos['end_date'] = str(pos['end_date'])
+    username = flask.session.get('username')
+    if username:
+        user_id = get_user_id(username)
+        for group in helpers.get_group_list_of_member(user_id):
+            if group["control"]:
+                approved_group_ids.append(group["group_id"])
+                approved_group_names.append(group["group_name"])
+    all_positions = groups.helpers.get_position_data(
+        include_houses=False, order_by=("group_name", "pos_name"))
     return flask.render_template(
         'campus_positions.html',
         approved_group_ids=approved_group_ids,
