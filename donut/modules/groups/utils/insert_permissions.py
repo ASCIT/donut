@@ -1,5 +1,12 @@
 import argparse
 from donut.pymysql_connection import make_db
+from donut.modules.auth.permissions import Permissions as auth_permissions
+from donut.modules.calendar.permissions import calendar_permissions
+from donut.modules.directory_search.permissions import Directory_Permissions as directory_permissions
+from donut.modules.editor.edit_permission import EditPermission as page_edit_permissions
+from donut.modules.feedback.permissions import BOD_PERMISSIONS as bod_permissions, ARC_PERMISSIONS as arc_permissions, DONUT_PERMISSIONS as donut_permissions
+from donut.modules.uploads.upload_permission import UploadPermissions as upload_permissions
+from donut.modules.voting.permissions import Permissions as voting_permissions
 
 valid_permissions = {
     "Devteam":
@@ -10,75 +17,113 @@ valid_permissions = {
     },
     "IHC":
     {
-        True: [2, 4, 5], #Edit Rotation Info, Editing Pages, Upload documents
-        False: [2, 4, 5] #Edit Rotation Info, Editing Pages, Upload documents
+        # Editing Pages, Upload documents
+        True: [page_edit_permissions.ABLE.value, upload_permissions.ABLE.value],
+        # Editing Pages, Upload documents
+        False: [page_edit_permissions.ABLE.value, upload_permissions.ABLE.value]
     },
     "ASCIT":
     {   # Editing Pages, Upload documents, View Bodfeedback summary,
         # Edit Bodfeedback, Edit Bodfeedback emails, View Bodfeedback emails
-        True: [4, 5, 8,
-            9, 10, 11,
+        True: [
+                page_edit_permissions.ABLE.value,
+                upload_permissions.ABLE.value,
+                bod_permissions.SUMMARY.value,
+                bod_permissions.TOGGLE_READ.value,
+                bod_permissions.ADD_REMOVE_EMAIL.value,
+                bod_permissions.VIEW_EMAILS.value,
             # All the calendars
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                calendar_permissions.ASCIT.value,
+                calendar_permissions.AVERY.value,
+                calendar_permissions.BECHTEL.value,
+                calendar_permissions.BLACKER.value,
+                calendar_permissions.DABNEY.value,
+                calendar_permissions.FLEMING.value,
+                calendar_permissions.LLOYD.value,
+                calendar_permissions.PAGE.value,
+                calendar_permissions.RICKETTS.value,
+                calendar_permissions.RUDDOCK.value,
+                calendar_permissions.OTHER.value,
+                calendar_permissions.ATHLETICS.value,
             # Surveys
-            33],
+
+            ],
         # View Bodfeedback summary, Edit Bodfeedback, View Bodfeedback emails
-        False: [8, 9, 11,
-            # Surveys
-            33]
+        False: [
+                bod_permissions.SUMMARY.value,
+                bod_permissions.TOGGLE_READ.value,
+                bod_permissions.VIEW_EMAILS.value,
+                # Surveys
+                voting_permissions.SURVEYS.value]
     },
     "Academics and Research Committee (ARC)":
     {
         # View Arcfeedback summary, Edit Arcfeedback, Edit Arcfeedback emails
         # View Arcfeedback emails, Surveys
-        True: [13, 14, 15, 16, 33],
+        True: [
+                arc_permissions.SUMMARY.value,
+                arc_permissions.TOGGLE_READ.value,
+                arc_permissions.ADD_REMOVE_EMAIL.value,
+                arc_permissions.VIEW_EMAILS.value,
+                voting_permissions.SURVEYS.value],
         # View Arcfeedback summary, Edit Arcfeedback, View Arcfeedback emails,
         # Surveys
-        False: [13, 14, 16, 33]
+        False: [arc_permissions.SUMMARY.value,
+                arc_permissions.TOGGLE_READ.value,
+                arc_permissions.VIEW_EMAILS.value,
+                voting_permissions.SURVEYS.value],
     },
     "Avery":
     {   # Edit Avery Calendar
-        True: [21],
+        True: [calendar_permissions.AVERY.value],
     },
     "Blacker":
     {
         # Edit Blacker Calendar
-        True: [24],
+        True: [calendar_permissions.BLACKER.value],
     },
     "Dabney":
     {
         # Edit Dabney Calendar
-        True: [25],
+        True: [calendar_permissions.DABNEY.value],
     },
     "Fleming":
     {
         # Edit Fleming Calendar
-        True: [26],
+        True: [calendar_permissions.FLEMING.value],
     },
     "Lloyd":
     {
-        # Edit Fleming Calendar
-        True: [27],
+        # Edit LLoyd Calendar
+        True: [calendar_permissions.LLOYD.value],
     },
     "Page":
     {
-        # Edit Fleming Calendar
-        True: [28],
+        # Edit Page Calendar
+        True: [calendar_permissions.PAGE.value],
     },
     "Ricketts":
     {
         # Edit Ricketts Calendar
-        True: [29],
+        True: [calendar_permissions.RICKETTS.value],
     },
     "Ruddock":
     {
         # Edit Ruddock Calendar
-        True: [30],
+        True: [calendar_permissions.RUDDOCK.value],
+    },
+    "Bechtel":
+    {
+        # Edit Bechtel Calendar
+        True: [calendar_permissions.BECHTEL.value],
     },
     "Review Committee":
     {
         # Editing Pages, Upload documents, Surveys
-        True: [4, 5, 33]
+        True: [
+                page_edit_permissions.ABLE.value,
+                upload_permissions.ABLE.value,
+                voting_permissions.SURVEYS.value]
     }
 }
 
@@ -87,13 +132,13 @@ def insert_permissions(env):
     db = make_db(env)
     try:
         db.begin()
-        for group in valid_permissions:
-            query = '''INSERT INTO position_permissions(pos_id, permission_id)
-                        VALUES (%s, %s) '''
-            for control in valid_permissions[group]:
+        query = '''INSERT INTO position_permissions(pos_id, permission_id)
+            VALUES (%s, %s) '''
+        for group, group_permissions in valid_permissions.items():
+            for control, permission_ids in group_permissions.items():
                 position_ids = get_position_id(group, control, db)
                 for position_id in position_ids:
-                    for permission_id in valid_permissions[group][control]:
+                    for permission_id in permission_ids:
                         with db.cursor() as cursor:
                             cursor.execute(query, [position_id, permission_id])
         db.commit()
