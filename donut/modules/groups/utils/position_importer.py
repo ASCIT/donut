@@ -40,8 +40,8 @@ def get_create_group_id(group_name, db):
     if res is None:
         with db.cursor() as cursor:
             cursor.execute(insertion_query, [group_name])
-        res = get_group_id(group_name, db)
-    return res['group_id']
+            res = cursor.lastrowid
+    return res
 
 
 def get_group_id(group_name, db):
@@ -49,7 +49,7 @@ def get_group_id(group_name, db):
     with db.cursor() as cursor:
         cursor.execute(group_id_query, [group_name])
         res = cursor.fetchone()
-    return res
+    return None if res is None else res['group_id']
 
 
 def clean_names(group_name):
@@ -71,8 +71,8 @@ def get_create_position_id(pos_name, group_id, control, db):
         with db.cursor() as cursor:
             cursor.execute(insertion_query,
                            [group_id, pos_name, control == "t"])
-        res = get_position_id(pos_name, group_id, db)
-    return res['pos_id']
+            res = cursor.lastrowid
+    return res
 
 
 def get_position_id(pos_name, group_id, db):
@@ -80,7 +80,7 @@ def get_position_id(pos_name, group_id, db):
     with db.cursor() as cursor:
         cursor.execute(query, [group_id, pos_name])
         res = cursor.fetchone()
-    return res
+    return None if res is None else res['pos_id']
 
 
 if __name__ == "__main__":
