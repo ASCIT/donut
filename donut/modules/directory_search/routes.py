@@ -6,8 +6,6 @@ from flask import jsonify, redirect
 from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
 from donut.modules.directory_search import blueprint, helpers
 
-PER_PAGE = 20
-
 
 @blueprint.route('/directory')
 def directory_search():
@@ -74,7 +72,6 @@ def search():
         page = int(form['page'])
         total = int(form['total'])
         per_page = int(form['per_page'])
-        num_pgs = int(form['num_pgs'])
     name = form['name']
     if name.strip() == '':
         name = None
@@ -99,7 +96,8 @@ def search():
     else:
         grad_year = None
     offset = (page - 1) * per_page
-    args = dict(name=name,
+    args = dict(
+        name=name,
         house_id=house_id,
         option_id=option_id,
         building_id=building_id,
@@ -107,16 +105,15 @@ def search():
         username=form['username'],
         email=form['email'])
     if flask.request.method == 'POST':
-        total = int(helpers.execute_search(**args))
-        num_pgs = total // per_page + (total % per_page > 0)
+        total = helpers.execute_search(**args)
     offset = (page - 1) * per_page
     users = helpers.execute_search(**args, offset=offset, per_page=per_page)
-    if len(users) == 1:  #1 result
+    if total == 1:  #1 result
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
     show_images = 'show_images' in form
-    query_info = { k: ('' if v is None else v) for k, v in args.items() }
+    query_info = {k: ('' if v is None else v) for k, v in args.items()}
     return flask.render_template(
         'search_results.html',
         users=users,

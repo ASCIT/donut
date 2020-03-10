@@ -2,9 +2,11 @@
 -- TODO: Better comments
 
 DROP TABLE IF EXISTS news;
+DROP VIEW IF EXISTS current_position_holders;
+DROP VIEW IF EXISTS current_direct_position_holders;
 DROP TABLE IF EXISTS position_relations;
-DROP VIEW IF EXISTS group_house_membership;
-DROP VIEW IF EXISTS group_houses;
+DROP VIEW IF EXISTS house_positions;
+DROP VIEW IF EXISTS house_groups;
 DROP TABLE IF EXISTS position_holders;
 DROP TABLE IF EXISTS positions;
 DROP TABLE IF EXISTS groups;
@@ -139,12 +141,12 @@ CREATE TABLE groups (
 CREATE TABLE newsgroup_posts (
     newsgroup_post_id       INT          NOT NULL AUTO_INCREMENT,
     group_id                INT          NOT NULL, -- Which group was it to
-    subject                 TEXT         NOT NULL, 
+    subject                 TEXT         NOT NULL,
     message                 TEXT         NOT NULL,
     post_as		    VARCHAR(32)  DEFAULT NULL,
     user_id                 INT          NOT NULL, -- Who sent this message
     time_sent               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP, -- When were messages sent
-    PRIMARY KEY (newsgroup_post_id), 
+    PRIMARY KEY (newsgroup_post_id),
     FOREIGN KEY (group_id) REFERENCES groups(group_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
@@ -164,7 +166,8 @@ CREATE TABLE positions (
     PRIMARY KEY (pos_id),
     FOREIGN KEY (group_id)
         REFERENCES groups(group_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    UNIQUE (group_id, pos_name)
 );
 
 -- Position to Member Table
@@ -174,7 +177,7 @@ CREATE TABLE position_holders (
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
-    receive    BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
+    subscribed BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
     PRIMARY KEY (hold_id),
     FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
@@ -182,21 +185,19 @@ CREATE TABLE position_holders (
     FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
--- House View
+-- Houses View
 -- Because houses are used so much, make a view separate from the groups
 -- table.
-CREATE VIEW group_houses AS (
+CREATE VIEW house_groups AS (
     SELECT group_id, group_name FROM groups WHERE type = 'house'
 );
-
--- House Members View
--- Because house membership is used so much, make a view separate from the
--- positions table.
-CREATE VIEW group_house_membership AS (
-    SELECT user_id, group_id, pos_id
-    FROM group_houses NATURAL JOIN positions NATURAL JOIN position_holders
-    WHERE UPPER(pos_name) = UPPER('Full Member')
-        OR UPPER(pos_name) = UPPER('Social Member')
+-- House Positions View
+-- House membership positions are special,
+-- so make a view separate from the positions table.
+CREATE VIEW house_positions AS (
+    SELECT group_id, group_name, pos_id, pos_name
+    FROM house_groups NATURAL JOIN positions
+    WHERE pos_name IN ('Full Member', 'Social Member')
 );
 
 -- Position to position table
@@ -208,6 +209,28 @@ CREATE TABLE position_relations (
     FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id)
 );
 
+-- Filters the position_holders table to only list holds that are active
+CREATE VIEW current_direct_position_holders AS (
+    SELECT * FROM position_holders
+    WHERE (start_date IS NULL OR start_date <= CURRENT_DATE)
+        AND (end_date IS NULL OR CURRENT_DATE <= end_date)
+);
+-- All direct and indirect position holds that are currently active.
+-- This should be used in general for querying held positions.
+CREATE VIEW current_position_holders AS (
+    SELECT * FROM current_direct_position_holders
+    UNION ALL
+    SELECT
+        current_direct_position_holders.hold_id,
+        position_relations.pos_id_to AS pos_id,
+        current_direct_position_holders.user_id,
+        current_direct_position_holders.start_date,
+        current_direct_position_holders.end_date,
+        current_direct_position_holders.subscribed
+    FROM current_direct_position_holders
+        JOIN position_relations ON pos_id = pos_id_from
+);
+
 -- News items to show on the homepage
 CREATE TABLE news (
     news_id     INT  NOT NULL AUTO_INCREMENT,
@@ -216,9 +239,9 @@ CREATE TABLE news (
     PRIMARY KEY (news_id)
 );
 CREATE TABLE group_applications (
-    user_id         INT NOT NULL, 
-    group_id        INT NOT NULL, 
+    user_id         INT NOT NULL,
+    group_id        INT NOT NULL,
     PRIMARY KEY (user_id, group_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (group_id) REFERENCES groups(group_id)
-)
+);

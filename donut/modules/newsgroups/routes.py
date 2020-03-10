@@ -99,7 +99,8 @@ def apply_subscription(group_id):
 def unsubscribe(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
-    helpers.unsubscribe(flask.session['username'], group_id)
+    helpers.unsubscribe(
+        auth_utils.get_user_id(flask.session['username']), group_id)
     flask.flash('Successfully unsubscribed')
     return flask.redirect(
         flask.url_for('newsgroups.view_group', group_id=group_id))

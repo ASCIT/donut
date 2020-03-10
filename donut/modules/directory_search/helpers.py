@@ -62,7 +62,7 @@ def get_user(user_id):
             cursor.execute(option_query, [user_id])
             user['options'] = cursor.fetchall()
         groups_query = """
-        SELECT group_name, pos_name
+            SELECT group_name, pos_name
             FROM current_position_holders NATURAL JOIN positions NATURAL JOIN groups
             WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)
             AND user_id = %s
@@ -162,7 +162,6 @@ def execute_search(**kwargs):
     else:
         query = 'SELECT COUNT(*) AS cnt FROM (' + query + ') sub'
     with flask.g.pymysql_db.cursor() as cursor:
-        print(query, (substitution_arguments))
         cursor.execute(query, substitution_arguments)
         if 'offset' in kwargs:
             return cursor.fetchall()

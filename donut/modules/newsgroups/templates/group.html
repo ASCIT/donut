@@ -5,7 +5,9 @@
   <h1> Must be a member to view </h1>
 {% else %}
   <h1> {{ group['group_name'] }} </h1>
-  <h2> {{ group['group_desc'] }} </h2>
+  {% if group['group_desc'] %}
+    <h2> {{ group['group_desc'] }} </h2>
+  {% endif %}
   {% if not member %}
     <form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
       <div class="form-group">
@@ -25,10 +27,10 @@
   {% endif %}
   {% if actions["receive"] %}
     <h4> You are subscribed. </h4>
-  {% else %} 
+  {% else %}
     <h4> You are not subscribed. </h4>
   {% endif %}
-  {% if actions["control"] %} 
+  {% if actions["control"] %}
     <h4> You have admin control. </h4>
     <h4> Applications </h4>
     <table style="width:100%">

@@ -56,7 +56,7 @@ graduation_years = {
 
 get_options_query = "SELECT * FROM options"
 get_house_poss_query = """
-SELECT group_name, pos_id FROM house_positions WHERE pos_name = 'Full Member'
+    SELECT group_name, pos_id FROM house_positions WHERE pos_name = 'Full Member'
 """
 # The following values are updated on duplicate keys:
 # msc, preferred_name
@@ -98,13 +98,16 @@ insert_option_query = """
     VALUES (%s, %s, 'Major')
 """
 get_house_membership_query = """
-    SELECT hold_id FROM position_holders WHERE user_id = %s AND pos_id = %s
+    SELECT hold_id FROM current_position_holders
+    WHERE user_id = %s AND pos_id = %s
 """
 add_house_membership_query = """
-    INSERT INTO position_holders (user_id, pos_id) VALUES (%s, %s)
+    INSERT INTO position_holders (user_id, pos_id, start_date)
+    VALUES (%s, %s, CURRENT_DATE)
 """
 end_house_membership_query = """
-    DELETE FROM position_holders WHERE user_id = %s AND pos_id IN
+    UPDATE position_holders SET end_date = CURRENT_DATE
+    WHERE user_id = %s AND pos_id IN
 """
 
 
@@ -195,7 +198,6 @@ def add_user_to_db(cursor, student, option_ids, house_pos_ids):
             cursor.execute(insert_option_query, (user_id, option_id))
 
     # Update house memberships
-    # TODO: use start and end dates to determine if position is active
     house = student["HOUSE_AFFILIATION_1"]  # 2 and 3 appear unpopulated
     if house and house != "Unaffiliated":
         pos_id = house_pos_ids.get(house)
