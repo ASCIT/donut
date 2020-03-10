@@ -1,6 +1,5 @@
 import smtplib
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 
 def send_email(to, text, subject, use_prefix=True, group=None):
@@ -9,8 +8,7 @@ def send_email(to, text, subject, use_prefix=True, group=None):
     emails, and for 'msg' and 'subject' to be strings. If group
     is not none, the email is sent to a newsgroup and the to emails are hidden.
     """
-
-    msg = MIMEText(msg)
+    msg = MIMEText(text)
     if use_prefix and '[ASCIT Donut]' not in subject:
         subject = '[ASCIT Donut] ' + subject
 
