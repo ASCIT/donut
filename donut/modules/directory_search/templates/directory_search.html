@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block page %}
-	<div class='container theme-showcase jumbotron' style='float: none; margin-top: -40px; padding-bottom: 25px'>
+	<div class='container theme-showcase jumbotron'>
 		<h2>Directory Search</h2>
 		<h4>I'm looking for someone...</h4>
 		<form action='{{ url_for("directory_search.search") }}' method='POST'>

@@ -1,8 +1,11 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+
 {% if not group['visible'] and not member %}
-  <h1> Must be a member to view </h1>
+  <h2> Must be a member to view </h2>
 {% else %}
   <h1> {{ group['group_name'] }} </h1>
   {% if group['group_desc'] %}
@@ -77,4 +80,6 @@
     <h4> Must be a member to view messages </h4>
   {% endif %}
 {% endif %}
+</div>
+</div>
 {% endblock %}

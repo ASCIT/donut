@@ -1,4 +1,8 @@
 {% extends "layout.html" %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href={{ url_for('uploads.static', filename='style.css')}}>
+{% endblock %}
 {% block scripts %}
   {{super()}}
   <script src="https://cdn.rawgit.com/showdownjs/showdown/1.8.7/dist/showdown.min.js"></script>
