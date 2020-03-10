@@ -1,8 +1,18 @@
-.btn{
-  margin: 5px;
+.jumbotron h1 {
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
+  color: #000;
+  text-align: left;
 }
 
+#title {
+  font-family: 'Open Sans', Helvetica, Arial, 'sans-serif';
+  color: #000;
+  text-align: center;
+}
 
-.dropdown:hover .dropdown-menu {
-  display: block;
+label {
+  font-size: 21px;
+}
+#submit_btn {
+  margin-top:30px;
 }
