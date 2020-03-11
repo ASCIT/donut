@@ -10,8 +10,8 @@
 				<ul class='list-group' id='name-search'></ul>
 			</div>
 			<div class='form-group'>
-				<label for='house'>Affiliated with</label>
-				<select class='form-control' id='house' name='house'>
+				<label for='house_id'>Affiliated with</label>
+				<select class='form-control' id='house_id' name='house_id'>
 					<option value=''>Any house</option>
 					{% for house in houses %}
 						<option value={{ house['group_id'] }}>{{ house['group_name'] }}</option>
@@ -19,8 +19,8 @@
 				</select>
 			</div>
 			<div class='form-group'>
-				<label for='option'>Pursuing</label>
-				<select class='form-control' id='option' name='option'>
+				<label for='option_id'>Pursuing</label>
+				<select class='form-control' id='option_id' name='option_id'>
 					<option value=''>Any option</option>
 					{% for option in options %}
 						<option value={{ option['option_id'] }}>{{ option['option_name'] }}</option>
@@ -28,8 +28,8 @@
 				</select>
 			</div>
 			<div class='form-group'>
-				<label for='residence'>Living in</label>
-				<select class='form-control' id='residence' name='residence'>
+				<label for='building_id'>Living in</label>
+				<select class='form-control' id='building_id' name='building_id'>
 					<option value=''>Any residence</option>
 					{% for residence in residences %}
 						<option value={{ residence['building_id'] }}>{{ residence['building_name'] }}</option>
@@ -37,8 +37,8 @@
 				</select>
 			</div>
 			<div class='form-group'>
-				<label for='graduation'>Graduating in</label>
-				<select class='form-control' id='graduation' name='graduation'>
+				<label for='grad_year'>Graduating in</label>
+				<select class='form-control' id='grad_year' name='grad_year'>
 					<option value=''>Any year</option>
 					{% for year in grad_years %}
 						<option>{{ year }}</option>

@@ -374,10 +374,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -386,10 +386,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': 'san',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -400,10 +400,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '2',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '2',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -414,10 +414,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '100',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '100',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -426,10 +426,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '1',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '1',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -440,10 +440,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '100',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '100',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -452,10 +452,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '1',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '1',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -466,10 +466,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '100',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '100',
+            'grad_year': '',
             'username': '',
             'email': ''
         })
@@ -478,10 +478,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '2021',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '2021',
             'username': '',
             'email': ''
         })
@@ -492,10 +492,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '2019',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '2019',
             'username': '',
             'email': ''
         })
@@ -504,10 +504,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': 'qu',
             'email': ''
         })
@@ -518,10 +518,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': 'abc',
             'email': ''
         })
@@ -530,10 +530,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': 'reng'
         })
@@ -544,10 +544,10 @@ def test_search(client):
         flask.url_for('directory_search.search'),
         data={
             'name': '',
-            'house': '',
-            'option': '',
-            'residence': '',
-            'graduation': '',
+            'house_id': '',
+            'option_id': '',
+            'building_id': '',
+            'grad_year': '',
             'username': '',
             'email': 'xyz'
         })
