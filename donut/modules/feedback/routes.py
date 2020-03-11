@@ -103,7 +103,8 @@ def feedback_view_summary(group):
     # Add links to each complaint
     for complaint in complaints:
         complaint['link'] = helpers.get_link(group, complaint['complaint_id'])
-    return flask.render_template('summary.html', complaints=complaints)
+    return flask.render_template(
+        'summary.html', complaints=complaints, group=group)
 
 
 # Mark a complaint read

@@ -97,8 +97,10 @@ def test_get_owners(client):
     res = sorted(res, key=lambda owner: owner['user_id'])
     assert res == [{
         'user_id': 2,
-        'pos_name': 'President'
+        'pos_name': 'President',
+        'full_name': 'Robert Eng'
     }, {
         'user_id': 4,
-        'pos_name': 'President'
+        'pos_name': 'President',
+        'full_name': 'Sean Yu'
     }]

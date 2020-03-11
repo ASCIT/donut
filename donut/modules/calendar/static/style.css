@@ -2,7 +2,9 @@ body{
     padding-bottom:0;
     padding-top:0;
 }
-
+.jumbotron {
+    padding-top: 83px
+}
 .checkbox-inline input[type=checkbox]{
     margin-top: 2px;
     margin-left: 0;
@@ -13,6 +15,7 @@ body{
 }
 #cal{
     height: 100%;
+    font-size: 14px;
 }
 
 #cal td{
