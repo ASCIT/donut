@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
-<h1> <a href={{ url_for("newsgroups.view_group", group_id=group_id) }}>{{ group_name }}</a></h1>
-<h4> Past Messages </h4>
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+    <h2> <a href={{ url_for("newsgroups.view_group", group_id=group_id) }}>{{ group_name }}</a></h2>
+    <h4> Past Messages </h4>
     <table style="width:100%">
       <tr>
           <th>Date</th>
@@ -17,4 +19,6 @@
       </tr>
      {% endfor %}
     </table>
+  </div>
+</div>
 {% endblock %}

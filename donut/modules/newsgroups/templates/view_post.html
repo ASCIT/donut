@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block page %}
 {% include "navbar.html" %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
 	<h3>
 		<label for="from">From: </label>
 		<a href={{ url_for('directory_search.view_user', user_id=post.user_id) }}>{{ post.post_as }}</a> </h3>
@@ -12,4 +14,6 @@
 		<h3>Subject: {{ post.subject }}</h3>
 		<h3>Message:</h3>
 		<h4>{{ post.message }}</h4>
+</div>
+</div>
 {% endblock %}

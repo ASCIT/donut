@@ -40,8 +40,11 @@
       </div>
     {% endif %}
     </div>
-
-    <div class="half-float-left">
+    {% if news %}
+      <div class="half-float-left">
+    {% else %}
+      <div>
+    {% endif %}
 
     <p>Welcome to Donut, the official website of the Associated Students of the California Institute of Technology. We provide unique services on behalf of the student body in an effort to better communication and make services accessible to all students.</p>
 
