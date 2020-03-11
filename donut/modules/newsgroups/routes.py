@@ -116,7 +116,7 @@ def mygroups():
     return flask.render_template(
         'newsgroups.html',
         groups=helpers.get_my_newsgroups(user_id),
-        page_title="My Newgroups")
+        page_title="My Newsgroups")
 
 
 @blueprint.route('/newsgroups/viewmsg/<post_id>')
