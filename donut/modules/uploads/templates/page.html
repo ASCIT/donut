@@ -10,7 +10,6 @@
 {% endblock %}
 {% block page %}
 <div class="container theme-showcase" role="main">
-  <div class="col-md-24">
     <div class="jumbotron">
       <h1 id = "title" class="text-center">{{title}}</h1>
       <div id = "content">
@@ -19,6 +18,5 @@
         <a href="{{ url_for('editor.editor', title=title.replace(' ', '_'))}}">edit this page</a>
       {% endif %}
     </div>
-  </div>
 </div>
 {% endblock %}

@@ -65,7 +65,13 @@ def get_user_actions(user_id, group_id):
         cursor.execute(query, (user_id, group_id))
         res = cursor.fetchall()
     actions = {'send': False, 'control': False, 'receive': False}
-    if not res:
+    anyone_can_send_query = """SELECT anyone_can_send FROM groups
+        WHERE group_id=%s"""
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(anyone_can_send_query, (group_id))
+        anyone_can_send = cursor.fetchone()
+
+    if not res and not anyone_can_send:
         return actions
     else:
         for a in actions:
@@ -73,6 +79,8 @@ def get_user_actions(user_id, group_id):
                 if pos[a]:
                     actions[a] = True
                     break
+        if anyone_can_send is not None and anyone_can_send['anyone_can_send']:
+            actions['send'] = True
         return actions
 
 
@@ -183,8 +191,9 @@ def get_owners(group_id):
     """Get users with control access to group."""
 
     query = """
-        SELECT user_id, pos_name
+        SELECT user_id, pos_name, full_name
         FROM positions NATURAL JOIN current_position_holders
+        NATURAL JOIN members_full_name 
         WHERE control = 1 AND group_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:

@@ -96,6 +96,18 @@ def format_text(text):
                 i, '[' + link_piece[1].strip() + ']' + '(' + file_uploads +
                 link_piece[0].strip().replace(" ", "_") + ')')
 
+    # If they directly link to a donut.caltech.edu page -- look for them
+    # and replace with the short hand/local way of linking
+    # example for images: http://donut.caltech.edu/w/images/5/5c/ASCIT_event_funding.pdf
+    # Example for text: http://donut.caltech.edu/ascit/ASCIT_Teaching_Awards
+    text = re.sub(
+        r"http://donut.caltech.edu/w/images/[0-9a-zA-Z]{1}/[0-9a-zA-Z]{2}/([^\]]*)",
+        r"uploaded_file/\1", text)
+    text = re.sub(r"http://donut.caltech.edu/ascit/([^\]]*)", r"\1", text)
+
+    text = text.replace("http://donut.caltech.edu/positions/view.php",
+                        "contact")
+
     for i in range(4, 0, -1):
         text = text.replace("*" * i, "\t" * (i - 1) + "* ")
 

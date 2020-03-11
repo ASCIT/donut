@@ -108,15 +108,16 @@ input[type=checkbox], input[type=radio] {
             drop-shadow(1px -1px 0 white)
             drop-shadow(-1px -1px 0 white);
 
-  font-size: 94px;
   text-align: center;
-  font-family: 'donutfont';
-  color: #f5903b;
   z-index: 9999;
   margin: auto;
   display: block;
 }
 
+/*Default jumbotron text is too large*/
+.jumbotron p{
+  font-size: 16px;
+}
 /* All inputs should have an orange border with light spacing around
  * the element.
  */
@@ -166,7 +167,7 @@ table {
   border-collapse: separate;
   border: 0px;
   width: 100%;
-  font-size: 21px;
+  font-size: 16px;
   font-weight: 200;
 }
 
@@ -177,7 +178,7 @@ td {
 
 /* Same font size as everything else*/
 ul, ol {
-  font-size: 21px;
+  font-size: 16px;
   font-weight: 200;
 }
 /* When we need something to be center regardless of other elements. */
@@ -296,7 +297,9 @@ ul, ol {
   float: right;
   display: inline-block;
   margin: 0;
+  padding-top: 15px;
   padding-left: 3%;
+  font-size: 16px;
 }
 
 /* Left-half class for a div of a split, two-column page. */
@@ -305,7 +308,9 @@ ul, ol {
   float: left;
   display: inline-block;
   margin: 0;
+  padding-top: 15px;
   padding-right: 3%;
+  font-size:16px;
 }
 
 /* A class for giving an element a thin white border. */
@@ -485,6 +490,12 @@ ul, ol {
   border-color: orange;
 }
 
+.newsgroup-frame{
+  padding-right: 60px;
+  padding-left: 60px;
+  font-size: 16px;
+}
+
 /* BEGIN MOBILE CSS */
 /* In case an element doesn't need a border. This will remove it. */
 .no-border {
@@ -612,6 +623,9 @@ ul, ol {
 /* Content needs to span the width of its parent. */
 #content {
   width: 100%;
+  padding-top: 20px;
+  max-width: 800px;
+  margin: auto;
 }
 
 /* Give the header some spacing to avoid overlap with other elements. */
@@ -645,8 +659,8 @@ ul, ol {
 
 /* Let it match with other elements */
 #newsgroup-nav-bar {
-  padding-left:45px;
-  padding-right:45px;
+  padding-left:60px;
+  padding-right:60px;
   padding-top: 60px;
 }
 
@@ -693,10 +707,6 @@ ul, ol {
     top: 0;
     left: 0;
   }
-
-  /*.jumbotron h1 {
-    font-size: 60px;
-  }*/
 
   /* Avoids issues with strange background transitions. */
   #homepage-jumbotron {

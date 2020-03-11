@@ -2,6 +2,8 @@
 {% block page %}
 {% include "topbar.html" %}
 
+<div class="half-float-left jumbopadding" style="padding-left: 15px; padding-right: 15px;">
+
 {% set is_textbook = item['cat_title'] == 'Textbooks' %}
 {% set title = item['textbook_title' if is_textbook else 'item_title'] %}
 
@@ -86,6 +88,7 @@
         </td>
     </tr>
 </table>
+</div>
 {% endblock %}
 {% block styles %}
     {{ super() }}

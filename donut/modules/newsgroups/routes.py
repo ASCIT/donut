@@ -13,7 +13,9 @@ def newsgroups_home():
     if 'username' not in flask.session:
         return flask.abort(403)
     return flask.render_template(
-        'newsgroups.html', groups=helpers.get_newsgroups())
+        'newsgroups.html',
+        groups=helpers.get_newsgroups(),
+        page_title="All Newsgroups")
 
 
 @blueprint.route('/newsgroups/post')
@@ -112,7 +114,9 @@ def mygroups():
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
     return flask.render_template(
-        'newsgroups.html', groups=helpers.get_my_newsgroups(user_id))
+        'newsgroups.html',
+        groups=helpers.get_my_newsgroups(user_id),
+        page_title="My Newgroups")
 
 
 @blueprint.route('/newsgroups/viewmsg/<post_id>')

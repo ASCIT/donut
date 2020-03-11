@@ -2,12 +2,12 @@
 {% block page %}
 {% include "navbar.html" %}
 <div class="container theme-showcase" role="main">
-  <div class="jumbotron">
+  <div class="newsgroup-frame">
 
 {% if not group['visible'] and not member %}
   <h2> Must be a member to view </h2>
 {% else %}
-  <h1> {{ group['group_name'] }} </h1>
+  <h2> {{ group['group_name'] }} </h2>
   {% if group['group_desc'] %}
     <h2> {{ group['group_desc'] }} </h2>
   {% endif %}
@@ -57,7 +57,7 @@
   {% endif %}
     <h2> Group Owners </h2>
   {% for owner in owners %}
-    <a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.pos_name }}</a><br>
+    {{ owner.pos_name }}: <a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.full_name }} </a><br>
   {% endfor %}
   {% if member %}
     <h4> Recent Messages </h4>

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block page %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
   <div class='row'>
     <div class='col-md-6 col-md-offset-3'>
       {% if logged_in %}
@@ -43,6 +45,8 @@
       {% endif %}
     </div>
   </div>
+  </div>
+</div>
 {% endblock %}
 {% block scripts %}
   {{ super() }}
