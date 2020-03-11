@@ -628,6 +628,12 @@ ul, ol {
   margin: auto;
 }
 
+#dOnut {
+  margin: auto;
+  width: 50%;
+  display: block;
+}
+
 /* Give the header some spacing to avoid overlap with other elements. */
 #header {
   margin-bottom: 10px;
