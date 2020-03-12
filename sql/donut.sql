@@ -193,8 +193,8 @@ CREATE TABLE position_relations (
     pos_id_from   INT  NOT NULL,
     pos_id_to     INT  NOT NULL,
     PRIMARY KEY (pos_id_from, pos_id_to),
-    FOREIGN KEY (pos_id_from) REFERENCES positions(pos_id),
-    FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id)
+    FOREIGN KEY (pos_id_from) REFERENCES positions(pos_id) ON DELETE CASCADE,
+    FOREIGN KEY (pos_id_to) REFERENCES positions(pos_id) ON DELETE CASCADE
 );
 
 -- Filters the position_holders table to only list holds that are active
