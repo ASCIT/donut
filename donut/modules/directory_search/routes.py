@@ -112,8 +112,10 @@ def search():
         return redirect(
             flask.url_for(
                 'directory_search.view_user', user_id=users[0]['user_id']))
-    show_images = 'show_images' in form
+    show_images = form.get('show_images')
     query_info = {k: ('' if v is None else v) for k, v in args.items()}
+    query_info['total'] = total
+    query_info['show_images'] = show_images
     return flask.render_template(
         'search_results.html',
         users=users,
