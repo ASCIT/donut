@@ -9,7 +9,7 @@
 {% else %}
   <h2> {{ group['group_name'] }} </h2>
   {% if group['group_desc'] %}
-    <h2> {{ group['group_desc'] }} </h2>
+    <h3> {{ group['group_desc'] }} </h3>
   {% endif %}
   {% if not member %}
     <form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
@@ -17,24 +17,21 @@
 	<input class="btn btn-primary" id="apply-btn" type="submit" value="Apply for Subscription"/>
      </form>
   {% endif %}
+  <ul style="list-style-type:disc;">
   {% if group['anyone_can_send'] %}
-    <h4> Anyone can post to this group. </h4>
+    <li> Anyone can post to this group. </li>
   {% else %}
-    <h4> Posting is restricted to authorized members. </h4>
+    <li> Posting is restricted to authorized members. </li>
   {% endif %}
   {% if group['admin_control_members'] %}
-    <h4> Administrators control the membership of this group. </h4>
+    <li> Administrators control the membership of this group. </li>
   {% endif %}
   {% if group['visible'] %}
-    <h4> Anyone can learn that this group exists. </h4>
+    <li> Anyone can learn that this group exists. </li>
   {% endif %}
-  {% if actions["receive"] %}
-    <h4> You are subscribed. </h4>
-  {% else %}
-    <h4> You are not subscribed. </h4>
-  {% endif %}
+  <li> You are {% if not actions['receive'] %} not {% endif %} subscribed. </li>
   {% if actions["control"] %}
-    <h4> You have admin control. </h4>
+    <li> You have admin control. </li>
     <h4> Applications </h4>
     <table style="width:100%">
       <tr>
@@ -52,6 +49,7 @@
        {% endfor %}
      </table>
   {% endif %}
+  </ul>
   {% if actions['send'] or group['anyone_can_send'] %}
     <br><a href={{ url_for('newsgroups.post', group_id=group['group_id']) }}>Send Message</a>
   {% endif %}
