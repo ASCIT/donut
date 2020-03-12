@@ -18,7 +18,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ASCIT <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
                             <li><a href=" {{ url_for('campus_positions') }}">Campus Positions</a></li>
-                            <li><a href="#">Clubs</a></li>
+                            <li><a href="{{ url_for('uploads.display', url='Clubs') }}">Clubs</a></li>
                             <li><a href=" {{ url_for('contact') }} ">Contacts</a></li>
                             <li><a href="{{ url_for('uploads.display', url='Main_Page') }}">Documents</a></li>
                             <li><a href="{{ url_for('feedback.feedback', group='bod') }}">Suggestions</a></li>
