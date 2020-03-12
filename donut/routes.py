@@ -33,7 +33,7 @@ def campus_positions():
                 approved_group_ids.append(group["group_id"])
                 approved_group_names.append(group["group_name"])
     all_positions = groups.helpers.get_position_data(
-        include_houses=False, order_by=("group_name", "pos_name"))
+        include_house_and_ug=False, order_by=("group_name", "pos_name"))
     return flask.render_template(
         'campus_positions.html',
         approved_group_ids=approved_group_ids,

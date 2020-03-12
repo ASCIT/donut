@@ -142,7 +142,7 @@ def get_group_data(group_id, fields=None):
     return result or {}
 
 
-def get_position_data(fields=None, include_houses=True, order_by=None):
+def get_position_data(fields=None, include_house_and_ug=True, order_by=None):
     """
     Queries database for all instances where an individual holds a position.
     This includes when person A directly holds position Y, or when person A
@@ -152,7 +152,8 @@ def get_position_data(fields=None, include_houses=True, order_by=None):
     Arguments:
         fields:   The fields to return. If None are specified, then
                   default_fields are used
-        include_houses: Whether to include house membership positions
+        include_house_and_ug: Whether to include house membership positions and
+                  ug-* group membership positions
         order_by: Fields to order the results by, in ascending order
     Returns:
         result    A list where each element is a dict corresponding to a person holding
@@ -181,8 +182,13 @@ def get_position_data(fields=None, include_houses=True, order_by=None):
         NATURAL JOIN groups
     """
 
-    if not include_houses:
-        query += ' WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)'
+    if not include_house_and_ug:
+        query += """
+            WHERE NOT (
+                pos_id IN (SELECT pos_id FROM house_positions) OR
+                (type = 'ug-auto' AND pos_name = 'Member')
+            )
+        """
     if order_by:
         if not all(field in fields for field in order_by):
             return "Invalid ORDER BY fields"
