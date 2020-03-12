@@ -132,8 +132,11 @@ def insert_permissions(env):
     db = make_db(env)
     try:
         db.begin()
-        query = '''INSERT INTO position_permissions(pos_id, permission_id)
-            VALUES (%s, %s) '''
+        query = '''
+            INSERT INTO position_permissions(pos_id, permission_id)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE pos_id = pos_id
+        '''
         for group, group_permissions in valid_permissions.items():
             for control, permission_ids in group_permissions.items():
                 position_ids = get_position_id(group, control, db)
