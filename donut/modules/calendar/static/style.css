@@ -185,6 +185,9 @@ hr {
     right: 182px;
 }
 
+.alert{
+  padding-top: 60px;
+}
 .share {
     margin-bottom: 3px;
 }
@@ -414,4 +417,3 @@ button {
   }
 }
 
->>>>>>> bug fix+style fix
