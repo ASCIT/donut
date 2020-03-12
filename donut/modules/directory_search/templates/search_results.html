@@ -5,7 +5,7 @@
 	<div>Your search returned {{ total }} results</div>
 	{% if users %}
 		<label for='per_page'>Results per page</label>
-		<select id='per_page'> 
+		<select id='per_page'>
 			{% for i in range(10, 50, 10) %}
 				<option value={{ i }} {% if i == per_page  %} selected {% endif %}>{{ i }}</option>
 			{% endfor %}
@@ -40,7 +40,7 @@
 			</tbody>
 		</table>
 		<ul class="pagination">
-			{% set num_pgs = total // per_page + (total % per_page > 0) %}
+			{% set num_pgs = total // per_page + (1 if total % per_page > 0 else 0) %}
 			<li class="page-item {% if page == 1 %} disabled {% endif %}">
 				<a class="page-link" {% if page != 1 %} href="{{ url_for('directory_search.search', page=page-1, per_page=per_page, total=total, **query_info) }}" {% endif %} aria-label="Previous">
 					<span aria-hidden="true">&laquo;</span>
@@ -91,7 +91,7 @@
 <script>
 	$(document).ready(function() {
 		$('#per_page').change(function() {
-			var p = $(this).val(); 
+			var p = $(this).val();
 			window.location = "{{ url_for('directory_search.search', page=1, total=total, **query_info) | safe }}" + "&per_page=" + p;
 		});
 	});
