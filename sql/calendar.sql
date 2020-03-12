@@ -4,9 +4,9 @@ CREATE TABLE calendar_logs(
     log_id                 INT          NOT NULL AUTO_INCREMENT,
     user_id                INT          NOT NULL, 
     calendar_id            VARCHAR(25)  NOT NULL, 
-    calendar_gmail         VARCHAR(50)  NOT NULL,
-    user_gmail             VARCHAR(50)  NOT NULL,
-    acl_id                 VARCHAR(50)  NOT NULL,
+    calendar_gmail         VARCHAR(60)  NOT NULL,
+    user_gmail             VARCHAR(60)  NOT NULL,
+    acl_id                 VARCHAR(60)  NOT NULL,
     request_time           DATETIME     NOT NULL, 
     request_permission     CHAR(6)      NOT NULL, 
     PRIMARY KEY (log_id)
