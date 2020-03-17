@@ -151,7 +151,7 @@ def send_email(data):
     emails = None
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, data['group'])
-        emails = ','.join([item['email'] for item in cursor.fetchall()])
+        emails = [item['email'] for item in cursor.fetchall()]
     if not emails:
         return True
     try:

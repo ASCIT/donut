@@ -20,4 +20,4 @@ def send_email(to, text, subject, use_prefix=True, group=None):
         msg['To'] = to
 
     with smtplib.SMTP('localhost') as s:
-        s.sendmail('auto@donut.caltech.edu', [to], msg.as_string())
+        s.sendmail('auto@donut.caltech.edu', to, msg.as_string())
