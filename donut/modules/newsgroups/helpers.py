@@ -156,7 +156,11 @@ def send_email(data):
         return True
     try:
         email_utils.send_email(
-            emails, data['msg'], data['subject'], group=data['group'])
+            data['poster'],
+            emails,
+            data['msg'],
+            data['subject'],
+            group=data['group_name'])
         return True
     except smtplib.SMTPException:
         return False
