@@ -388,15 +388,12 @@ def get_permission():
     '''
     Returns permissions list related to calendars
     '''
-    perms = {}
+    permissions = auth_utils.check_permission(
+        flask.session.get('username'), set(cal_permissions.values()))
+    perms = {tag: perm in permissions for tag, perm in cal_permissions.items()}
     # If they have edit permissions on anything, the events pages and stuff
     # will show up.
-    anyy = False
-    username = flask.session.get('username')
-    for tag, perm in cal_permissions.items():
-        perms[tag] = auth_utils.check_permission(username, perm)
-        anyy = perms[tag] or anyy
-    perms['Any'] = anyy
+    perms['Any'] = bool(permissions)
     return perms
 
 
