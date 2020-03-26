@@ -335,12 +335,18 @@ def get_permissions(username):
     return set(row['permission_id'] for row in result)
 
 
-def check_permission(username, permission_id):
+def check_permission(username, permission_ids):
     """
-    Returns True if the user has this permission, otherwise False
+    Returns the permissions among permission_ids that the current user has.
+    permission_ids should either be a single permission_id or a iterable of them.
     """
+    if isinstance(permission_ids, (list, tuple)):
+        permission_ids = set(permission_ids)
+    elif not isinstance(permission_ids, set):
+        permission_ids = set((permission_ids, ))
     permissions = get_permissions(username)
-    return permission_id in permissions or Permissions.ADMIN in permissions
+    return permission_ids if Permissions.ADMIN in permissions \
+        else permission_ids & permissions
 
 
 def is_caltech_user():
