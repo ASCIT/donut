@@ -74,6 +74,9 @@
 					$('<a>').attr('href', '/1/users/' + String(user.user_id)).text(user.full_name)
 				)
 			})
+			document.addEventListener("click", function() {
+                                nameSearch.children().remove()
+                        })
 		})
 	</script>
 {% endblock %}
