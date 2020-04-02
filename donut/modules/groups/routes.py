@@ -59,8 +59,7 @@ def create_position():
         helpers.add_position(
             group_id, pos_name, send=send, control=control, receive=receive)
     except Exception as e:
-        flask.current_app.logger.error('Failed to create position:')
-        flask.current_app.logger.exception(e)
+        flask.current_app.logger.exception(f'Failed to create position: {e}')
         return jsonify({'success': False, 'message': 'Unable to add position'})
 
     return jsonify({'success': True})
@@ -116,8 +115,8 @@ def create_pos_holder(pos_id):
     try:
         helpers.create_position_holder(pos_id, user_id, start_date, end_date)
     except Exception as e:
-        flask.current_app.logger.error('Failed to add position holder:')
-        flask.current_app.logger.exception(e)
+        flask.current_app.logger.exception(
+            f'Failed to add position holder: {e}')
         return jsonify({
             'success': False,
             'message': 'Unable to add position holder'
@@ -139,8 +138,8 @@ def remove_pos_holder(hold_id):
     try:
         helpers.end_position_holder(hold_id)
     except Exception as e:
-        flask.current_app.logger.error('Failed to remove position holder:')
-        flask.current_app.logger.exception(e)
+        flask.current_app.logger.exception(
+            f'Failed to remove position holder: {e}')
         return jsonify({
             'success': False,
             'message': 'Unable to remove position holder'

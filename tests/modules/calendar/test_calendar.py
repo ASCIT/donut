@@ -14,7 +14,7 @@ import os
 
 
 def test_plain_calendar_page(client):
-    assert client.get(flask.url_for('calendar.add_events')).status_code == 200
+    assert client.get(flask.url_for('calendar.add_events')).status_code == 302
     assert client.get(flask.url_for('calendar.calendar')).status_code == 200
     assert client.get(flask.url_for('calendar.sync')).status_code == 200
     assert client.post(

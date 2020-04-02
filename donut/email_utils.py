@@ -1,6 +1,8 @@
 import smtplib
 from email.mime.text import MIMEText
 
+DOMAIN = "beta.donut.caltech.edu"
+
 
 def send_email(to, text, subject, use_prefix=True, group=None, poster=''):
     """
@@ -13,11 +15,11 @@ def send_email(to, text, subject, use_prefix=True, group=None, poster=''):
         subject = '[ASCIT Donut] ' + subject
 
     msg['Subject'] = subject
-    msg['From'] = poster + '<auto@donut.caltech.edu>'
+    msg['From'] = poster + f'<auto@{DOMAIN}>'
     if group:
         msg['To'] = group.lower().replace(' ', '_')
     else:
         msg['To'] = to
 
     with smtplib.SMTP('localhost') as s:
-        s.sendmail('auto@donut.caltech.edu', to, msg.as_string())
+        s.sendmail('auto@' + DOMAIN, to, msg.as_string())
