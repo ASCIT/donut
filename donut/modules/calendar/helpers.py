@@ -379,7 +379,7 @@ def share_calendar(calendars, email, permission_level):
         calendar_names = ', '.join(calendars)
         username = flask.session.get('username')
         flask.current_app.logger.exception(
-            f'Error while sharing {calendar_names} with {email} by {username}: \n{e}'
+            f'Error while sharing {calendar_names} calendars with {email} by {username}: {e}'
         )
         return e.get('message', e) if type(e) is dict else str(e)
 
@@ -392,9 +392,8 @@ def delete(cal_event_id, cal_name):
             delete_event_from_db(cal_event_id)
         return ''
     except Exception as e:
-        flask.current_app.logger.error(
-            flask.current_app.logger.exception(
-                f'Error while deleting {cal_event_id} from {cal_name} \n{e}'))
+        flask.current_app.logger.exception(
+            f'Error while deleting {cal_event_id} from {cal_name}: {e}')
         return e.get('message', e) if type(e) is dict else str(e)
 
 
