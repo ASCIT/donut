@@ -9,7 +9,6 @@ def send_update_email(group, email, complaint_id):
     '''
     Sends an email to [email] of poster and group
     '''
-    EMAIL = "{}@donut.caltech.edu".format(group)
     msg = email_templates.added_message.format(group,
                                                get_link(group, complaint_id))
     subject = "Received {} Feedback".format(group)

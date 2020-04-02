@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 DOMAIN = "beta.donut.caltech.edu"
 
 
-def send_email(to, text, subject, use_prefix=True, group=None):
+def send_email(to, text, subject, use_prefix=True, group=None, poster=''):
     """
     Sends an email to a user. Expects 'to' to be a comma separated string of
     emails, and for 'msg' and 'subject' to be strings. If group
@@ -15,7 +15,7 @@ def send_email(to, text, subject, use_prefix=True, group=None):
         subject = '[ASCIT Donut] ' + subject
 
     msg['Subject'] = subject
-    msg['From'] = 'auto@' + DOMAIN
+    msg['From'] = poster + f'<auto@{DOMAIN}>'
     if group:
         msg['To'] = group.lower().replace(' ', '_')
     else:

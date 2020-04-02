@@ -13,9 +13,7 @@ def newsgroups_home():
     if 'username' not in flask.session:
         return flask.abort(403)
     return flask.render_template(
-        'newsgroups.html',
-        groups=helpers.get_newsgroups(),
-        page_title="All Newsgroups")
+        'newsgroups.html', groups=helpers.get_newsgroups(), page="all")
 
 
 @blueprint.route('/newsgroups/post')
@@ -29,7 +27,8 @@ def post(group_id=None):
     return flask.render_template(
         'post.html',
         groups=helpers.get_my_newsgroups(user_id, True),
-        group_selected=group_id)
+        group_selected=group_id,
+        page='post')
 
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
@@ -116,7 +115,7 @@ def mygroups():
     return flask.render_template(
         'newsgroups.html',
         groups=helpers.get_my_newsgroups(user_id),
-        page_title="My Newsgroups")
+        page="my")
 
 
 @blueprint.route('/newsgroups/viewmsg/<post_id>')

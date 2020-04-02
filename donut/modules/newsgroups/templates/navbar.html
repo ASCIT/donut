@@ -2,9 +2,9 @@
 <div role="group">
 <div id="newsgroup-nav-bar">
 <h1>Newsgroup Services</h1>
-<a href={{ url_for("newsgroups.newsgroups_home") }} class="btn btn-default">All Groups</a>
-<a href={{ url_for("newsgroups.mygroups") }} class="btn btn-default">My Groups</a>
-<a href={{ url_for("newsgroups.post") }} class="btn btn-default">Post Message</a>
+<a href={{ url_for("newsgroups.newsgroups_home") }} class="btn btn-primary {% if page == 'all' %} active {% endif %}">All Groups</a>
+<a href={{ url_for("newsgroups.mygroups") }} class="btn btn-primary {% if page == 'my' %} active {% endif %}">My Groups</a>
+<a href={{ url_for("newsgroups.post") }} class="btn btn-primary {% if page == 'post' %} active {% endif %}">Post Message</a>
 </div>
 </div>
 </div>

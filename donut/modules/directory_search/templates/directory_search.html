@@ -74,6 +74,7 @@
 					$('<a>').attr('href', '/1/users/' + String(user.user_id)).text(user.full_name)
 				)
 			})
+			$(document).click(function() { nameSearch.empty() })
 		})
 	</script>
 {% endblock %}
