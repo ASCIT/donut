@@ -60,7 +60,7 @@ def test_email_newsgroup(client):
     data = {
         'group': 1,
         'subject': 'Subj',
-        'msg': 'msg to donut',
+        'plain': 'msg to donut',
         'poster': 'Head'
     }
     helpers.insert_email(1, data)
