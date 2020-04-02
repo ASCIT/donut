@@ -6,6 +6,7 @@ import pdb
 import traceback
 import http
 import datetime
+import logging
 
 try:
     from donut import config
@@ -13,6 +14,8 @@ except ImportError:
     from donut import default_config as config
 from donut import constants
 from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, newsgroups, rooms, uploads, voting
+from donut.donut_SMTP_handler import DonutSMTPHandler
+from donut.email_utils import DOMAIN
 
 app = flask.Flask(__name__)
 Bootstrap(app)  # enable Bootstrap in Flask
@@ -73,6 +76,18 @@ def init(environment_name):
     app.jinja_env.globals.update(
         current_year=lambda: datetime.datetime.now().year)
 
+    mail_handler = DonutSMTPHandler(
+        mailhost='localhost',
+        fromaddr='server-error@' + DOMAIN,
+        toaddrs=[],
+        subject='Donut Server Error',
+        db_instance=make_db())
+    mail_handler.setLevel(logging.ERROR)
+    mail_handler.setFormatter(
+        logging.Formatter(
+            '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
+    app.logger.addHandler(mail_handler)
+
 
 # Create database engine object.
 @app.before_request
@@ -81,15 +96,19 @@ def before_request():
     """Logic executed before request is processed."""
     if ('DB_NAME' in app.config and 'DB_USER' in app.config
             and 'DB_PASSWORD' in app.config):
-        flask.g.pymysql_db = pymysql.connect(
-            host='localhost',
-            database=app.config['DB_NAME'],
-            user=app.config['DB_USER'],
-            password=app.config['DB_PASSWORD'],
-            db='db',
-            autocommit=True,
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor)
+        flask.g.pymysql_db = make_db()
+
+
+def make_db():
+    return pymysql.connect(
+        host='localhost',
+        database=app.config['DB_NAME'],
+        user=app.config['DB_USER'],
+        password=app.config['DB_PASSWORD'],
+        db='db',
+        autocommit=True,
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor)
 
 
 @app.after_request

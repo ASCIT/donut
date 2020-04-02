@@ -224,6 +224,8 @@ def sync_data(begin_month=datetime.datetime.now().month,
                 delete_event_from_db(db_event_key['google_event_id'])
         return all_events
     except Exception as e:
+        flask.current_app.logger.exception(
+            f'Error while syncing with google calendars: \n{e}')
         return e.get('message', e) if type(e) is dict else str(e)
 
 
@@ -265,6 +267,8 @@ def get_events(begin_month=datetime.datetime.now().month,
                 next_page = 'nextPageToken' in events_result
         return all_events
     except Exception as e:
+        flask.current_app.logger.exception(
+            f'Error while fetching events google calendars: \n{e}')
         return e.get('message', e) if type(e) is dict else str(e)
 
 
@@ -335,6 +339,8 @@ def add_event(name,
                                    flask.session['username'])
         return ''
     except Exception as e:
+        flask.current_app.logger.exception(
+            f'Error while adding events in calendars: \n{e}')
         return e.get('message', e) if type(e) is dict else str(e)
 
 
@@ -370,6 +376,11 @@ def share_calendar(calendars, email, permission_level):
                             created_rule['id'], role))
         return ''
     except Exception as e:
+        calendar_names = ', '.join(calendars)
+        username = flask.session.get('username')
+        flask.current_app.logger.exception(
+            f'Error while sharing {calendar_names} calendars with {email} by {username}: {e}'
+        )
         return e.get('message', e) if type(e) is dict else str(e)
 
 
@@ -381,6 +392,8 @@ def delete(cal_event_id, cal_name):
             delete_event_from_db(cal_event_id)
         return ''
     except Exception as e:
+        flask.current_app.logger.exception(
+            f'Error while deleting {cal_event_id} from {cal_name}: {e}')
         return e.get('message', e) if type(e) is dict else str(e)
 
 
@@ -399,5 +412,4 @@ def get_permission():
 
 def check_if_error(e):
     if type(e) is not list:
-        return 'Error when fetching events from google: ' + str(
-            e) + ' ; If this error persists, contact devteam'
+        return 'Error: ' + str(e) + ' ; If this error persists, contact devteam'

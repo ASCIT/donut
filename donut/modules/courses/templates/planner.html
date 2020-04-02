@@ -10,7 +10,7 @@
           <li class='list-group-item'>Loading...</li>
         </ul>
       </div>
-      <div class='col-md-9'>
+      <div class='col-md-9' id='courses-pane'>
         <table class='table table-bordered' id='courses'>
           <thead>
             <tr>
@@ -109,7 +109,7 @@
     #warning {
       float: right;
     }
-    #course-results, #courses {
+    #course-results, #courses-pane {
       overflow-y: auto;
       margin-bottom: 0;
     }
@@ -465,8 +465,10 @@
       $('.progress-bar#pe').css('width', Math.min(PE / 3, 1) * 100 + '%')
     }
     function setCoursesHeight() {
-      coursesList.css('height', String(innerHeight - 175) + 'px')
-      termsTable.css('height', String(innerHeight - 150) + 'px')
+      coursesList.css('height', String(innerHeight - 185) + 'px')
+      var termsTableHeight = String(innerHeight - 150) + 'px'
+      termsTable.css('height', termsTableHeight)
+      termsTable.parent().css('max-height', termsTableHeight)
     }
 
     $(document).ready(function() {
