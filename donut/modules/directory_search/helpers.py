@@ -1,9 +1,10 @@
+from datetime import date
 import flask
 import pymysql.cursors
 from donut.auth_utils import check_permission, get_permissions, get_user_id
 from donut.constants import Gender
 from donut.default_permissions import Permissions
-from donut.modules.directory_search.permissions import Directory_Permissions
+from .permissions import DirectoryPermissions, ManageMembersPermissions
 
 
 def get_hidden_fields(viewer_name, viewee_id):
@@ -14,7 +15,7 @@ def get_hidden_fields(viewer_name, viewee_id):
     if viewer_name is not None:
         is_me = get_user_id(viewer_name) == viewee_id
         if is_me or check_permission(
-                viewer_name, Directory_Permissions.HIDDEN_SEARCH_FIELDS):
+                viewer_name, DirectoryPermissions.HIDDEN_SEARCH_FIELDS):
             return set()
     return set(['uid', 'birthday', 'phone_string', 'hometown_string'])
 
@@ -202,3 +203,55 @@ def get_residences():
 
 def get_grad_years():
     return members_unique_values('graduation_year', False)
+
+
+def get_manage_members_houses():
+    username = flask.session.get('username')
+    if not username: return ()
+
+    permissions = check_permission(username, set(ManageMembersPermissions))
+    return tuple(permission.name.title()
+                 for permission in ManageMembersPermissions
+                 if permission in permissions)
+
+
+def get_house_member_positions(house):
+    query = """
+        SELECT pos_id, pos_name FROM house_positions
+        WHERE group_name = %s
+        ORDER BY pos_name
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, house)
+        return cursor.fetchall()
+
+
+def get_members(pos_id):
+    query = """
+        SELECT user_id, full_name, hold_id
+        FROM members NATURAL JOIN members_full_name
+            NATURAL JOIN current_position_holders
+        WHERE pos_id = %s AND graduation_year > %s
+        ORDER BY last_name, full_name
+    """
+    today = date.today()
+    year_start = today.year - (1 if today.month < 7 else 0)
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (pos_id, year_start))
+        return cursor.fetchall()
+
+
+def get_position_house(pos_id):
+    query = 'SELECT group_name FROM house_positions WHERE pos_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, pos_id)
+        res = cursor.fetchone()
+    return res and res['group_name']
+
+
+def get_held_position_house(hold_id):
+    query = 'SELECT pos_id FROM position_holders WHERE hold_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, hold_id)
+        res = cursor.fetchone()
+    return res and get_position_house(res['pos_id'])

@@ -1,10 +1,13 @@
+from datetime import date
 import flask
 import json
 import mimetypes
 from flask import jsonify, redirect
 
 from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
-from donut.modules.directory_search import blueprint, helpers
+from donut.validation_utils import validate_exists, validate_int
+from . import blueprint, helpers
+from ..groups.helpers import create_position_holder, end_position_holder
 
 
 @blueprint.route('/directory')
@@ -14,6 +17,7 @@ def directory_search():
 
     return flask.render_template(
         'directory_search.html',
+        manage_members_houses=helpers.get_manage_members_houses(),
         houses=helpers.get_houses(),
         options=helpers.get_options(),
         residences=helpers.get_residences(),
@@ -124,3 +128,49 @@ def search():
         per_page=per_page,
         page=page,
         query_info=query_info)
+
+
+@blueprint.route('/house_members')
+def manage_members():
+    manage_houses = helpers.get_manage_members_houses()
+    house_members = {}
+    for house in manage_houses:
+        positions = helpers.get_house_member_positions(house)
+        house_members[house] = [
+            {**position, 'members': helpers.get_members(position['pos_id'])}
+            for position in positions
+        ]
+    return flask.render_template(
+        'manage_house_members.html',
+        manage_houses=manage_houses,
+        house_members=house_members)
+
+
+@blueprint.route('/house_members/<int:pos_id>', methods=('POST', ))
+def add_member(pos_id):
+    house = helpers.get_position_house(pos_id)
+    if house not in helpers.get_manage_members_houses():
+        flask.abort(403)
+
+    form = flask.request.form
+    if not validate_exists(form, 'user_id'):
+        return flask.redirect(flask.url_for('.manage_members'))
+    user_id = form['user_id']
+    if not validate_int(user_id, flash_errors=False):
+        flask.flash('Please select a user')
+        return flask.redirect(flask.url_for('.manage_members'))
+
+    create_position_holder(pos_id, int(user_id), date.today(), None)
+    flask.flash('Added member')
+    return flask.redirect(flask.url_for('.manage_members'))
+
+
+@blueprint.route('/house_members/<int:hold_id>/remove')
+def remove_member(hold_id):
+    house = helpers.get_held_position_house(hold_id)
+    if house not in helpers.get_manage_members_houses():
+        flask.abort(403)
+
+    end_position_holder(hold_id)
+    flask.flash('Removed member')
+    return flask.redirect(flask.url_for('.manage_members'))

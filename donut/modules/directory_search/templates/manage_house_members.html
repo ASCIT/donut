@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+{% block page %}
+  <div class='container theme-showcase' role='main'>
+    <div class='jumbotron'>
+      {% for house in manage_houses %}
+        <div class='panel panel-default'>
+          <div class='panel-heading'>
+            <h1>Manage {{ house }} members</h1>
+          </div>
+          <div class='panel-body'>
+            <div class='row'>
+              {% for member_type in house_members[house] %}
+                <div class='col-md-{{ 12 // house_members[house]|length }}'>
+                  {% set member_type_name = member_type['pos_name'].lower() %}
+                  <h3>Add a {{ member_type_name }}</h3>
+                  <form action='{{ url_for(".add_member", pos_id=member_type["pos_id"]) }}' method='POST'>
+                    <div class='form-group'>
+                      <label class='required' for='{{ house }}_name'>New member:</label>
+                      <input class='form-control name' id='{{ house }}_name' placeholder='Type a name...' />
+                      <ul class='list-group name-search'></ul>
+                      <input type='hidden' class='user' name='user_id' />
+                    </div>
+                    <button class='btn btn-primary'>Add {{ member_type_name }}</button>
+                  </form>
+
+                  <h3>Current {{ member_type_name }}s</h3>
+                  <table class='table table-condensed table-striped'>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for member in member_type['members'] %}
+                        <tr>
+                          <td>
+                            <a href='{{ url_for(".view_user", user_id=member["user_id"]) }}'>
+                              {{ member['full_name'] }}
+                            </a>
+                          </td>
+                          <td>
+                            <a class='btn btn-danger' href='{{ url_for(".remove_member", hold_id=member["hold_id"]) }}'>
+                              <span class='glyphicon glyphicon-remove'></span>
+                            </a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
+  <script>
+    $('input.name').each(function() {
+      var $this = $(this)
+      var nameSearch = $this.siblings('.name-search')
+      attachDirectorySearch($this, nameSearch, function(user) {
+        return $('<li>').addClass('list-group-item').text(user.full_name)
+          .click(function() {
+            $this.val(user.full_name)
+            $this.siblings('.user').val(user.user_id)
+            nameSearch.empty()
+          })
+      })
+    })
+  </script>
+{% endblock %}
