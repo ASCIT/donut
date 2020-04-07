@@ -208,7 +208,7 @@ def test_planner_mine(client):
     assert rv.status_code == 200
     assert json.loads(rv.data) == {
         'success': False,
-        'message': 'Cannot schedule class twice in a term'
+        'message': 'Cannot add a class twice in the same term'
     }
     # Test courses list now that courses have been added; verify order
     rv = client.get(flask.url_for('courses.planner_mine'))

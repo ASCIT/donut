@@ -76,17 +76,18 @@ def init(environment_name):
     app.jinja_env.globals.update(
         current_year=lambda: datetime.datetime.now().year)
 
-    mail_handler = DonutSMTPHandler(
-        mailhost='localhost',
-        fromaddr='server-error@' + DOMAIN,
-        toaddrs=[],
-        subject='Donut Server Error',
-        db_instance=make_db())
-    mail_handler.setLevel(logging.ERROR)
-    mail_handler.setFormatter(
-        logging.Formatter(
-            '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
-    app.logger.addHandler(mail_handler)
+    if environment_name == "prod":
+        mail_handler = DonutSMTPHandler(
+            mailhost='localhost',
+            fromaddr='server-error@' + DOMAIN,
+            toaddrs=[],
+            subject='Donut Server Error',
+            db_instance=make_db())
+        mail_handler.setLevel(logging.ERROR)
+        mail_handler.setFormatter(
+            logging.Formatter(
+                '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
+        app.logger.addHandler(mail_handler)
 
 
 # Create database engine object.

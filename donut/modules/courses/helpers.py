@@ -1,5 +1,7 @@
 import flask
 import pymysql.cursors
+from pymysql.constants import ER
+from pymysql.err import IntegrityError
 
 from donut.auth_utils import get_user_id
 
@@ -247,3 +249,6 @@ def get_user_scheduler_sections(username, year, term):
         'id': section['course_id'],
         'section': section['section_number']
     } for section in sections]
+
+is_duplicate_error = lambda e: \
+    isinstance(e, IntegrityError) and e.args[0] == ER.DUP_ENTRY
