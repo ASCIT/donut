@@ -44,11 +44,17 @@ def planner_add_course(course_id, year):
 
     try:
         helpers.add_planner_course(username, course_id, year)
-    except pymysql.err.IntegrityError:
-        return flask.jsonify({
-            'success': False,
-            'message': 'Cannot schedule class twice in a term'
-        })
+    except Exception as e:
+        if helpers.is_duplicate_error(e):
+            flask.current_app.logger.warning(f'Duplicate planner entry: {e}')
+            return flask.jsonify({
+                'success':
+                False,
+                'message':
+                'Cannot add a class twice in the same term'
+            })
+        else:
+            raise e
     return flask.jsonify({'success': True})
 
 
@@ -87,7 +93,17 @@ def scheduler_add_section(course, section):
             'message': 'Must be logged in to save'
         })
 
-    helpers.add_scheduler_section(username, course, section)
+    try:
+        helpers.add_scheduler_section(username, course, section)
+    except Exception as e:
+        if helpers.is_duplicate_error(e):
+            flask.current_app.logger.warning(f'Duplicate scheduler entry: {e}')
+            return flask.jsonify({
+                'success': False,
+                'message': 'Cannot add a section twice'
+            })
+        else:
+            raise e
     return flask.jsonify({'success': True})
 
 
