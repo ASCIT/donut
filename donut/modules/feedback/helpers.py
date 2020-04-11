@@ -2,7 +2,9 @@ from donut import email_utils
 from donut.modules.feedback import email_templates
 import flask
 import pymysql.cursors
-from donut.modules.feedback.groups import groupInt
+from donut.modules.feedback.groups import groupInt, groupName
+import donut.modules.groups.helpers as groups
+import donut.modules.newsgroups.helpers as newsgroups
 
 
 def send_update_email(group, email, complaint_id):
@@ -42,7 +44,17 @@ def register_complaint(group, data, notification=True):
             add_email(groupInt[group], complaint_id, email.strip(), False)
     # Add message to database
     add_msg(group, complaint_id, data['msg'], data['name'], notification)
+    if notification:
+        send_to_group(group, data)
     return complaint_id
+
+
+def send_to_group(group, data):
+    group_id = groups.get_group_id(groupName[group])
+    data['group'] = group_id
+    data['group_name'] = group
+    data['poster'] = "{} Feedback".format(group)
+    newsgroups.send_email(data)
 
 
 def add_email(group, complaint_id, email, notification=True):
