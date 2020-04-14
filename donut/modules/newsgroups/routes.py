@@ -149,10 +149,11 @@ def all_posts(group_id):
         messages=helpers.get_past_messages(group_id, 50))
 
 
-@blueprint.route('/_delete_application')
+@blueprint.route('/_delete_application/<user_id>/<group_id>')
 def delete_application(user_id, group_id):
-    actions = helpers.get_user_actions(user_id, group_id)
-    if not actions['control']:
+    username = flask.session.get('username')
+    if username is None or not helpers.get_user_actions(
+            auth_utils.get_user_id(username), group_id)['control']:
         return flask.abort(403)
     helpers.remove_application(user_id, group_id)
     return flask.redirect(
