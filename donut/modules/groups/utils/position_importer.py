@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 from donut.pymysql_connection import make_db
 import csv
@@ -23,7 +25,7 @@ def import_file(env, filename):
                 user_id = get_user_id_from_uid(uid, db)
 
                 query = """
-                INSERT INTO position_holders(pos_id, user_id, start_date, end_date) VALUES(%s, %s, %s, %s) 
+                INSERT INTO position_holders(pos_id, user_id, start_date, end_date) VALUES(%s, %s, %s, %s)
                 """
                 with db.cursor() as cursor:
                     cursor.execute(query,
