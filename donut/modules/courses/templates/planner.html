@@ -30,10 +30,9 @@
                 <td>{{ YEARS[year] }}</td>
                 {% for term in TERMS %}
                   <td class='term-courses'>
-                    <ul class='list-group term-courses-list' year={{ year }} term={{ term }}></ul>
-                    <span class='term-units' units=0>
-                      (0 units)
-                    </span>
+                    <ul class='list-group term-courses-list' year={{ year }} term={{ term }}>
+                      <li class='list-group-item term-units' units=0>0 units</li>
+                    </ul>
                   </td>
                 {% endfor %}
               </tr>
@@ -141,18 +140,18 @@
       width: {{ 100 / TERMS|length }}%;
     }
     .term-courses-list {
-      display: inline-table;
       width: 100%;
-      height: 100%;
+      margin: 0;
     }
     .term-courses-list .list-group-item {
       display: flex;
       justify-content: space-between;
       padding: 0;
+      font-size: 14px;
     }
     .term-units {
-      position: relative;
-      top: -40px;
+      font-weight: bold;
+      border: none;
     }
     #requirements-modal {
       position: fixed;
@@ -244,13 +243,16 @@
       })
     }
     function unitString(units) {
-      return '(' + String(units) + ' unit' + (units === 1 ? '' : 's') + ')';
+      return String(units) + ' unit' + (units === 1 ? '' : 's')
+    }
+    function getUnitsDisplay(courseList) {
+      return courseList.children('.term-units')
     }
     function addUnits(courseList, units) {
-      var unitsSpan = courseList.parent().children('.term-units')
-      var newUnits = Number(unitsSpan.attr('units')) + units
-      unitsSpan.attr('units', newUnits)
-      unitsSpan.text(unitString(newUnits))
+      var unitsDisplay = getUnitsDisplay(courseList)
+      var newUnits = Number(unitsDisplay.attr('units')) + units
+      unitsDisplay.attr('units', newUnits)
+      unitsDisplay.text(unitString(newUnits))
     }
     var draggedCourse = null
     function addCourse(course, courseList, skipAPIAdd) {
@@ -264,7 +266,7 @@
       var units = courseUnits(course)
       var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
         $('<span>').text(
-          course.number + ' ' + unitString(units)
+          course.number + ' (' + unitString(units) + ')'
         ),
         $('<button>').addClass('btn btn-danger btn-xs')
           .click(function() {
@@ -292,7 +294,7 @@
           })
           .append($('<span>').addClass('glyphicon glyphicon-trash'))
       )
-      courseList.append(courseItem)
+      getUnitsDisplay(courseList).before(courseItem)
       addUnits(courseList, units)
       if (skipAPIAdd) return
 
@@ -393,10 +395,11 @@
           Ch3 = false, labUnits = 0,
           PE = 0,
           hums = 0
-      termLists.each(function(_, termList) {
-        $(termList).find('.list-group-item').each(function(_, course) {
-          var courseName = $(course).attr('course'),
-            units = Number($(course).attr('units'))
+      termLists.each(function() {
+        $(this).children(':not(.term-units)').each(function() {
+          var $this = $(this)
+          var courseName = $this.attr('course'),
+            units = Number($this.attr('units'))
           totalUnits += units
           switch (courseName) {
             case 'Ma 1a': Ma1a = true; break
@@ -476,13 +479,13 @@
       termsTable = $('table#courses')
       termLists = $('.term-courses-list')
       requirementsModal = $('#requirements-modal')
-      termLists
+      $('.term-courses')
         .on('dragover', function(e) {
           e.preventDefault()
         })
         .on('drop', function(e) {
           e.preventDefault() // stops some browsers from redirecting
-          addCourse(draggedCourse, $(this))
+          addCourse(draggedCourse, $(this).children('.term-courses-list'))
           draggedCourse = null
         })
       $('#show-requirements').click(function() {
