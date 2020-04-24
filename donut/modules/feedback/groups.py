@@ -1,7 +1,7 @@
 groupInt = {'bod': 1, 'arc': 2, 'donut': 3}
 groupName = {
-    'arc': 'ASCIT',
-    'bod': 'Academics and Research Committee (ARC)',
+    'arc': 'Academics and Research Committee (ARC)',
+    'bod': 'ASCIT',
     'donut': 'Devteam'
 }
 
