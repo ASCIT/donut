@@ -157,10 +157,11 @@ def send_email(data):
     try:
         email_utils.send_email(
             emails,
-            data['msg'],
+            data['plain'],
             data['subject'],
             group=data['group_name'],
-            poster=data['poster'])
+            poster=data['poster'],
+            richtext=data['msg'])
         return True
     except smtplib.SMTPException:
         return False
@@ -175,7 +176,7 @@ def insert_email(user_id, data):
     VALUES (%s, %s, %s, %s, %s)
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (data['group'], data['subject'], data['msg'],
+        cursor.execute(query, (data['group'], data['subject'], data['plain'],
                                user_id, data['poster']))
 
 

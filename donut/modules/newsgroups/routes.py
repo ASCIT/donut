@@ -4,8 +4,12 @@ from donut.modules.groups import helpers as groups
 from donut.modules.account import helpers as account
 from donut.modules.core.helpers import get_name_and_email
 from donut import auth_utils
+import html2text
 
 from . import blueprint, helpers
+
+# Set up converter for html to plain text
+html2plain = html2text.HTML2Text()
 
 
 @blueprint.route('/newsgroups')
@@ -49,6 +53,7 @@ def post_message():
         data['poster'] = get_name_and_email(user_id)['full_name']
     else:
         data['poster'] = ' '.join((data['group_name'], data['poster']))
+    data['plain'] = html2plain.handle(data['msg'])
     if helpers.send_email(data):
         flask.flash('Email sent')
         helpers.insert_email(user_id, data)
@@ -144,10 +149,11 @@ def all_posts(group_id):
         messages=helpers.get_past_messages(group_id, 50))
 
 
-@blueprint.route('/_delete_application')
+@blueprint.route('/_delete_application/<user_id>/<group_id>')
 def delete_application(user_id, group_id):
-    actions = helpers.get_user_actions(user_id, group_id)
-    if not actions['control']:
+    username = flask.session.get('username')
+    if username is None or not helpers.get_user_actions(
+            auth_utils.get_user_id(username), group_id)['control']:
         return flask.abort(403)
     helpers.remove_application(user_id, group_id)
     return flask.redirect(

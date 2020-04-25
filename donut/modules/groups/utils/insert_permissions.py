@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 from donut.pymysql_connection import make_db
 from donut.default_permissions import Permissions
@@ -73,6 +75,9 @@ groups_permissions = {
                 arc_permissions.TOGGLE_READ,
                 arc_permissions.VIEW_EMAILS,
                 voting_permissions.SURVEYS],
+    },
+    "Board of Control (BoC)": {
+        True: [page_edit_permissions.ABLE, upload_permissions.ABLE]
     },
     "Avery":
     {
