@@ -2,7 +2,12 @@
 {% block page %}
 {% set admin = 'ADMIN' in perms %}
 <div class="jumbotron">
-    <div class="row">
+  <div style="margin-left: 10px;"> 
+    {% if admin or 'SUMMARY' in perms%}
+      <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
+    {% endif %}
+  </div>
+  <div class="row">
         <div class="col-md-8">
             <div style="margin-left: 10px;" class="panel panel-default">
                 <div class="panel-heading">
@@ -51,9 +56,6 @@
                 </div>
             {% endif %}
         </div>
-        {% if admin or 'SUMMARY' in perms%}
-            <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
-        {% endif %}
 
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
