@@ -206,14 +206,15 @@ def get_owners(group_id):
         return cursor.fetchall()
 
 
-def get_posting_positions(group_id, user_id):
+def get_posting_positions(user_id):
     """Get positions user can send as in a group."""
 
     query = """
-        SELECT pos_id, pos_name
+        SELECT CONCAT(group_name, " ", pos_name) AS pos_name
         FROM positions NATURAL JOIN current_position_holders
-        WHERE group_id = %s AND user_id = %s AND send = 1
+        NATURAL JOIN groups
+        WHERE user_id = %s AND send = 1
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (group_id, user_id))
+        cursor.execute(query, user_id)
         return cursor.fetchall()

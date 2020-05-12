@@ -51,8 +51,6 @@ def post_message():
                                                ['group_name'])['group_name']
     if not data['poster']:
         data['poster'] = get_name_and_email(user_id)['full_name']
-    else:
-        data['poster'] = ' '.join((data['group_name'], data['poster']))
     data['plain'] = html2plain.handle(data['msg'])
     if helpers.send_email(data):
         flask.flash('Email sent')
@@ -160,9 +158,9 @@ def delete_application(user_id, group_id):
         flask.url_for('newsgroups.view_group', group_id=group_id))
 
 
-@blueprint.route('/newsgroups/positions/<int:group>')
-def posting_positions(group):
+@blueprint.route('/newsgroups/positions')
+def posting_positions():
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    return flask.jsonify(helpers.get_posting_positions(group, user_id))
+    return flask.jsonify(helpers.get_posting_positions(user_id))
