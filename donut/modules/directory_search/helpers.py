@@ -6,6 +6,9 @@ from donut.constants import Gender
 from donut.default_permissions import Permissions
 from .permissions import DirectoryPermissions, ManageMembersPermissions
 
+HIDDEN_FIELDS = \
+    set(('username', 'uid', 'birthday', 'phone_string', 'hometown_string'))
+
 
 def get_hidden_fields(viewer_name, viewee_id):
     """
@@ -17,7 +20,7 @@ def get_hidden_fields(viewer_name, viewee_id):
         if is_me or check_permission(
                 viewer_name, DirectoryPermissions.HIDDEN_SEARCH_FIELDS):
             return set()
-    return set(['uid', 'birthday', 'phone_string', 'hometown_string'])
+    return HIDDEN_FIELDS
 
 
 def get_user(user_id):
