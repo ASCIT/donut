@@ -89,8 +89,8 @@ def make_ug_year_groups(cursor, group_type, ug_admin_positions):
         VALUES (%s, 'Member')
     """
     make_admin_position_query = """
-        INSERT INTO positions(group_id, pos_name, send, control)
-        VALUES (%s, 'Admin', TRUE, TRUE)
+        INSERT INTO positions(group_id, pos_name, send, control, receive)
+        VALUES (%s, 'Admin', TRUE, TRUE, FALSE)
     """
     add_admin_relation_query = """
         INSERT INTO position_relations(pos_id_from, pos_id_to) VALUES (%s, %s)
