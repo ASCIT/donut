@@ -10,7 +10,7 @@
 <form method="POST" action={{ url_for("newsgroups.post_message") }}>
 	<div class="form-group">
 		<label for="group">Group</label>
-		<select class="form-control" id="group" name="group"> 
+		<select class="form-control" id="group" name="group">
 			{% for group in groups %}
 				<option value="{{ group['group_id'] }}" {% if group_selected == group["group_id"]|string %} selected {% endif %}>{{ group["group_name"] }}</option>
 			{% endfor %}
@@ -29,7 +29,7 @@
 			  <label for="msg" class="required"> Message: </label>
                     <textarea id="msg" class="form-control" name="msg" rows="10" required ></textarea>
                   </div>
-               
+
 	<div class="row">
                 <div class="text-center">
                   <input class="btn" type="submit" value="Submit" />
@@ -70,7 +70,7 @@
 		posList.children().remove()
 		$.ajax({
 			type: 'GET',
-			url: '/newsgroups/positions', 
+			url: '/newsgroups/positions/' + groupSelect.val(),
 			success: function(positions) {
 				displayPositions(positions)
 			},
@@ -81,7 +81,7 @@
 	}
 	function displayPositions(positions) {
 		positions.forEach(function(pos) {
-			var posItem = $('<option></option>').text(pos.pos_name)
+			var posItem = $('<option>').val(pos.pos_id).text(pos.pos_name)
 			posList.append(posItem)
 		})
 	}

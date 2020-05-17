@@ -28,7 +28,7 @@ def send_email(to,
         subject = '[ASCIT Donut] ' + subject
 
     msg['Subject'] = subject
-    msg['From'] = poster + f'<auto@{DOMAIN}>'
+    msg['From'] = f'{poster} <auto@{DOMAIN}>'
     if group:
         msg['To'] = group.lower().replace(' ', '_')
     else:

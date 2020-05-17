@@ -44,13 +44,28 @@ def post_message():
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
-    actions = helpers.get_user_actions(user_id, data['group'])
+    group_id = data['group']
+    actions = helpers.get_user_actions(user_id, group_id)
     if not actions['send']:
         return flask.abort(403)
-    data['group_name'] = groups.get_group_data(data['group'],
+    data['group_name'] = groups.get_group_data(group_id,
                                                ['group_name'])['group_name']
-    if not data['poster']:
-        data['poster'] = get_name_and_email(user_id)['full_name']
+    full_name = get_name_and_email(user_id)['full_name']
+    poster = data['poster']
+    if poster is None:
+        # If not posting from a position, just use the user's name
+        data['poster'] = full_name
+    else:
+        # If positing from a position, ensure the user has that position
+        poster = int(poster)
+        pos_name = None
+        for position in helpers.get_posting_positions(group_id, user_id):
+            if position['pos_id'] == poster:
+                pos_name = position['pos_name']
+                break
+        if pos_name is None:
+            flask.abort(403)
+        data['poster'] = f'{pos_name} ({full_name})'
     data['plain'] = html2plain.handle(data['msg'])
     if helpers.send_email(data):
         flask.flash('Email sent')
@@ -158,9 +173,9 @@ def delete_application(user_id, group_id):
         flask.url_for('newsgroups.view_group', group_id=group_id))
 
 
-@blueprint.route('/newsgroups/positions')
-def posting_positions():
+@blueprint.route('/newsgroups/positions/<int:group_id>')
+def posting_positions(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    return flask.jsonify(helpers.get_posting_positions(user_id))
+    return flask.jsonify(helpers.get_posting_positions(group_id, user_id))
