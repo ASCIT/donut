@@ -42,7 +42,7 @@ def test_get_can_send_groups(client):
 
 def test_get_my_positions(client):
     assert helpers.get_posting_positions(3, 5) == [{
-        'pos_name': 'Member',
+        'pos_name': 'IHC Member',
         'pos_id': 5
     }]
     assert helpers.get_posting_positions(3, 1) == ()

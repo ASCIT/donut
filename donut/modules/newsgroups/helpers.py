@@ -198,7 +198,7 @@ def get_owners(group_id):
     query = """
         SELECT user_id, pos_name, full_name
         FROM positions NATURAL JOIN current_position_holders
-        NATURAL JOIN members_full_name 
+        NATURAL JOIN members_full_name
         WHERE control = 1 AND group_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -209,11 +209,24 @@ def get_owners(group_id):
 def get_posting_positions(group_id, user_id):
     """Get positions user can send as in a group."""
 
+    # The first SELECT handles directly held positions with send privileges.
+    # The second handles indirect positions. We return pos_id_from,
+    # but we need to check pos_id_to for sending privileges.
     query = """
-        SELECT pos_id, pos_name
-        FROM positions NATURAL JOIN current_position_holders
+        SELECT pos_id, CONCAT(group_name, " ", pos_name) AS pos_name
+        FROM current_direct_position_holders
+            NATURAL JOIN positions
+            NATURAL JOIN groups
         WHERE group_id = %s AND user_id = %s AND send = 1
+        UNION
+        SELECT holders.pos_id, CONCAT(group_name, " ", held_positions.pos_name) AS pos_name
+        FROM current_direct_position_holders holders
+            JOIN position_relations ON holders.pos_id = pos_id_from
+            JOIN positions post_positions ON pos_id_to = post_positions.pos_id
+            JOIN positions held_positions ON pos_id_from = held_positions.pos_id
+            JOIN groups ON held_positions.group_id = groups.group_id
+        WHERE post_positions.group_id = %s AND user_id = %s AND post_positions.send = 1
     """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (group_id, user_id))
+        cursor.execute(query, (group_id, user_id) * 2)
         return cursor.fetchall()
