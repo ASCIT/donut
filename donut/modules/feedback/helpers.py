@@ -55,6 +55,7 @@ def send_to_group(group, data):
     data['group_name'] = group
     data['poster'] = "{} Feedback".format(group)
     data['plain'] = data['msg']
+    data['plain'] += "\nEmails: {}".format(data['email'])
     data['msg'] = None
     newsgroups.send_email(data)
 
