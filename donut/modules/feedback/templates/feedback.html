@@ -20,7 +20,7 @@
         <div>
           <div class="row">
             <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
-              <table class="table">
+              <table class="table" id="feedback">
                 <tr>
                   <td>
                     <label for="name">Name:</label>
@@ -39,7 +39,7 @@
                 </tr>
                 <tr>
                     <td>
-			    <label class="required" for="subject">Subject{% if group == 'arc' %} (or Course) {% endif %}:</label>
+			    <label class="required" for="subject">Subject{% if group == 'arc' %} (or Course){% endif %}:</label>
                     </td>
                     <td>
                       <input id="subject" name="subject" class="form-control" required />
@@ -78,4 +78,13 @@
 
 </div>
 
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  #feedback td {
+    width: 50%;
+  }
+</style>
 {% endblock %}
