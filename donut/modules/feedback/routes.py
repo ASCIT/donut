@@ -81,7 +81,7 @@ def feedback_add_msg(group, id):
 
 
 # Allow bod members to see a summary
-@blueprint.route('/feedback/<group>/view/summary')
+@blueprint.route('/feedback/<group>/view/summary', methods=['POST', 'GET'])
 def feedback_view_summary(group):
     if group not in Groups:
         return flask.abort(404)
@@ -89,42 +89,35 @@ def feedback_view_summary(group):
             flask.session['username'], permissions[group].SUMMARY):
         return flask.abort(403)
     # Get a list containing data for each post
-    complaints = helpers.get_new_posts(group)
+    if flask.request.method == 'POST':
+        view_unresolved = flask.request.form.get('unresolved')
+    else:
+        view_unresolved = True
+    complaints = helpers.get_posts(group, view_unresolved)
     # Add links to each complaint
     for complaint in complaints:
         complaint['link'] = helpers.get_link(group, complaint['complaint_id'])
     return flask.render_template(
-        'summary.html', complaints=complaints, group=group)
+        'summary.html',
+        complaints=complaints,
+        group=group,
+        view_unresolved=view_unresolved)
 
 
 # Mark a complaint read
-@blueprint.route('/1/feedback/<group>/markRead/<id>')
-def feedback_mark_read(group, id):
+@blueprint.route('/1/feedback/<group>/setResolved/<id>', methods=['POST'])
+def set_resolved(group, id):
     if group not in Groups:
         return flask.abort(404)
     # Authenticate
-    if 'username' not in flask.session or not auth_utils.check_permission(
-            flask.session['username'], permissions[group].TOGGLE_READ):
+    if not auth_utils.check_login() or not auth_utils.check_permission(
+            flask.session['username'], permissions[group].TOGGLE_RESOLVED):
         return flask.abort(403)
     complaint_id = helpers.get_id(group, id)
-    if helpers.mark_read(group, complaint_id) == False:
-        return flask.abort(400)
-    return 'Success'
-
-
-# Mark a complaint unread
-@blueprint.route('/1/feedback/<group>/markUnread/<id>')
-def feedback_mark_unread(group, id):
-    if group not in Groups:
-        return flask.abort(404)
-    # Authenticate
-    if 'username' not in flask.session or not auth_utils.check_permission(
-            flask.session['username'], permissions[group].TOGGLE_READ):
-        return flask.abort(403)
-    complaint_id = helpers.get_id(group, id)
-    if helpers.mark_unread(group, complaint_id) == False:
-        return flask.abort(400)
-    return 'Success'
+    resolved = 'status' in flask.request.form
+    helpers.set_resolved(group, complaint_id, resolved)
+    return flask.redirect(
+        flask.url_for('feedback.feedback_view_complaint', group=group, id=id))
 
 
 # Add an email to this complaint

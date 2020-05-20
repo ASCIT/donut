@@ -15,7 +15,10 @@
                 </div>
                 <div class="panel-body" id="summary-panel">
                     <p>Subject: {{ complaint['subject'] }} </p>
-                    <p>Status: {{ complaint['status'] }} </p>
+		    <form method="POST" action="{{ url_for('feedback.set_resolved', group=group, id=complaint['uuid']) }}">
+			    <label for="status">Resolved?</label>
+			    <input type="checkbox" id="status" name="status" onchange="this.form.submit()" {% if complaint['resolved'] %} checked {% endif %} {% if not (admin or 'TOGGLE_RESOLVED' in perms) %} disabled {% endif %}>
+		    </form>
                     {% if admin or 'VIEW_EMAILS' in perms or 'ADD_REMOVE_EMAIL' in perms %}
                         {% if not complaint['emails'] %}
                             <p>No emails subscribed to this complaint </p>
@@ -30,10 +33,6 @@
                         {% endif %}
                     {% endif %}
                 </div>
-                {% if admin or 'TOGGLE_READ' in perms %}
-                    <button class="btn btn-primary" style="margin-left: 15px;" id="markRead">Mark as read</button>
-                    <button class="btn btn-primary" style="margin-left: 15px;" id="markUnread">Mark as unread</button>
-                {% endif %}
 		{% if group == 'arc' %}
 			<form method="POST" action="{{ url_for('feedback.arc_ombuds', id=complaint['uuid']) }}"> 
 				<label for="ombuds">Have you already talked to an Ombud/TA/Instructor of this course about your concern?:</label>
@@ -102,48 +101,5 @@
         </div>
     </div>
 </div>
-
-{% endblock %}
-{% block scripts %}
-{{ super() }}
-<script>
-
- $(document).ready(function() {
-     {% if complaint['status'] == 'new_msg' %}
-         $('#markUnread').hide();
-     {% else %}
-         $('#markRead').hide();
-     {% endif %}
-     $('#markRead').click(function() {
-	 $.ajax({
-	     url: "{{ url_for('feedback.feedback_mark_read', id=complaint['uuid'], group=group) }}",
-             type: 'GET',
-             success: function(){
-                 $('#markRead').hide();
-                 $('#markUnread').show();
-                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
-             },
-             error: function(response){
-                alert("An error occurred");
-             }
-         });
-     });
-     $('#markUnread').click(function() {
-         $.ajax({
-             url: "{{ url_for('feedback.feedback_mark_unread', id=complaint['uuid'], group=group) }}",
-             type: 'GET',
-             success: function(){
-                 $('#markUnread').hide();
-                 $('#markRead').show();
-                 window.location.href = "{{ url_for('feedback.feedback_view_complaint', id=complaint['uuid'], group=group) }}";
-             },
-             error: function(response){
-                alert("An error occurred");
-             }
-         });
-     });
- });
-
-</script>
 
 {% endblock %}

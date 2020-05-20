@@ -35,9 +35,9 @@ def test_get_messages(client):
 
 def test_get_summary(client):
     summary = helpers.get_summary(group, 1)
-    assert summary == {'subject': 'Sub1', 'status': 'new_msg'}
+    assert summary == {'subject': 'Sub1', 'resolved': 0}
     summary = helpers.get_summary(group, 2)
-    assert summary == {'subject': 'Sub2', 'status': 'read'}
+    assert summary == {'subject': 'Sub2', 'resolved': 1}
     assert helpers.get_summary(group, 500) is None
 
 
@@ -48,18 +48,16 @@ def test_get_subject(client):
 
 
 def test_get_status(client):
-    assert helpers.get_status(group, 1) == 'new_msg'
-    assert helpers.get_status(group, 2) == 'read'
+    assert helpers.get_status(group, 1) == False
+    assert helpers.get_status(group, 2) == True
     assert helpers.get_status(group, 500) is None
 
 
-def test_mark_read(client):
-    helpers.mark_read(group, 1)
-    assert helpers.get_status(group, 1) == 'read'
-    helpers.mark_unread(group, 1)
-    assert helpers.get_status(group, 1) == 'new_msg'
-    assert helpers.mark_read(group, 500) == False
-    assert helpers.mark_unread(group, 500) == False
+def test_mark_resolved(client):
+    helpers.set_resolved(group, 1, True)
+    assert helpers.get_status(group, 1) == True
+    helpers.set_resolved(group, 1, False)
+    assert helpers.get_status(group, 1) == False
 
 
 def test_get_emails(client):
@@ -86,22 +84,22 @@ def test_get_all_fields(client):
         }],
         'subject':
         'Sub1',
-        'status':
-        'new_msg'
+        'resolved':
+        0
     }
     assert fields == expected
     assert helpers.get_all_fields(group, 500) is None
 
 
-def test_get_new_posts(client):
-    posts = helpers.get_new_posts(group)
+def test_get_posts(client):
+    posts = helpers.get_posts(group, True)
     assert posts == [{
         'complaint_id':
         1,
         'subject':
         'Sub1',
-        'status':
-        'new_msg',
+        'resolved':
+        0,
         'uuid':
         b'\xf04\xcbA,\x04\x11\xe9\x97\xed\x02\x1e\xf4\xd6\xe8\x81',
         'message':
@@ -124,7 +122,7 @@ def test_register_complaint(client):
     res = helpers.get_all_fields(group, complaint_id)
     expected_without_messages = {
         'subject': 'Sub1',
-        'status': 'new_msg',
+        'resolved': 0,
         'emails': ['joe@example.com', 'joey@example.com']
     }
     expected_messages = [{
@@ -178,5 +176,5 @@ def test_add_msg(client):
         'poster':
         '(anonymous)'
     }]
-    assert helpers.get_status(group, 2) == 'new_msg'
+    assert helpers.get_status(group, 2) == False
     assert helpers.add_msg(group, 500, '', '') == False
