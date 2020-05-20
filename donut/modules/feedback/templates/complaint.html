@@ -34,6 +34,13 @@
                     <button class="btn btn-primary" style="margin-left: 15px;" id="markRead">Mark as read</button>
                     <button class="btn btn-primary" style="margin-left: 15px;" id="markUnread">Mark as unread</button>
                 {% endif %}
+		{% if group == 'arc' %}
+			<form method="POST" action="{{ url_for('feedback.arc_ombuds', id=complaint['uuid']) }}"> 
+				<label for="ombuds">Have you already talked to an Ombud/TA/Instructor of this course about your concern?:</label>
+				<label><input type="radio" name="ombuds" value=1 onchange="this.form.submit()" {% if complaint['ombuds'] %} checked {% endif %}>Yes</label>
+				<label><input type="radio" name="ombuds" value=0 onchange="this.form.submit()" {% if not complaint['ombuds'] %} checked {% endif %}>No</label>
+			</form>
+		{% endif %}
            </div>
         </div>
         <div class="col-md-4">

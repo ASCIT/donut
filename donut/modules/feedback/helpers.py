@@ -31,12 +31,15 @@ def register_complaint(group, data, notification=True):
     if not (data and data['subject'] and data['msg']): return False
     # Register complaint
     query = """
-    INSERT INTO complaint_info (org, subject, status, uuid) 
-    VALUES (%s, %s, %s, UNHEX(REPLACE(UUID(), '-', '')))
+    INSERT INTO complaint_info (org, subject, status, ombuds, uuid) 
+    VALUES (%s, %s, %s, %s, UNHEX(REPLACE(UUID(), '-', '')))
     """
     status = 'new_msg'
+    if 'ombuds' not in data:
+        data['ombuds'] = 0
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, (groupInt[group], data['subject'], status))
+        cursor.execute(query, (groupInt[group], data['subject'], status,
+                               data['ombuds']))
         complaint_id = cursor.lastrowid
     # Add email to db if applicable
     if data['email']:
@@ -228,6 +231,26 @@ def get_emails(group, complaint_id):
     return [row['email'] for row in res]
 
 
+def get_ombuds(complaint_id):
+    '''
+    Returns whether the person has already talked to an ombuds/TA/instructor about 
+    their problem.
+    '''
+    query = 'SELECT ombuds FROM complaint_info WHERE complaint_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, complaint_id)
+        return cursor.fetchone()['ombuds']
+
+
+def set_ombuds(complaint_id, ombuds):
+    '''
+    Sets the status of whether the user has spoken to an ombuds/TA/instructor.
+    '''
+    query = "UPDATE complaint_info SET ombuds = %s WHERE complaint_id = %s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [ombuds, complaint_id])
+
+
 def get_all_fields(group, complaint_id):
     '''
     Returns a dict with emails, messages, subject, status
@@ -241,6 +264,8 @@ def get_all_fields(group, complaint_id):
         'subject': get_subject(group, complaint_id),
         'status': get_status(group, complaint_id)
     }
+    if group == 'arc':
+        data['ombuds'] = get_ombuds(complaint_id)
     return data
 
 

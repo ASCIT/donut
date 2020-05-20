@@ -8,6 +8,7 @@ CREATE TABLE complaint_info (
   status VARCHAR(36) DEFAULT NULL,
   uuid BINARY(16) NOT NULL,
   org INT(11) NOT NULL,
+  ombuds BOOLEAN DEFAULT NULL,
   PRIMARY KEY (complaint_id),
   UNIQUE KEY (uuid)
 );

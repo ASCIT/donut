@@ -31,7 +31,7 @@ def feedback(group):
 def feedback_submit(group):
     if group not in Groups:
         return flask.abort(404)
-    fields = ['name', 'email', 'subject', 'msg']
+    fields = ['name', 'email', 'subject', 'msg', 'ombuds']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
@@ -40,16 +40,6 @@ def feedback_submit(group):
         Markup('Success (you may want to save this link): <a href="' +
                helpers.get_link(group, complaint_id) + '">View Complaint</a>'))
     return flask.redirect(flask.url_for('feedback.feedback', group=group))
-
-
-# API endpoint with all visible data
-@blueprint.route('/1/feedback/<group>/view/<id>')
-def feedback_api_view_complaint(group, id):
-    if group not in Groups or not helpers.get_id(group, id):
-        return flask.abort(404)
-    complaint_id = helpers.get_id(group, id)
-    # Pack all the data we need into a dict
-    return flask.jsonify(helpers.get_all_fields(group, complaint_id))
 
 
 # View a complaint
@@ -172,3 +162,19 @@ def feedback_remove_email(group, id):
         helpers.remove_email(group, complaint_id, em)
     return flask.redirect(
         flask.url_for('feedback.feedback_view_complaint', group=group, id=id))
+
+
+# Set the spoken to ombuds status
+@blueprint.route('/1/feedback/arc/arc_ombuds/<id>', methods=['POST'])
+def arc_ombuds(id):
+    if 'username' not in flask.session:
+        return flask.abort(403)
+    complaint_id = helpers.get_id('arc', id)
+    if not complaint_id:
+        return flask.abort(400)
+    ombuds = flask.request.form.get('ombuds')
+    if ombuds is None:
+        return flask.abort(400)
+    helpers.set_ombuds(complaint_id, ombuds)
+    return flask.redirect(
+        flask.url_for('feedback.feedback_view_complaint', group='arc', id=id))

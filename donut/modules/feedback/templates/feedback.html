@@ -6,19 +6,21 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
 
-      <h1>{{group}} Feedback</h1>
+      <h1>{% if group == 'arc' %} Course Concerns and ARC {% else %} {{group}} {% endif %} Feedback</h1>
+      {% if group == 'arc' %}
+      	<p style="text-align:center;"><img src='/static/images/arcchart.png' style='max-width: 800px; max-height: 800px'/></p>
+      {% endif %}
       <div class="half-float-left medium-text">
         <p style="white-space: pre-line;"> {{ msg }} </p>
         {% if summary %}
         <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
         {% endif %}
       </div>
-
       <div class="half-float-right">
         <div>
           <div class="row">
             <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
-              <table class="table">
+              <table class="table" id="feedback">
                 <tr>
                   <td>
                     <label for="name">Name:</label>
@@ -36,16 +38,25 @@
                   </td>
                 </tr>
                 <tr>
-                  <div class="form-group">
                     <td>
-                      <label class="required" for="subject">Subject:</label>
+			    <label class="required" for="subject">Subject{% if group == 'arc' %} (or Course){% endif %}:</label>
                     </td>
                     <td>
                       <input id="subject" name="subject" class="form-control" required />
                     </td>
-                  </div>
                 </tr>
+		{% if group == 'arc' %}
                 <tr>
+                  <td>
+                    <label class="required" for="ombuds">Have you already talked to an Ombud/TA/Instructor of this course about your concern?:</label>
+                  </td>
+                  <td>
+			  <label><input type="radio" name="ombuds" value=1 required>Yes</label>
+			  <label><input type="radio" name="ombuds" value=0>No</label>
+                  </td>
+                </tr>
+		{% endif %}
+		<tr>
                   <td>
                     <label class="required" for="msg">Feedback:</label>
                   </td>
@@ -67,4 +78,13 @@
 
 </div>
 
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  #feedback td {
+    width: 50%;
+  }
+</style>
 {% endblock %}
