@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS complaint_info;
 CREATE TABLE complaint_info (
   complaint_id INT(11) NOT NULL AUTO_INCREMENT,
   subject VARCHAR(50) DEFAULT NULL,
-  status VARCHAR(36) DEFAULT NULL,
+  resolved BOOLEAN DEFAULT FALSE,
   uuid BINARY(16) NOT NULL,
   org INT(11) NOT NULL,
   ombuds BOOLEAN DEFAULT NULL,

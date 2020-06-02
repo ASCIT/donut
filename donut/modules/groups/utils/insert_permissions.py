@@ -32,7 +32,7 @@ groups_permissions = {
                 page_edit_permissions.ABLE,
                 upload_permissions.ABLE,
                 bod_permissions.SUMMARY,
-                bod_permissions.TOGGLE_READ,
+                bod_permissions.TOGGLE_RESOLVED,
                 bod_permissions.ADD_REMOVE_EMAIL,
                 bod_permissions.VIEW_EMAILS,
             # All the calendars
@@ -54,7 +54,7 @@ groups_permissions = {
         # View Bodfeedback summary, Edit Bodfeedback, View Bodfeedback emails
         False: [
                 bod_permissions.SUMMARY,
-                bod_permissions.TOGGLE_READ,
+                bod_permissions.TOGGLE_RESOLVED,
                 bod_permissions.VIEW_EMAILS,
                 # Surveys
                 voting_permissions.SURVEYS]
@@ -65,14 +65,14 @@ groups_permissions = {
         # View Arcfeedback emails, Surveys
         True: [
                 arc_permissions.SUMMARY,
-                arc_permissions.TOGGLE_READ,
+                arc_permissions.TOGGLE_RESOLVED,
                 arc_permissions.ADD_REMOVE_EMAIL,
                 arc_permissions.VIEW_EMAILS,
                 voting_permissions.SURVEYS],
         # View Arcfeedback summary, Edit Arcfeedback, View Arcfeedback emails,
         # Surveys
         False: [arc_permissions.SUMMARY,
-                arc_permissions.TOGGLE_READ,
+                arc_permissions.TOGGLE_RESOLVED,
                 arc_permissions.VIEW_EMAILS,
                 voting_permissions.SURVEYS],
     },
