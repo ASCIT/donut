@@ -31,7 +31,12 @@
                 {% for term in TERMS %}
                   <td class='term-courses'>
                     <ul class='list-group term-courses-list' year={{ year }} term={{ term }}>
-                      <li class='list-group-item term-units' units=0>0 units</li>
+                      <li class='list-group-item'>
+                        <span class='term-units' units=0>0 units</span>
+                        <button class='btn btn-default btn-xs add-placeholder'>
+                          <span class='glyphicon glyphicon-plus'></span>
+                        </button>
+                      </li>
                     </ul>
                   </td>
                 {% endfor %}
@@ -149,9 +154,11 @@
       padding: 0;
       font-size: 14px;
     }
+    .term-courses-list .list-group-item:last-child {
+      border: none;
+    }
     .term-units {
       font-weight: bold;
-      border: none;
     }
     #requirements-modal {
       position: fixed;
@@ -246,13 +253,26 @@
       return String(units) + ' unit' + (units === 1 ? '' : 's')
     }
     function getUnitsDisplay(courseList) {
-      return courseList.children('.term-units')
+      return courseList.find('.term-units')
     }
     function addUnits(courseList, units) {
       var unitsDisplay = getUnitsDisplay(courseList)
       var newUnits = Number(unitsDisplay.attr('units')) + units
       unitsDisplay.attr('units', newUnits)
       unitsDisplay.text(unitString(newUnits))
+    }
+    function addCourseOrPlaceholder(courseList, course, units, onDelete) {
+      var courseItem = $('<li>')
+        .addClass('list-group-item course')
+        .attr({course: course, units: units})
+        .append(
+          $('<span>').text(course + ' (' + unitString(units) + ')'),
+          $('<button>').addClass('btn btn-danger btn-xs').click(onDelete)
+            .append($('<span>').addClass('glyphicon glyphicon-trash'))
+        )
+      getUnitsDisplay(courseList).parent().before(courseItem)
+      addUnits(courseList, units)
+      return courseItem
     }
     var draggedCourse = null
     function addCourse(course, courseList, skipAPIAdd) {
@@ -264,38 +284,25 @@
       }
       var id = String(course.ids[termIndex])
       var units = courseUnits(course)
-      var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
-        $('<span>').text(
-          course.number + ' (' + unitString(units) + ')'
-        ),
-        $('<button>').addClass('btn btn-danger btn-xs')
-          .click(function() {
-            courseItem.remove()
-            addUnits(courseList, -units)
-            displayWarning('Saving...')
-            $.ajax({
-              type: 'GET',
-              url: '/1/planner/course/' + id + '/drop/' + String(year),
-              dataType: 'json',
-              success: function(response) {
-                if (response.success) displayWarning('')
-                else {
-                  displayWarning(response.message)
-                  courseList.append(courseItem)
-                  addUnits(courseList, units)
-                }
-              },
-              error: function() {
-                displayWarning('Failed to drop course ' + course.number)
-                courseList.append(courseItem)
-                addUnits(courseList, units)
-              }
-            })
-          })
-          .append($('<span>').addClass('glyphicon glyphicon-trash'))
-      )
-      getUnitsDisplay(courseList).before(courseItem)
-      addUnits(courseList, units)
+      var courseItem = addCourseOrPlaceholder(courseList, course.number, units, function() {
+        displayWarning('Saving...')
+        $.ajax({
+          type: 'GET',
+          url: '/1/planner/course/' + id + '/drop/' + String(year),
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) {
+              displayWarning('')
+              courseItem.remove()
+              addUnits(courseList, -units)
+            }
+            else displayWarning(response.message)
+          },
+          error: function() {
+            displayWarning('Failed to drop course ' + course.number)
+          }
+        })
+      })
       if (skipAPIAdd) return
 
       displayWarning('Saving...')
@@ -315,6 +322,77 @@
           displayWarning('Failed to add course ' + course.number)
           courseItem.remove()
           addUnits(courseList, -units)
+        }
+      })
+    }
+    function newPlaceholder(courseList) {
+      var courseInput = $('<input>').addClass('form-control')
+        .attr({name: 'course', placeholder: 'Course'})
+        .keydown(saveOnEnter)
+      var unitsInput = $('<input>').addClass('form-control')
+        .attr({type: 'number', name: 'units', placeholder: 'Units'})
+        .keydown(saveOnEnter)
+      var placeholder = $('<li>').addClass('list-group-item').append(
+        $('<form>').append(
+          $('<div>').addClass('form-group').append(courseInput),
+          $('<div>').addClass('form-group').append(unitsInput),
+          $('<button>').attr('type', 'button').addClass('btn btn-success')
+            .click(savePlaceholder)
+            .append($('<span>').addClass('glyphicon glyphicon-ok'))
+        )
+      )
+      courseList.prepend(placeholder)
+      courseInput.focus()
+
+      function savePlaceholder() {
+        displayWarning('Saving...')
+        var yearTerm = getYearTerm(courseList)
+        var course = courseInput.val()
+        var units = Number(unitsInput.val())
+        $.ajax({
+          type: 'POST',
+          url: '/1/planner/' + yearTerm.join('/') + '/placeholder',
+          data: {course: course, units: units},
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) {
+              displayWarning('')
+              placeholder.remove()
+              var placeholderID = response.id
+              var courseItem = addCourseOrPlaceholder(courseList, course, units, function() {
+                dropPlaceholder(courseItem, placeholderID)
+              })
+            }
+            else displayWarning(response.message)
+          },
+          error: function() {
+            displayWarning('Failed to add placeholder')
+          }
+        })
+      }
+      function saveOnEnter(e) {
+        if (e.which === 13) savePlaceholder()
+      }
+    }
+    function dropPlaceholder(placeholder, id) {
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'DELETE',
+        url: '/1/planner/placeholder/' + String(id),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            displayWarning('')
+            addUnits(
+              placeholder.closest('.term-courses-list'),
+              -Number(placeholder.attr('units'))
+            )
+            placeholder.remove()
+          }
+          else displayWarning(response.message)
+        },
+        error: function() {
+          displayWarning('Failed to drop placeholder')
         }
       })
     }
@@ -358,6 +436,9 @@
     function displayWarning(message) {
       $('#warning').text(message).show()
     }
+    function getTermCoursesList(year, term) {
+      return $('.term-courses-list[year=' + String(year) + '][term=' + String(term) + ']')
+    }
     $.ajax({
       type: 'GET',
       url: '{{ url_for("courses.planner_courses") }}',
@@ -375,10 +456,17 @@
       url: '{{ url_for("courses.planner_mine") }}',
       dataType: 'json',
       success: function(courses) {
-        myCourses = courses
-        courses.forEach(function(course) {
-          var courseList = $('.term-courses-list[year=' + course.year + '][term=' + course.terms[0] + ']')
-          addCourse(course, courseList, true)
+        courses.courses.forEach(function(course) {
+          addCourse(course, getTermCoursesList(course.year, course.terms[0]), true)
+        })
+        courses.placeholders.forEach(function(placeholder) {
+          var courseList = getTermCoursesList(placeholder.year, placeholder.term)
+          var courseItem = addCourseOrPlaceholder(
+            courseList,
+            placeholder.course,
+            placeholder.units,
+            function() { dropPlaceholder(courseItem, placeholder.id) }
+          )
         })
       },
       error: function() {
@@ -396,7 +484,7 @@
           PE = 0,
           hums = 0
       termLists.each(function() {
-        $(this).children(':not(.term-units)').each(function() {
+        $(this).children('.course').each(function() {
           var $this = $(this)
           var courseName = $this.attr('course'),
             units = Number($this.attr('units'))
@@ -488,6 +576,9 @@
           addCourse(draggedCourse, $(this).children('.term-courses-list'))
           draggedCourse = null
         })
+      $('.add-placeholder').click(function() {
+        newPlaceholder($(this).closest('.term-courses-list'))
+      })
       $('#show-requirements').click(function() {
         setRequirementsProgress()
         requirementsModal.show()

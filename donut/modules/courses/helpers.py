@@ -115,6 +115,38 @@ def drop_planner_course(username, course_id, year):
         cursor.execute(query, (user_id, course_id, year))
 
 
+def add_planner_placeholder(username, year, term, course, units):
+    """
+    Adds a placedholder course to a user's planner for a given term.
+    Year 1 is frosh year, year 2 is smore year, etc.
+    Term 1 is FA, 2 is WI, and 3 is SP.
+    """
+    user_id = get_user_id(username)
+    query = """
+        INSERT INTO planner_placeholders
+            (user_id, planner_year, term, course_name, course_units)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, year, term, course, units))
+        return cursor.lastrowid
+
+
+def drop_planner_placeholder(username, placeholder_id):
+    """
+    Removes the placeholder with the given ID from the user's planner.
+    Returns whether successful (i.e. the given placeholder did belong to the user).
+    """
+    user_id = get_user_id(username)
+    query = """
+        DELETE FROM planner_placeholders
+        WHERE placeholder_id = %s AND user_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (placeholder_id, user_id))
+        return cursor.rowcount > 0
+
+
 def get_user_planner_courses(username):
     """
     Returns {'ids'[1], 'number', 'units', 'terms'[1], 'year'} structs
@@ -142,6 +174,25 @@ def get_user_planner_courses(username):
         'terms': (course['term'], ),
         'year': course['planner_year']
     } for course in courses]
+
+
+def get_user_planner_placeholders(username):
+    query = """
+        SELECT placeholder_id, planner_year, term, course_name, course_units
+        FROM planner_placeholders NATURAL JOIN users
+        WHERE username = %s
+        ORDER BY course_units DESC, course_name
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, username)
+        placeholders = cursor.fetchall()
+    return [{
+        'id': placeholder['placeholder_id'],
+        'year': placeholder['planner_year'],
+        'term': placeholder['term'],
+        'course': placeholder['course_name'],
+        'units': try_int(placeholder['course_units'])
+    } for placeholder in placeholders]
 
 
 def get_scheduler_courses(year, term):

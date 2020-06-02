@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS planner_courses;
+DROP TABLE IF EXISTS planner_placeholders;
 DROP TABLE IF EXISTS scheduler_sections;
 DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS courses;
@@ -56,6 +57,17 @@ CREATE TABLE planner_courses (
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
         ON DELETE CASCADE
+);
+
+CREATE TABLE planner_placeholders (
+    placeholder_id  INT      NOT NULL AUTO_INCREMENT,
+    user_id         INT      NOT NULL,
+    planner_year    TINYINT  NOT NULL, -- Frosh: 1, ..., Senior: 4
+    term            TINYINT  NOT NULL, -- FA: 1, WI: 2, SP: 3
+    course_name     TEXT     NOT NULL,
+    course_units    FLOAT    NOT NULL,
+    PRIMARY KEY (placeholder_id),
+    FOREIGN KEY (user_id) REFERENCES members(user_id)
 );
 
 CREATE TABLE scheduler_sections (
