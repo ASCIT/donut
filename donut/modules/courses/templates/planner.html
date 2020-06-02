@@ -429,6 +429,7 @@
 
             draggedCourse = course
           })
+          .on('dragend', function() { draggedCourse = null })
           .append(termsList)
         coursesList.append(courseItem)
       })
@@ -586,9 +587,13 @@
       $('#close-requirements').click(function() {
         requirementsModal.hide()
       })
-      $('#search').keyup(function() {
-        displayCourses(searchCourses(courses, $(this).val()))
-      })
+      $('#search')
+        .keyup(function() {
+          displayCourses(searchCourses(courses, $(this).val()))
+        })
+        .on('drop', function(e) {
+          if (draggedCourse) e.preventDefault()
+        })
       setCoursesHeight()
       $(window).resize(setCoursesHeight)
     })
