@@ -188,7 +188,7 @@ def test_planner_mine(client):
         sess['username'] = 'csander'
     rv = client.get(flask.url_for('courses.planner_mine'))
     assert rv.status_code == 200
-    assert json.loads(rv.data) == []
+    assert json.loads(rv.data) == {'courses': [], 'placeholders': []}
     # Test adding some courses
     rv = client.get(
         flask.url_for('courses.planner_add_course', course_id=1, year=2))
@@ -213,25 +213,28 @@ def test_planner_mine(client):
     # Test courses list now that courses have been added; verify order
     rv = client.get(flask.url_for('courses.planner_mine'))
     assert rv.status_code == 200
-    assert json.loads(rv.data) == [{
-        'ids': [1],
-        'number': 'CS 124',
-        'terms': [1],
-        'units': 12,
-        'year': 2
-    }, {
-        'ids': [6],
-        'number': 'Bi 1',
-        'terms': [3],
-        'units': 9,
-        'year': 1
-    }, {
-        'ids': [5],
-        'number': 'CS 38',
-        'terms': [3],
-        'units': 9,
-        'year': 1
-    }]
+    assert json.loads(rv.data) == {
+        'courses': [{
+            'ids': [1],
+            'number': 'CS 124',
+            'terms': [1],
+            'units': 12,
+            'year': 2
+        }, {
+            'ids': [6],
+            'number': 'Bi 1',
+            'terms': [3],
+            'units': 9,
+            'year': 1
+        }, {
+            'ids': [5],
+            'number': 'CS 38',
+            'terms': [3],
+            'units': 9,
+            'year': 1
+        }],
+        'placeholders': []
+    }
     # Test dropping a course
     rv = client.get(
         flask.url_for('courses.planner_drop_course', course_id=5, year=1))
@@ -239,19 +242,22 @@ def test_planner_mine(client):
     assert json.loads(rv.data) == {'success': True}
     rv = client.get(flask.url_for('courses.planner_mine'))
     assert rv.status_code == 200
-    assert json.loads(rv.data) == [{
-        'ids': [1],
-        'number': 'CS 124',
-        'terms': [1],
-        'units': 12,
-        'year': 2
-    }, {
-        'ids': [6],
-        'number': 'Bi 1',
-        'terms': [3],
-        'units': 9,
-        'year': 1
-    }]
+    assert json.loads(rv.data) == {
+        'courses': [{
+            'ids': [1],
+            'number': 'CS 124',
+            'terms': [1],
+            'units': 12,
+            'year': 2
+        }, {
+            'ids': [6],
+            'number': 'Bi 1',
+            'terms': [3],
+            'units': 9,
+            'year': 1
+        }],
+        'placeholders': []
+    }
 
 
 def test_scheduler_mine(client):
