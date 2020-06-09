@@ -112,6 +112,7 @@
   <style>
     #warning {
       float: right;
+      margin-bottom: 0;
     }
     #course-results, #courses-pane {
       overflow-y: auto;
@@ -279,8 +280,21 @@
       addUnits(courseList, units)
       return courseItem
     }
-    var draggedCourse = null
-    function addCourse(course, courseList, skipAPIAdd) {
+    var draggedCourse = null, draggedCourseItem = null
+    function makeDraggable(element, removeWhenDragged, getCourse) {
+      element.attr('draggable', 'true')
+        .on('dragstart', function(e) {
+          // Needed for Firefox
+          var event = e.originalEvent
+          event.dataTransfer.setData('text/plain', null)
+          event.dropEffect = 'move'
+
+          draggedCourse = getCourse()
+          draggedCourseItem = removeWhenDragged ? $(this) : null
+        })
+        .on('dragend', function() { draggedCourse = null })
+    }
+    function addCourse(courseList, course, oldCourseItem, skipAPIAdd) {
       var yearTerm = getYearTerm(courseList)
       var year = yearTerm[0], term = yearTerm[1]
       var termIndex = course.terms.indexOf(term)
@@ -308,6 +322,12 @@
           }
         })
       })
+      makeDraggable(courseItem, true, function() {
+        for (var i = 0; i < courses.length; i++) {
+          if (courses[i].number === course.number) return courses[i]
+        }
+        return course
+      })
       if (skipAPIAdd) return
 
       displayWarning('Saving...')
@@ -316,7 +336,11 @@
         url: '/1/planner/course/' + id + '/add/' + String(year),
         dataType: 'json',
         success: function(response) {
-          if (response.success) displayWarning('')
+          if (response.success) {
+            // Remove the course from its old term if necessary
+            if (oldCourseItem) oldCourseItem.find('button').click()
+            else displayWarning('')
+          }
           else {
             displayWarning(response.message)
             courseItem.remove()
@@ -350,34 +374,47 @@
       courseInput.focus()
 
       function savePlaceholder() {
-        displayWarning('Saving...')
-        var yearTerm = getYearTerm(courseList)
-        var course = courseInput.val()
-        var units = Number(unitsInput.val())
-        $.ajax({
-          type: 'POST',
-          url: '/1/planner/' + yearTerm.join('/') + '/placeholder',
-          data: {course: course, units: units},
-          dataType: 'json',
-          success: function(response) {
-            if (response.success) {
-              displayWarning('')
-              placeholder.remove()
-              var placeholderID = response.id
-              var courseItem = addCourseOrPlaceholder(courseList, course, units, function() {
-                dropPlaceholder(courseItem, placeholderID)
-              })
-            }
-            else displayWarning(response.message)
-          },
-          error: function() {
-            displayWarning('Failed to add placeholder')
-          }
-        })
+        addPlaceholder(
+          courseList,
+          courseInput.val(),
+          Number(unitsInput.val()),
+          placeholder
+        )
       }
       function saveOnEnter(e) {
         if (e.which === 13) savePlaceholder()
       }
+    }
+    function displayPlaceholder(courseList, course, units, placeholderID) {
+      var courseItem = addCourseOrPlaceholder(courseList, course, units, function() {
+        dropPlaceholder(courseItem, placeholderID)
+      })
+      makeDraggable(courseItem, true, function() {
+        return {placeholder: true, course: course, units: units}
+      })
+    }
+    function addPlaceholder(courseList, course, units, placeholder, oldCourseItem) {
+      var yearTerm = getYearTerm(courseList)
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'POST',
+        url: '/1/planner/' + yearTerm.join('/') + '/placeholder',
+        data: {course: course, units: units},
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            // Remove the previous location of this placeholder
+            if (placeholder) placeholder.remove()
+            if (oldCourseItem) oldCourseItem.find('button').click()
+            else displayWarning('')
+            displayPlaceholder(courseList, course, units, response.id)
+          }
+          else displayWarning(response.message)
+        },
+        error: function() {
+          displayWarning('Failed to add placeholder')
+        }
+      })
     }
     function dropPlaceholder(placeholder, id) {
       displayWarning('Saving...')
@@ -424,19 +461,8 @@
             {% endfor %}
           }
         })
-        courseItem
-          .attr('draggable', 'true')
-          .on('dragstart', function(e) {
-            // Needed for Firefox
-            var event = e.originalEvent
-            event.dataTransfer.setData('text/plain', null)
-            event.dropEffect = 'move'
-
-            draggedCourse = course
-          })
-          .on('dragend', function() { draggedCourse = null })
-          .append(termsList)
-        coursesList.append(courseItem)
+        makeDraggable(courseItem, false, function() { return course })
+        coursesList.append(courseItem.append(termsList))
       })
     }
     function displayWarning(message) {
@@ -463,15 +489,14 @@
       dataType: 'json',
       success: function(courses) {
         courses.courses.forEach(function(course) {
-          addCourse(course, getTermCoursesList(course.year, course.terms[0]), true)
+          addCourse(getTermCoursesList(course.year, course.terms[0]), course, null, true)
         })
         courses.placeholders.forEach(function(placeholder) {
-          var courseList = getTermCoursesList(placeholder.year, placeholder.term)
-          var courseItem = addCourseOrPlaceholder(
-            courseList,
+          displayPlaceholder(
+            getTermCoursesList(placeholder.year, placeholder.term),
             placeholder.course,
             placeholder.units,
-            function() { dropPlaceholder(courseItem, placeholder.id) }
+            placeholder.id
           )
         })
       },
@@ -585,7 +610,17 @@
         })
         .on('drop', function(e) {
           e.preventDefault() // stops some browsers from redirecting
-          addCourse(draggedCourse, $(this).children('.term-courses-list'))
+          var courseList = $(this).children('.term-courses-list')
+          if (draggedCourse.placeholder) {
+            addPlaceholder(
+              courseList,
+              draggedCourse.course,
+              draggedCourse.units,
+              null,
+              draggedCourseItem
+            )
+          }
+          else addCourse(courseList, draggedCourse, draggedCourseItem)
           draggedCourse = null
         })
       $('.add-placeholder').click(function() {
