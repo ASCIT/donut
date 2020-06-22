@@ -4,6 +4,7 @@ from flask import jsonify, redirect
 
 from donut import auth_utils
 from donut.modules.core import blueprint, helpers
+from donut.validation_utils import validate_email, validate_matches
 
 VALID_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 VALID_EXTENSIONS |= set(ext.upper() for ext in VALID_EXTENSIONS)
@@ -79,8 +80,7 @@ def set_image():
 
     def flash_error(message):
         flask.flash(message)
-        return redirect(
-            flask.url_for('directory_search.edit_user', user_id=user_id))
+        return redirect(flask.url_for('.edit_user'))
 
     file = flask.request.files['file']
     if not file.filename:
@@ -109,5 +109,23 @@ def set_gender():
     user_id = auth_utils.get_user_id(flask.session['username'])
     helpers.set_member_field(user_id, 'gender_custom',
                              flask.request.form['gender'])
+    return redirect(
+        flask.url_for('directory_search.view_user', user_id=user_id))
+
+
+@blueprint.route('/1/users/me/email', methods=('POST', ))
+def set_email():
+    username = flask.session.get('username')
+    if username is None:
+        flask.abort(403)
+
+    email = flask.request.form['email']
+    valid = validate_email(email) and \
+        validate_matches(email, flask.request.form['email2'])
+    if not valid:
+        return redirect(flask.url_for('.edit_user'))
+
+    user_id = auth_utils.get_user_id(username)
+    helpers.set_member_field(user_id, 'email', email)
     return redirect(
         flask.url_for('directory_search.view_user', user_id=user_id))

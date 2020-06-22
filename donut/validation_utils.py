@@ -185,3 +185,13 @@ def validate_int(int_str, min=None, max=None, flash_errors=True):
         return False
 
     return True
+
+
+def validate_matches(value1, value2, flash_errors=True):
+    """
+    Validates that the two values match
+    """
+    matches = value1 == value2
+    if not matches and flash_errors:
+        flask.flash(repr(value1) + " and " + repr(value2) + " do not match")
+    return matches
