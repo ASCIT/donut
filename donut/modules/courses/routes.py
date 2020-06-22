@@ -71,12 +71,64 @@ def planner_drop_course(course_id, year):
     return flask.jsonify({'success': True})
 
 
+@blueprint.route('/1/planner/<int:year>/<int:term>/placeholder', \
+    methods=('POST', ))
+def planner_add_placeholder(year, term):
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in to save'
+        })
+    form = flask.request.form
+    course = form.get('course')
+    units = form.get('units')
+    if not (course and units):
+        return flask.jsonify({
+            'success': False,
+            'message': 'Missing course or units'
+        })
+    try:
+        units = float(units)
+    except ValueError:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Invalid number of units'
+        })
+
+    placeholder_id = \
+        helpers.add_planner_placeholder(username, year, term, course, units)
+    return flask.jsonify({'success': True, 'id': placeholder_id})
+
+
+@blueprint.route('/1/planner/placeholder/<int:id>', methods=('DELETE', ))
+def planner_drop_placeholder(id):
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in to save'
+        })
+    if not helpers.drop_planner_placeholder(username, id):
+        return flask.jsonify({
+            'success': False,
+            'message': 'Invalid placeholder'
+        })
+
+    return flask.jsonify({'success': True})
+
+
 @blueprint.route('/1/planner/courses/mine')
 def planner_mine():
     username = flask.session.get('username')
     if not username: return flask.jsonify(())
 
-    return flask.jsonify(helpers.get_user_planner_courses(username))
+    return flask.jsonify({
+        'courses':
+        helpers.get_user_planner_courses(username),
+        'placeholders':
+        helpers.get_user_planner_placeholders(username)
+    })
 
 
 @blueprint.route('/1/scheduler/courses/<int:year>/<int:term>')

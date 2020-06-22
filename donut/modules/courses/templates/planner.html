@@ -31,7 +31,12 @@
                 {% for term in TERMS %}
                   <td class='term-courses'>
                     <ul class='list-group term-courses-list' year={{ year }} term={{ term }}>
-                      <li class='list-group-item term-units' units=0>0 units</li>
+                      <li class='list-group-item'>
+                        <span class='term-units' units=0>0 units</span>
+                        <button class='btn btn-default btn-xs add-placeholder'>
+                          <span class='glyphicon glyphicon-plus'></span>
+                        </button>
+                      </li>
                     </ul>
                   </td>
                 {% endfor %}
@@ -107,6 +112,7 @@
   <style>
     #warning {
       float: right;
+      margin-bottom: 0;
     }
     #course-results, #courses-pane {
       overflow-y: auto;
@@ -149,9 +155,11 @@
       padding: 0;
       font-size: 14px;
     }
+    .term-courses-list .list-group-item:last-child {
+      border: none;
+    }
     .term-units {
       font-weight: bold;
-      border: none;
     }
     #requirements-modal {
       position: fixed;
@@ -205,21 +213,26 @@
   <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
-    var HSS_DEPARTMENTS = {
-      An: true,
-      BEM: true,
-      Ec: true,
+    var HUMANITIES_DEPARTMENTS = {
       En: true,
       H: true,
       HPS: true,
       Hum: true,
-      L: true,
-      Law: true,
       Mu: true,
       Pl: true,
+      VC: true
+    }
+    var SOCIAL_SCIENCE_DEPARTMENTS = {
+      An: true,
+      BEM: true,
+      Ec: true,
+      Law: true,
       PS: true,
       Psy: true,
-      SS: true,
+      SS: true
+    }
+    var MISC_HSS_DEPARTMENTS = {
+      L: true,
       Wr: true
     }
 
@@ -246,7 +259,7 @@
       return String(units) + ' unit' + (units === 1 ? '' : 's')
     }
     function getUnitsDisplay(courseList) {
-      return courseList.children('.term-units')
+      return courseList.find('.term-units')
     }
     function addUnits(courseList, units) {
       var unitsDisplay = getUnitsDisplay(courseList)
@@ -254,8 +267,34 @@
       unitsDisplay.attr('units', newUnits)
       unitsDisplay.text(unitString(newUnits))
     }
-    var draggedCourse = null
-    function addCourse(course, courseList, skipAPIAdd) {
+    function addCourseOrPlaceholder(courseList, course, units, onDelete) {
+      var courseItem = $('<li>')
+        .addClass('list-group-item course')
+        .attr({course: course, units: units})
+        .append(
+          $('<span>').text(course + ' (' + unitString(units) + ')'),
+          $('<button>').addClass('btn btn-danger btn-xs').click(onDelete)
+            .append($('<span>').addClass('glyphicon glyphicon-trash'))
+        )
+      getUnitsDisplay(courseList).parent().before(courseItem)
+      addUnits(courseList, units)
+      return courseItem
+    }
+    var draggedCourse = null, draggedCourseItem = null
+    function makeDraggable(element, removeWhenDragged, getCourse) {
+      element.attr('draggable', 'true')
+        .on('dragstart', function(e) {
+          // Needed for Firefox
+          var event = e.originalEvent
+          event.dataTransfer.setData('text/plain', null)
+          event.dropEffect = 'move'
+
+          draggedCourse = getCourse()
+          draggedCourseItem = removeWhenDragged ? $(this) : null
+        })
+        .on('dragend', function() { draggedCourse = null })
+    }
+    function addCourse(courseList, course, oldCourseItem, skipAPIAdd) {
       var yearTerm = getYearTerm(courseList)
       var year = yearTerm[0], term = yearTerm[1]
       var termIndex = course.terms.indexOf(term)
@@ -264,38 +303,31 @@
       }
       var id = String(course.ids[termIndex])
       var units = courseUnits(course)
-      var courseItem = $('<li>').addClass('list-group-item').attr({course: course.number, units: units}).append(
-        $('<span>').text(
-          course.number + ' (' + unitString(units) + ')'
-        ),
-        $('<button>').addClass('btn btn-danger btn-xs')
-          .click(function() {
-            courseItem.remove()
-            addUnits(courseList, -units)
-            displayWarning('Saving...')
-            $.ajax({
-              type: 'GET',
-              url: '/1/planner/course/' + id + '/drop/' + String(year),
-              dataType: 'json',
-              success: function(response) {
-                if (response.success) displayWarning('')
-                else {
-                  displayWarning(response.message)
-                  courseList.append(courseItem)
-                  addUnits(courseList, units)
-                }
-              },
-              error: function() {
-                displayWarning('Failed to drop course ' + course.number)
-                courseList.append(courseItem)
-                addUnits(courseList, units)
-              }
-            })
-          })
-          .append($('<span>').addClass('glyphicon glyphicon-trash'))
-      )
-      getUnitsDisplay(courseList).before(courseItem)
-      addUnits(courseList, units)
+      var courseItem = addCourseOrPlaceholder(courseList, course.number, units, function() {
+        displayWarning('Saving...')
+        $.ajax({
+          type: 'GET',
+          url: '/1/planner/course/' + id + '/drop/' + String(year),
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) {
+              displayWarning('')
+              courseItem.remove()
+              addUnits(courseList, -units)
+            }
+            else displayWarning(response.message)
+          },
+          error: function() {
+            displayWarning('Failed to drop course ' + course.number)
+          }
+        })
+      })
+      makeDraggable(courseItem, true, function() {
+        for (var i = 0; i < courses.length; i++) {
+          if (courses[i].number === course.number) return courses[i]
+        }
+        return course
+      })
       if (skipAPIAdd) return
 
       displayWarning('Saving...')
@@ -304,7 +336,11 @@
         url: '/1/planner/course/' + id + '/add/' + String(year),
         dataType: 'json',
         success: function(response) {
-          if (response.success) displayWarning('')
+          if (response.success) {
+            // Remove the course from its old term if necessary
+            if (oldCourseItem) oldCourseItem.find('button').click()
+            else displayWarning('')
+          }
           else {
             displayWarning(response.message)
             courseItem.remove()
@@ -315,6 +351,90 @@
           displayWarning('Failed to add course ' + course.number)
           courseItem.remove()
           addUnits(courseList, -units)
+        }
+      })
+    }
+    function newPlaceholder(courseList) {
+      var courseInput = $('<input>').addClass('form-control')
+        .attr({name: 'course', placeholder: 'Course'})
+        .keydown(saveOnEnter)
+      var unitsInput = $('<input>').addClass('form-control')
+        .attr({type: 'number', name: 'units', placeholder: 'Units'})
+        .keydown(saveOnEnter)
+      var placeholder = $('<li>').addClass('list-group-item').append(
+        $('<form>').append(
+          $('<div>').addClass('form-group').append(courseInput),
+          $('<div>').addClass('form-group').append(unitsInput),
+          $('<button>').attr('type', 'button').addClass('btn btn-success')
+            .click(savePlaceholder)
+            .append($('<span>').addClass('glyphicon glyphicon-ok'))
+        )
+      )
+      courseList.prepend(placeholder)
+      courseInput.focus()
+
+      function savePlaceholder() {
+        addPlaceholder(
+          courseList,
+          courseInput.val(),
+          Number(unitsInput.val()),
+          placeholder
+        )
+      }
+      function saveOnEnter(e) {
+        if (e.which === 13) savePlaceholder()
+      }
+    }
+    function displayPlaceholder(courseList, course, units, placeholderID) {
+      var courseItem = addCourseOrPlaceholder(courseList, course, units, function() {
+        dropPlaceholder(courseItem, placeholderID)
+      })
+      makeDraggable(courseItem, true, function() {
+        return {placeholder: true, course: course, units: units}
+      })
+    }
+    function addPlaceholder(courseList, course, units, placeholder, oldCourseItem) {
+      var yearTerm = getYearTerm(courseList)
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'POST',
+        url: '/1/planner/' + yearTerm.join('/') + '/placeholder',
+        data: {course: course, units: units},
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            // Remove the previous location of this placeholder
+            if (placeholder) placeholder.remove()
+            if (oldCourseItem) oldCourseItem.find('button').click()
+            else displayWarning('')
+            displayPlaceholder(courseList, course, units, response.id)
+          }
+          else displayWarning(response.message)
+        },
+        error: function() {
+          displayWarning('Failed to add placeholder')
+        }
+      })
+    }
+    function dropPlaceholder(placeholder, id) {
+      displayWarning('Saving...')
+      $.ajax({
+        type: 'DELETE',
+        url: '/1/planner/placeholder/' + String(id),
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            displayWarning('')
+            addUnits(
+              placeholder.closest('.term-courses-list'),
+              -Number(placeholder.attr('units'))
+            )
+            placeholder.remove()
+          }
+          else displayWarning(response.message)
+        },
+        error: function() {
+          displayWarning('Failed to drop placeholder')
         }
       })
     }
@@ -341,22 +461,15 @@
             {% endfor %}
           }
         })
-        courseItem
-          .attr('draggable', 'true')
-          .on('dragstart', function(e) {
-            // Needed for Firefox
-            var event = e.originalEvent
-            event.dataTransfer.setData('text/plain', null)
-            event.dropEffect = 'move'
-
-            draggedCourse = course
-          })
-          .append(termsList)
-        coursesList.append(courseItem)
+        makeDraggable(courseItem, false, function() { return course })
+        coursesList.append(courseItem.append(termsList))
       })
     }
     function displayWarning(message) {
       $('#warning').text(message).show()
+    }
+    function getTermCoursesList(year, term) {
+      return $('.term-courses-list[year=' + String(year) + '][term=' + String(term) + ']')
     }
     $.ajax({
       type: 'GET',
@@ -375,10 +488,16 @@
       url: '{{ url_for("courses.planner_mine") }}',
       dataType: 'json',
       success: function(courses) {
-        myCourses = courses
-        courses.forEach(function(course) {
-          var courseList = $('.term-courses-list[year=' + course.year + '][term=' + course.terms[0] + ']')
-          addCourse(course, courseList, true)
+        courses.courses.forEach(function(course) {
+          addCourse(getTermCoursesList(course.year, course.terms[0]), course, null, true)
+        })
+        courses.placeholders.forEach(function(placeholder) {
+          displayPlaceholder(
+            getTermCoursesList(placeholder.year, placeholder.term),
+            placeholder.course,
+            placeholder.units,
+            placeholder.id
+          )
         })
       },
       error: function() {
@@ -394,9 +513,9 @@
           menu = false,
           Ch3 = false, labUnits = 0,
           PE = 0,
-          hums = 0
+          humanities = 0, socialSciences = 0, hss = 0
       termLists.each(function() {
-        $(this).children(':not(.term-units)').each(function() {
+        $(this).children('.course').each(function() {
           var $this = $(this)
           var courseName = $this.attr('course'),
             units = Number($this.attr('units'))
@@ -438,20 +557,24 @@
             case 'Ph 5':
             case 'Ph 8b':
             case 'Ph 8c':
-              labUnits += units
-              break
+              labUnits += units; break
             default:
               if (courseName.startsWith('PE ')) PE++
               else if (units >= 9) {
-                var depts = courseName.split(' ')[0].split('/')
-                var hss = false
-                for (let i = 0; i < depts.length; i++) {
-                  if (HSS_DEPARTMENTS[depts[i]]) {
-                    hss = true
-                    break
-                  }
-                }
-                if (hss) hums++
+                var departments = courseName.split(' ')[0].split('/')
+                var isHumanity = departments.some(function(department) {
+                  return department in HUMANITIES_DEPARTMENTS
+                })
+                if (isHumanity) humanities++
+                var isSocialScience = departments.some(function(department) {
+                  return department in SOCIAL_SCIENCE_DEPARTMENTS
+                })
+                if (isSocialScience) socialSciences++
+                var isHSS = isHumanity || isSocialScience ||
+                  departments.some(function(department) {
+                    return department in MISC_HSS_DEPARTMENTS
+                  })
+                if (isHSS) hss++
               }
           }
         })
@@ -464,7 +587,9 @@
       $('.progress-bar#menu').css('width', menu * 100 + '%')
       $('.progress-bar#ch3').css('width', Ch3 * 100 + '%')
       $('.progress-bar#add-lab').css('width', Math.min(labUnits / 6, 1) * 100 + '%')
-      $('.progress-bar#hums').css('width', Math.min(hums / 12, 1) * 100 + '%')
+      $('.progress-bar#hums')
+        .text('Humanities: ' + String(humanities) + '; Social sciences: ' + String(socialSciences))
+        .css('width', Math.min(hss / 12, 1) * 100 + '%')
       $('.progress-bar#pe').css('width', Math.min(PE / 3, 1) * 100 + '%')
     }
     function setCoursesHeight() {
@@ -485,9 +610,22 @@
         })
         .on('drop', function(e) {
           e.preventDefault() // stops some browsers from redirecting
-          addCourse(draggedCourse, $(this).children('.term-courses-list'))
+          var courseList = $(this).children('.term-courses-list')
+          if (draggedCourse.placeholder) {
+            addPlaceholder(
+              courseList,
+              draggedCourse.course,
+              draggedCourse.units,
+              null,
+              draggedCourseItem
+            )
+          }
+          else addCourse(courseList, draggedCourse, draggedCourseItem)
           draggedCourse = null
         })
+      $('.add-placeholder').click(function() {
+        newPlaceholder($(this).closest('.term-courses-list'))
+      })
       $('#show-requirements').click(function() {
         setRequirementsProgress()
         requirementsModal.show()
@@ -495,9 +633,13 @@
       $('#close-requirements').click(function() {
         requirementsModal.hide()
       })
-      $('#search').keyup(function() {
-        displayCourses(searchCourses(courses, $(this).val()))
-      })
+      $('#search')
+        .keyup(function() {
+          displayCourses(searchCourses(courses, $(this).val()))
+        })
+        .on('drop', function(e) {
+          if (draggedCourse) e.preventDefault()
+        })
       setCoursesHeight()
       $(window).resize(setCoursesHeight)
     })
