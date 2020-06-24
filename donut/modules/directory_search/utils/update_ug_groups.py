@@ -25,7 +25,7 @@ def update_ug_groups(env):
             ug_admin_positions = get_ug_admin_positions(cursor)
 
             remove_ug_group_members(cursor, ug_pos_id)
-            remove_ug_year_groups(cursor)
+            remove_ug_year_group_members(cursor)
             add_ug_group_members(cursor, ug_pos_id)
             pos_ids = make_ug_year_groups(cursor, ug_type, ug_admin_positions)
             add_ug_year_members(cursor, pos_ids)
@@ -62,8 +62,12 @@ def remove_ug_group_members(cursor, ug_pos_id):
     cursor.execute('DELETE FROM position_holders WHERE pos_id = %s', ug_pos_id)
 
 
-def remove_ug_year_groups(cursor):
-    cursor.execute("DELETE FROM groups WHERE group_name LIKE 'ug-%'")
+def remove_ug_year_group_members(cursor):
+    cursor.execute("""
+        DELETE position_holders
+        FROM position_holders NATURAL JOIN positions NATURAL JOIN groups
+        WHERE group_name LIKE 'ug-%' AND pos_name = 'Member'
+    """)
 
 
 def add_ug_group_members(cursor, ug_pos_id):
@@ -78,7 +82,12 @@ def add_ug_group_members(cursor, ug_pos_id):
 def make_ug_year_groups(cursor, group_type, ug_admin_positions):
     get_years_query = """
         SELECT DISTINCT graduation_year
-        FROM members WHERE graduation_year >= %s
+        FROM members WHERE graduation_year IS NOT NULL
+    """
+    get_position_query = """
+        SELECT pos_id
+        FROM groups NATURAL JOIN positions
+        WHERE group_name = %s AND pos_name = 'Member'
     """
     make_group_query = """
         INSERT INTO groups(group_name, group_desc, type, newsgroups)
@@ -97,11 +106,17 @@ def make_ug_year_groups(cursor, group_type, ug_admin_positions):
     """
 
     pos_ids = {}
-    cursor.execute(get_years_query, year_end)
+    cursor.execute(get_years_query)
     for graduation_year in cursor.fetchall():
         year = graduation_year['graduation_year']
         year_str = str(year)
         group_name = 'ug-' + year_str
+        cursor.execute(get_position_query, group_name)
+        position = cursor.fetchone()
+        if position is not None:
+            pos_ids[year] = position['pos_id']
+            continue
+
         group_desc = 'Undergrads graduating in ' + year_str
         cursor.execute(make_group_query, (group_name, group_desc, group_type))
         group_id = cursor.lastrowid
