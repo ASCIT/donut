@@ -6,7 +6,7 @@ update-packages:
 
 venv:
 	mkdir -p ~/virtualenvs
-	virtualenv -p /usr/local/bin/python3.6 ~/virtualenvs/donut-py3
+	python3 -m venv ~/virtualenvs/donut-py3
 	echo "# Virtualenv" >> ~/.profile
 	echo "source ~/virtualenvs/donut-py3/bin/activate" >> ~/.profile
 
