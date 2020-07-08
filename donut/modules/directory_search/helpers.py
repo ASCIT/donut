@@ -69,6 +69,7 @@ def get_user(user_id):
             SELECT group_name, pos_name
             FROM current_position_holders NATURAL JOIN positions NATURAL JOIN groups
             WHERE pos_id NOT IN (SELECT pos_id FROM house_positions)
+            AND NOT (group_name LIKE 'ug-%%' AND pos_name = 'Admin')
             AND user_id = %s
         """
         with flask.g.pymysql_db.cursor() as cursor:
