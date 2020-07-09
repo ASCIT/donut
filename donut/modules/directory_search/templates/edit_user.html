@@ -39,6 +39,10 @@
 		<br />
 
 		Set email:
+		<div id='email-warning'>
+			(We recommend using your Caltech email until graduation.
+			Donut emails may be flagged as spam by other email providers.)
+		</div>
 		<form action='{{ url_for(".set_email") }}' method='POST'>
 			<div class='input-group'>
 				<span class='input-group-addon'>
@@ -71,6 +75,9 @@
 	<style>
 		label {
 			margin-bottom: 0;
+		}
+		#email-warning {
+			font-size: 80%;
 		}
 	</style>
 {% endblock %}
