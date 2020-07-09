@@ -7,7 +7,7 @@
 		<form
 			id='image'
 			enctype='multipart/form-data'
-			action='{{ url_for("core.set_image") }}'
+			action='{{ url_for(".set_image") }}'
 			method='POST'
 		>
 			<label class='btn btn-default'>
@@ -15,8 +15,9 @@
 			</label>
 		</form>
 		<br />
+
 		Set preferred name:
-		<form action='{{ url_for("core.set_name") }}' method='POST'>
+		<form action='{{ url_for(".set_name") }}' method='POST'>
 			<div class='input-group'>
 				<input class='form-control' name='name' placeholder='Preferred name' value='{{ name }}' />
 				<span class='input-group-btn'>
@@ -25,10 +26,33 @@
 			</div>
 		</form>
 		<br />
+
 		Set gender:
-		<form action='{{ url_for("core.set_gender") }}' method='POST'>
+		<form action='{{ url_for(".set_gender") }}' method='POST'>
 			<div class='input-group'>
 				<input class='form-control' name='gender' placeholder='Gender' value='{{ gender }}' />
+				<span class='input-group-btn'>
+					<input type='submit' class='btn btn-primary' value='Save' />
+				</span>
+			</div>
+		</form>
+		<br />
+
+		Set email:
+		<div id='email-warning'>
+			(We recommend using your Caltech email until graduation.
+			Donut emails may be flagged as spam by other email providers.)
+		</div>
+		<form action='{{ url_for(".set_email") }}' method='POST'>
+			<div class='input-group'>
+				<span class='input-group-addon'>
+					<label class='required' for='email'>Email:</label>
+				</span>
+				<input class='form-control' type='email' name='email' id='email' />
+				<span class='input-group-addon'>
+					<label class='required' for='email2'>Confirm email:</label>
+				</span>
+				<input class='form-control' type='email' name='email2' id='email2' />
 				<span class='input-group-btn'>
 					<input type='submit' class='btn btn-primary' value='Save' />
 				</span>
@@ -45,4 +69,15 @@
 			imageInput.change(function() { imageForm.submit() })
 		})
 	</script>
+{% endblock %}
+{% block styles %}
+	{{ super() }}
+	<style>
+		label {
+			margin-bottom: 0;
+		}
+		#email-warning {
+			font-size: 80%;
+		}
+	</style>
 {% endblock %}
