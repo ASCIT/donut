@@ -1,0 +1,47 @@
+name: Python CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.4
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_USER: donut_test
+          MYSQL_PASSWORD: public
+          MYSQL_DATABASE: donut_test
+          MYSQL_ROOT_PASSWORD: root
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Since MariaDB is running in a Docker container,
+    # we need to connect over TCP (127.0.0.1:3306) instead of a local socket
+    - name: Setup MariaDB
+      run: |
+        sudo sh -c '(echo "[client]"; echo "host=127.0.0.1") >> /etc/mysql/my.cnf'
+        while ! mysqladmin ping -s; do sleep 1; done
+        mysql -u root -proot -e "SET GLOBAL max_connections = 1000;"
+        mysql -u root -proot < sql/setup.sql
+    - name: Decrypt calendar.json
+      run: openssl aes-256-cbc -K ${{ secrets.CALENDAR_KEY }} -iv ${{ secrets.CALENDAR_IV }} -in calendar.json.enc -out calendar.json -d
+
+    - name: Test
+      run: make test
+    - name: Lint
+      run: yapf -d -r .
