@@ -75,6 +75,8 @@ def init(environment_name):
     # Update jinja global functions
     app.jinja_env.globals.update(
         current_year=lambda: datetime.datetime.now().year)
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
 
     if environment_name == "prod":
         mail_handler = DonutSMTPHandler(
