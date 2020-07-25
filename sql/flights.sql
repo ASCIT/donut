@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS flights;
+
+CREATE TABLE flights (
+    link	TEXT NOT NULL DEFAULT '',
+    visible     BOOLEAN NOT NULL DEFAULT FALSE
+);

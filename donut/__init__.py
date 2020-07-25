@@ -13,7 +13,7 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
-from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, newsgroups, rooms, uploads, voting
+from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, newsgroups, rooms, uploads, voting, flights
 from donut.donut_SMTP_handler import DonutSMTPHandler
 from donut.email_utils import DOMAIN
 
@@ -35,6 +35,7 @@ app.register_blueprint(rooms.blueprint)
 app.register_blueprint(uploads.blueprint)
 app.register_blueprint(voting.blueprint)
 app.register_blueprint(newsgroups.blueprint)
+app.register_blueprint(flights.blueprint)
 
 
 def init(environment_name):

@@ -20,6 +20,7 @@ SOURCE sql/rooms.sql
 SOURCE sql/permissions.sql
 SOURCE sql/voting.sql
 SOURCE sql/courses.sql
+SOURCE sql/flights.sql
 
 SET FOREIGN_KEY_CHECKS = 1;
 
