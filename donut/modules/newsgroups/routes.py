@@ -28,11 +28,12 @@ def post(group_id=None):
     user_id = auth_utils.get_user_id(flask.session['username'])
     if not group_id:
         group_id = flask.request.form.get('group')
+    if auth_utils.is_admin():
+        groups = helpers.get_newsgroups()
+    else:
+        groups = helpers.get_my_newsgroups(user_id, True)
     return flask.render_template(
-        'post.html',
-        groups=helpers.get_my_newsgroups(user_id, True),
-        group_selected=group_id,
-        page='post')
+        'post.html', groups=groups, group_selected=group_id, page='post')
 
 
 @blueprint.route('/newsgroups/postmessage', methods=['POST'])
@@ -45,7 +46,7 @@ def post_message():
     for field in fields:
         data[field] = flask.request.form.get(field)
     group_id = data['group']
-    actions = helpers.get_user_actions(user_id, group_id)
+    actions = get_user_actions(user_id, group_id)
     if not actions['send']:
         return flask.abort(403)
     data['group_name'] = groups.get_group_data(group_id,
@@ -80,7 +81,7 @@ def view_group(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    actions = helpers.get_user_actions(user_id, group_id)
+    actions = get_user_actions(user_id, group_id)
     fields = [
         'group_id', 'group_name', 'group_desc', 'anyone_can_send',
         'members_can_send', 'visible', 'admin_control_members'
@@ -165,7 +166,7 @@ def all_posts(group_id):
 @blueprint.route('/_delete_application/<user_id>/<group_id>')
 def delete_application(user_id, group_id):
     username = flask.session.get('username')
-    if username is None or not helpers.get_user_actions(
+    if username is None or not get_user_actions(
             auth_utils.get_user_id(username), group_id)['control']:
         return flask.abort(403)
     helpers.remove_application(user_id, group_id)
@@ -178,4 +179,16 @@ def posting_positions(group_id):
     if 'username' not in flask.session:
         return flask.abort(403)
     user_id = auth_utils.get_user_id(flask.session['username'])
-    return flask.jsonify(helpers.get_posting_positions(group_id, user_id))
+    if auth_utils.is_admin():
+        pos = [{
+            'pos_id': groups.get_position_id('Devteam', 'Devteam Member'),
+            'pos_name': 'Devteam Member'
+        }]
+    pos.extend(helpers.get_posting_positions(group_id, user_id))
+    return flask.jsonify(pos)
+
+
+def get_user_actions(user_id):
+    if auth_utils.is_admin():
+        return {'send': True, 'control': True}
+    return helpers.get_user_actions(user_id)
