@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+	<div class="jumbotron">
+		<h1>Airport Carpools</h1>
+		{% if admin %}                        
+			<a class="btn btn-primary" href="{{ url_for('flights.settings') }}" role="button">Settings</a>
+		{% endif %}
+		{% if visible %}
+			<a class="btn btn-primary" href="{{ link }}" target="_blank">Go to Spreadsheet</a>
+			<iframe width=100% height=700 src="{{ link }}&rm=minimal"></iframe>
+		{% else %}
+			<h2>✈ Check back later ✈</h2>
+		{% endif %}
+	</div>
+</div>
+
+{% endblock %}
