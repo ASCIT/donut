@@ -31,7 +31,7 @@ def register_complaint(group, data, notification=True):
     if not (data and data['subject'] and data['msg']): return False
     # Register complaint
     query = """
-    INSERT INTO complaint_info (org, subject, resolved, ombuds, uuid) 
+    INSERT INTO complaint_info (org, subject, resolved, ombuds, uuid)
     VALUES (%s, %s, FALSE, %s, UNHEX(REPLACE(UUID(), '-', '')))
     """
     if 'ombuds' not in data:
@@ -49,12 +49,17 @@ def register_complaint(group, data, notification=True):
     return complaint_id
 
 
-def send_to_group(group, data):
+def send_to_group(group, data, complaint_id=None):
     group_id = groups.get_group_id(groupName[group])
     data['group'] = group_id
     data['group_name'] = group
     data['poster'] = "{} Feedback".format(group)
     data['plain'] = data['msg']
+    if data['email']:
+        data['plain'] += "\nEmails: {}".format(data['email'])
+    if complaint_id:
+        data['plain'] += "\nLink to the issue: {}".format(
+            get_link(group, complaint_id))
     data['msg'] = None
     newsgroups.send_email(data)
 
@@ -116,7 +121,7 @@ def add_msg(group, complaint_id, message, poster, notification=True):
         cursor.execute(query2, complaint_id)
     if notification:
         data = {'msg': message, 'subject': subject}
-        send_to_group(group, data)
+        send_to_group(group, data, complaint_id)
         query = 'SELECT email FROM complaint_emails WHERE complaint_id = %s'
         with flask.g.pymysql_db.cursor() as cursor:
             cursor.execute(query, complaint_id)
@@ -162,7 +167,7 @@ def get_messages(group, complaint_id):
     in ascending order of timestamp
     '''
     query = """
-    SELECT time, poster, message, message_id FROM complaint_messages 
+    SELECT time, poster, message, message_id FROM complaint_messages
     WHERE complaint_id = %s ORDER BY time
     """.format(group)
     with flask.g.pymysql_db.cursor() as cursor:
@@ -219,7 +224,7 @@ def get_emails(group, complaint_id):
 
 def get_ombuds(complaint_id):
     '''
-    Returns whether the person has already talked to an ombuds/TA/instructor about 
+    Returns whether the person has already talked to an ombuds/TA/instructor about
     their problem.
     '''
     query = 'SELECT ombuds FROM complaint_info WHERE complaint_id = %s'
@@ -258,20 +263,20 @@ def get_all_fields(group, complaint_id):
 def get_posts(group, view_unresolved):
     '''
     Returns posts and their associated list
-    of messages. 
+    of messages.
     If view_all is false, only returns unresolved posts.
     Will be an array of dicts with keys complaint_id, subject,
     resolved, uuid, message, poster, time
     Note that message and poster refer to the latest comment on this complaint
     '''
     query = """SELECT post.complaint_id AS complaint_id, post.subject AS subject,
-    post.resolved AS resolved, post.uuid AS uuid, comment.message AS message, 
-    comment.poster AS poster, comment.time AS time 
+    post.resolved AS resolved, post.uuid AS uuid, comment.message AS message,
+    comment.poster AS poster, comment.time AS time
     FROM complaint_info post
     NATURAL JOIN complaint_messages comment
     INNER JOIN (
-    SELECT complaint_id, max(time) AS time 
-    FROM complaint_messages 
+    SELECT complaint_id, max(time) AS time
+    FROM complaint_messages
     GROUP BY complaint_id
     ) maxtime
     ON maxtime.time = comment.time AND maxtime.complaint_id = comment.complaint_id
