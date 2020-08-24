@@ -55,8 +55,6 @@ def send_to_group(group, data, complaint_id=None):
     data['group_name'] = group
     data['poster'] = "{} Feedback".format(group)
     data['plain'] = data['msg']
-    if data['email']:
-        data['plain'] += "\nEmails: {}".format(data['email'])
     if complaint_id:
         data['plain'] += "\nLink to the issue: {}".format(
             get_link(group, complaint_id))
