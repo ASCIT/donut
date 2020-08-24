@@ -168,7 +168,7 @@ def test_planner_mine(client):
     # Test when not logged in
     rv = client.get(flask.url_for('courses.planner_mine'))
     assert rv.status_code == 200
-    assert json.loads(rv.data) == []
+    assert json.loads(rv.data) == {'courses': [], 'placeholders': []}
     rv = client.get(
         flask.url_for('courses.planner_add_course', course_id=1, year=2))
     assert rv.status_code == 200

@@ -301,20 +301,23 @@
       if (termIndex < 0) {
         return alert('Class is not offered that term')
       }
+
+      // Remove the course from its old term if necessary
+      if (oldCourseItem) oldCourseItem.find('button').click()
+
+      // Display the new course
       var id = String(course.ids[termIndex])
       var units = courseUnits(course)
       var courseItem = addCourseOrPlaceholder(courseList, course.number, units, function() {
+        courseItem.remove()
+        addUnits(courseList, -units)
         displayWarning('Saving...')
         $.ajax({
           type: 'GET',
           url: '/1/planner/course/' + id + '/drop/' + String(year),
           dataType: 'json',
           success: function(response) {
-            if (response.success) {
-              displayWarning('')
-              courseItem.remove()
-              addUnits(courseList, -units)
-            }
+            if (response.success) displayWarning('')
             else displayWarning(response.message)
           },
           error: function() {
@@ -330,27 +333,21 @@
       })
       if (skipAPIAdd) return
 
-      displayWarning('Saving...')
+      // Request the course to be added.
+      // If moving a course, the warning will be updated by the remove request.
+      if (!oldCourseItem) displayWarning('Saving...')
       $.ajax({
         type: 'GET',
         url: '/1/planner/course/' + id + '/add/' + String(year),
         dataType: 'json',
         success: function(response) {
           if (response.success) {
-            // Remove the course from its old term if necessary
-            if (oldCourseItem) oldCourseItem.find('button').click()
-            else displayWarning('')
+            if (!oldCourseItem) displayWarning('')
           }
-          else {
-            displayWarning(response.message)
-            courseItem.remove()
-            addUnits(courseList, -units)
-          }
+          else displayWarning(response.message)
         },
         error: function() {
           displayWarning('Failed to add course ' + course.number)
-          courseItem.remove()
-          addUnits(courseList, -units)
         }
       })
     }
@@ -403,7 +400,9 @@
         dataType: 'json',
         success: function(response) {
           if (response.success) {
-            // Remove the previous location of this placeholder
+            // Remove the previous location of this placeholder.
+            // We can't add the placeholder until the response is received,
+            // since we wouldn't know its ID yet.
             if (placeholder) placeholder.remove()
             if (oldCourseItem) oldCourseItem.find('button').click()
             else displayWarning('')

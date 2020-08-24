@@ -121,14 +121,13 @@ def planner_drop_placeholder(id):
 @blueprint.route('/1/planner/courses/mine')
 def planner_mine():
     username = flask.session.get('username')
-    if not username: return flask.jsonify(())
-
-    return flask.jsonify({
-        'courses':
-        helpers.get_user_planner_courses(username),
-        'placeholders':
-        helpers.get_user_planner_placeholders(username)
-    })
+    if username:
+        courses = helpers.get_user_planner_courses(username)
+        placeholders = helpers.get_user_planner_placeholders(username)
+    else:
+        courses = ()
+        placeholders = ()
+    return flask.jsonify({'courses': courses, 'placeholders': placeholders})
 
 
 @blueprint.route('/1/scheduler/courses/<int:year>/<int:term>')
