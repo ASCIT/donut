@@ -113,9 +113,6 @@ CREATE TABLE groups (
                                                         -- whether or not
                                                         -- anyone can send
                                                         -- emails to the group
-    members_can_send        BOOLEAN      DEFAULT FALSE, -- Controls if any
-                                                        -- member can send to
-                                                        -- the group
     visible                 BOOLEAN      DEFAULT FALSE, -- Controls if anyone
                                                         -- anyone can see this
                                                         -- group

@@ -82,8 +82,8 @@ def view_group(group_id):
     user_id = auth_utils.get_user_id(flask.session['username'])
     actions = helpers.get_user_actions(user_id, group_id)
     fields = [
-        'group_id', 'group_name', 'group_desc', 'anyone_can_send',
-        'members_can_send', 'visible', 'admin_control_members'
+        'group_id', 'group_name', 'group_desc', 'anyone_can_send', 'visible',
+        'admin_control_members'
     ]
     group_info = groups.get_group_data(group_id, fields)
     applications = None
