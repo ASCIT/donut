@@ -1,83 +1,121 @@
 {% extends "layout.html" %}
 {% block page %}
-{% include "navbar.html" %}
-<div class="container theme-showcase" role="main">
-  <div class="newsgroup-frame">
-
-{% if not group['visible'] and not member %}
-  <h2> Must be a member to view </h2>
-{% else %}
-  <h2> {{ group['group_name'] }} </h2>
-  {% if group['group_desc'] %}
-    <h3> {{ group['group_desc'] }} </h3>
-  {% endif %}
-  {% if not member %}
-    <form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
-      <div class="form-group">
-	<input class="btn btn-primary" id="apply-btn" type="submit" value="Apply for Subscription"/>
-     </form>
-  {% endif %}
-  <ul style="list-style-type:disc;">
-  {% if group['anyone_can_send'] %}
-    <li> Anyone can post to this group. </li>
-  {% else %}
-    <li> Posting is restricted to authorized members. </li>
-  {% endif %}
-  {% if group['admin_control_members'] %}
-    <li> Administrators control the membership of this group. </li>
-  {% endif %}
-  {% if group['visible'] %}
-    <li> Anyone can learn that this group exists. </li>
-  {% endif %}
-  <li> You are {% if not actions['receive'] %} not {% endif %} subscribed. </li>
-  {% if actions["control"] %}
-    <li> You have admin control. </li>
-    <h4> Applications </h4>
-    <table style="width:100%">
-      <tr>
-        <th>Applicant</th>
-        <th>Email</th>
-        <th>Subscription</th>
-      </tr>
-      {% for applicant in applications %}
-        <tr>
-          <td> {{applicant.name}}</td>
-          <td> {{applicant.email}} </td>
-          <td> <a href={{ url_for('campus_positions')}}>Add to Group</a> </td>
-          <td> <a href={{ url_for('newsgroups.delete_application', user_id=applicant.user_id, group_id=group['group_id']) }}>Dismiss</a> </td>
-        </tr>
-       {% endfor %}
-     </table>
-  {% endif %}
-  </ul>
-  {% if actions['send'] or group['anyone_can_send'] %}
-    <br><a href={{ url_for('newsgroups.post', group_id=group['group_id']) }}>Send Message</a>
-  {% endif %}
-    <h2> Group Owners </h2>
-  {% for owner in owners %}
-    {{ owner.pos_name }}: <a href={{ url_for('directory_search.view_user', user_id=owner.user_id) }}>{{ owner.full_name }} </a><br>
-  {% endfor %}
-  {% if member %}
-    <h4> Recent Messages </h4>
-    <table style="width:100%">
-      <tr>
-        <th>Date</th>
-        <th>From</th>
-        <th>Subject</th>
-       </tr>
-       {% for message in messages %}
-         <tr>
-           <td> {{ message.time_sent }}</td>
-           <td> <a href={{ url_for('directory_search.view_user', user_id=message.user_id) }}>{{ message.post_as }}</a> </td>
-           <td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
-          </tr>
-        {% endfor %}
-    </table>
-    <a href={{ url_for('newsgroups.all_posts', group_id=group['group_id']) }}>View All</a>
-  {% else %}
-    <h4> Must be a member to view messages </h4>
-  {% endif %}
+	{% include "navbar.html" %}
+	<div class="container theme-showcase" role="main">
+		<div class="newsgroup-frame">
+			{% if not group['visible'] and not member %}
+				<h2> Must be a member to view </h2>
+			{% else %}
+				<h2> {{ group['group_name'] }}
+					{% if actions['send'] or group['anyone_can_send'] %}
+						<a href={{ url_for('newsgroups.post', group_id=group['group_id']) }}><span class="glyphicon glyphicon-send"></span></a>
+					{% endif %}
+				</h2>
+				{% if group['group_desc'] %}
+					<h3> {{ group['group_desc'] }} </h3>
+				{% endif %}
+				<ul style="list-style-type:disc;">
+					<li>
+						{% if group['anyone_can_send'] %}
+							Anyone can post to this group. 
+						{% else %}
+							Posting is restricted to authorized members. 
+						{% endif %}
+					</li>
+					{% if group['admin_control_members'] %}
+						<li> Administrators control the membership of this group. </li>
+					{% endif %}
+					{% if group['visible'] %}
+						<li> Anyone can learn that this group exists. </li>
+					{% endif %}
+					<li> You are {% if not actions['receive'] %} not {% endif %} subscribed. </li>
+					{% if actions["control"] %}
+						<li> You have admin control. </li>
+					{% endif %}
+					{% if not member %}
+						<li>
+							<form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
+								<a href="#" onclick="this.parentNode.submit()">Apply for Subscription'</a>
+							</form>
+						</li>
+					{% endif %}
+				</ul>
+				<div class="panel-group">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#apps">Applications</a>
+							</h4>
+						</div>
+						<div id="apps" class="panel-body collapse">
+							{% if actions["control"] %}
+								<table style="width:100%">
+									<tr>
+										<th>Applicant</th>
+										<th>Email</th>
+										<th>Subscription</th>
+									</tr>
+									{% for applicant in applications %}
+										<tr>
+											<td> {{applicant.name}}</td>
+											<td> {{applicant.email}} </td>
+											<td> <a href={{ url_for('campus_positions')}}>Add to Group</a> </td>
+											<td> <a href={{ url_for('newsgroups.delete_application', user_id=applicant.user_id, group_id=group['group_id']) }}>Dismiss</a> </td>
+										</tr>
+									{% endfor %}
+								</table>
+							{% else %}
+								You do not have access.
+							{% endif %}
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#owners">Group Owners</a> 
+							</h4>
+						</div>
+						<div id="owners" class="panel-body collapse">
+							{% for pos_name, pos_people in owners.items() %}
+								<h5> {{ pos_name }}: </h5>
+								{% for person in pos_people %} 
+									<div>
+										<a href={{ url_for('directory_search.view_user', user_id=person.user_id) }}>{{ person.full_name }}</a>
+									</div>
+								{% endfor %}
+							{% endfor %}
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" href="#msgs">Recent Messages</a>
+							</h4>
+						</div>
+						<div id="msgs" class="panel-body collapse">
+							{% if member %}
+								<table style="width:100%">
+									<tr>
+										<th>Date</th>
+										<th>From</th>
+										<th>Subject</th>
+									</tr>
+									{% for message in messages %}
+										<tr>
+											<td> {{ message.time_sent }}</td>
+											<td> <a href={{ url_for('directory_search.view_user', user_id=message.user_id) }}>{{ message.post_as }}</a> </td>
+											<td> <a href={{ url_for('newsgroups.view_post', post_id=message.newsgroup_post_id) }}>{{ message.subject }}</a> </td>
+										</tr>
+									{% endfor %}
+								</table>
+								<a href={{ url_for('newsgroups.all_posts', group_id=group['group_id']) }}>View All</a>
+							{% else %}
+								Must be a member to view messages
+							{% endif %}
+						</div>
+					</div>
+				</div>
+		</div>
+	</div>
 {% endif %}
-</div>
-</div>
 {% endblock %}

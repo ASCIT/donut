@@ -203,7 +203,16 @@ def get_owners(group_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, group_id)
-        return cursor.fetchall()
+        res = cursor.fetchall()
+        owners = {}
+        for row in res:
+            owners.setdefault(row['pos_name'], []).append({
+                'user_id':
+                row['user_id'],
+                'full_name':
+                row['full_name']
+            })
+        return owners
 
 
 def get_posting_positions(group_id, user_id):
