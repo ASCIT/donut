@@ -2,6 +2,7 @@ import flask
 from donut.modules.newsgroups import helpers
 from donut.testing.fixtures import client
 from datetime import datetime
+from donut.default_permissions import Permissions
 
 
 def test_get_newsgroups(client):
@@ -22,22 +23,22 @@ def test_get_my_newsgroups(client):
 
 
 def test_get_can_send_groups(client):
-    assert helpers.get_my_newsgroups(5, True) == [{
+    expected_groups = [{
         'group_name': 'IHC',
         'group_id': 3
     }, {
-        'group_name':
-        'Donut Devteam',
-        'group_id':
-        1
+        'group_name': 'Donut Devteam',
+        'group_id': 1
     }]
-
-    assert helpers.get_my_newsgroups(100, True) == [{
-        'group_name':
-        'Donut Devteam',
-        'group_id':
-        1
-    }]
+    groups = helpers.get_my_newsgroups(5, True)
+    assert len(groups) == len(expected_groups)
+    assert [group for group in groups if group not in expected_groups] == []
+    # anyone can send
+    assert helpers.get_my_newsgroups(100, True) == groups[1:]
+    # admin can send to any group
+    groups = helpers.get_my_newsgroups(1, True)
+    assert len(groups) == len(expected_groups)
+    assert [group for group in groups if group not in expected_groups] == []
 
 
 def test_get_my_positions(client):
@@ -45,7 +46,15 @@ def test_get_my_positions(client):
         'pos_name': 'IHC Member',
         'pos_id': 5
     }]
-    assert helpers.get_posting_positions(3, 1) == ()
+    assert helpers.get_posting_positions(1, 5) == []
+
+    # Admin can post to any group
+    assert helpers.get_posting_positions(9, 1) == [{
+        'pos_name':
+        'Donut Devteam Head',
+        'pos_id':
+        1
+    }]
 
 
 def test_get_user_actions(client):
@@ -53,6 +62,13 @@ def test_get_user_actions(client):
         'send': 1,
         'control': 0,
         'receive': 1
+    }
+
+    # user is not part of group but is admin
+    assert helpers.get_user_actions(1, 5) == {
+        'send': 1,
+        'control': 1,
+        'receive': 0
     }
 
 

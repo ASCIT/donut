@@ -258,6 +258,15 @@ def get_user_id(username):
     return user and user['user_id']
 
 
+def get_username(user_id):
+    """Takes a user_id and returns the user's username."""
+    query = 'SELECT username FROM users WHERE user_id = %s'
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id])
+        user = cursor.fetchone()
+    return user and user['username']
+
+
 def update_last_login(username):
     """Updates the last login time for the user."""
     query = """
@@ -359,9 +368,31 @@ def is_caltech_user():
         re.search(ip_match, flask.request.remote_addr) is not None
 
 
-def is_admin():
+def is_admin(user_id=None):
     """
     Returns whether the current user is an admin
     """
-    username = flask.session.get('username')
+    if user_id:
+        username = get_username(user_id)
+    else:
+        username = flask.session.get('username')
     return username and check_permission(username, None)
+
+
+def get_admin_pos(user_id):
+    """
+    Returns position id and name of the admin position.
+    """
+    if not is_admin(user_id):
+        return []
+    query = """
+        SELECT pos_id, CONCAT(group_name, ' ', pos_name) AS pos_name 
+        FROM position_permissions 
+        NATURAL JOIN positions
+        NATURAL JOIN groups
+        NATURAL JOIN current_direct_position_holders
+        WHERE user_id=%s AND permission_id=%s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, Permissions.ADMIN.value))
+        return cursor.fetchall()

@@ -5,9 +5,9 @@ INSERT INTO options(option_id, option_name) VALUES
     (1, 'CS'),
     (2, 'MechE');
 
-INSERT INTO members(uid, last_name, first_name, email, phone) VALUES
-    ('1957540', 'Qu', 'David', 'davidqu12345@gmail.com', NULL),
-    ('1984853', 'Eng', 'Robert', 'reng@caltech.edu', '+11234567890');
+INSERT INTO members(user_id, uid, last_name, first_name, email, phone) VALUES
+    (1, '1957540', 'Qu', 'David', 'davidqu12345@gmail.com', NULL),
+    (2, '1984853', 'Eng', 'Robert', 'reng@caltech.edu', '+11234567890');
 INSERT INTO members(
     user_id,
     uid,
@@ -47,9 +47,9 @@ INSERT INTO members(
     1,
     '203'
 );
-INSERT INTO members(uid, last_name, first_name, email) VALUES
-    ('2045251', 'Yu', 'Sean', 'ssyu@caltech.edu'),
-    ('2077933', 'Lin', 'Rachel', 'rlin@caltech.edu');
+INSERT INTO members(user_id, uid, last_name, first_name, email) VALUES
+    (4, '2045251', 'Yu', 'Sean', 'ssyu@caltech.edu'),
+    (5, '2077933', 'Lin', 'Rachel', 'rlin@caltech.edu');
 
 INSERT INTO member_options(user_id, option_id, option_type) VALUES
     (3, 1, 'Major'),

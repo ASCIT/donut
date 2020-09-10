@@ -90,7 +90,8 @@ def view_group(group_id):
     if actions['control']:
         applications = helpers.get_applications(group_id)
     messages = None
-    member = groups.is_user_in_group(user_id, group_id)
+    member = auth_utils.is_admin() or groups.is_user_in_group(
+        user_id, group_id)
     if member:
         messages = helpers.get_past_messages(group_id)
     return flask.render_template(

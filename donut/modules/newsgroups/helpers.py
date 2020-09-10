@@ -3,6 +3,7 @@ import flask
 import smtplib
 from donut.modules.core.helpers import get_name_and_email
 from donut.modules.groups import helpers as groups
+from donut import auth_utils
 
 
 def get_past_messages(group_id, limit=5):
@@ -40,6 +41,8 @@ def get_my_newsgroups(user_id, send=False):
         WHERE newsgroups = 1 AND user_id = %s
     """
     if send:
+        if auth_utils.is_admin(user_id):
+            return get_newsgroups()
         query += """
             AND send = 1
             UNION SELECT group_id, group_name
@@ -65,6 +68,9 @@ def get_user_actions(user_id, group_id):
         cursor.execute(query, (user_id, group_id))
         res = cursor.fetchall()
     actions = {'send': False, 'control': False, 'receive': False}
+    if auth_utils.is_admin(user_id):
+        actions['send'] = True
+        actions['control'] = True
     anyone_can_send_query = """SELECT anyone_can_send FROM groups
         WHERE group_id=%s"""
     with flask.g.pymysql_db.cursor() as cursor:
@@ -209,6 +215,7 @@ def get_owners(group_id):
 def get_posting_positions(group_id, user_id):
     """Get positions user can send as in a group."""
 
+    pos = auth_utils.get_admin_pos(user_id)
     # The first SELECT handles directly held positions with send privileges.
     # The second handles indirect positions. We return pos_id_from,
     # but we need to check pos_id_to for sending privileges.
@@ -229,4 +236,5 @@ def get_posting_positions(group_id, user_id):
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (group_id, user_id) * 2)
-        return cursor.fetchall()
+        pos.extend(cursor.fetchall())
+        return pos
