@@ -72,7 +72,7 @@ def get_closed_surveys(user_id):
 def get_survey_data(access_key):
     query = """
         SELECT survey_id, title, description, group_id,
-        start_time, end_time, creator, auth, results_shown
+        start_time, end_time, creator, results_shown
         FROM surveys WHERE access_key = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
@@ -155,12 +155,8 @@ def process_params_request(editing, survey_id=None, access_key=None):
             end_hour=form.get('end_hour'),
             end_minute=form.get('end_minute'),
             end_period=form.get('end_period'),
-            auth='auth' in form,
             public='public' in form,
             group_id=form.get('group'))
-
-    if 'username' not in flask.session:
-        return creation_error('Not logged in')
 
     validations = [
         validate_exists(form, 'title'),
@@ -211,7 +207,6 @@ def process_params_request(editing, survey_id=None, access_key=None):
         'description': form['description'].strip() or None,
         'start_time': start,
         'end_time': end,
-        'auth': 'auth' in form,
         'public': 'public' in form,
         'group_id': group
     }
@@ -231,7 +226,7 @@ def process_params_request(editing, survey_id=None, access_key=None):
 
 def get_survey_params(survey_id):
     query = """
-        SELECT title, description, start_time, end_time, group_id, auth, public
+        SELECT title, description, start_time, end_time, group_id, public
         FROM surveys WHERE survey_id = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:

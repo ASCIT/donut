@@ -203,8 +203,6 @@ def test_survey_data(client):
         datetime(tomorrow.year, tomorrow.month, tomorrow.day, 12),
         'creator':
         3,
-        'auth':
-        0,
         'results_shown':
         0
     }
@@ -272,7 +270,6 @@ def test_process_params_error(client):
         end_hour='12',
         end_minute='00',
         end_period='P',
-        auth='on',
         public='on',
         group='')
 
@@ -290,7 +287,7 @@ def test_process_params_error(client):
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
     for delete_param in default_params:
-        if delete_param in ['auth', 'public']: continue  # these are optional
+        if delete_param == 'public': continue  # this param is optional
         params = default_params.copy()
         del params[delete_param]
         assert_message(b'Invalid form data', params)
@@ -352,15 +349,10 @@ def test_survey_params(client):
         datetime(tomorrow.year, tomorrow.month, tomorrow.day, 12),
         'group_id':
         None,
-        'auth':
-        0,
         'public':
         1
     }
-    helpers.update_survey_params(1,
-                                 {'title': 'ABC',
-                                  'group_id': 2,
-                                  'auth': True})
+    helpers.update_survey_params(1, {'title': 'ABC', 'group_id': 2})
     assert helpers.get_survey_params(1) == {
         'title':
         'ABC',
@@ -372,8 +364,6 @@ def test_survey_params(client):
         datetime(tomorrow.year, tomorrow.month, tomorrow.day, 12),
         'group_id':
         2,
-        'auth':
-        1,
         'public':
         1
     }
@@ -867,7 +857,6 @@ def test_submit(client):
             end_hour='12',
             end_minute='00',
             end_period='P',
-            auth='on',
             public='on',
             group=''),
         follow_redirects=False)
@@ -918,29 +907,10 @@ def test_submit(client):
     }
     with client.session_transaction() as sess:
         sess['username'] = 'csander'
-    # Test authorization
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data='{"uid":"","birthday":"1999-05-08"}')
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Incorrect UID or birthday'
-    }
-    rv = client.post(
-        flask.url_for('voting.submit', access_key=access_key),
-        data='{"uid":"2078141","birthday":""}')
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == {
-        'success': False,
-        'message': 'Incorrect UID or birthday'
-    }
     # Test questions match
     rv = client.post(
         flask.url_for('voting.submit', access_key=access_key),
-        data=
-        '{"uid":"2078141","birthday":"1999-05-08","responses":[{"question":1}]}'
-    )
+        data='{"responses":[{"question":1}]}')
     assert rv.status_code == 200
     assert json.loads(rv.data) == {
         'success': False,
@@ -951,8 +921,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":"4"},
                     {"question":9},
@@ -971,8 +939,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":15},
                     {"question":9},
@@ -991,8 +957,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":10},
@@ -1011,8 +975,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
@@ -1031,8 +993,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
@@ -1051,8 +1011,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
@@ -1071,8 +1029,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
@@ -1091,10 +1047,6 @@ def test_submit(client):
         rv = client.post(
             flask.url_for('voting.submit', access_key=access_key),
             data=json.dumps({
-                'uid':
-                '2078141',
-                'birthday':
-                '1999-05-08',
                 'responses': [{
                     'question': 8,
                     'response': 13
@@ -1121,10 +1073,6 @@ def test_submit(client):
         rv = client.post(
             flask.url_for('voting.submit', access_key=access_key),
             data=json.dumps({
-                'uid':
-                '2078141',
-                'birthday':
-                '1999-05-08',
                 'responses': [{
                     'question': 8,
                     'response': 13
@@ -1153,10 +1101,6 @@ def test_submit(client):
         rv = client.post(
             flask.url_for('voting.submit', access_key=access_key),
             data=json.dumps({
-                'uid':
-                '2078141',
-                'birthday':
-                '1999-05-08',
                 'responses': [{
                     'question': 8,
                     'response': 13
@@ -1183,8 +1127,6 @@ def test_submit(client):
         flask.url_for('voting.submit', access_key=access_key),
         data="""
             {
-                "uid":"2078141",
-                "birthday":"1999-05-08",
                 "responses":[
                     {"question":8,"response":13},
                     {"question":9,"response":"shorty"},
@@ -1340,7 +1282,6 @@ def test_results(client):
             end_hour='1',
             end_minute='00',
             end_period='P',
-            auth='on',
             public='on',
             group=''),
         follow_redirects=False)

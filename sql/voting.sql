@@ -12,7 +12,6 @@ CREATE TABLE surveys (
     end_time       DATETIME      NOT NULL,
     access_key     CHAR(64)      NOT NULL,
     group_id       INT,                         -- restrict to this group if non-NULL
-    auth           BOOLEAN       NOT NULL,      -- require authentication (UID and birthday)
     public         BOOLEAN       NOT NULL,      -- whether survey should appear in the list of active surveys
     results_shown  BOOLEAN       DEFAULT FALSE, -- whether survey should appear in the list of results
     creator        INT,                         -- user id of survey creator
@@ -61,7 +60,11 @@ CREATE TABLE survey_responses (
                        -- For dropdown:         choice_id (number)
                        -- For checkbox:         [choice_id (number)]
                        -- For short/long text:  text (string)
-                       -- For elected position: [choice_id (number) | user_id (negative number) | NO (null)]
+                       -- For elected position:
+                       --   [[choice_id (number) | user_id (negative number) | NO (null)]]
+                       --   Each element of the outer list is a set of equivalent candidates.
+                       --   For example, the rankings "1. A, B; 2. C; 3. NO" would be represented as
+                       --   [["A", "B"], ["C"], [null]].
 
     PRIMARY KEY(response_id),
     FOREIGN KEY(question_id) REFERENCES survey_questions(question_id) ON DELETE CASCADE,
