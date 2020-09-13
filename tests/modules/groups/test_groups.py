@@ -212,17 +212,16 @@ def test_create_pos_holders(client):
 
 def test_create_group(client):
     group_id = helpers.create_group("Page House", "May the work be light",
-                                    "House", False, False, True, True, True)
+                                    "House", False, False, True, True)
     assert helpers.get_group_data(group_id, [
         "group_id", "group_name", "group_desc", "type", "anyone_can_send",
-        "members_can_send", "newsgroups", "visible", "admin_control_members"
+        "newsgroups", "visible", "admin_control_members"
     ]) == {
         "group_name": "Page House",
         "group_desc": "May the work be light",
         "type": "House",
         "newsgroups": False,
         "anyone_can_send": False,
-        "members_can_send": True,
         "visible": True,
         "admin_control_members": True,
         "group_id": group_id
