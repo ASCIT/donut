@@ -13,17 +13,6 @@
     {% if description %}
       <div id="description"></div>
     {% endif %}
-    {% if auth %}
-      <h4>Please enter your UID and birthday to verify your identity</h4>
-      <div class="form-group">
-        <label class="required" for="uid">UID</label>
-        <input class="form-control" id="uid" name="uid" placeholder="1234567" autofocus />
-      </div>
-      <div class="form-group">
-        <label class="required" for="birthday">Birthday</label>
-        <input type="date" class="form-control" id="birthday" name="birthday"/>
-      </div>
-    {% endif %}
     <ul id="question_container"></ul>
     <button class="btn btn-primary" id="submit">Submit answers</button>
   </div>
