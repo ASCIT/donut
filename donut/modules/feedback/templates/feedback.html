@@ -26,7 +26,7 @@
                     <label for="name">Name:</label>
                   </td>
                   <td>
-                    <input id="name" name="name" class="form-control" />
+                    <input id="name" name="name" class="form-control" maxlength="50"/>
                   </td>
                 </tr>
                 <tr>
@@ -42,7 +42,7 @@
 			    <label class="required" for="subject">Subject{% if group == 'arc' %} (or Course){% endif %}:</label>
                     </td>
                     <td>
-                      <input id="subject" name="subject" class="form-control" required />
+                      <input id="subject" name="subject" class="form-control" maxlength="50" required />
                     </td>
                 </tr>
 		{% if group == 'arc' %}
