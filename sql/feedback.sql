@@ -25,7 +25,7 @@ CREATE TABLE complaint_messages (
 
 CREATE TABLE complaint_emails (
   complaint_id INT(11) NOT NULL,
-  email VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL,
   PRIMARY KEY (complaint_id, email),
   FOREIGN KEY (complaint_id) REFERENCES complaint_info (complaint_id) ON DELETE CASCADE
 ); 
