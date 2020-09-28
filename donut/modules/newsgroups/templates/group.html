@@ -35,7 +35,7 @@
 					{% if not member %}
 						<li>
 							<form method="POST" id="apply" action="{{ url_for('newsgroups.apply_subscription', group_id=group['group_id']) }}">
-								<a href="#" onclick="this.parentNode.submit()">Apply for Subscription'</a>
+								<a href="#" onclick="this.parentNode.submit()">Apply for Subscription</a>
 							</form>
 						</li>
 					{% endif %}
