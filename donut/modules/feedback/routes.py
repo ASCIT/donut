@@ -15,6 +15,8 @@ permissions = {
 
 @blueprint.route('/feedback/<group>')
 def feedback(group):
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     if group not in Groups:
         return flask.abort(404)
     summary = False
@@ -29,6 +31,8 @@ def feedback(group):
 # Submit feedback form
 @blueprint.route('/feedback/<group>/submit', methods=['POST'])
 def feedback_submit(group):
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     if group not in Groups:
         return flask.abort(404)
     fields = ['name', 'email', 'subject', 'msg', 'ombuds']
