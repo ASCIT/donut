@@ -1,5 +1,5 @@
 var URL_REGEX = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
-function formatText(text, textType) {
+function formatText(text, textType, target='_self') {
   textType = textType || 'p'
   textType = '<' + textType + '>'
   function makeText(text) {
@@ -17,7 +17,7 @@ function formatText(text, textType) {
       }
       var link = match[0]
       var linkPrefix = link.startsWith('http') ? '' : '//'
-      formattedLine.append($('<a>').attr('href', linkPrefix + link).append(makeText(link)))
+      formattedLine.append($('<a>').attr({'href': linkPrefix + link, 'target': target}).append(makeText(link)))
       searchIndex = match.index + link.length
     }
     if (searchIndex < line.length) {

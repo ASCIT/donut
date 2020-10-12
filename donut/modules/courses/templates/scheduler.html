@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% block page %}
+  {% include "notes_modal.html" %}
   <div class='col-md-10 col-md-offset-1' style='float: none'>
     <h3 id='warning'></h3>
     <h1>Course Scheduler</h1>
@@ -77,7 +78,14 @@
     }
     .interval .btn.remove {
       display: none;
-      width: 100%;
+      float: right;
+      width: 30%;
+      height: 100%;
+    }
+    .interval .btn.edit {
+      display: none;
+      float: left;
+      width: 70%;
       height: 100%;
     }
     .interval:hover .interval-label {
@@ -85,6 +93,11 @@
     }
     .interval:hover .btn.remove {
       display: inline-block;
+      background-color:#ffb3ba;
+    }
+    .interval:hover .btn.edit {
+      display: inline-block;
+      background-color: #bae1ff;
     }
     .interval-label {
       word-break: break-all;
@@ -104,12 +117,16 @@
     .section.selected .section-name {
       font-weight: bold;
     }
+    .modal p {
+      word-wrap: break-word;
+    }
   </style>
 {% endblock %}
 {% block scripts %}
   {{ super() }}
   <script src='{{ url_for("static", filename="js/hash.js") }}'></script>
   <script src='{{ url_for("static", filename="js/courses/search.js") }}'></script>
+  <script src='{{ url_for("static", filename="js/format-text.js") }}'></script>
   <script>
     var SHOW_COURSES = 50
     var OM = 'OM,'
@@ -242,7 +259,8 @@
               $('<div>').addClass('interval-label').append(
                 $('<strong>').text(course.number),
                 $('<div>').text(sectionNumber)
-              ),
+	        ),
+              // delete button
               $('<button>')
                 .attr({
                   type: 'button',
@@ -258,8 +276,21 @@
                   fitIntervals()
                   dropSection(course, sectionNumber)
                   e.stopPropagation() // prevent section dropdowns from closing
+		}),
+              // edit button
+              $('<button>')
+                .attr({
+                  type: 'button',
+                  course: course.id,
+                  section: sectionNumber,
+                  class: 'btn edit',
+                  "data-toggle": 'modal',
+                  "data-target": '#modal',
+                  "data-course-id": course.id,
+                  "data-course-num": course.number
                 })
-            )
+                .append($('<span>').addClass('glyphicon glyphicon-edit'))
+              )
           dayLists.eq(weekday).append(intervalItem)
           intervals.push(intervalItem)
         }
@@ -461,7 +492,52 @@
     function displayUnits() {
       units.text('Units: ' + String(coursesUnits))
     }
-
+    $('#modal').on('show.bs.modal', function(e) {
+      var courseNum = $(e.relatedTarget).data("courseNum");
+      var courseId = $(e.relatedTarget).data("courseId");
+      displayNotes(courseNum, courseId); 
+    });
+    $('#editButton').click(function() {
+      $('#postNotes').show();
+      $('#viewNotes').hide();
+      $('#editButton').hide();
+    });
+    $('#postNotes').submit(function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: '/1/scheduler/edit_notes',
+        type: 'POST',
+        data:$('#postNotes').serialize(),
+	success:function(data) {
+	  if (data.success) {
+            displayNotes($('#courseNum').val(), $('#courseId').val());
+          }
+	  else alert('Failed to save notes: ' + data.message);
+	},
+        error: function() {
+          displayWarning('Failed to save notes')
+        }
+      });
+    });
+    function displayNotes(courseNum, courseId) {
+      $('#courseId').val(courseId);
+      $('#courseNum').val(courseNum);
+      $('#modalTitle').text(courseNum);
+      $.ajax({
+        type: 'GET',
+        url: '/1/scheduler/notes/' + courseId,
+        success: function(notes) {
+          $('#viewNotes').html(formatText(notes, 'p', '_blank'));
+	  $('#viewNotes').show();
+	  $('#editButton').show();
+	  $('#postNotes').hide();
+	  $('#notes').text(notes);
+        },
+        error: function() {
+          displayWarning('Failed to load notes')
+        }
+      })
+    }
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
       coursesList = $('#courses')

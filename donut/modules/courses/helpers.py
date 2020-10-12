@@ -303,3 +303,35 @@ def get_user_scheduler_sections(username, year, term):
 
 is_duplicate_error = lambda e: \
     isinstance(e, IntegrityError) and e.args[0] == ER.DUP_ENTRY
+
+
+def get_notes(username, course):
+    user_id = get_user_id(username)
+    query = "SELECT notes FROM scheduler_notes WHERE user_id=%s AND course_id=%s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course))
+        res = cursor.fetchone()
+        if res:
+            return res['notes']
+        else:
+            return None
+
+
+def edit_notes(username, course, notes):
+    if len(notes) == 0:
+        delete_notes(username, course)
+        return
+    user_id = get_user_id(username)
+    query = """
+    INSERT INTO scheduler_notes (user_id, course_id, notes) VALUES (%s, %s, %s)
+    ON DUPLICATE KEY UPDATE notes = VALUES(notes)
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course, notes))
+
+
+def delete_notes(username, course):
+    user_id = get_user_id(username)
+    query = "DELETE FROM scheduler_notes WHERE user_id=%s AND course_id=%s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, (user_id, course))
