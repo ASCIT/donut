@@ -1,7 +1,13 @@
-from itertools import chain, combinations, product
+from itertools import chain, combinations, permutations
 
 
-def winners(responses):
+class RankedPairsResult:
+    def __init__(self, tallies, winners):
+        self.tallies = tallies
+        self.winners = winners
+
+
+def results(responses):
     """
     Returns the list of ranked-pairs winners based on responses.
     Takes as input a list of rankings, e.g. [
@@ -15,7 +21,7 @@ def winners(responses):
                          for vote in rank)
     tallies = {  # mapping of pairs (A, B) of candidates
         pair: 0  # to numbers of responders who ranked A above B
-        for pair in product(all_candidates, repeat=2)
+        for pair in permutations(all_candidates, 2)
     }
     for response in responses:
         ranked = set(vote for rank in response for vote in rank)
@@ -44,4 +50,5 @@ def winners(responses):
                 for t in lower[B]:  #  and          B > ... > t
                     lower[s].add(t)  # then s > ... > t
                     higher[t].add(s)
-    return sorted(all_candidates, key=lambda A: len(higher[A]))
+    winners = sorted(all_candidates, key=lambda A: len(higher[A]))
+    return RankedPairsResult(tallies, winners)

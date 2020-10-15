@@ -9,7 +9,7 @@ from donut.modules.groups.helpers import get_group_list_data, is_user_in_group
 from donut.validation_utils import (validate_date, validate_exists,
                                     validate_in, validate_int)
 from .permissions import Permissions
-from .ranked_pairs import winners
+from .ranked_pairs import results
 
 ACCESS_KEY_LENGTH = 64
 AM_OR_PM = set(['A', 'P'])
@@ -424,5 +424,5 @@ def get_results(survey_id):
         elif question_type == question_types['Checkboxes']:
             question['results'] = Counter(chain(*responses)).most_common()
         elif question_type == question_types['Elected position']:
-            question['results'] = winners(responses)
+            question['results'] = results(responses)
     return questions

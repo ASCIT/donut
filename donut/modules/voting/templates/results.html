@@ -81,13 +81,39 @@
             </ul>
           {% elif question['type'] == question_types['Elected position'] %}
             <ul class="list-group">
-              {% for winner in question['results'] %}
+              {% for winner in question['results'].winners %}
                 <li class="list-group-item">
                   {{ loop.index }}.
                   {{ winner }}
                 </li>
               {% endfor %}
             </ul>
+            <table class="tallies-table">
+              <thead>
+                <tr>
+                  <th>vs.</th>
+                  {% for candidate1 in question['results'].winners %}
+                    <th class="candidate1">{{ candidate1 }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for candidate2 in question['results'].winners[1:] %}
+                  <tr>
+                    <th class="candidate2">{{ candidate2 }}</th>
+                    {% for candidate1 in question['results'].winners[:loop.index] %}
+                      <td>
+                        {% set tally1 = question['results'].tallies[candidate1, candidate2] %}
+                        {% set tally2 = question['results'].tallies[candidate2, candidate1] %}
+                        <span class="candidate1">{{ tally1 }}</span>
+                        <span class="candidate2">{{ tally2 }}</span>
+                        <span>{{ question['responses']|length - tally1 - tally2 }}</span>
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
             <h4>
               Abstentions:
               {{ question['responses']|length - question['responses']|length }}
@@ -120,6 +146,18 @@
   <style>
     .show-responses:not(:checked) ~ ul {
       display: none;
+    }
+    .tallies-table {
+      border-collapse: collapse;
+    }
+    .tallies-table td {
+      border: 1px solid black;
+    }
+    .candidate1 {
+      color: seagreen;
+    }
+    .candidate2 {
+      color: crimson;
     }
   </style>
 {% endblock %}

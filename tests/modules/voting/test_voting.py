@@ -23,14 +23,30 @@ def test_ranked_pairs():
     responses += (((N, ), (C, ), (K, ), (M, )), ) * 26
     responses += (((C, ), (K, ), (N, ), (M, )), ) * 15
     responses += (((K, ), (C, ), (N, ), (M, )), ) * 17
-    assert ranked_pairs.winners(responses) == [N, C, K, M]
+    results = ranked_pairs.results(responses)
+    assert results.winners == [N, C, K, M]
+    assert results.tallies == {
+        (C, K): 42 + 26 + 15,
+        (C, M): 26 + 15 + 17,
+        (C, N): 15 + 17,
+        (K, C): 17,
+        (K, M): 26 + 15 + 17,
+        (K, N): 15 + 17,
+        (M, C): 42,
+        (M, K): 42,
+        (M, N): 42,
+        (N, C): 42 + 26,
+        (N, K): 42 + 26,
+        (N, M): 26 + 15 + 17,
+    }
 
     # Test incomplete lists
-    assert ranked_pairs.winners([[['A']], [['B']], [['A']]]) == ['A', 'B']
+    results = ranked_pairs.results([[['A']], [['B']], [['A']]])
+    assert results.winners == ['A', 'B']
 
     # Test ties
     responses = [[['A'], ['B', 'C'], ['D']], [['A', 'C'], ['B', 'D']]]
-    assert ranked_pairs.winners(responses) == ['A', 'C', 'B', 'D']
+    assert ranked_pairs.results(responses).winners == ['A', 'C', 'B', 'D']
 
 
 # Helpers
@@ -416,7 +432,9 @@ def test_respond(client):
             '[[7], [-1], [9], [-2], [null]]'
         ])
     assert helpers.some_responses_for_survey(1)
-    assert helpers.get_results(1) == [{
+    results = helpers.get_results(1)
+    election_result = results.pop()
+    assert results == [{
         'question_id': 1,
         'title': 'A',
         'description': None,
@@ -452,40 +470,30 @@ def test_respond(client):
         'responses': [[4, 6]],
         'results': [(4, 1), (6, 1)]
     }, {
-        'question_id':
-        4,
-        'title':
-        'D',
-        'description':
-        None,
-        'type':
-        5,
-        'list_order':
-        3,
-        'choices':
-        0,
+        'question_id': 4,
+        'title': 'D',
+        'description': None,
+        'type': 5,
+        'list_order': 3,
+        'choices': 0,
         'responses': ['Lorem ipsum dolor sit amet'],
         'results': [('Lorem ipsum dolor sit amet', 1)]
-    }, {
-        'question_id':
-        5,
-        'title':
-        'E',
-        'description':
-        None,
-        'type':
-        3,
-        'list_order':
-        4,
+    }]
+    results = election_result.pop('results')
+    assert election_result == {
+        'question_id': 5,
+        'title': 'E',
+        'description': None,
+        'type': 3,
+        'list_order': 4,
         'choices': {
             7: 'do',
             8: 're',
             9: 'me'
         },
-        'responses': [[[7], [-1], [9], [-2], [None]]],
-        'results': ['do', 'David Qu', 'me', 'Robert Eng', 'NO'],
         'responses': [[['do'], ['David Qu'], ['me'], ['Robert Eng'], ['NO']]]
-    }]
+    }
+    assert results.winners == ['do', 'David Qu', 'me', 'Robert Eng', 'NO']
     with app.test_request_context():
         flask.session['username'] = 'dqu'
         # Invalid elected position response
