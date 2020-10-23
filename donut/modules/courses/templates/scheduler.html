@@ -78,14 +78,18 @@
     }
     .interval .btn.remove {
       display: none;
-      float: right;
-      width: 30%;
+      position: absolute;
+      right: 0;
+      width: 50%;
+      top: 0;
       height: 100%;
     }
     .interval .btn.edit {
       display: none;
-      float: left;
-      width: 70%;
+      position: absolute;
+      left: 0;
+      width: 50%;
+      top: 0;
       height: 100%;
     }
     .interval:hover .interval-label {
@@ -93,7 +97,7 @@
     }
     .interval:hover .btn.remove {
       display: inline-block;
-      background-color:#ffb3ba;
+      background-color: #ffb3ba;
     }
     .interval:hover .btn.edit {
       display: inline-block;
@@ -290,7 +294,7 @@
                   "data-course-num": course.number
                 })
                 .append($('<span>').addClass('glyphicon glyphicon-edit'))
-              )
+            )
           dayLists.eq(weekday).append(intervalItem)
           intervals.push(intervalItem)
         }
