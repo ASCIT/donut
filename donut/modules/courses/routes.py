@@ -197,5 +197,6 @@ def edit_notes():
 @blueprint.route('/1/scheduler/notes/<int:course>')
 def get_notes(course):
     username = flask.session.get('username')
-    if not username: return flask.jsonify(())
+    if not username: return flask.jsonify('')
+
     return flask.jsonify(helpers.get_notes(username, course) or '')
