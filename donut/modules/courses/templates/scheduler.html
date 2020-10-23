@@ -259,7 +259,7 @@
               $('<div>').addClass('interval-label').append(
                 $('<strong>').text(course.number),
                 $('<div>').text(sectionNumber)
-	        ),
+              ),
               // delete button
               $('<button>')
                 .attr({
@@ -276,7 +276,7 @@
                   fitIntervals()
                   dropSection(course, sectionNumber)
                   e.stopPropagation() // prevent section dropdowns from closing
-		}),
+                }),
               // edit button
               $('<button>')
                 .attr({
@@ -495,9 +495,10 @@
     $('#modal').on('show.bs.modal', function(e) {
       var courseNum = $(e.relatedTarget).data("courseNum");
       var courseId = $(e.relatedTarget).data("courseId");
-      displayNotes(courseNum, courseId); 
+      displayNotes(courseNum, courseId);
     });
     $('#editButton').click(function() {
+      $('#notes').val($('#notes').text());
       $('#postNotes').show();
       $('#viewNotes').hide();
       $('#editButton').hide();
@@ -508,12 +509,13 @@
         url: '/1/scheduler/edit_notes',
         type: 'POST',
         data:$('#postNotes').serialize(),
-	success:function(data) {
-	  if (data.success) {
+        success: function(data) {
+          if (data.success) {
             displayNotes($('#courseNum').val(), $('#courseId').val());
+            displayWarning('');
           }
-	  else alert('Failed to save notes: ' + data.message);
-	},
+          else displayWarning('Failed to save notes: ' + data.message);
+        },
         error: function() {
           displayWarning('Failed to save notes')
         }
@@ -528,10 +530,11 @@
         url: '/1/scheduler/notes/' + courseId,
         success: function(notes) {
           $('#viewNotes').html(formatText(notes, 'p', '_blank'));
-	  $('#viewNotes').show();
-	  $('#editButton').show();
-	  $('#postNotes').hide();
-	  $('#notes').text(notes);
+          $('#viewNotes').show();
+          $('#editButton').show();
+          $('#postNotes').hide();
+          $('#notes').text(notes);
+          displayWarning('');
         },
         error: function() {
           displayWarning('Failed to load notes')
