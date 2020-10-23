@@ -178,3 +178,25 @@ def scheduler_mine(year, term):
 
     return flask.jsonify(
         helpers.get_user_scheduler_sections(username, year, term))
+
+
+@blueprint.route('/1/scheduler/edit_notes', methods=['POST'])
+def edit_notes():
+    username = flask.session.get('username')
+    if not username:
+        return flask.jsonify({
+            'success': False,
+            'message': 'Must be logged in to save'
+        })
+    helpers.edit_notes(username,
+                       flask.request.form.get('courseId'),
+                       flask.request.form.get('notes'))
+    return flask.jsonify({'success': True})
+
+
+@blueprint.route('/1/scheduler/notes/<int:course>')
+def get_notes(course):
+    username = flask.session.get('username')
+    if not username: return flask.jsonify('')
+
+    return flask.jsonify(helpers.get_notes(username, course) or '')
