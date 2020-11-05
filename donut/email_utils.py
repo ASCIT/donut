@@ -2,7 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-DOMAIN = "beta.donut.caltech.edu"
+DOMAIN = 'donut.caltech.edu'
 
 
 def send_email(to,
