@@ -74,18 +74,10 @@ CREATE TABLE scheduler_sections (
     user_id         INT      NOT NULL,
     course_id       INT      NOT NULL,
     section_number  TINYINT  NOT NULL,
+    notes           TEXT,
     PRIMARY KEY (user_id, course_id, section_number),
     FOREIGN KEY (user_id) REFERENCES members(user_id),
     FOREIGN KEY (course_id, section_number)
         REFERENCES sections(course_id, section_number)
         ON DELETE CASCADE
 );
-
-CREATE TABLE scheduler_notes (
-    user_id         INT      NOT NULL,
-    course_id       INT      NOT NULL,
-    notes	    TEXT     NOT NULL,
-    PRIMARY KEY (user_id, course_id),
-    FOREIGN KEY (user_id) REFERENCES members(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
-)

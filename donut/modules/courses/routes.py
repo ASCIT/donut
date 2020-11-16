@@ -188,15 +188,21 @@ def edit_notes():
             'success': False,
             'message': 'Must be logged in to save'
         })
-    helpers.edit_notes(username,
-                       flask.request.form.get('courseId'),
-                       flask.request.form.get('notes'))
+
+    data = flask.request.get_json(force=True)
+    course = data.get('course')
+    section = data.get('section')
+    notes = data.get('notes')
+    if notes:
+        helpers.edit_notes(username, course, section, notes)
+    else:
+        helpers.delete_notes(username, course, section)
     return flask.jsonify({'success': True})
 
 
-@blueprint.route('/1/scheduler/notes/<int:course>')
-def get_notes(course):
+@blueprint.route('/1/scheduler/notes/<int:course>/section/<int:section>')
+def get_notes(course, section):
     username = flask.session.get('username')
-    if not username: return flask.jsonify('')
+    if not username: return flask.jsonify(None)
 
-    return flask.jsonify(helpers.get_notes(username, course) or '')
+    return flask.jsonify(helpers.get_notes(username, course, section))
