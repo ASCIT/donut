@@ -1,22 +1,28 @@
-<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div
+	class="modal fade"
+	id="modal"
+	tabindex="-1"
+	role="dialog"
+	aria-hidden="true"
+	data-backdrop="static"
+	data-keyboard="false"
+>
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button class="close" id="close-notes">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h5 class="modal-title" id="modalTitle"></h5>
+				<h5 id="modal-title"></h5>
 			</div>
 			<div class="modal-body">
-				<div id="viewNotes"></div>
-				<form id='postNotes'>
-					<input type="hidden" id="courseId" name="courseId">
-					<input type="hidden" id="courseNum" name="courseNum">
-					<textarea class="form-control" id="notes" name="notes" rows="10"></textarea>
-					<input class="btn btn-primary" type="submit" value="Save" />
-				</form>
-				<div class="modal-footer">
-					<button class="btn btn-primary ml-auto" id="editButton">Edit</button>
+				<div id="old-notes">
+					<div id="notes-display"></div>
+					<button class="btn btn-primary" id="edit-notes">Edit</button>
+				</div>
+				<div id="new-notes">
+					<textarea class="form-control" id="notes-input" rows="10"></textarea>
+					<button class="btn btn-primary" id="save-notes">Save</button>
 				</div>
 			</div>
 		</div>

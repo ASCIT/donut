@@ -283,17 +283,10 @@
                 }),
               // edit button
               $('<button>')
-                .attr({
-                  type: 'button',
-                  course: course.id,
-                  section: sectionNumber,
-                  class: 'btn edit',
-                  "data-toggle": 'modal',
-                  "data-target": '#modal',
-                  "data-course-id": course.id,
-                  "data-course-num": course.number
-                })
+                .attr('type', 'button')
+                .addClass('btn edit')
                 .append($('<span>').addClass('glyphicon glyphicon-edit'))
+                .click(function() { displayNotes(course, sectionNumber) })
             )
           dayLists.eq(weekday).append(intervalItem)
           intervals.push(intervalItem)
@@ -496,55 +489,31 @@
     function displayUnits() {
       units.text('Units: ' + String(coursesUnits))
     }
-    $('#modal').on('show.bs.modal', function(e) {
-      var courseNum = $(e.relatedTarget).data("courseNum");
-      var courseId = $(e.relatedTarget).data("courseId");
-      displayNotes(courseNum, courseId);
-    });
-    $('#editButton').click(function() {
-      $('#notes').val($('#notes').text());
-      $('#postNotes').show();
-      $('#viewNotes').hide();
-      $('#editButton').hide();
-    });
-    $('#postNotes').submit(function(e) {
-      e.preventDefault();
-      $.ajax({
-        url: '/1/scheduler/edit_notes',
-        type: 'POST',
-        data:$('#postNotes').serialize(),
-        success: function(data) {
-          if (data.success) {
-            displayNotes($('#courseNum').val(), $('#courseId').val());
-            displayWarning('');
-          }
-          else displayWarning('Failed to save notes: ' + data.message);
-        },
-        error: function() {
-          displayWarning('Failed to save notes')
-        }
-      });
-    });
-    function displayNotes(courseNum, courseId) {
-      $('#courseId').val(courseId);
-      $('#courseNum').val(courseNum);
-      $('#modalTitle').text(courseNum);
+
+    var notesCourse, notesSection
+    function displayNotes(course, sectionNumber) {
+      notesCourse = course.id
+      notesSection = sectionNumber
+      $('#modal-title').text(course.number)
+      $('#modal').modal('show')
+      $('#notes-display').text('Loading...')
+      $('#old-notes').show()
+      $('#new-notes').hide()
       $.ajax({
         type: 'GET',
-        url: '/1/scheduler/notes/' + courseId,
+        url: '/1/scheduler/notes/' + String(course.id) + '/section/' + String(sectionNumber),
         success: function(notes) {
-          $('#viewNotes').html(formatText(notes, 'p', '_blank'));
-          $('#viewNotes').show();
-          $('#editButton').show();
-          $('#postNotes').hide();
-          $('#notes').text(notes);
-          displayWarning('');
+          if (notes === null) notes = ''
+          $('#notes-display').html(formatText(notes, 'p', '_blank'))
+          $('#notes-input').val(notes)
+          displayWarning('')
         },
         error: function() {
           displayWarning('Failed to load notes')
         }
       })
     }
+
     $(document).ready(function() {
       termSelect = $('#term').change(loadTerm)
       coursesList = $('#courses')
@@ -553,6 +522,41 @@
       })
       dayLists = $('.day')
       units = $('#units')
+
+      $('#edit-notes').click(function() {
+        $('#old-notes').hide()
+        $('#new-notes').show()
+        $('#notes-input').focus()
+      })
+      $('#save-notes').click(function() {
+        var notes = $('#notes-input').val()
+        $.ajax({
+          url: '/1/scheduler/edit_notes',
+          type: 'POST',
+          data: JSON.stringify({
+            course: notesCourse,
+            section: notesSection,
+            notes: notes
+          }),
+          success: function(data) {
+            if (data.success) {
+              $('#notes-display').html(formatText(notes, 'p', '_blank'))
+              $('#new-notes').hide()
+              $('#old-notes').show()
+              displayWarning('')
+            }
+            else displayWarning('Failed to save notes: ' + data.message)
+          },
+          error: function() {
+            displayWarning('Failed to save notes')
+          }
+        })
+      })
+      $('#close-notes').click(function() {
+        if ($('#new-notes').is(':hidden') || confirm('Discard changes to notes?')) {
+          $('#modal').modal('hide')
+        }
+      })
 
       loadTerm()
     })
