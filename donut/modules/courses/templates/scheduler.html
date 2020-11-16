@@ -264,6 +264,12 @@
                 $('<strong>').text(course.number),
                 $('<div>').text(sectionNumber)
               ),
+              // edit button
+              $('<button>')
+                .attr('type', 'button')
+                .addClass('btn edit')
+                .append($('<span>').addClass('glyphicon glyphicon-edit'))
+                .click(function() { displayNotes(course, sectionNumber) }),
               // delete button
               $('<button>')
                 .attr({
@@ -280,13 +286,7 @@
                   fitIntervals()
                   dropSection(course, sectionNumber)
                   e.stopPropagation() // prevent section dropdowns from closing
-                }),
-              // edit button
-              $('<button>')
-                .attr('type', 'button')
-                .addClass('btn edit')
-                .append($('<span>').addClass('glyphicon glyphicon-edit'))
-                .click(function() { displayNotes(course, sectionNumber) })
+                })
             )
           dayLists.eq(weekday).append(intervalItem)
           intervals.push(intervalItem)
