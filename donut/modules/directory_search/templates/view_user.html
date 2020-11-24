@@ -43,6 +43,13 @@
 							{{ user['gender_string'] }}
 						</li>
 					{% endif %}
+					<!-- TODO: remove timezone after COVID -->
+					{% if user['timezone'] and 'timezone' not in hidden_fields %}
+                                                <li class='list-group-item'>
+                                                        <strong>Timezone</strong>:
+							GMT{% if user['timezone'] >= 0 %}+{% endif %}{{ user['timezone'] }}:00
+                                                </li>
+                                        {% endif %}
 					{% if user['email'] and 'email' not in hidden_fields %}
 						<li class='list-group-item'>
 							<strong>Email</strong>:

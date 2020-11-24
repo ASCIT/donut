@@ -49,6 +49,31 @@
 					{% endfor %}
 				</select>
 			</div>
+			<!-- TODO: remove timezone after COVID -->
+			<div class='form-group'>
+				<label for='timezone_from'>Timezone between</label>
+				<div class='row'>
+					<div class="col-xs-2">
+						<select class='form-control' id='timezone_from' name='timezone_from'>
+							<option value=''>Any</option>
+							{% for i in range(-12, 15) %}
+								<option value={{ i }}>GMT{% if i>=0 %}+{% endif %}{{ i }}:00</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-xs-1">
+						<label for='timezone_to'>and</label>
+					</div>
+					<div class="col-xs-2">
+						<select class='form-control' id='timezone_to' name='timezone_to'>
+							<option value=''>Any</option>
+							{% for i in range(-12, 15) %}
+								<option value={{ i }}>GMT{% if i>=0 %}+{% endif %}{{ i }}:00</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+                        </div>
 			<div class='form-group'>
 				<label for='username'>Username</label>
 				<input class='form-control' id='username' name='username' />

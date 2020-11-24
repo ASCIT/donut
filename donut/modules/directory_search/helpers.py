@@ -24,12 +24,13 @@ def get_hidden_fields(viewer_name, viewee_id):
 
 
 def get_user(user_id):
+    # TODO: remove timezone after COVID
     query = """
         SELECT
             uid, first_name, middle_name, last_name, preferred_name,
             gender, gender_custom, birthday, entry_year, graduation_year,
             msc, building_name, room, address, city, state, zip, country,
-            email, phone, username, extension IS NOT NULL as image
+            email, phone, username, timezone, extension IS NOT NULL as image
         FROM members
             NATURAL LEFT JOIN buildings
             NATURAL LEFT JOIN images
@@ -160,6 +161,13 @@ def execute_search(**kwargs):
     if kwargs['grad_year']:
         query += ' AND graduation_year = %s'
         substitution_arguments.append(kwargs['grad_year'])
+    # TODO: remove timezone after COVID
+    if kwargs['tz_from']:
+        query += ' AND timezone >= %s'
+        substitution_arguments.append(kwargs['tz_from'])
+    if kwargs['tz_to']:
+        query += ' AND timezone <= %s'
+        substitution_arguments.append(kwargs['tz_to'])
     if 'offset' in kwargs:
         query += ' ORDER BY LOWER(last_name), LOWER(full_name) LIMIT %s, %s'
         substitution_arguments.append(kwargs['offset'])

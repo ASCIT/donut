@@ -38,6 +38,20 @@
 		</form>
 		<br />
 
+		<!-- TODO: remove timezone after COVID -->
+		Set time zone:
+                <form action='{{ url_for(".set_timezone") }}' method='POST'>
+                        <div class='input-group'>
+				<select class='form-control' name='timezone' id='timezone'>
+					<option value=''>None</option>
+				</select>
+                                <span class='input-group-btn'>
+                                        <input type='submit' class='btn btn-primary' value='Save' />
+                                </span>
+                        </div>
+                </form>
+		<br />
+
 		Set email:
 		<div id='email-warning'>
 			(We recommend using your Caltech email until graduation.
@@ -62,11 +76,26 @@
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
+	<script src="https://momentjs.com/downloads/moment.js"></script>
+	<script src="https://momentjs.com/downloads/moment-timezone-with-data.js"></script>
 	<script>
+		// TODO: remove timezone after COVID
+		function loadTimezone() {
+			myTz = Math.floor(new Date().getTimezoneOffset() / -60)
+			myTz = (myTz < 0 ? '' : '+') + myTz
+			$('#timezone').append($('<option>').val(myTz).text('Use my timezone: GMT'+myTz+':00'))
+			names = moment.tz.names().sort()
+			names.forEach(function(name) {
+				offset = moment.tz(name).format('Z')
+				$('#timezone').append($('<option>').val(offset.substr(0,3)).text('(GMT'+offset+') '+name))
+			})
+		}
+
 		$(document).ready(function() {
 			var imageInput = $('form#image input')
 			var imageForm = $('form#image')
 			imageInput.change(function() { imageForm.submit() })
+			loadTimezone()
 		})
 	</script>
 {% endblock %}
