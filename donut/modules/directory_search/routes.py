@@ -32,13 +32,13 @@ def view_user(user_id):
     user = helpers.get_user(user_id)
     username = flask.session.get('username')
     hidden_fields = helpers.get_hidden_fields(username, user_id)
-    user = {key: value for key, value in user.items() if key not in hidden_fields}
+    user = {
+        key: value
+        for key, value in user.items() if key not in hidden_fields
+    }
     is_me = username is not None and get_user_id(username) == user_id
     return flask.render_template(
-        'view_user.html',
-        user=user,
-        is_me=is_me,
-        user_id=user_id)
+        'view_user.html', user=user, is_me=is_me, user_id=user_id)
 
 
 @blueprint.route('/1/users/<int:user_id>/image')

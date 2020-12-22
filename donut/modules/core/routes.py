@@ -136,10 +136,7 @@ def set_email():
 def set_timezone():
     user_id = auth_utils.get_user_id(flask.session['username'])
     timezone = flask.request.form['timezone']
-    if timezone == '':
-        timezone = None
-    else:
-        timezone = int(timezone)
+    timezone = int(timezone) if timezone else None
     helpers.set_member_field(user_id, 'timezone', timezone)
     return redirect(
         flask.url_for('directory_search.view_user', user_id=user_id))
