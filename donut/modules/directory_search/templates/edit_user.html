@@ -40,16 +40,16 @@
 
 		<!-- TODO: remove timezone after COVID -->
 		Set time zone:
-                <form action='{{ url_for(".set_timezone") }}' method='POST'>
-                        <div class='input-group'>
+		<form action='{{ url_for(".set_timezone") }}' method='POST'>
+			<div class='input-group'>
 				<select class='form-control' name='timezone' id='timezone'>
 					<option value=''>None</option>
 				</select>
-                                <span class='input-group-btn'>
-                                        <input type='submit' class='btn btn-primary' value='Save' />
-                                </span>
-                        </div>
-                </form>
+				<span class='input-group-btn'>
+					<input type='submit' class='btn btn-primary' value='Save' />
+				</span>
+			</div>
+		</form>
 		<br />
 
 		Set email:
@@ -77,25 +77,51 @@
 {% block scripts %}
 	{{ super() }}
 	<script src="https://momentjs.com/downloads/moment.js"></script>
-	<script src="https://momentjs.com/downloads/moment-timezone-with-data.js"></script>
+	<script src="https://momentjs.com/downloads/moment-timezone-with-data-10-year-range.js"></script>
+	<script src='{{ url_for("static", filename="js/time.js") }}'></script>
 	<script>
 		// TODO: remove timezone after COVID
-		function loadTimezone() {
-			myTz = Math.floor(new Date().getTimezoneOffset() / -60)
-			myTz = (myTz < 0 ? '' : '+') + myTz
-			$('#timezone').append($('<option>').val(myTz).text('Use my timezone: GMT'+myTz+':00'))
-			names = moment.tz.names().sort()
-			names.forEach(function(name) {
-				offset = moment.tz(name).format('Z')
-				$('#timezone').append($('<option>').val(offset.substr(0,3)).text('(GMT'+offset+') '+name))
+		var ETC_TIMEZONE_PREFIX = 'Etc/'
+		function loadTimezones(timezoneSelect) {
+			var now = new Date()
+			var timezoneOffset = -now.getTimezoneOffset()
+			timezoneSelect.append(
+				$('<option>')
+					.val(timezoneOffset)
+					.text('Use my timezone: ' + timezoneName(timezoneOffset))
+			)
+			var timezoneNames = {}
+			moment.tz.names().forEach(function(timezoneName) {
+				if (timezoneName.slice(0, ETC_TIMEZONE_PREFIX.length) === ETC_TIMEZONE_PREFIX) {
+					return
+				}
+
+				var zone = moment.tz.zone(timezoneName)
+				var zoneOffset = -zone.utcOffset(now)
+				var currentNames = timezoneNames[zoneOffset]
+				if (!currentNames) {
+					currentNames = timezoneNames[zoneOffset] = []
+				}
+				currentNames.push(timezoneName)
 			})
+			Object.keys(timezoneNames)
+				.map(Number)
+				.sort(function(a, b) { return a - b })
+				.forEach(function(offset) {
+					var offsetName = timezoneName(offset)
+					timezoneNames[offset].forEach(function(name) {
+						timezoneSelect.append(
+							$('<option>').val(offset).text(name + ' (' + offsetName + ')')
+						)
+					})
+				})
 		}
 
 		$(document).ready(function() {
 			var imageInput = $('form#image input')
 			var imageForm = $('form#image')
 			imageInput.change(function() { imageForm.submit() })
-			loadTimezone()
+			loadTimezones($('#timezone'))
 		})
 	</script>
 {% endblock %}

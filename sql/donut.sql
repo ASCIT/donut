@@ -52,7 +52,7 @@ CREATE TABLE members (
     state              VARCHAR(64)  DEFAULT NULL,
     zip                VARCHAR(10)  DEFAULT NULL,
     country            VARCHAR(64)  DEFAULT NULL,
-    timezone           INT          DEFAULT NULL, -- Offset from GMT
+    timezone           INT          DEFAULT NULL, -- Offset from GMT in minutes
                                                   -- TODO: remove after COVID
     create_account_key CHAR(32)     DEFAULT NULL,
     PRIMARY KEY (user_id),

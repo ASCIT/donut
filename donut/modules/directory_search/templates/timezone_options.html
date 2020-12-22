@@ -1,0 +1,3 @@
+{% for i in range(-11, 15) %}
+	<option value={{ i * 60 }}>GMT{% if i != 0 %}{% if i > 0 %}+{% endif %}{{ i }}:00{% endif %}</option>
+{% endfor %}
