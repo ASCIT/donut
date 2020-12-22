@@ -167,14 +167,14 @@
 		}
 	</style>
 {% endblock %}
-{% block scripts %}
-	{{ super() }}
-	<script src='{{ url_for("static", filename="js/time.js") }}'></script>
-	<script>
-		{% if user.get('timezone') %}
+{% if user and user.get('timezone') %}
+	{% block scripts %}
+		{{ super() }}
+		<script src='{{ url_for("static", filename="js/time.js") }}'></script>
+		<script>
 			$(document).ready(function() {
 				$('#timezone').text(timezoneName({{ user['timezone'] }}))
 			})
-		{% endif %}
-	</script>
-{% endblock %}
+		</script>
+	{% endblock %}
+{% endif %}
