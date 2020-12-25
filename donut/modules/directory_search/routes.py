@@ -29,17 +29,17 @@ def view_user(user_id):
     if not is_caltech_user():
         return login_redirect()
 
+    username = flask.session.get('username')
     user = helpers.get_user(user_id)
-    is_me = 'username' in flask.session and get_user_id(
-        flask.session['username']) == user_id
-    hidden_fields = helpers.get_hidden_fields(
-        flask.session.get('username'), user_id)
+    if user is not None:
+        hidden_fields = helpers.get_hidden_fields(username, user_id)
+        user = {
+            key: value
+            for key, value in user.items() if key not in hidden_fields
+        }
+    is_me = username is not None and get_user_id(username) == user_id
     return flask.render_template(
-        'view_user.html',
-        user=user,
-        is_me=is_me,
-        user_id=user_id,
-        hidden_fields=hidden_fields)
+        'view_user.html', user=user, is_me=is_me, user_id=user_id)
 
 
 @blueprint.route('/1/users/<int:user_id>/image')
@@ -99,6 +99,11 @@ def search():
         grad_year = int(grad_year)
     else:
         grad_year = None
+    # TODO: remove timezone after COVID
+    tz_from = form.get('timezone_from')
+    tz_to = form.get('timezone_to')
+    tz_from = int(tz_from) if tz_from else None
+    tz_to = int(tz_to) if tz_to else None
     offset = (page - 1) * per_page
     args = dict(
         name=name,
@@ -107,7 +112,9 @@ def search():
         building_id=building_id,
         grad_year=grad_year,
         username=form['username'],
-        email=form['email'])
+        email=form['email'],
+        tz_from=tz_from,
+        tz_to=tz_to)
     if flask.request.method == 'POST':
         total = helpers.execute_search(**args)
     offset = (page - 1) * per_page

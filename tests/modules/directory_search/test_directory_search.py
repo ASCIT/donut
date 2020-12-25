@@ -85,6 +85,8 @@ def test_get_user(client):
         'username':
         'csander',
         'zip':
+        None,
+        'timezone':
         None
     }
     user_data2 = helpers.get_user(helpers.get_user_id('dqu'))

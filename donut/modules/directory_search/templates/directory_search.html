@@ -49,6 +49,16 @@
 					{% endfor %}
 				</select>
 			</div>
+			<!-- TODO: remove timezone after COVID -->
+			<div class='form-group'>
+				<label for='timezone_from'>Timezone</label>
+				<div class='input-group'>
+					<span class='input-group-addon'>Between</span>
+					<select class='form-control' id='timezone_from' name='timezone_from'></select>
+					<span class='input-group-addon'>and</span>
+					<select class='form-control' id='timezone_to' name='timezone_to'></select>
+				</div>
+			</div>
 			<div class='form-group'>
 				<label for='username'>Username</label>
 				<input class='form-control' id='username' name='username' />
@@ -70,7 +80,18 @@
 {% block scripts %}
 	{{ super() }}
 	<script src='{{ url_for("static", filename="js/search-directory.js") }}'></script>
+	<script src='{{ url_for("static", filename="js/time.js") }}'></script>
 	<script>
+		function addTimezoneOptions(timezoneSelect) {
+			timezoneSelect.append($('<option>').val('').text('any'))
+			for (var hourOffset = -11; hourOffset <= 14; hourOffset++) {
+				var timezoneOffset = hourOffset * 60
+				timezoneSelect.append(
+					$('<option>').val(timezoneOffset).text(timezoneName(timezoneOffset))
+				)
+			}
+		}
+
 		$(document).ready(function() {
 			var nameInput = $('input#name'), nameSearch = $('ul#name-search')
 			attachDirectorySearch(nameInput, nameSearch, function(user) {
@@ -79,6 +100,9 @@
 				)
 			})
 			$(document).click(function() { nameSearch.empty() })
+
+			addTimezoneOptions($('#timezone_from'))
+			addTimezoneOptions($('#timezone_to'))
 		})
 	</script>
 {% endblock %}

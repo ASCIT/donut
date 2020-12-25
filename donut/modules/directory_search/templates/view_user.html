@@ -19,74 +19,81 @@
 				{% endif %}
 
 				<ul class='list-group list-group-root'>
-					{% if user['username'] and 'username' not in hidden_fields %}
+					{% if user.get('username') %}
 						<li class='list-group-item'>
 							<strong>Username</strong>:
 							{{ user['username'] }}
 						</li>
 					{% endif %}
-					{% if 'uid' not in hidden_fields %}
+					{% if user.get('uid') %}
 						<li class='list-group-item'>
 							<strong>UID</strong>:
 							{{ user['uid'] }}
 						</li>
 					{% endif %}
-					{% if user['birthday'] and 'birthday' not in hidden_fields %}
+					{% if user.get('birthday') %}
 						<li class='list-group-item'>
 							<strong>Birthday</strong>:
 							{{ user['birthday'].strftime('%b %-d, %Y') }}
 						</li>
 					{% endif %}
-					{% if 'gender_string' in user and 'gender_string' not in hidden_fields %}
+					{% if user.get('gender_string') %}
 						<li class='list-group-item'>
 							<strong>Gender</strong>:
 							{{ user['gender_string'] }}
 						</li>
 					{% endif %}
-					{% if user['email'] and 'email' not in hidden_fields %}
+					<!-- TODO: remove timezone after COVID -->
+					{% if user.get('timezone') %}
+						<li class='list-group-item'>
+							<strong>Timezone</strong>:
+							<span id='timezone'></span>
+						</li>
+					{% endif %}
+					{% if user.get('email') %}
 						<li class='list-group-item'>
 							<strong>Email</strong>:
 							<a href='mailto:{{ user["email"] }}'>{{ user['email'] }}</a>
 						</li>
 					{% endif %}
-					{% if 'phone_string' in user and 'phone_string' not in hidden_fields %}
+					{% if user.get('phone_string') %}
 						<li class='list-group-item'>
 							<strong>Phone</strong>:
 							{{ user['phone_string'] }}
 						</li>
 					{% endif %}
-					{% if user['msc'] and 'msc' not in hidden_fields %}
+					{% if user.get('msc') %}
 						<li class='list-group-item'>
 							<strong>Mail Stop Code (MSC)</strong>:
 							{{ user['msc'] }}
 						</li>
 					{% endif %}
-					{% if user['building_name'] and 'building_name' not in hidden_fields %}
+					{% if user.get('building_name') %}
 						<li class='list-group-item'>
 							<strong>Residence</strong>:
 							{{ user['building_name'] }}
 							{{ user['room'] }}
 						</li>
 					{% endif %}
-					{% if user['hometown_string'] and 'hometown_string' not in hidden_fields %}
+					{% if user.get('hometown_string') %}
 						<li class='list-group-item'>
 							<strong>Hometown</strong>:
 							{{ user['hometown_string'] }}
 						</li>
 					{% endif %}
-					{% if user['entry_year'] and 'entry_year' not in hidden_fields %}
+					{% if user.get('entry_year') %}
 						<li class='list-group-item'>
 							<strong>Matriculation</strong>:
 							{{ user['entry_year'] }}
 						</li>
 					{% endif %}
-					{% if user['graduation_year'] and 'graduation_year' not in hidden_fields %}
+					{% if user.get('graduation_year') %}
 						<li class='list-group-item'>
 							<strong>Graduation</strong>:
 							{{ user['graduation_year'] }}
 						</li>
 					{% endif %}
-					{% if user['options'] and 'options' not in hidden_fields %}
+					{% if user.get('options') %}
 						<li class='list-group-item'>
 							<strong>Option{% if user['options']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -98,7 +105,7 @@
 							{% endfor %}
 						</ul>
 					{% endif %}
-					{% if user['houses'] and 'houses' not in hidden_fields %}
+					{% if user.get('houses') %}
 						<li class='list-group-item'>
 							<strong>House{% if user['houses']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -110,7 +117,7 @@
 							{% endfor %}
 						</ul>
 					{% endif %}
-					{% if user['positions'] and 'positions' not in hidden_fields %}
+					{% if user.get('positions') %}
 						<li class='list-group-item'>
 							<strong>Position{% if user['positions']|length > 1 %}s{% endif %}</strong>:
 						</li>
@@ -124,7 +131,7 @@
 					{% endif %}
 				</ul>
 			</div>
-			{% if user['image'] and 'image' not in hidden_fields %}
+			{% if user.get('image') %}
 				<div class='col-md-4'>
 					<img src='{{ url_for("directory_search.get_image", user_id=user_id) }}' style='max-width: 200px; max-height: 250px' />
 				</div>
@@ -160,3 +167,14 @@
 		}
 	</style>
 {% endblock %}
+{% if user and user.get('timezone') %}
+	{% block scripts %}
+		{{ super() }}
+		<script src='{{ url_for("static", filename="js/time.js") }}'></script>
+		<script>
+			$(document).ready(function() {
+				$('#timezone').text(timezoneName({{ user['timezone'] }}))
+			})
+		</script>
+	{% endblock %}
+{% endif %}
