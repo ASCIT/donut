@@ -100,10 +100,10 @@ def search():
     else:
         grad_year = None
     # TODO: remove timezone after COVID
-    tz_from = form.get('timezone_from')
-    tz_to = form.get('timezone_to')
-    tz_from = int(tz_from) if tz_from else None
-    tz_to = int(tz_to) if tz_to else None
+    timezone_from = form.get('timezone_from')
+    timezone_to = form.get('timezone_to')
+    timezone_from = int(timezone_from) if timezone_from else None
+    timezone_to = int(timezone_to) if timezone_to else None
     offset = (page - 1) * per_page
     args = dict(
         name=name,
@@ -113,8 +113,8 @@ def search():
         grad_year=grad_year,
         username=form['username'],
         email=form['email'],
-        tz_from=tz_from,
-        tz_to=tz_to)
+        timezone_from=timezone_from,
+        timezone_to=timezone_to)
     if flask.request.method == 'POST':
         total = helpers.execute_search(**args)
     offset = (page - 1) * per_page

@@ -162,12 +162,12 @@ def execute_search(**kwargs):
         query += ' AND graduation_year = %s'
         substitution_arguments.append(kwargs['grad_year'])
     # TODO: remove timezone after COVID
-    if kwargs['tz_from']:
+    if kwargs['timezone_from']:
         query += ' AND timezone >= %s'
-        substitution_arguments.append(kwargs['tz_from'])
-    if kwargs['tz_to']:
+        substitution_arguments.append(kwargs['timezone_from'])
+    if kwargs['timezone_to']:
         query += ' AND timezone <= %s'
-        substitution_arguments.append(kwargs['tz_to'])
+        substitution_arguments.append(kwargs['timezone_to'])
     if 'offset' in kwargs:
         query += ' ORDER BY LOWER(last_name), LOWER(full_name) LIMIT %s, %s'
         substitution_arguments.append(kwargs['offset'])
