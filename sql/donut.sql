@@ -39,8 +39,7 @@ CREATE TABLE members (
     phone              VARCHAR(64)  DEFAULT NULL,
     gender             TINYINT      DEFAULT NULL, -- Numerical code that will be
                                                   -- stored in code
-    gender_custom      VARCHAR(32)  DEFAULT NULL, -- TODO: Implement showing
-                                                  -- custom gender options
+    gender_custom      VARCHAR(32)  DEFAULT NULL,
     birthday           DATE         DEFAULT NULL,
     entry_year         YEAR(4)      DEFAULT NULL,
     graduation_year    YEAR(4)      DEFAULT NULL,
@@ -118,9 +117,6 @@ CREATE TABLE groups (
     visible                 BOOLEAN      DEFAULT FALSE, -- Controls if anyone
                                                         -- anyone can see this
                                                         -- group
-    admin_control_members   BOOLEAN      DEFAULT TRUE,  -- Toggles whether or
-                                                        -- not admins control
-                                                        -- Group membership
     PRIMARY KEY (group_id),
     UNIQUE (group_name)
 );
