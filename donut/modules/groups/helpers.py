@@ -19,7 +19,7 @@ def get_group_list_data(fields=None, attrs={}):
     """
     all_returnable_fields = [
         "group_id", "group_name", "group_desc", "type", "anyone_can_send",
-        "newsgroups", "visible", "admin_control_members"
+        "newsgroups", "visible"
     ]
     default_fields = ["group_id", "group_name", "group_desc", "type"]
     if fields == None:
@@ -123,7 +123,7 @@ def get_group_data(group_id, fields=None):
     """
     all_returnable_fields = [
         "group_id", "group_name", "group_desc", "type", "anyone_can_send",
-        "newsgroups", "visible", "admin_control_members"
+        "newsgroups", "visible"
     ]
     default_fields = ["group_id", "group_name", "group_desc", "type"]
     if fields is None:
@@ -253,8 +253,7 @@ def create_group(group_name,
                  group_type="",
                  newsgroups=False,
                  anyone_can_send=False,
-                 visible=False,
-                 admin_control_members=True):
+                 visible=False):
     """
     Creates a group with the given group_id, group name and other specifications
 
@@ -265,15 +264,15 @@ def create_group(group_name,
         newgroups: Toggles if group is a news group
         anyone_can_send: Toggles if anyone can send emails to this group
         visible: Toggles if the group is visible
-        admin_control_members: toggles if administrator can control membership
     """
-    query = """INSERT INTO groups (group_name, group_desc, type,
-        newsgroups, anyone_can_send, visible,
-        admin_control_members) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+    query = """
+        INSERT INTO groups (
+            group_name, group_desc, type, newsgroups, anyone_can_send, visible
+        ) VALUES (%s, %s, %s, %s, %s, %s)
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query,
-                       (group_name, group_desc, group_type, newsgroups,
-                        anyone_can_send, visible, admin_control_members))
+        cursor.execute(query, (group_name, group_desc, group_type, newsgroups,
+                               anyone_can_send, visible))
         new_group_id = cursor.lastrowid
     add_position(new_group_id, "Member")
     return new_group_id

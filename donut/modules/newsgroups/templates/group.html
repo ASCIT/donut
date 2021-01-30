@@ -17,14 +17,11 @@
 				<ul style="list-style-type:disc;">
 					<li>
 						{% if group['anyone_can_send'] %}
-							Anyone can post to this group. 
+							Anyone can post to this group.
 						{% else %}
-							Posting is restricted to authorized members. 
+							Posting is restricted to authorized members.
 						{% endif %}
 					</li>
-					{% if group['admin_control_members'] %}
-						<li> Administrators control the membership of this group. </li>
-					{% endif %}
 					{% if group['visible'] %}
 						<li> Anyone can learn that this group exists. </li>
 					{% endif %}
@@ -72,13 +69,13 @@
 					<div class="panel panel-default">
 						<div class="panel-heading">
 							<h4 class="panel-title">
-								<a data-toggle="collapse" href="#owners">Group Owners</a> 
+								<a data-toggle="collapse" href="#owners">Group Owners</a>
 							</h4>
 						</div>
 						<div id="owners" class="panel-body collapse">
 							{% for pos_name, pos_people in owners.items() %}
 								<h5> {{ pos_name }}: </h5>
-								{% for person in pos_people %} 
+								{% for person in pos_people %}
 									<div>
 										<a href={{ url_for('directory_search.view_user', user_id=person.user_id) }}>{{ person.full_name }}</a>
 									</div>
