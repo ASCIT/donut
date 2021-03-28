@@ -59,3 +59,13 @@ To start the test site:
 python run_server.py -e dev -p 50XX
 ```
 You can visit the test site by going to [localhost:9000](http://localhost:9000) (or whichever port you decided to forward) in your local browser.
+
+# Development Workflow
+1. Create a new branch
+2. Create a PR
+3. After your PR approved and merged with `master`, you must refresh the server to update the site. After sshing, run 
+```
+cd /home/ascit/donut
+git pull
+sudo apachectl restart
+```
