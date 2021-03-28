@@ -2,6 +2,7 @@
 The repository for Donut. Written using Python/Flask and powered by MariaDB.
 
 # Setting up your environment
+- You must be on Caltech wifi or use a VPN (http://imss.sites.caltech.edu/services/wired-wireless-remote-access/Virtual-Private-Network-VPN)
 - Gain SSH access to the server:
 
    AWS Domain:
