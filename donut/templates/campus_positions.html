@@ -85,6 +85,16 @@
                 <div id="assignHold" class="tab-pane fade in">
                     <form id="holdForm">
                         <div class="form-group">
+                            <label class="required" for="groupIdHold">Group:</label>
+                            <select
+                                class="form-control"
+                                id="groupIdHold"
+                                onchange="populateAddPositions()"
+                            >
+                                <option>Pick a Group</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label class="required" for="posIdHold">Position:</label>
                             <select class="form-control" id="posIdHold">
                                 <option>Pick a Position</option>
@@ -113,8 +123,24 @@
                 <div id="removeHold" class="tab-pane fade in">
                     <form id="removeHoldForm">
                         <div class="form-group">
-                            <label class="required" for="posHold">Position Holder:</label>
-                            <select class="form-control" id="posHold">
+                            <label class="required" for="groupIdHolder">Group:</label>
+                            <select
+                                class="form-control"
+                                id="groupIdHolder"
+                                onchange="populateRemovePositions()"
+                            >
+                                <option>Pick a Group</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required" for="posIdHolder">Position:</label>
+                            <select class="form-control" id="posIdHolder" onchange="populateHolders()">
+                                <option>Pick a Position</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required" for="holdId">Position Holder:</label>
+                            <select class="form-control" id="holdId">
                                 <option>Pick a Position Holder</option>
                             </select>
                         </div>
