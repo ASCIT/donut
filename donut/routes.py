@@ -4,7 +4,7 @@ from donut import app
 from donut.auth_utils import get_user_id, is_admin
 from donut.constants import CONTACTS
 from donut.modules.core import helpers
-from donut.modules import groups
+import donut.modules.groups.helpers as groups_helpers
 
 
 @app.route('/')
@@ -25,14 +25,23 @@ def campus_positions():
     also collect the total list of positions and pass it in'''
     approved_group_ids = []
     approved_group_names = []
-    username = flask.session.get('username')
-    if username:
-        user_id = get_user_id(username)
-        for group in helpers.get_group_list_of_member(user_id):
-            if group["control"]:
-                approved_group_ids.append(group["group_id"])
-                approved_group_names.append(group["group_name"])
-    all_positions = groups.helpers.get_position_data(
+
+    def approve_group(group):
+        approved_group_ids.append(group['group_id'])
+        approved_group_names.append(group['group_name'])
+
+    if is_admin():
+        groups = groups_helpers.get_group_list_data(('group_id', 'group_name'))
+        for group in groups:
+            approve_group(group)
+    else:
+        username = flask.session.get('username')
+        if username:
+            user_id = get_user_id(username)
+            for group in helpers.get_group_list_of_member(user_id):
+                if group["control"]:
+                    approve_group(group)
+    all_positions = groups_helpers.get_position_data(
         include_house_and_ug=False, order_by=("group_name", "pos_name"))
     return flask.render_template(
         'campus_positions.html',

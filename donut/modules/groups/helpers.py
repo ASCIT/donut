@@ -1,5 +1,6 @@
 import flask
 import pymysql.cursors
+from donut.auth_utils import is_admin
 from donut.modules.core import helpers as core
 
 
@@ -78,8 +79,9 @@ def get_position_holders(pos_id):
 
     query = f"""
         SELECT DISTINCT user_id, full_name, hold_id, start_date, end_date
-        FROM current_position_holders NATURAL JOIN members_full_name
+        FROM current_position_holders NATURAL JOIN members NATURAL JOIN members_full_name
         WHERE pos_id IN ({', '.join('%s' for id in pos_id)})
+        ORDER BY last_name, full_name
     """
 
     with flask.g.pymysql_db.cursor() as cursor:
@@ -352,6 +354,9 @@ def can_control(user_id, group_id):
     """
     Returns whether the given user has control privileges for the given group.
     """
+    if is_admin():
+        return True
+
     query = """
         SELECT pos_id
         FROM current_position_holders NATURAL JOIN positions

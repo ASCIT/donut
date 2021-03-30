@@ -14,18 +14,20 @@ function init(approvedGroupIds, approvedGroupNames, allPos) {
     collectPositions();
     populateTables();
     populateAdminGroups(approvedGroupIds, approvedGroupNames);
-    populatePositions();
 }
 
 /*
  * Populates the groups list in the admin tab
  */
 function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
+    var selects = [$('#groupCreate'), $('#groupIdHold'), $('#groupIdHolder')];
     for (var i = 0; i < approvedGroupIds.length; i++) {
-        $('#groupCreate').append($('<option>')
-            .attr('value', approvedGroupIds[i])
-            .text(approvedGroupNames[i])
-        );
+        var groupId = approvedGroupIds[i];
+        var groupName = approvedGroupNames[i];
+        groupDict[groupId] = groupName;
+        selects.forEach(function(select) {
+            select.append($('<option>').attr('value', groupId).text(groupName));
+        });
     }
 }
 
@@ -34,15 +36,16 @@ function populateAdminGroups(approvedGroupIds, approvedGroupNames) {
  * an option to the group select.
  */
 function getGroupList() {
+    var addedGroups = {};
     allPositions.forEach(function(position) {
-        var id = position.group_id
-        if (!(id in groupDict)) {
-            groupDict[id] = position.group_name;
-            $('#groupSelect').append($('<option>')
-                .attr('value', id)
-                .text(position.group_name)
-            );
-        }
+        var id = position.group_id;
+        if (addedGroups[id]) return;
+
+        addedGroups[id] = true;
+        $('#groupSelect').append($('<option>')
+            .attr('value', id)
+            .text(position.group_name)
+        );
     })
 }
 
@@ -116,42 +119,55 @@ function changePosition(posName) {
     filterChange();
 }
 
-/*
- * Finds all positions in groups that user controls,
- * and adds them to the positions dropdown.
- * Also finds all holds for those positions and adds them to the holds dropdown.
- */
-function populatePositions() {
-    var posSelect = $('#posIdHold');
-    posSelect.children().slice(1).remove();
-    $('#posHold').children().slice(1).remove();
-    controlGroupIds.forEach(function(groupId) {
-        $.ajax({
-            url: '/1/groups/' + groupId + '/positions',
-            success: function(data) {
-                data.forEach(function(position) {
-                    var posId = position.pos_id;
-                    var posName = groupDict[groupId] + ' - ' + position.pos_name;
-                    posSelect.append(
-                        $('<option>').attr('value', posId).text(posName)
-                    );
-                    populateHolders(posId, posName);
-                });
-            }
-        });
+function populatePositions(groupSelect, posSelect) {
+    var children = posSelect.children();
+    children.slice(1).remove();
+    var groupId = groupSelect.val();
+    if (isNaN(groupId)) return;
+
+    var selectHeader = children.eq(0);
+    selectHeader.text('Loading...');
+    $.ajax({
+        url: '/1/groups/' + groupId + '/positions',
+        success: function(data) {
+            data.forEach(function(position) {
+                posSelect.append($('<option>')
+                    .attr('value', position.pos_id)
+                    .text(position.pos_name)
+                );
+            });
+            selectHeader.text('Pick a Position');
+        }
     });
 }
 
-function populateHolders(posId, posName) {
+function populateAddPositions() {
+    populatePositions($('#groupIdHold'), $('#posIdHold'));
+}
+
+function populateRemovePositions() {
+    populatePositions($('#groupIdHolder'), $('#posIdHolder'));
+}
+
+function populateHolders() {
+    var holderSelect = $('#holdId');
+    var children = holderSelect.children();
+    children.slice(1).remove();
+    var posId = $('#posIdHolder').val();
+    if (isNaN(posId)) return;
+
+    var selectHeader = children.eq(0);
+    selectHeader.text('Loading...');
     $.ajax({
         url: '/1/positions/' + posId,
         success: function(data) {
             data.forEach(function(holder) {
-                $('#posHold').append($('<option>')
+                holderSelect.append($('<option>')
                     .attr('value', holder.hold_id)
-                    .text(posName + ': ' + holder.full_name)
+                    .text(holder.full_name)
                 );
             });
+            selectHeader.text('Pick a Position Holder');
         }
     });
 }
@@ -165,7 +181,8 @@ function submitPosForm() {
             if (data.success) {
                 alert("Position created!");
                 $('#posCreate').trigger("reset");
-                populatePositions();
+                populateAddPositions();
+                populateRemovePositions();
             }
             else alert('Failed to add position: ' + data.message);
         }
@@ -187,7 +204,7 @@ function submitHoldForm() {
             if (data.success) {
                 alert("Assigned position!");
                 $('#holdForm').trigger("reset");
-                populatePositions();
+                populateAddPositions();
             }
             else alert('Failed to add position holder: ' + data.message);
         }
@@ -195,7 +212,7 @@ function submitHoldForm() {
 }
 
 function submitRemoveHoldForm() {
-    var holdId = $('#posHold').val();
+    var holdId = $('#holdId').val();
     if (isNaN(holdId)) {
         alert('Please select a position holder to remove');
         return;
@@ -208,7 +225,8 @@ function submitRemoveHoldForm() {
             if (data.success) {
                 alert('Removed position holder!');
                 $('#removeHoldForm').trigger("reset");
-                populatePositions();
+                populateRemovePositions();
+                populateHolders();
             }
             else alert('Failed to remove position holder: ' + data.message);
         }
