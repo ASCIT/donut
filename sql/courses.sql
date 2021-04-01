@@ -32,7 +32,8 @@ CREATE TABLE instructors (
 CREATE TABLE grades_types (
     grades_type_id  INT          NOT NULL AUTO_INCREMENT,
     grades_type     VARCHAR(30)  NOT NULL, -- e.g. PASS-FAIL
-    PRIMARY KEY (grades_type_id)
+    PRIMARY KEY (grades_type_id),
+    UNIQUE (grades_type)
 );
 
 CREATE TABLE sections (
