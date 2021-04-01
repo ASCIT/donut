@@ -108,15 +108,12 @@ CREATE TABLE groups (
     group_name              VARCHAR(64)  NOT NULL,
     group_desc              VARCHAR(255) DEFAULT NULL,
     type                    VARCHAR(255) NOT NULL,
-    newsgroups              BOOLEAN      DEFAULT FALSE, -- Controls if this is
-                                                        -- an email group
-    anyone_can_send         BOOLEAN      DEFAULT FALSE, -- This flag controls
-                                                        -- whether or not
-                                                        -- anyone can send
-                                                        -- emails to the group
-    visible                 BOOLEAN      DEFAULT FALSE, -- Controls if anyone
-                                                        -- anyone can see this
-                                                        -- group
+    -- Controls if this is an email group
+    newsgroups              BOOLEAN      NOT NULL DEFAULT FALSE,
+    -- Controls whether or not anyone can send emails to the group
+    anyone_can_send         BOOLEAN      NOT NULL DEFAULT FALSE,
+    -- Controls if everyone can see this group
+    visible                 BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (group_id),
     UNIQUE (group_name)
 );
@@ -128,7 +125,8 @@ CREATE TABLE newsgroup_posts (
     message                 TEXT         NOT NULL,
     post_as		    VARCHAR(32)  DEFAULT NULL,
     user_id                 INT          NOT NULL, -- Who sent this message
-    time_sent               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP, -- When were messages sent
+    -- When was the message sent
+    time_sent               TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (newsgroup_post_id),
     FOREIGN KEY (group_id) REFERENCES groups(group_id),
     FOREIGN KEY (user_id) REFERENCES members(user_id)
@@ -139,12 +137,12 @@ CREATE TABLE positions (
     group_id INT         NOT NULL,
     pos_id   INT         NOT NULL AUTO_INCREMENT,
     pos_name VARCHAR(64) NOT NULL,
-    send        BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
-                                       -- can send emails to group
-    control     BOOLEAN DEFAULT FALSE, -- Toggles whether or not this position
-                                       -- has admin control over group
-    receive     BOOLEAN DEFAULT TRUE,  -- Toggles if this position receives
-                                       -- emails from this group
+    -- Whether this position can send emails to group
+    send     BOOLEAN     NOT NULL DEFAULT FALSE,
+    -- Whether this position has admin control over group
+    control  BOOLEAN     NOT NULL DEFAULT FALSE,
+    -- Whether this position receives emails from this group
+    receive  BOOLEAN     NOT NULL DEFAULT TRUE,
 
     PRIMARY KEY (pos_id),
     FOREIGN KEY (group_id)
@@ -160,7 +158,8 @@ CREATE TABLE position_holders (
     user_id    INT  NOT NULL,
     start_date DATE DEFAULT NULL,
     end_date   DATE DEFAULT NULL,
-    subscribed BOOLEAN DEFAULT TRUE, -- Toggles whether user is subscribed to newsgroup
+    -- Whether user is subscribed to newsgroup
+    subscribed BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (hold_id),
     FOREIGN KEY (pos_id)
         REFERENCES positions(pos_id)
