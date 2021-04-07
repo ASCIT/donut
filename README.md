@@ -11,13 +11,12 @@ The repository for Donut. Written using Python/Flask and powered by MariaDB.
 
    2. Email the public key to the Directly Responsible Individual for the Getting Started section of the Site rewrite project.
 
-   3. Ask for the Domain. (i.e. `ec2-35-162-204-135.us-west-2.compute.amazonaws.com` for user `dqu`). The .ssh config file lets you configure a ssh connection so you don't have to
+   3. The .ssh config file lets you configure a ssh connection so you don't have to
    Example `~/.ssh/config` on your personal machine:
       ```
       Host donut-dqu
-          HostName ec2-35-162-204-135.us-west-2.compute.amazonaws.com
+          HostName donut.caltech.edu
           User dqu
-          IdentityFile ~/.ssh/id_rsa
           LocalForward 9000 127.0.0.1:50XX
               (Where 50XX is a unique port number on the server we should each use)
       ```
