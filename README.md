@@ -67,6 +67,6 @@ You can visit the test site by going to [localhost:9000](http://localhost:9000) 
 3. After your PR approved and merged with `master`, you must refresh the server to update the site. After sshing, run 
 ```
 cd /home/ascit/donut
-git pull
+sudo git pull
 sudo apachectl restart
 ```
