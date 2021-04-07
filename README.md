@@ -11,7 +11,7 @@ The repository for Donut. Written using Python/Flask and powered by MariaDB.
 
    2. Email the public key to the Directly Responsible Individual for the Getting Started section of the Site rewrite project.
 
-   3. The .ssh config file lets you configure a ssh connection so you don't have to
+   3. The .ssh config file lets you configure a ssh connection so you don't have to.
    Example `~/.ssh/config` on your personal machine:
       ```
       Host donut-dqu
@@ -23,8 +23,9 @@ The repository for Donut. Written using Python/Flask and powered by MariaDB.
    4. Now to SSH into the server, we can type from terminal `ssh donut-dqu`
 
 - Clone the repository:
-```
+```ssh
 git clone https://github.com/ASCIT/donut.git ~/donut
+# Or use git@github.com:ASCIT/donut.git to avoid having to type your password every time you push
 ```
 - Set up your virtualenv and install requirements in that virtualenv
 ```
@@ -37,8 +38,7 @@ This (see `Makefile`)
 
    To deactivate the virtualenv (which you shouldn't need to do), simply type `deactivate`
 
-
-- You will also need a separate config file that we will give you in order to access the database.
+- You also need a few config files which are omitted from the repository for security reasons: `donut/config.py` and `calendar.json`. Ask a Devteam member to copy these to your clone of the repository.
 
 # Testing
 ## Linting
