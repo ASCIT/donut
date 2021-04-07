@@ -38,8 +38,7 @@ This (see `Makefile`)
 
    To deactivate the virtualenv (which you shouldn't need to do), simply type `deactivate`
 
-
-- You will also need a separate config file that we will give you in order to access the database.
+- You also need a few config files which are omitted from the repository for security reasons: `donut/config.py` and `calendar.json`. Ask a Devteam member to copy these to your clone of the repository.
 
 # Testing
 ## Linting
