@@ -79,6 +79,9 @@ groups_permissions = {
     "Board of Control (BoC)": {
         True: [page_edit_permissions.ABLE, upload_permissions.ABLE]
     },
+    "Conduct Review Committee (CRC)": {
+        True: [page_edit_permissions.ABLE, upload_permissions.ABLE]
+    },
     "Avery":
     {
         # Edit Avery Calendar, Manage Avery members
