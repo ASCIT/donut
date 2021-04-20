@@ -4,7 +4,6 @@ Flask==1.0.2
 flask_bootstrap==3.3.7.0
 itsdangerous==0.24
 MarkupSafe==0.23
-py==1.8.1
 pytest==5.3.5
 pytest-cov==2.8.1
 six==1.9.0
