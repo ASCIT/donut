@@ -99,7 +99,7 @@ def set_image():
 def set_name():
     user_id = auth_utils.get_user_id(flask.session['username'])
     helpers.set_member_field(user_id, 'preferred_name',
-                             flask.request.form['name'])
+                             flask.request.form['name'] or None)
     return redirect(
         flask.url_for('directory_search.view_user', user_id=user_id))
 
@@ -108,7 +108,7 @@ def set_name():
 def set_gender():
     user_id = auth_utils.get_user_id(flask.session['username'])
     helpers.set_member_field(user_id, 'gender_custom',
-                             flask.request.form['gender'])
+                             flask.request.form['gender'] or None)
     return redirect(
         flask.url_for('directory_search.view_user', user_id=user_id))
 
