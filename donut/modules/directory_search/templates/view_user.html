@@ -5,8 +5,10 @@
 			No such user!
 		{% else %}
 			<h2 class="pos-left">
-				{{ user['preferred_name'] or user['first_name'] }}
-				{{ user['middle_name'] or '' }}
+				{{
+					user['preferred_name'] or
+					user['first_name'] + ' ' + (user['middle_name'] or '')
+				}}
 				{{ user['last_name'] }}
 			</h2>
 			{% if user['image'] %}
