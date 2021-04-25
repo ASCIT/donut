@@ -201,6 +201,8 @@ def validate_length(value, min_len=None, max_len=None, flash_errors=True):
     """
     Validates that the given string is between the length bounds (inclusive)
     """
+    if value is None:
+        return True
     length = len(value)
     if not ((min_len is None or min_len <= length) and
             (max_len is None or length <= max_len)):

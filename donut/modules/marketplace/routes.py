@@ -162,19 +162,6 @@ def sell():
     editing = state == 'edit'
     if saving:
         form = flask.request.form
-        validations = [
-            validate_exists(form, 'textbook_title') and
-            validate_length(form['textbook_title'], 0, 191),
-            validate_exists(form, 'textbook_author') and
-            validate_length(form['textbook_author'], 0, 191),
-            validate_exists(form, 'item_title') and
-            validate_length(form['item_title'], 0, 255),
-            validate_exists(form, 'item_condition') and
-            validate_length(form['item_condition'], 0, 20),
-        ]
-        if not all(validations):
-            flask.flash('Invalid form data')
-            return flask.redirect(flask.url_for('.sell'))
         item = {
             'cat_id': helpers.try_int(form.get('cat')),
             'textbook_id': helpers.try_int(form.get('textbook_id')),
@@ -226,6 +213,10 @@ def sell():
                 if not textbook:
                     errors.append('Invalid textbook')
             else:
+                if not validate_length(item['textbook_title'], 0, 191):
+                    errors.append('Invalid textbook title length')
+                if not validate_length(item['textbook_author'], 0, 191):
+                    errors.append('Invalid textbook author length')
                 if not item['textbook_title']:
                     errors.append('Missing textbook title')
                 if not item['textbook_author']:
