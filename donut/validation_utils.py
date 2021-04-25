@@ -195,3 +195,18 @@ def validate_matches(value1, value2, flash_errors=True):
     if not matches and flash_errors:
         flask.flash(repr(value1) + " and " + repr(value2) + " do not match")
     return matches
+
+
+def validate_length(value, min_len=None, max_len=None, flash_errors=True):
+    """
+    Validates that the given string is between the length bounds (inclusive)
+    """
+    length = len(value)
+    if not ((min_len is None or min_len <= length) and
+            (max_len is None or length <= max_len)):
+        if flash_errors:
+            flask.flash("Length not between " + str(min_len) + " and " +
+                    str(max_len) + ": got \"" + value  + "\" of length " + 
+                    str(length))
+        return False
+    return True

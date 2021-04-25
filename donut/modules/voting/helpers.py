@@ -7,7 +7,7 @@ from donut.auth_utils import check_permission, get_user_id
 from donut.misc_utils import generate_random_string
 from donut.modules.groups.helpers import get_group_list_data, is_user_in_group
 from donut.validation_utils import (validate_date, validate_exists,
-                                    validate_in, validate_int)
+                                    validate_in, validate_int, validate_length)
 from .permissions import Permissions
 from .ranked_pairs import results
 
@@ -159,7 +159,8 @@ def process_params_request(editing, survey_id=None, access_key=None):
             group_id=form.get('group'))
 
     validations = [
-        validate_exists(form, 'title'),
+        validate_exists(form, 'title')
+        and validate_length(form['title'], 0, 100),
         validate_exists(form, 'description'),
         validate_exists(form, 'start_date')
         and validate_date(form['start_date']),

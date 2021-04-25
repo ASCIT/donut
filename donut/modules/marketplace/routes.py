@@ -4,6 +4,7 @@ import json
 from donut.modules.marketplace import blueprint, helpers
 from donut.modules.core.helpers import get_name_and_email
 from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
+from donut.validation_utils import (validate_exists, validate_length)
 
 MAX_IMAGES = 5
 
@@ -161,6 +162,19 @@ def sell():
     editing = state == 'edit'
     if saving:
         form = flask.request.form
+        validations = [
+            validate_exists(form, 'textbook_title') and
+            validate_length(form['textbook_title'], 0, 191),
+            validate_exists(form, 'textbook_author') and
+            validate_length(form['textbook_author'], 0, 191),
+            validate_exists(form, 'item_title') and
+            validate_length(form['item_title'], 0, 255),
+            validate_exists(form, 'item_condition') and
+            validate_length(form['item_condition'], 0, 20),
+        ]
+        if not all(validations):
+            flask.flash('Invalid form data')
+            return flask.redirect(flask.url_for('.sell'))
         item = {
             'cat_id': helpers.try_int(form.get('cat')),
             'textbook_id': helpers.try_int(form.get('textbook_id')),
