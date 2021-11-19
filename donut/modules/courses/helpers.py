@@ -309,11 +309,12 @@ def get_notes(username, course, section):
     user_id = get_user_id(username)
     query = """
         SELECT notes FROM scheduler_sections
-        WHERE user_id= %s AND course_id = %s AND section_number = %s
+        WHERE user_id = %s AND course_id = %s AND section_number = %s
     """
     with flask.g.pymysql_db.cursor() as cursor:
         cursor.execute(query, (user_id, course, section))
-        return cursor.fetchone()['notes']
+        notes = cursor.fetchone()
+    return notes and notes['notes']
 
 
 def edit_notes(username, course, section, notes):
