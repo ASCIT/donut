@@ -1,9 +1,10 @@
 from logging.handlers import SMTPHandler
 
 DEV_TEAM_EMAILS_QUERY = '''SELECT DISTINCT email FROM
-            members NATURAL JOIN current_position_holders NATURAL JOIN positions NATURAL JOIN groups 
-            WHERE group_name = "Devteam" 
+            members NATURAL JOIN current_position_holders NATURAL JOIN positions NATURAL JOIN groups
+            WHERE group_name = "Devteam"
         '''
+DEFAULT_DEV_TEAM_EMAILS = ['devteam@donut.caltech.edu']
 
 
 class DonutSMTPHandler(SMTPHandler):
@@ -31,7 +32,11 @@ class DonutSMTPHandler(SMTPHandler):
     def getAdmins(self):
         ''' Returns current members in Devteam '''
 
-        with self.db_instance.cursor() as cursor:
-            cursor.execute(DEV_TEAM_EMAILS_QUERY, [])
-            res = cursor.fetchall()
-        return [result['email'] for result in res]
+        try:
+            with self.db_instance.cursor() as cursor:
+                cursor.execute(DEV_TEAM_EMAILS_QUERY)
+                res = cursor.fetchall()
+            return [result['email'] for result in res]
+        except Exception:
+            # If the database is inaccessible, fallback to a hard-coded email list
+            return DEFAULT_DEV_TEAM_EMAILS
