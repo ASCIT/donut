@@ -151,6 +151,14 @@ def access_forbidden(error):
     return flask.render_template("403.html"), http.client.FORBIDDEN
 
 
+@app.errorhandler(http.client.REQUEST_ENTITY_TOO_LARGE)
+def upload_too_large(error):
+    """ Handles a 413 Payload Too Large error. """
+    max_size = constants.MAX_CONTENT_LENGTH_STRING
+    return flask.render_template("413.html", max_size=max_size), \
+        http.client.REQUEST_ENTITY_TOO_LARGE
+
+
 @app.errorhandler(http.client.INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
     """

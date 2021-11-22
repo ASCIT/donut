@@ -2,7 +2,8 @@
 from enum import Enum
 
 # Maximum file upload size (in bytes).
-MAX_CONTENT_LENGTH = 1 * 1024 * 1024 * 1024
+MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+MAX_CONTENT_LENGTH_STRING = '10 MB'
 
 # Authentication/account creation constants
 PWD_HASH_ALGORITHM = 'pbkdf2_sha256'

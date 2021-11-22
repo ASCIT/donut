@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="container theme-showcase" role="main">
+	<div class="jumbotron">
+		<h2>Uploaded file is too large</h2>
+		<br>
+		<p>Please limit uploads to {{ max_size }}.</p>
+	</div>
+</div>
+{% endblock page %}
