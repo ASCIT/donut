@@ -15,21 +15,10 @@ def client():
     app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
 
     # Establish an application context before running the tests.
-    ctx = app.app_context()
-    ctx.push()
-    if ('DB_NAME' in app.config and 'DB_USER' in app.config
-            and 'DB_PASSWORD' in app.config):
-        flask.g.pymysql_db = pymysql.connect(
-            host='localhost',
-            database=app.config['DB_NAME'],
-            user=app.config['DB_USER'],
-            password=app.config['DB_PASSWORD'],
-            db='db',
-            autocommit=True,
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor)
+    with app.app_context():
+        flask.g.pymysql_db = donut.make_db()
+        assert flask.g.pymysql_db
 
-    yield app.test_client()
+        yield app.test_client()
 
-    # Teardown logic (happens after each test function)
-    flask.g.pymysql_db.close()
+        flask.g.pymysql_db.close()

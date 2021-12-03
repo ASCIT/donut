@@ -57,6 +57,7 @@ def init(environment_name):
     app.config["ENV"] = "production" if environment_name == "prod" \
         else "development"
     # Initialize configuration variables.
+    app.config["MAKE_REQUEST_DB"] = environment_name != "test"
     app.config["DB_URI"] = environment.db_uri
     app.config["DEBUG"] = environment.debug
     app.config["SECRET_KEY"] = environment.secret_key
@@ -93,20 +94,27 @@ def init(environment_name):
 # Create database engine object.
 @app.before_request
 def before_request():
-    flask.request.start = datetime.datetime.now()
     """Logic executed before request is processed."""
-    if ('DB_NAME' in app.config and 'DB_USER' in app.config
-            and 'DB_PASSWORD' in app.config):
-        flask.g.pymysql_db = make_db()
+    flask.request.start = datetime.datetime.now()
+    # When running in a test, the database connection will be created by the test fixture
+    if app.config['MAKE_REQUEST_DB']:
+        db = make_db()
+        if db:
+            flask.g.pymysql_db = db
 
 
 def make_db():
+    database = app.config.get('DB_NAME')
+    user = app.config.get('DB_USER')
+    password = app.config.get('DB_PASSWORD')
+    if database is None or user is None or password is None:
+        return None
+
     return pymysql.connect(
         host='localhost',
-        database=app.config['DB_NAME'],
-        user=app.config['DB_USER'],
-        password=app.config['DB_PASSWORD'],
-        db='db',
+        database=database,
+        user=user,
+        password=password,
         autocommit=True,
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor)
@@ -120,19 +128,21 @@ def log_request(response):
     path = flask.request.path
     args = dict(flask.request.args.items())
     args = f' {args}' if args else ''
-    source = flask.request.remote_addr
+    source = f' from {flask.request.remote_addr}'
     user = flask.session.get('username')
     user = ' by ' + user if user else ''
-    app.logger.info(f'{method} {path}{args}{user} in {duration} ms')
+    app.logger.info(f'{method} {path}{args}{user}{source} in {duration} ms')
     return response
 
 
 @app.teardown_request
 def teardown_request(exception):
     """Logic executed after every request is finished."""
-    db = getattr(flask.g, 'db', None)
-    if db is not None:
-        db.close()
+    # When running in a test, the database connection will be closed by the test fixture
+    if app.config['MAKE_REQUEST_DB']:
+        db = getattr(flask.g, 'pymysql_db', None)
+        if db:
+            db.close()
 
 
 # Error handlers
