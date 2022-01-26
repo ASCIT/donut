@@ -4,6 +4,8 @@ import pymysql.cursors
 import http
 import datetime
 import logging
+import sys
+import traceback
 
 try:
     from donut import config
@@ -172,6 +174,25 @@ def internal_server_error(error):
   Handles a 500 internal server error response.
   """
     return flask.render_template("500.html"), http.client.INTERNAL_SERVER_ERROR
+
+
+@app.errorhandler(KeyError)
+def key_error(error):
+    """
+    Handles a KeyError('username') caused by accessing flask.session['username']
+    in many places without checking whether the user is logged in.
+    This should report a 403 Access Forbidden rather than a server error.
+    """
+    if error.args != ('username', ):
+        # Not a KeyError('username')
+        raise error
+
+    if not any("session['username']" or 'session["username"]' in line
+               for line in traceback.format_tb(sys.exc_info()[2])):
+        # Not caused by accessing flask.session
+        raise error
+
+    return access_forbidden(error)
 
 
 # After initialization, import the routes.
