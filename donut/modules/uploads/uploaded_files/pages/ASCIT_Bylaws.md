@@ -80,23 +80,23 @@ A voter may cast no more than one ballot in each election.
 
 SECTION 5. Ballot Procedures. Each voter shall rank the candidates for each office in order of descending preference, with 1 (first Rank) representing the most preferred. Voters may assign any order to any candidate, including ranking candidates equally. Candidates can only be ranked once. The ballot shall consist of:
 
-(a) The word “NO”,  
-(b) All legally qualified persons who were i) nominated and ii) accepted their nomination,  
-(c) A write-in box (write-in candidates must be legally qualified candidates)  
+(a) The word “NO”,
+(b) All legally qualified persons who were i) nominated and ii) accepted their nomination,
+(c) A write-in box (write-in candidates must be legally qualified candidates)
 
 Candidates are all ranked last by default. Voters cannot abstain from ranking all candidates, but can leave the ballot in its default state; this is equivalent to abstention. Voters may choose to rank candidates equally.
 
 SECTION 6. Counting Procedures. The Review Committee shall conduct the Count Process as follows:
 
-(a) A Ballot shall be defined as a ranked (numbered), ordering of choices among candidates, expressing preference between candidates. Lower numbers express a greater preference, equal numbers express an equal preference. A ballot shall refer to a voter’s list of preferences among candidates for a particular office, even if voters vote on multiple offices simultaneously (If voters are voting on n offices at once, they are submitting n ballots, one per office).  
+(a) A Ballot shall be defined as a ranked (numbered), ordering of choices among candidates, expressing preference between candidates. Lower numbers express a greater preference, equal numbers express an equal preference. A ballot shall refer to a voter’s list of preferences among candidates for a particular office, even if voters vote on multiple offices simultaneously (If voters are voting on n offices at once, they are submitting n ballots, one per office).
 
-(b) Ballots may only contain legal candidates. Candidates may only be ranked once. Ballots with improper format or non-legal candidates shall be amended as follows:  
+(b) Ballots may only contain legal candidates. Candidates may only be ranked once. Ballots with improper format or non-legal candidates shall be amended as follows:
 
-i) If a candidate is ranked multiple times, the best ranking shall be kept, and all others shall be removed.  
+i) If a candidate is ranked multiple times, the best ranking shall be kept, and all others shall be removed.
 
-ii) Any non-legal candidates shall be removed from the ballot.  
+ii) Any non-legal candidates shall be removed from the ballot.
 
--For the purposes of verification, it is preferred for write-ins to be referred to by their names as they appear on Donut. Revcomm may, at their discretion, account for misspellings, nicknames, and preferred names by allocating rankings to the person they believe was written in on the ballot. There is no guarantee of accuracy here, and should the write-in candidate win with reallocated rankings, a protest shall immediately be filed with Revcomm.  
+-For the purposes of verification, it is preferred for write-ins to be referred to by their names as they appear on Donut. Revcomm may, at their discretion, account for misspellings, nicknames, and preferred names by allocating rankings to the person they believe was written in on the ballot. There is no guarantee of accuracy here, and should the write-in candidate win with reallocated rankings, a protest shall immediately be filed with Revcomm.
 
 (c) Ballots shall be counted, and a winning candidate shall be decided according to the following procedure, commonly referred to as Ranked Pairs Voting:
 
@@ -128,7 +128,7 @@ An oath of office shall be administered by the retiring President to the incomin
 
 The President shall administer the oath of his choice to the incoming Board of Directors.
 
-  
+
 SECTION 9. Retirement All general officers of the Corporation shall retire immediately upon the installation of their respective successors.
 
 SECTION 10. Vacancies. In the event of a vacancy of any elected office due to "NO" winning the election, the Review Committee may appoint an acting officer to fill the office and perform all of its duties, provided that the appointed officer was not a candidate in that election.
@@ -151,7 +151,7 @@ All appointed positions, regardless of what body has the power to appoint, must 
 
 SECTION 12. Non-election votes. For non-election votes, the winning proposal must receive an absolute majority of votes. Absolute majority is defined as follows:
 
-(a) In votes requiring a simple majority, absolute majority shall be defined as half the number of correctly-cast non-abstaining votes. (b) In votes requiring a two-thirds (2/3) majority, absolute majority shall be defined as two-thirds (2/3) of the number of correctly-cast non-abstaining votes.  
+(a) In votes requiring a simple majority, absolute majority shall be defined as half the number of correctly-cast non-abstaining votes. (b) In votes requiring a two-thirds (2/3) majority, absolute majority shall be defined as two-thirds (2/3) of the number of correctly-cast non-abstaining votes.
 
 ### ARTICLE VIII--RECALL
 
@@ -167,37 +167,39 @@ SECTION 4. Any appointed committee member may be recalled by a two-thirds vote o
 
 ### ARTICLE IX--FISCAL
 
-SECTION 1. DUES. The Corporation dues shall be payable on registration day of each term at the rate given in the schedule below (effective school year 2012-13):
+SECTION 1. DUES. SECTION 1. DUES. Caltech will disburse the Corporations award from the Caltech Student Activity Fee per direction of the annual MOU between the Corporation and Caltech as described in SECTION 4. The amount disbursed, as ASCIT’s budget, will be the cost of dues times the number of registered students. The Corporation dues shall be payable on registration day of each term at the rate given in the schedule below:
 
-Fall: $30.00 Winter: $30.00 Spring: $30.00 Total: $90.00
+Fall: $33.00 Winter: $33.00 Spring: $33.00 Total: $99.00
 
 Dues for each term shall be non-refundable after add day of said term. Of the dues, 10% each term shall be for a subscription to The California Tech.
 
 SECTION 2. BUDGET. Upon entering office, the new Board of Directors shall adopt a budget to govern all Corporation expenditures for the following fiscal year.
 
-SECTION 3. AUDIT. All the books of account of the Corporation including those of the Big T and The California Tech shall be submitted by the Treasurer to a certified public accountant at the end of each fiscal year for auditing. The fiscal year shall begin on October 1st and end on September 30th. The audit shall cover the entire fiscal year concerned, including all checks and bank statements, purchase orders, bills, and receipts.
+SECTION 3. BIG T ASSESSMENT. Each Corporation member will be assessed fifty-seven dollars ($57) for the Big T, payable on the days of registration at the rate of nineteen dollars ($19) per term. A member withdrawing before the end of third term may either receive a refund for installments paid, or complete the payments and receive an annual. Before the end of third term, a member who does not wish to receive a copy may, upon written request to the Business Manager of the Big T, receive a refund of any installments paid toward that year's book.
 
-SECTION 4. CHECKS. The President and Treasurer shall have the power to sign the checks of the Corporation.
+SECTION 4. MEMORANDUM OF UNDERSTANDING (MOU). At the start of each academic year, the Corporation and Caltech will enter a MOU regarding certain accounting and business services. This MOU will outline the business relationship between the two entities. The President will have the power to sign the MOU, after review and approval from the simple majority of BoD and the simple majority of Revcomm. This review meeting must occur no more than a week after receiving the MOU.
 
-SECTION 5. BIG T ASSESSMENT. Each Corporation member will be assessed fifty-seven dollars ($57) for the Big T, payable on the days of registration at the rate of nineteen dollars ($19) per term. A member withdrawing before the end of third term may either receive a refund for installments paid, or complete the payments and receive an annual. Before the end of third term, a member who does not wish to receive a copy may, upon written request to the Business Manager of the Big T, receive a refund of any installments paid toward that year's book.
+SECTION 5: TAXES: Caltech shall prepare the Corporation’s annual IRS form 990 and any related forms based on information recorded in the Oracle financial system. The Corporation will provide Caltech any other necessary information to facilitate the timely completion of such tax returns. The fiscal year shall begin on October 1st and end on September 30th of the following year. Only the President and Treasurer will have the power to sign tax documents.
+
+SECTION 6: ACCOUNTING MATTERS: The President and the Treasurer shall have online access to the Oracle financial system and Data Warehouse so that the Corporation may view their financial accounts.
 
 ### ARTICLE X--PUBLICATIONS
 
 SECTION 1. The official publications of this Corporation are:
 
-(a) _California Tech_, a newspaper published at least once a week, except during finals and vacations,  
-(b) _Big T_, an annual published once a year,  
-(c) _little t_, a student handbook published once a year,  
-(d) _Totem_, a literary art anthology published once a year,  
-(e) _Donut_, a website.  
+(a) _California Tech_, a newspaper published at least once a week, except during finals and vacations,
+(b) _Big T_, an annual published once a year,
+(c) _little t_, a student handbook published once a year,
+(d) _Totem_, a literary art anthology published once a year,
+(e) _Donut_, a website.
 
 SECTION 2. The officers of these publications are:
 
-(a) for _The California Tech_: Editor(s), elected by the Corporation; and Business Manager, appointed by the Board of Directors.  
-(b) for the _Big T_: Editor(s) and Business Manager, both appointed by the Board of Directors.  
-(c) for the _little t_: Editor(s) and Business Manager, both appointed by the Board of Directors.  
-(d) for _Totem_: Editor(s), appointed by the Board of Directors.  
-(e) for _Donut_: A Development Team, approved by the Board of Directors.  
+(a) for _The California Tech_: Editor(s), elected by the Corporation; and Business Manager, appointed by the Board of Directors.
+(b) for the _Big T_: Editor(s) and Business Manager, both appointed by the Board of Directors.
+(c) for the _little t_: Editor(s) and Business Manager, both appointed by the Board of Directors.
+(d) for _Totem_: Editor(s), appointed by the Board of Directors.
+(e) for _Donut_: A Development Team, approved by the Board of Directors.
 
 SECTION 3. The officers of each publication are solely responsible to the Board of Directors for that publication's success. The Board of Directors may make recommendations to the publication's officers in regard to policy or finances. The Board of Directors is ultimately responsible for the circulation and finances of the publications. The Director of Operations shall be responsible for maintaining communication with publication officers on the progress of publications.
 
@@ -209,10 +211,10 @@ SECTION 6. Receiving ASCIT funding is contingent upon the following conditions. 
 
 ### ARTICLE XI--PRIVILEGES OF MEMBERSHIP
 
-SECTION 1. All members of the Corporation shall be entitled to:  
-(a) The right to hold a Corporation office, in accordance with the provisions of these bylaws.  
-(b) One vote in each corporate election.  
-(c) One subscription to all Corporation publications.  
+SECTION 1. All members of the Corporation shall be entitled to:
+(a) The right to hold a Corporation office, in accordance with the provisions of these bylaws.
+(b) One vote in each corporate election.
+(c) One subscription to all Corporation publications.
 
 ### ARTICLE XII--CORPORATION MEETINGS
 
@@ -240,7 +242,7 @@ SECTION 2. Membership. The activities of the BoC will be led and reviewed by the
 
 (d) All BoC representatives must attend a formal training before they may serve on a case. Training shall be conducted by the Chairman and Secretaries with assistance from the Dean of Students and former Board representatives. Training should occur at the end of second term or the beginning of third term such that new representatives can begin hearing cases promptly. The training shall be open to any member of the Caltech community at the discretion of the Chairman and the Dean.
 
-  
+
 SECTION 3. Rules of Procedure.
 
 (a) Reporting. Violations of the Honor System may be brought to the attention of the Board by any member of the Caltech community.
@@ -284,7 +286,7 @@ SECTION 3. Rules of Procedure.
    1\. Conviction: Whether or not an Honor System violation has been committed.
            2\. Nullification: How to nullify the advantage that has been taken.
            3\. Protection: How to protect the Caltech Community from future violations.
-        
+
 
 (ii) Before the Board votes to convict, the defendant will be shown all physical evidence pertaining to his case and given a reasonable opportunity to respond.
 
@@ -334,9 +336,9 @@ SECTION 1. The position of Conduct Review Committee Student Chairman is not a Co
 
 SECTION 2. MEMBERSHIP. The student representatives on the Conduct Review Committee shall consist of the Conduct Review Committee Student Chair, one representative from each of the undergraduate houses, elected by the members of that House, and one member elected by students living outside of the Houses.
 
-(a) The representatives from the Houses shall be elected each year in accordance with the election procedures determined by the House. A candidate may declare his candidacy in any House, but all students shall vote in the House with which they are affiliated at the time of the election. Students not affiliated with any House may register to vote in the House of their choice. Students not registered nor affiliated with a House at the time of the election may not vote.  
-(b) Students affiliated with more than one House may only vote in one House.  
-(c) Students living outside the houses and associated off-campus alleys shall be eligible to elect one representative in an annual election organized according to procedures determined by the electors. Eligible students who choose to vote in the election for off-campus Conduct Review Committee Representative may not vote for Conduct Review Committee Representatives in one of the houses.  
+(a) The representatives from the Houses shall be elected each year in accordance with the election procedures determined by the House. A candidate may declare his candidacy in any House, but all students shall vote in the House with which they are affiliated at the time of the election. Students not affiliated with any House may register to vote in the House of their choice. Students not registered nor affiliated with a House at the time of the election may not vote.
+(b) Students affiliated with more than one House may only vote in one House.
+(c) Students living outside the houses and associated off-campus alleys shall be eligible to elect one representative in an annual election organized according to procedures determined by the electors. Eligible students who choose to vote in the election for off-campus Conduct Review Committee Representative may not vote for Conduct Review Committee Representatives in one of the houses.
 (d) In the event that a Conduct Review Committee representative from the Houses retires before his term of office expires, the House shall elect a replacement for the remainder of the term of office in accordance with the election procedures determined by the House.
 
 ### ARTICLE XV--AMENDMENTS
