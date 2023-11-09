@@ -12,6 +12,9 @@
       {% endif %}
       <div class="half-float-left medium-text">
         <p style="white-space: pre-line;"> {{ msg }} </p>
+        {% if group == 'arc' %}
+        <p>To view ARC course concerns progress, check the <a href="https://docs.google.com/spreadsheets/d/1-YaBhyU7ld2cF-0q-y_zaKME9ZdTdAVCCv-XxJ8edFI/edit">2023 Course Concerns Progress/Updates tracker</a>.</p>
+        {% endif %}
         {% if summary %}
         <a class="btn btn-primary" href="{{ url_for('feedback.feedback_view_summary', group=group) }}" role="button">Summary</a>
         {% endif %}
