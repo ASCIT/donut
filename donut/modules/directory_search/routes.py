@@ -2,6 +2,8 @@ from datetime import date
 import flask
 import json
 import mimetypes
+
+import werkzeug.exceptions
 from flask import jsonify, redirect
 
 from donut.auth_utils import get_user_id, is_caltech_user, login_redirect
@@ -73,9 +75,14 @@ def search():
         per_page = 10
     else:
         form = flask.request.args
-        page = int(form['page'])
-        total = int(form['total'])
-        per_page = int(form['per_page'])
+        try:
+            page = int(form['page'])
+            total = int(form['total'])
+            per_page = int(form['per_page'])
+        except werkzeug.exceptions.BadRequestKeyError:
+            # happens all the time for some reason, perhaps web scraping bots trying to paginate?
+            # instead redirect user back to search page
+            return flask.redirect('/directory')
     name = form['name']
     if name.strip() == '':
         name = None
