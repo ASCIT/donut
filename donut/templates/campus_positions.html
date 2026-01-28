@@ -35,121 +35,52 @@
             </table>
         </div>
         <div id="admin" class="tab-pane fade">
-            <ul class="nav nav-pills tabs">
-                <li class="active">
-                    <a data-toggle="pill" class="btn btn-primary" href="#createPos">Create a Position</a>
-                </li>
-                <li>
-                    <a data-toggle="pill" class="btn btn-primary" href="#assignHold">Add a Position Holder</a>
-                </li>
-                <li>
-                    <a data-toggle="pill" class="btn btn-primary" href="#removeHold">Remove a Position Holder</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div id="createPos" class="tab-pane fade in active">
-                    <form id="posCreate">
-                        <div class="form-group">
-                            <label class="required" for="groupCreate">Group Name:</label>
-                            <select class="form-control" id="groupCreate" name="group_id">
-                                <option>Pick a Group</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="posName">Position Name:</label>
-                            <input class="form-control" id="posName" name="pos_name" />
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" name="receive" checked />
-                                Receives emails from the group
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" name="send" />
-                                Can send emails to the group
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" name="control" />
-                                Can manage the group
-                            </label>
-                        </div>
-                        <button type="button" class="btn btn-default" onclick="submitPosForm()">
-                            Add Position
-                        </button>
-                    </form>
-                </div>
-                <div id="assignHold" class="tab-pane fade in">
-                    <form id="holdForm">
-                        <div class="form-group">
-                            <label class="required" for="groupIdHold">Group:</label>
-                            <select
-                                class="form-control"
-                                id="groupIdHold"
-                                onchange="populateAddPositions()"
-                            >
-                                <option>Pick a Group</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="posIdHold">Position:</label>
-                            <select class="form-control" id="posIdHold">
-                                <option>Pick a Position</option>
-                            </select>
-                        </div>
-                        <div class='form-group'>
-                            <label class="required" for='name'>Name:</label>
-                            <input class='form-control' id='name'
-                                autocomplete="off" placeholder='Search by name' />
-                            <ul class='list-group' id='name-search'></ul>
-                        </div>
-                        <input type="hidden" id="user_id" name="user_id" />
-                        <div class='form-group'>
-                            <label class='required' for='start_date'>Start Date:</label>
-                            <input id='start_date' type='date' name='start_date' placeholder='YYYY-MM-DD'/>
-                        </div>
-                        <div class='form-group'>
-                            <label class='required' for='end_date'>End Date:</label>
-                            <input id='end_date' type='date' name='end_date' placeholder='YYYY-MM-DD'/>
-                        </div>
-                        <button type="button" class="btn btn-default" onclick="submitHoldForm()">
-                            Add Position Holder
-                        </button>
-                    </form>
-                </div>
-                <div id="removeHold" class="tab-pane fade in">
-                    <form id="removeHoldForm">
-                        <div class="form-group">
-                            <label class="required" for="groupIdHolder">Group:</label>
-                            <select
-                                class="form-control"
-                                id="groupIdHolder"
-                                onchange="populateRemovePositions()"
-                            >
-                                <option>Pick a Group</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="posIdHolder">Position:</label>
-                            <select class="form-control" id="posIdHolder" onchange="populateHolders()">
-                                <option>Pick a Position</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="required" for="holdId">Position Holder:</label>
-                            <select class="form-control" id="holdId">
-                                <option>Pick a Position Holder</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-default" onclick="submitRemoveHoldForm()">
-                            End Position Holder's Term
-                        </button>
-                    </form>
-                </div>
+            <button type="button" class="btn btn-primary" id="toggleCreateGroup" onclick="toggleCreateGroupForm()">
+                + Create New Group
+            </button>
+            <div id="createGroupForm" style="display: none; margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                <h4>Create New Group</h4>
+                <form id="groupCreateForm">
+                    <div class="form-group">
+                        <label class="required" for="newGroupName">Group Name:</label>
+                        <input class="form-control" id="newGroupName" name="group_name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newGroupDesc">Description:</label>
+                        <input class="form-control" id="newGroupDesc" name="group_desc" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newGroupType">Type:</label>
+                        <select class="form-control" id="newGroupType" name="group_type">
+                            <option value="committee">Committee</option>
+                            <option value="house">House</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="submitGroupForm()">
+                        Create Group
+                    </button>
+                    <button type="button" class="btn btn-default" onclick="toggleCreateGroupForm()">
+                        Cancel
+                    </button>
+                </form>
             </div>
+            <div class="input" style="margin: 15px 0;">
+                <select class="form-control" id="adminGroupFilter" onchange="adminFilterChange()">
+                    <option value="0">All Groups</option>
+                </select>
+            </div>
+            <table class="table" id="adminPositionsTable">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Position</th>
+                        <th>Settings</th>
+                        <th>Current Holders</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
     </div>
   </div>
@@ -165,19 +96,187 @@
             {{ approved_group_names|tojson|safe }},
             {{ all_positions|tojson|safe }}
         );
-
-        $(document).ready(function() {
-            var nameInput = $('input#name'), nameSearch = $('ul#name-search')
-            attachDirectorySearch(nameInput, nameSearch, function(user) {
-                return $('<li>').addClass('list-group-item').append($('<a>')
-                        .text(user.full_name)
-                        .click(function() {
-                                nameInput.val(user.full_name);
-                                nameSearch.children().remove();
-                                $('input#user_id').val(user.user_id);
-                        })
-                    );
-            })
-        })
     </script>
+    <style>
+        .holder-chip {
+            display: inline-block;
+            background: #fff;
+            border: 1px solid orange;
+            padding: 4px 10px;
+            border-radius: 3px;
+            margin: 3px 5px 3px 0;
+            font-size: 13px;
+        }
+        .holder-chip.expanded {
+            background: #fff8f0;
+        }
+        .holder-chip .holder-name {
+            color: #FF8C00;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .holder-chip .holder-name:hover {
+            color: #CD6600;
+        }
+        .holder-chip .btn-remove {
+            background: none;
+            border: none;
+            color: #999;
+            padding: 0 0 0 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .holder-chip .btn-remove:hover {
+            color: #c00;
+        }
+        .holder-dates {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #ffe0b3;
+            font-size: 12px;
+            color: #666;
+        }
+        .holder-dates .date-row {
+            margin-bottom: 2px;
+        }
+        .holder-dates .date-label {
+            color: #999;
+            display: inline-block;
+            width: 40px;
+        }
+        .holder-dates .profile-link {
+            display: inline-block;
+            margin-top: 4px;
+            color: #FF8C00;
+            text-decoration: none;
+            font-size: 11px;
+        }
+        .holder-dates .profile-link:hover {
+            color: #CD6600;
+        }
+        .btn-add-holder {
+            display: inline-block;
+            background: #fff;
+            border: 1px dashed orange;
+            color: #FF8C00;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-add-holder:hover {
+            background: #fff8f0;
+            border-style: solid;
+        }
+        .add-holder-form {
+            margin-top: 10px;
+            padding: 12px;
+            background: #fff8f0;
+            border: 1px solid orange;
+            border-radius: 5px;
+        }
+        .add-holder-form .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .add-holder-form .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .add-holder-form .form-field label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .add-holder-form .name-search-results {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid orange;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            list-style: none;
+            padding: 0;
+            margin: 2px 0 0 0;
+        }
+        .add-holder-form .name-search-results li {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .add-holder-form .name-search-results li:hover {
+            background: #fff8f0;
+        }
+        .add-holder-form .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+        .no-holders {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+            margin-right: 5px;
+        }
+        #adminPositionsTable tbody td {
+            vertical-align: middle;
+        }
+        .btn-delete-group, .btn-delete-position {
+            background: none;
+            border: none;
+            color: #ccc;
+            padding: 0 0 0 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-delete-group:hover, .btn-delete-position:hover {
+            color: #c00;
+        }
+        .btn-add-position {
+            background: #fff;
+            border: 1px dashed orange;
+            color: #FF8C00;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-add-position:hover {
+            background: #fff8f0;
+            border-style: solid;
+        }
+        .add-position-form {
+            display: inline-block;
+            padding: 8px;
+            background: #fff8f0;
+            border: 1px solid orange;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .add-position-form label {
+            font-weight: normal;
+            margin-right: 5px;
+        }
+        .add-position-row {
+            background: #fafafa;
+        }
+        .settings-cell {
+            white-space: nowrap;
+        }
+        .setting-checkbox {
+            display: inline-block;
+            margin-right: 8px;
+            font-weight: normal;
+            cursor: help;
+            font-size: 12px;
+        }
+        .setting-checkbox input {
+            margin-right: 2px;
+        }
+        .pos-settings {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
 {% endblock %}

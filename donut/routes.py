@@ -30,17 +30,18 @@ def campus_positions():
         approved_group_ids.append(group['group_id'])
         approved_group_names.append(group['group_name'])
 
-    if is_admin():
+    username = flask.session.get('username')
+    user_id = get_user_id(username) if username else None
+
+    # Admins and superuser positions (ASCIT/IHC leadership) can manage all groups
+    if is_admin() or (user_id and groups_helpers.is_position_superuser(user_id)):
         groups = groups_helpers.get_group_list_data(('group_id', 'group_name'))
         for group in groups:
             approve_group(group)
-    else:
-        username = flask.session.get('username')
-        if username:
-            user_id = get_user_id(username)
-            for group in helpers.get_group_list_of_member(user_id):
-                if group["control"]:
-                    approve_group(group)
+    elif user_id:
+        for group in helpers.get_group_list_of_member(user_id):
+            if group["control"]:
+                approve_group(group)
     all_positions = groups_helpers.get_position_data(
         include_house_and_ug=False, order_by=("group_name", "pos_name"))
     return flask.render_template(

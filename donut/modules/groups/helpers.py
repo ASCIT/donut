@@ -3,6 +3,31 @@ import pymysql.cursors
 from donut.auth_utils import is_admin
 from donut.modules.core import helpers as core
 
+# Position IDs that have admin-like powers for managing all groups
+# ASCIT: President (42), Director of Operations (25), Secretary (103)
+# IHC: Chair (26), Secretary (174)
+SUPERUSER_POSITION_IDS = [42, 25, 103, 26, 174]
+
+
+def is_position_superuser(user_id):
+    """
+    Returns whether the given user holds one of the special positions
+    that grants admin-like powers for managing all groups.
+    """
+    if not user_id:
+        return False
+
+    query = """
+        SELECT pos_id
+        FROM current_position_holders
+        WHERE user_id = %s AND pos_id IN ({})
+        LIMIT 1
+    """.format(', '.join('%s' for _ in SUPERUSER_POSITION_IDS))
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(query, [user_id] + SUPERUSER_POSITION_IDS)
+        return cursor.fetchone() is not None
+
 
 def get_group_list_data(fields=None, attrs={}):
     """
@@ -220,6 +245,51 @@ def add_position(group_id, pos_name, send=False, control=False, receive=True):
         cursor.execute(s, (group_id, pos_name, send, control, receive))
 
 
+def update_position(pos_id, send=False, control=False, receive=True):
+    '''
+    Updates position settings (send, control, receive flags)
+
+    Arguments:
+        pos_id: the id of the position to update
+        send: whether position can send emails to the group
+        control: whether position can manage the group
+        receive: whether position receives group emails
+    '''
+    s = """
+        UPDATE positions
+        SET send = %s, control = %s, receive = %s
+        WHERE pos_id = %s
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(s, (send, control, receive, pos_id))
+
+
+def delete_position(pos_id):
+    '''
+    Deletes a position if it has no current holders.
+
+    Arguments:
+        pos_id: the id of the position to delete
+
+    Returns:
+        True if deleted, False if position has holders
+    '''
+    # Check if position has any current holders
+    check_query = """
+        SELECT hold_id FROM current_position_holders WHERE pos_id = %s LIMIT 1
+    """
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(check_query, pos_id)
+        if cursor.fetchone():
+            return False
+
+    # Delete the position
+    delete_query = "DELETE FROM positions WHERE pos_id = %s"
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(delete_query, pos_id)
+    return True
+
+
 def create_position_holder(pos_id, user_id, start_date, end_date):
     '''
     Inserts row into position_holders table
@@ -357,6 +427,10 @@ def can_control(user_id, group_id):
     if is_admin():
         return True
 
+    # Check if user holds a superuser position (ASCIT/IHC leadership)
+    if is_position_superuser(user_id):
+        return True
+
     query = """
         SELECT pos_id
         FROM current_position_holders NATURAL JOIN positions
@@ -393,3 +467,72 @@ def get_hold_group(hold_id):
         cursor.execute(query, hold_id)
         position = cursor.fetchone()
         return position and position['group_id']
+
+
+def get_admin_positions_with_holders(group_ids):
+    """
+    Returns all positions and their current holders for the given groups
+    in a single query. Used for the admin UI to avoid N+1 queries.
+
+    Arguments:
+        group_ids: List of group IDs to fetch positions for
+
+    Returns:
+        Dict with 'positions' containing list of positions with nested holders
+    """
+    if not group_ids:
+        return {'positions': []}
+
+    # Get all positions for these groups
+    pos_query = """
+        SELECT p.pos_id, p.pos_name, p.group_id, g.group_name,
+               p.send, p.control, p.receive
+        FROM positions p
+        JOIN groups g ON p.group_id = g.group_id
+        WHERE p.group_id IN ({})
+        ORDER BY g.group_name, p.pos_name
+    """.format(', '.join('%s' for _ in group_ids))
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(pos_query, group_ids)
+        positions = list(cursor.fetchall())
+
+    if not positions:
+        return {'positions': []}
+
+    # Get all holders for these positions in one query
+    pos_ids = [p['pos_id'] for p in positions]
+    holders_query = """
+        SELECT cph.pos_id, cph.user_id, cph.hold_id, mfn.full_name,
+               cph.start_date, cph.end_date
+        FROM current_position_holders cph
+        JOIN members_full_name mfn ON cph.user_id = mfn.user_id
+        WHERE cph.pos_id IN ({})
+        ORDER BY mfn.full_name
+    """.format(', '.join('%s' for _ in pos_ids))
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(holders_query, pos_ids)
+        all_holders = cursor.fetchall()
+
+    # Group holders by position
+    holders_by_pos = {}
+    for holder in all_holders:
+        pos_id = holder['pos_id']
+        if pos_id not in holders_by_pos:
+            holders_by_pos[pos_id] = []
+        # Convert dates to strings for JSON serialization
+        holder_data = {
+            'user_id': holder['user_id'],
+            'hold_id': holder['hold_id'],
+            'full_name': holder['full_name'],
+            'start_date': holder['start_date'].strftime('%Y-%m-%d') if holder['start_date'] else None,
+            'end_date': holder['end_date'].strftime('%Y-%m-%d') if holder['end_date'] else None,
+        }
+        holders_by_pos[pos_id].append(holder_data)
+
+    # Attach holders to positions
+    for pos in positions:
+        pos['holders'] = holders_by_pos.get(pos['pos_id'], [])
+
+    return {'positions': positions}
