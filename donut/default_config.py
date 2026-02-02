@@ -17,3 +17,16 @@ TEST = environment.Environment(
         "secret": "****************************************"
     },
     restricted_ips=r"127\.0\.0\.1")
+
+
+# local development
+DEV = environment.Environment(
+    db_hostname="localhost",
+    db_name="donut",
+    db_user="ascit",
+    db_password="bAgEl82",
+    debug=True,
+    testing=True,
+    secret_key="1234567890",
+    imgur_api={},
+    restricted_ips=r"^131\.215\.|^127\.0\.0\.1")
