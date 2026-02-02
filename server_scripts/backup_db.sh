@@ -11,6 +11,6 @@ BACKUP_DIR="/backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/donut_backup_${TIMESTAMP}.sql"
 
-mysqldump -u ascit -pbAgEl82 --single-transaction --routines --triggers donut > "${BACKUP_FILE}"
+mysqldump -u root --password='1<3d0nut5' --single-transaction --routines --triggers donut > "${BACKUP_FILE}"
 
 echo "Backup created: ${BACKUP_FILE}"
