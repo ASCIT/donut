@@ -4,9 +4,9 @@ from donut.auth_utils import is_admin
 from donut.modules.core import helpers as core
 
 # Position IDs that have admin-like powers for managing all groups
-# ASCIT: President (42), Director of Operations (25), Secretary (103)
+# ASCIT: President (42), Director of Operations (25), Secretary (103), IHC Secretary (448) (yes there is an IHC position under the ASCIT group for some reason...)
 # IHC: Chair (26), Secretary (174)
-SUPERUSER_POSITION_IDS = [42, 25, 103, 26, 174]
+SUPERUSER_POSITION_IDS = [42, 25, 103, 448, 26, 174]
 
 
 def is_position_superuser(user_id):
@@ -515,6 +515,19 @@ def get_admin_positions_with_holders(group_ids):
         cursor.execute(holders_query, pos_ids)
         all_holders = cursor.fetchall()
 
+    # Get all permissions for these positions in one query
+    permissions_query = """
+        SELECT pp.pos_id, p.permission_id, p.permission_type, p.resource_name, p.description
+        FROM position_permissions pp
+        JOIN permissions p ON pp.permission_id = p.permission_id
+        WHERE pp.pos_id IN ({})
+        ORDER BY p.permission_type, p.resource_name
+    """.format(', '.join('%s' for _ in pos_ids))
+
+    with flask.g.pymysql_db.cursor() as cursor:
+        cursor.execute(permissions_query, pos_ids)
+        all_permissions = cursor.fetchall()
+
     # Group holders by position
     holders_by_pos = {}
     for holder in all_holders:
@@ -531,8 +544,23 @@ def get_admin_positions_with_holders(group_ids):
         }
         holders_by_pos[pos_id].append(holder_data)
 
-    # Attach holders to positions
+    # Group permissions by position
+    permissions_by_pos = {}
+    for perm in all_permissions:
+        pos_id = perm['pos_id']
+        if pos_id not in permissions_by_pos:
+            permissions_by_pos[pos_id] = []
+        perm_data = {
+            'permission_id': perm['permission_id'],
+            'permission_type': perm['permission_type'],
+            'resource_name': perm['resource_name'],
+            'description': perm['description'],
+        }
+        permissions_by_pos[pos_id].append(perm_data)
+
+    # Attach holders and permissions to positions
     for pos in positions:
         pos['holders'] = holders_by_pos.get(pos['pos_id'], [])
+        pos['permissions'] = permissions_by_pos.get(pos['pos_id'], [])
 
     return {'positions': positions}

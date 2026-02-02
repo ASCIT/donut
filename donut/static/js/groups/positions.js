@@ -166,7 +166,8 @@ function loadAdminPositionsTable(callback) {
                     send: pos.send,
                     control: pos.control,
                     receive: pos.receive,
-                    holders: pos.holders || []
+                    holders: pos.holders || [],
+                    permissions: pos.permissions || []
                 };
             });
             renderAdminTable();
@@ -269,7 +270,23 @@ function renderAdminTable() {
             settingsCell.append(createSettingsCheckboxes(pos));
             row.append(settingsCell);
 
+            // Permissions cell (read-only)
+            var permissionsCell = $('<td>').addClass('permissions-cell');
+            if (pos.permissions && pos.permissions.length > 0) {
+                pos.permissions.forEach(function(perm) {
+                    var permChip = $('<span>')
+                        .addClass('permission-chip')
+                        .attr('title', perm.description || '')
+                        .text(perm.permission_type + ': ' + (perm.resource_name || 'ALL'));
+                    permissionsCell.append(permChip);
+                });
+            } else {
+                permissionsCell.append($('<span>').addClass('no-permissions').text('(none)'));
+            }
+            row.append(permissionsCell);
+
             var holdersCell = $('<td>').addClass('holders-cell');
+            var holdersContent = $('<div>').addClass('holders-content');
 
             if (pos.holders && pos.holders.length > 0) {
                 pos.holders.forEach(function(holder) {
@@ -311,21 +328,23 @@ function renderAdminTable() {
                         $('<a>').addClass('profile-link').attr('href', '/1/users/' + holder.user_id).text('View Profile')
                     );
                     chip.append(dates);
-                    holdersCell.append(chip);
+                    holdersContent.append(chip);
                 });
             } else {
-                holdersCell.append($('<span>').addClass('no-holders').text('(none)'));
+                holdersContent.append($('<span>').addClass('no-holders').text('(none)'));
             }
 
             // Add holder button
-            holdersCell.append(
+            holdersContent.append(
                 $('<button>')
                     .addClass('btn-add-holder')
                     .text('+ Add')
                     .click(function() { showAddHolderForm(pos.pos_id, $(this).closest('tr')); })
             );
 
-            // Hidden add holder form
+            holdersCell.append(holdersContent);
+
+            // Hidden add holder form (outside the content div)
             var addForm = createAddHolderForm(pos.pos_id);
             holdersCell.append(addForm);
 
@@ -337,7 +356,7 @@ function renderAdminTable() {
         var addPosRow = $('<tr>').addClass('add-position-row').attr('data-group-id', groupId);
         addPosRow.append($('<td>')); // Empty group cell
         addPosRow.append(
-            $('<td>').attr('colspan', '3').append(
+            $('<td>').attr('colspan', '4').append(
                 $('<button>')
                     .addClass('btn-add-position')
                     .text('+ Add Position')

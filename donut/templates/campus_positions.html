@@ -75,6 +75,7 @@
                         <th>Group</th>
                         <th>Position</th>
                         <th>Settings</th>
+                        <th>Permissions</th>
                         <th>Current Holders</th>
                     </tr>
                 </thead>
@@ -213,11 +214,16 @@
             display: flex;
             gap: 5px;
         }
+        .holders-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+        }
         .no-holders {
             color: #999;
             font-style: italic;
             font-size: 13px;
-            margin-right: 5px;
         }
         #adminPositionsTable tbody td {
             vertical-align: middle;
@@ -277,6 +283,25 @@
         .pos-settings {
             display: flex;
             gap: 5px;
+        }
+        .permissions-cell {
+            max-width: 200px;
+        }
+        .permission-chip {
+            display: inline-block;
+            background: #e8f4f8;
+            border: 1px solid #5bc0de;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin: 2px 3px 2px 0;
+            font-size: 11px;
+            color: #31708f;
+            cursor: help;
+        }
+        .no-permissions {
+            color: #999;
+            font-style: italic;
+            font-size: 12px;
         }
     </style>
 {% endblock %}
