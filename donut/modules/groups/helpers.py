@@ -1,32 +1,30 @@
 import flask
 import pymysql.cursors
-from donut.auth_utils import is_admin
+from donut.auth_utils import is_admin, get_permissions
 from donut.modules.core import helpers as core
-
-# Position IDs that have admin-like powers for managing all groups
-# ASCIT: President (42), Director of Operations (25), Secretary (103), IHC Secretary (448) (yes there is an IHC position under the ASCIT group for some reason...)
-# IHC: Chair (26), Secretary (174)
-SUPERUSER_POSITION_IDS = [42, 25, 103, 448, 26, 174]
+from donut.modules.groups.permissions import Permissions
 
 
 def is_position_superuser(user_id):
     """
-    Returns whether the given user holds one of the special positions
-    that grants admin-like powers for managing all groups.
+    Returns whether the given user has the GROUP_EDITORS permission,
+    which grants admin-like powers for managing all groups.
     """
     if not user_id:
         return False
 
     query = """
-        SELECT pos_id
-        FROM current_position_holders
-        WHERE user_id = %s AND pos_id IN ({})
-        LIMIT 1
-    """.format(', '.join('%s' for _ in SUPERUSER_POSITION_IDS))
-
+        SELECT username FROM users WHERE user_id = %s
+    """
     with flask.g.pymysql_db.cursor() as cursor:
-        cursor.execute(query, [user_id] + SUPERUSER_POSITION_IDS)
-        return cursor.fetchone() is not None
+        cursor.execute(query, [user_id])
+        result = cursor.fetchone()
+        if not result:
+            return False
+        username = result['username']
+
+    permissions = get_permissions(username)
+    return Permissions.GROUP_EDITORS in permissions
 
 
 def get_group_list_data(fields=None, attrs={}):
