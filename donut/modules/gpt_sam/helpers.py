@@ -2446,165 +2446,6 @@ def get_user_house(user_id=None, name=None):
     }
 
 
-def get_context_data(user_message, current_user=None):
-    """
-    Analyze the user message and fetch relevant context data from the database.
-    Returns a string with relevant information to include in the prompt.
-    """
-    import re
-    context_parts = []
-    user_message_lower = user_message.lower()
-
-    # Common group names to look for (including aliases)
-    known_groups = [
-        'ascit', 'ihc', 'boc', 'crc', 'arc', 'devteam', 'donut',
-        'avery', 'blacker', 'dabney', 'fleming', 'lloyd', 'page', 'ricketts', 'ruddock',
-        'bechtel', 'the tech', 'big t', 'little t', 'totem',
-        'venerable'  # alias for Ruddock
-    ]
-
-    # Group aliases (maps alias to canonical name)
-    group_aliases = {
-        'venerable': 'ruddock',
-        'rud': 'ruddock',
-        'flem': 'fleming',
-        'dab': 'dabney',
-        'ricks': 'ricketts'
-    }
-
-    # House names specifically
-    houses = ['avery', 'blacker', 'dabney', 'fleming', 'lloyd', 'page', 'ricketts', 'ruddock']
-
-    # Check if user is asking about who can manage/add to a position
-    is_management_question = any(phrase in user_message_lower for phrase in [
-        'who can add', 'who has permission', 'who can manage', 'who can edit',
-        'who can remove', 'who controls', 'permission to add', 'add me as',
-        'add someone', 'give permission'
-    ])
-
-    # Check if asking about themselves ("my groups", "am I in", "can I send")
-    is_self_question = any(phrase in user_message_lower for phrase in [
-        'my group', 'my position', 'am i in', 'am i a', 'can i send', 'what group',
-        'i am in', 'i belong', 'my role', 'where am i'
-    ])
-
-    # Check if asking about position types across groups
-    is_position_type_question = any(phrase in user_message_lower for phrase in [
-        'house president', 'all president', 'who is the president', 'who are the president',
-        'house secretary', 'all secretary', 'who is the secretary',
-        'house treasurer', 'all treasurer', 'who is the treasurer',
-        'house social', 'all social'
-    ])
-
-    try:
-        # If asking about themselves, include current user info
-        if is_self_question and current_user and current_user.get('user_id'):
-            user_info = get_current_user_info(current_user['user_id'])
-            if user_info:
-                context_parts.append(f"\n=== Current User: {format_user_link(user_info['full_name'], user_info['user_id'])} ===")
-                context_parts.append(f"Email: {user_info['email']}")
-                if user_info['positions']:
-                    context_parts.append("Current positions:")
-                    for pos in user_info['positions']:
-                        flags = f"R={'Y' if pos['receive'] else 'N'} S={'Y' if pos['send'] else 'N'} M={'Y' if pos['control'] else 'N'}"
-                        context_parts.append(f"  - {pos['group_name']} / {pos['pos_name']} [{flags}]")
-                else:
-                    context_parts.append("No current positions")
-
-        # If asking about position types (like "house presidents")
-        if is_position_type_question:
-            # Detect which position type
-            position_types = ['president', 'secretary', 'treasurer', 'social', 'chair']
-            for pos_type in position_types:
-                if pos_type in user_message_lower:
-                    # Check if specifically about houses
-                    if 'house' in user_message_lower:
-                        context_parts.append(f"\n=== House {pos_type.title()}s ===")
-                        context_parts.append("| House | Name | Position |")
-                        context_parts.append("|-------|------|----------|")
-                        for house in houses:
-                            holders = get_position_holders_by_name(pos_type, house)
-                            for h in holders['holders'][:1]:  # Just first match per house
-                                context_parts.append(f"| {h['group']} | {format_user_link(h['name'], h['user_id'])} | {h['position']} |")
-                    else:
-                        holders = get_position_holders_by_name(pos_type)
-                        if holders['count'] > 0:
-                            context_parts.append(f"\n=== People with '{pos_type}' in their position ===")
-                            for h in holders['holders'][:15]:
-                                context_parts.append(f"  - {format_user_link(h['name'], h['user_id'])} - {h['position']} ({h['group']})")
-                    break
-
-        # If asking about a specific group, fetch its info
-        found_groups = []
-        for group_name in known_groups:
-            if group_name in user_message_lower:
-                # Resolve alias to canonical name
-                search_name = group_aliases.get(group_name, group_name)
-                group_info = search_groups(query=search_name)
-                if group_info['count'] > 0:
-                    for g in group_info['groups'][:2]:
-                        found_groups.append(g)
-                        positions = get_group_positions(group_id=g['group_id'])
-                        if 'positions' in positions:
-                            email_addr = get_group_email_address(g['group_name'])
-                            context_parts.append(f"\n=== Group: {g['group_name']} ===")
-                            context_parts.append(f"Type: {g['type']}, Has mailing list: {g['has_mailing_list']}, Anyone can send: {g['anyone_can_send']}")
-                            if g['has_mailing_list']:
-                                context_parts.append(f"Email address: {email_addr}")
-                            for pos in positions['positions'][:10]:
-                                # Format holders with links
-                                if pos['holders']:
-                                    holder_links = [format_user_link(h['name'], h['user_id']) for h in pos['holders']]
-                                    holders = ', '.join(holder_links)
-                                else:
-                                    holders = '(none)'
-                                flags = f"R={'Y' if pos['receive'] else 'N'} S={'Y' if pos['send'] else 'N'} M={'Y' if pos['control'] else 'N'}"
-                                context_parts.append(f"  - {pos['pos_name']} [{flags}]: {holders}")
-
-        # If this is a management question about a found group, add manager info
-        if is_management_question and found_groups:
-            for g in found_groups:
-                managers = get_group_managers(group_id=g['group_id'])
-                if managers.get('managers'):
-                    context_parts.append(f"\n=== Who can manage {g['group_name']} (add/remove people) ===")
-                    for m in managers['managers']:
-                        positions_str = ', '.join(m['positions'])
-                        context_parts.append(f"  - {format_user_link(m['name'], m['user_id'])} ({positions_str})")
-
-        # Look for capitalized words that might be names
-        words = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b', user_message)
-        common_words = {'How', 'What', 'When', 'Where', 'Why', 'Who', 'The', 'This', 'That',
-                       'Send', 'Email', 'Group', 'Position', 'Add', 'Remove', 'President',
-                       'Secretary', 'Chair', 'Member', 'Can', 'Does', 'Is', 'Are'}
-        potential_names = [w for w in words if w not in common_words]
-
-        for name in potential_names[:2]:
-            user_info = search_users(name=name)
-            if user_info['count'] > 0:
-                for u in user_info['users'][:2]:
-                    positions = get_user_positions(user_id=u['user_id'])
-                    if positions.get('positions'):
-                        context_parts.append(f"\n=== User: {format_user_link(u['full_name'], u['user_id'])} ===")
-                        for pos in positions['positions'][:10]:
-                            flags = f"R={'Y' if pos['receive'] else 'N'} S={'Y' if pos['send'] else 'N'} M={'Y' if pos['control'] else 'N'}"
-                            context_parts.append(f"  - {pos['group_name']} / {pos['pos_name']} [{flags}]")
-
-        # If asking about email/sending, include some helpful group info
-        if any(word in user_message_lower for word in ['email', 'send', 'mail', 'list', 'newsgroup']):
-            if not context_parts:
-                groups_with_lists = search_groups()
-                mailing_groups = [g for g in groups_with_lists['groups'] if g['has_mailing_list']][:5]
-                if mailing_groups:
-                    context_parts.append("\n=== Groups with mailing lists ===")
-                    for g in mailing_groups:
-                        context_parts.append(f"  - {g['group_name']} (anyone_can_send: {g['anyone_can_send']})")
-
-    except Exception as e:
-        flask.current_app.logger.error(f"Error fetching context data: {e}")
-
-    return '\n'.join(context_parts) if context_parts else ''
-
-
 def chat_with_tools(messages, current_user=None, backend=None):
     """
     Process a chat message using tool calling.
@@ -2729,85 +2570,6 @@ def chat_with_tools(messages, current_user=None, backend=None):
     }
 
 
-def chat_with_context(messages, current_user=None, backend=None):
-    """
-    Process a chat message using context injection (fallback method).
-    Pre-fetches relevant data and includes it in the prompt.
-
-    Args:
-        messages: List of chat messages
-        current_user: Current user info dict
-        backend: Backend configuration dict (if None, uses first backend)
-    """
-    if backend is None:
-        backends = get_backends()
-        backend = backends[0] if backends else {}
-
-    client = get_client_for_backend(backend)
-
-    # Get the latest user message for context analysis
-    latest_user_message = ""
-    for msg in reversed(messages):
-        if msg.get('role') == 'user':
-            latest_user_message = msg.get('content', '')
-            break
-
-    # Fetch relevant context data from database
-    context_data = get_context_data(latest_user_message, current_user=current_user)
-
-    # Build the full system prompt with context
-    full_system_prompt = SYSTEM_PROMPT.format(wiki_summaries=wiki.get_wiki_summaries())
-
-    # Add current user context
-    if current_user:
-        full_system_prompt += f"\n\n## CURRENT USER\nThe person asking is logged in as user_id={current_user.get('user_id')}, username={current_user.get('username')}. When they say 'I' or 'my', refer to this user."
-
-    if context_data:
-        full_system_prompt += f"\n\n## RELEVANT DATABASE INFORMATION\nHere is current data from the database that may help answer the user's question:\n{context_data}"
-
-    # Prepare messages with system prompt
-    full_messages = [{"role": "system", "content": full_system_prompt}]
-    full_messages.extend(messages)
-
-    # Build API call parameters
-    api_params = {
-        'model': backend.get('model', 'openai/gpt-oss-120b'),
-        'messages': full_messages,
-        'temperature': backend.get('temperature', 1),
-        'max_tokens': backend.get('max_tokens', 2048)
-    }
-
-    # Add top_p if specified
-    if 'top_p' in backend:
-        api_params['top_p'] = backend['top_p']
-
-    # Add thinking/reasoning if enabled
-    if backend.get('enable_thinking'):
-        api_params['enable_thinking'] = True
-        # Preserve thinking traces for agentic workflows (default: false to clear)
-        if not backend.get('clear_thinking', True):
-            api_params['clear_thinking'] = False
-
-    # API call without tools
-    response = client.chat.completions.create(**api_params)
-
-    # Extract reasoning content if available
-    message = response.choices[0].message
-    reasoning_content = getattr(message, 'reasoning', None) or \
-                       getattr(message, 'reasoning_content', None) or \
-                       getattr(message, 'thinking', None)
-
-    # Print reasoning trace if available
-    if reasoning_content:
-        flask.current_app.logger.info(f"GPT-SAM Reasoning Trace:\n{reasoning_content}")
-        print(f"\n[GPT-SAM Reasoning Trace]\n{reasoning_content}\n[/Reasoning Trace]\n")
-
-    return {
-        'content': message.content or "I apologize, but I couldn't generate a response. Please try again.",
-        'reasoning': reasoning_content
-    }
-
-
 def _print_response(response):
     """Print GPT-SAM response to console for debugging."""
     content = response.get('content', '') if isinstance(response, dict) else str(response)
@@ -2821,7 +2583,6 @@ def chat(messages, current_user=None):
     """
     Process a chat message and return a response dict with content and reasoning.
     Tries each backend in order, with failover if one fails.
-    For each backend, tries tool calling first, then context injection.
 
     Returns:
         dict with 'content' (str) and 'reasoning' (str or None)
@@ -2854,43 +2615,14 @@ def chat(messages, current_user=None):
     # Try each backend in order
     for backend_idx, backend in enumerate(backends):
         backend_name = backend.get('name', f'backend_{backend_idx}')
-        use_tools = backend.get('use_tools', True)
 
         try:
             flask.current_app.logger.info(f"GPT-SAM: Trying backend '{backend_name}'")
 
-            if use_tools:
-                try:
-                    response = chat_with_tools(messages, current_user=current_user, backend=backend)
-
-                    # Check if response content looks like raw JSON (tool calling bug)
-                    content = response.get('content', '')
-                    if content and content.strip().startswith('{') and content.strip().endswith('}'):
-                        flask.current_app.logger.warning(
-                            f"GPT-SAM: Backend '{backend_name}' returned raw JSON, trying context injection"
-                        )
-                        response = chat_with_context(messages, current_user=current_user, backend=backend)
-
-                    flask.current_app.logger.info(f"GPT-SAM: Successfully got response from '{backend_name}'")
-                    _print_response(response)
-                    return response
-
-                except Exception as tool_error:
-                    flask.current_app.logger.warning(
-                        f"GPT-SAM: Tool calling failed on '{backend_name}' ({tool_error}), trying context injection"
-                    )
-                    # Try context injection as fallback within same backend
-                    response = chat_with_context(messages, current_user=current_user, backend=backend)
-                    flask.current_app.logger.info(
-                        f"GPT-SAM: Successfully got response from '{backend_name}' (context mode)"
-                    )
-                    _print_response(response)
-                    return response
-            else:
-                response = chat_with_context(messages, current_user=current_user, backend=backend)
-                flask.current_app.logger.info(f"GPT-SAM: Successfully got response from '{backend_name}'")
-                _print_response(response)
-                return response
+            response = chat_with_tools(messages, current_user=current_user, backend=backend)
+            flask.current_app.logger.info(f"GPT-SAM: Successfully got response from '{backend_name}'")
+            _print_response(response)
+            return response
 
         except Exception as e:
             last_error = e
