@@ -7,6 +7,7 @@ import json
 import os
 import flask
 from openai import OpenAI
+from donut.modules.gpt_sam import wiki
 
 # Load configuration
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'config.json')
@@ -23,17 +24,45 @@ def load_config():
         return json.load(f)
 
 
-def get_client():
-    """Get an OpenAI client configured for the API"""
+def get_backends():
+    """Get list of backend configurations, supporting both old and new config formats"""
     config = load_config()
-    base_url = config.get('base_url', 'https://integrate.api.nvidia.com/v1')
-    model = config.get('model', 'gpt-oss-120b')
-    print(f"[GPT-SAM] Using model: {model}")
-    print(f"[GPT-SAM] API base URL: {base_url}")
+
+    # Support new multi-backend format
+    if 'backends' in config:
+        return config['backends']
+
+    # Backward compatibility: convert old single-backend format to list
+    return [{
+        'name': 'default',
+        'api_key': config['api_key'],
+        'base_url': config.get('base_url', 'https://integrate.api.nvidia.com/v1'),
+        'model': config.get('model', 'gpt-oss-120b'),
+        'temperature': config.get('temperature', 0.3),
+        'max_tokens': config.get('max_tokens', 2048),
+        'use_tools': config.get('use_tools', True),
+        'enable_thinking': config.get('enable_thinking', False),
+        'clear_thinking': config.get('clear_thinking', True)
+    }]
+
+
+def get_client_for_backend(backend):
+    """Get an OpenAI client configured for a specific backend"""
+    print(f"[GPT-SAM] Using backend: {backend.get('name', 'unnamed')}")
+    print(f"[GPT-SAM] Model: {backend.get('model')}")
+    print(f"[GPT-SAM] API base URL: {backend.get('base_url')}")
     return OpenAI(
-        base_url=base_url,
-        api_key=config['api_key']
+        base_url=backend.get('base_url'),
+        api_key=backend['api_key']
     )
+
+
+def get_client():
+    """Get an OpenAI client configured for the first backend (for backward compatibility)"""
+    backends = get_backends()
+    if not backends:
+        raise ValueError("No backends configured in config.json")
+    return get_client_for_backend(backends[0])
 
 
 SYSTEM_PROMPT = """You are GPT-SAM (Group Position & Sending Assistant for Management), the *only* assistant for Donut users at Caltech. You help with managing groups, positions, and email/mailing list configurations.
@@ -496,6 +525,24 @@ When listing multiple users, format each with a link:
 - [Bob Jones](/1/users/9012) - Secretary
 
 Always be specific with names and include links when the data is available. Never give vague answers when you have specific user data.
+
+## DEVELOPER DOCUMENTATION
+
+Developers (Devteam members) may ask technical questions about Donut's codebase, database schema, or implementation details. Use the `search_wiki` tool to find relevant documentation.
+
+**Developer Detection**: If a user asks about:
+- Database tables, schemas, SQL queries
+- Code implementation, Python/Flask, modules
+- Server configuration, deployment, Apache
+- Testing, imports, scripts
+- How something "works under the hood"
+
+Then they are likely a developer. Provide technical, code-oriented answers with SQL examples, file paths, and implementation details.
+
+**For regular users**: Give friendly, non-technical explanations focused on *how to use* features, not how they're implemented.
+
+### Available Wiki Topics
+{wiki_summaries}
 """
 
 # Tool definitions for function calling
@@ -987,6 +1034,40 @@ TOOLS = [
                 "required": []
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_wiki",
+            "description": "Search the Donut developer wiki for technical documentation about database schemas, code implementation, server configuration, and more. Use this when users ask developer/technical questions.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query - topic, keyword, or question about Donut's technical implementation"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_wiki_page",
+            "description": "Get a specific wiki page by its ID for detailed technical documentation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "page_id": {
+                        "type": "string",
+                        "description": "The wiki page ID (e.g., 'groups-and-positions', 'database', 'permissions')"
+                    }
+                },
+                "required": ["page_id"]
+            }
+        }
     }
 ]
 
@@ -1043,6 +1124,10 @@ def execute_tool(tool_name, arguments):
         return get_users_with_permission(**arguments)
     elif tool_name == "get_user_house":
         return get_user_house(**arguments)
+    elif tool_name == "search_wiki":
+        return wiki.search_wiki(**arguments)
+    elif tool_name == "get_wiki_page":
+        return wiki.get_wiki_page(**arguments)
     else:
         return {"error": f"Unknown tool: {tool_name}"}
 
@@ -2520,16 +2605,24 @@ def get_context_data(user_message, current_user=None):
     return '\n'.join(context_parts) if context_parts else ''
 
 
-def chat_with_tools(messages, current_user=None):
+def chat_with_tools(messages, current_user=None, backend=None):
     """
     Process a chat message using tool calling.
     Returns the final response after executing any requested tools.
+
+    Args:
+        messages: List of chat messages
+        current_user: Current user info dict
+        backend: Backend configuration dict (if None, uses first backend)
     """
-    config = load_config()
-    client = get_client()
+    if backend is None:
+        backends = get_backends()
+        backend = backends[0] if backends else {}
+
+    client = get_client_for_backend(backend)
 
     # Build the system prompt
-    full_system_prompt = SYSTEM_PROMPT
+    full_system_prompt = SYSTEM_PROMPT.format(wiki_summaries=wiki.get_wiki_summaries())
 
     # Add current user context
     if current_user:
@@ -2545,22 +2638,46 @@ def chat_with_tools(messages, current_user=None):
     while iteration < max_iterations:
         iteration += 1
 
+        # Build API call parameters
+        api_params = {
+            'model': backend['model'],
+            'messages': full_messages,
+            'tools': TOOLS,
+            'tool_choice': 'auto',
+            'temperature': backend.get('temperature', 1),
+            'max_tokens': backend.get('max_tokens', 2048)
+        }
+
+        # Add top_p if specified
+        if 'top_p' in backend:
+            api_params['top_p'] = backend['top_p']
+
+        # Add thinking/reasoning if enabled
+        if backend.get('enable_thinking'):
+            api_params['enable_thinking'] = True
+            # Preserve thinking traces for agentic workflows (default: false to clear)
+            if not backend.get('clear_thinking', True):
+                api_params['clear_thinking'] = False
+
         # Make API call with tools
-        response = client.chat.completions.create(
-            model=config.get('model', 'openai/gpt-oss-120b'),
-            messages=full_messages,
-            tools=TOOLS,
-            tool_choice="auto",
-            temperature=config.get('temperature', 0.3),
-            max_tokens=config.get('max_tokens', 2048)
-        )
+        response = client.chat.completions.create(**api_params)
 
         assistant_message = response.choices[0].message
 
+        # Extract reasoning content if available (check multiple possible field names)
+        reasoning_content = getattr(assistant_message, 'reasoning', None) or \
+                           getattr(assistant_message, 'reasoning_content', None) or \
+                           getattr(assistant_message, 'thinking', None)
+
+        # Print reasoning trace if available
+        if reasoning_content:
+            flask.current_app.logger.info(f"GPT-SAM Reasoning Trace:\n{reasoning_content}")
+            print(f"\n[GPT-SAM Reasoning Trace]\n{reasoning_content}\n[/Reasoning Trace]\n")
+
         # Check if the model wants to call tools
         if assistant_message.tool_calls:
-            # Add assistant's message to conversation
-            full_messages.append({
+            # Build assistant message dict
+            assistant_msg_dict = {
                 "role": "assistant",
                 "content": assistant_message.content or "",
                 "tool_calls": [
@@ -2574,7 +2691,11 @@ def chat_with_tools(messages, current_user=None):
                     }
                     for tc in assistant_message.tool_calls
                 ]
-            })
+            }
+            # Preserve reasoning content between turns
+            if reasoning_content:
+                assistant_msg_dict["reasoning_content"] = reasoning_content
+            full_messages.append(assistant_msg_dict)
 
             # Execute each tool call
             for tool_call in assistant_message.tool_calls:
@@ -2596,19 +2717,33 @@ def chat_with_tools(messages, current_user=None):
                     "content": json.dumps(result, default=str)
                 })
         else:
-            # No more tool calls, return the final response
-            return assistant_message.content or "I apologize, but I couldn't generate a response."
+            # No more tool calls, return the final response with reasoning
+            return {
+                'content': assistant_message.content or "I apologize, but I couldn't generate a response.",
+                'reasoning': reasoning_content
+            }
 
-    return "I apologize, but I encountered an issue processing your request. Please try again."
+    return {
+        'content': "I apologize, but I encountered an issue processing your request. Please try again.",
+        'reasoning': None
+    }
 
 
-def chat_with_context(messages, current_user=None):
+def chat_with_context(messages, current_user=None, backend=None):
     """
     Process a chat message using context injection (fallback method).
     Pre-fetches relevant data and includes it in the prompt.
+
+    Args:
+        messages: List of chat messages
+        current_user: Current user info dict
+        backend: Backend configuration dict (if None, uses first backend)
     """
-    config = load_config()
-    client = get_client()
+    if backend is None:
+        backends = get_backends()
+        backend = backends[0] if backends else {}
+
+    client = get_client_for_backend(backend)
 
     # Get the latest user message for context analysis
     latest_user_message = ""
@@ -2621,7 +2756,7 @@ def chat_with_context(messages, current_user=None):
     context_data = get_context_data(latest_user_message, current_user=current_user)
 
     # Build the full system prompt with context
-    full_system_prompt = SYSTEM_PROMPT
+    full_system_prompt = SYSTEM_PROMPT.format(wiki_summaries=wiki.get_wiki_summaries())
 
     # Add current user context
     if current_user:
@@ -2634,37 +2769,144 @@ def chat_with_context(messages, current_user=None):
     full_messages = [{"role": "system", "content": full_system_prompt}]
     full_messages.extend(messages)
 
-    # API call without tools
-    response = client.chat.completions.create(
-        model=config.get('model', 'openai/gpt-oss-120b'),
-        messages=full_messages,
-        temperature=config.get('temperature', 0.3),
-        max_tokens=config.get('max_tokens', 2048)
-    )
+    # Build API call parameters
+    api_params = {
+        'model': backend.get('model', 'openai/gpt-oss-120b'),
+        'messages': full_messages,
+        'temperature': backend.get('temperature', 1),
+        'max_tokens': backend.get('max_tokens', 2048)
+    }
 
-    return response.choices[0].message.content or "I apologize, but I couldn't generate a response. Please try again."
+    # Add top_p if specified
+    if 'top_p' in backend:
+        api_params['top_p'] = backend['top_p']
+
+    # Add thinking/reasoning if enabled
+    if backend.get('enable_thinking'):
+        api_params['enable_thinking'] = True
+        # Preserve thinking traces for agentic workflows (default: false to clear)
+        if not backend.get('clear_thinking', True):
+            api_params['clear_thinking'] = False
+
+    # API call without tools
+    response = client.chat.completions.create(**api_params)
+
+    # Extract reasoning content if available
+    message = response.choices[0].message
+    reasoning_content = getattr(message, 'reasoning', None) or \
+                       getattr(message, 'reasoning_content', None) or \
+                       getattr(message, 'thinking', None)
+
+    # Print reasoning trace if available
+    if reasoning_content:
+        flask.current_app.logger.info(f"GPT-SAM Reasoning Trace:\n{reasoning_content}")
+        print(f"\n[GPT-SAM Reasoning Trace]\n{reasoning_content}\n[/Reasoning Trace]\n")
+
+    return {
+        'content': message.content or "I apologize, but I couldn't generate a response. Please try again.",
+        'reasoning': reasoning_content
+    }
+
+
+def _print_response(response):
+    """Print GPT-SAM response to console for debugging."""
+    content = response.get('content', '') if isinstance(response, dict) else str(response)
+    print(f"\n{'-'*60}")
+    print(f"[GPT-SAM Response]")
+    print(f"{content}")
+    print(f"{'-'*60}\n")
 
 
 def chat(messages, current_user=None):
     """
-    Process a chat message and return a response.
-    Tries tool calling first, falls back to context injection if it fails.
+    Process a chat message and return a response dict with content and reasoning.
+    Tries each backend in order, with failover if one fails.
+    For each backend, tries tool calling first, then context injection.
+
+    Returns:
+        dict with 'content' (str) and 'reasoning' (str or None)
     """
-    config = load_config()
-    use_tools = config.get('use_tools', True)
+    # Print the user's question to console
+    latest_user_message = None
+    for msg in reversed(messages):
+        if msg.get('role') == 'user':
+            latest_user_message = msg.get('content', '')
+            break
 
-    if use_tools:
+    if latest_user_message:
+        print(f"\n{'='*60}")
+        print(f"[GPT-SAM Question]")
+        print(f"{latest_user_message}")
+        print(f"{'='*60}")
+        if current_user:
+            print(f"[User: {current_user.get('username', 'unknown')}]")
+
+    backends = get_backends()
+
+    if not backends:
+        return {
+            'content': "I apologize, but no AI backends are configured. Please contact the administrator.",
+            'reasoning': None
+        }
+
+    last_error = None
+
+    # Try each backend in order
+    for backend_idx, backend in enumerate(backends):
+        backend_name = backend.get('name', f'backend_{backend_idx}')
+        use_tools = backend.get('use_tools', True)
+
         try:
-            response = chat_with_tools(messages, current_user=current_user)
+            flask.current_app.logger.info(f"GPT-SAM: Trying backend '{backend_name}'")
 
-            # Check if response looks like raw JSON (tool calling bug)
-            if response and response.strip().startswith('{') and response.strip().endswith('}'):
-                flask.current_app.logger.warning("GPT-SAM: Tool calling returned raw JSON, falling back to context injection")
-                return chat_with_context(messages, current_user=current_user)
+            if use_tools:
+                try:
+                    response = chat_with_tools(messages, current_user=current_user, backend=backend)
 
-            return response
+                    # Check if response content looks like raw JSON (tool calling bug)
+                    content = response.get('content', '')
+                    if content and content.strip().startswith('{') and content.strip().endswith('}'):
+                        flask.current_app.logger.warning(
+                            f"GPT-SAM: Backend '{backend_name}' returned raw JSON, trying context injection"
+                        )
+                        response = chat_with_context(messages, current_user=current_user, backend=backend)
+
+                    flask.current_app.logger.info(f"GPT-SAM: Successfully got response from '{backend_name}'")
+                    _print_response(response)
+                    return response
+
+                except Exception as tool_error:
+                    flask.current_app.logger.warning(
+                        f"GPT-SAM: Tool calling failed on '{backend_name}' ({tool_error}), trying context injection"
+                    )
+                    # Try context injection as fallback within same backend
+                    response = chat_with_context(messages, current_user=current_user, backend=backend)
+                    flask.current_app.logger.info(
+                        f"GPT-SAM: Successfully got response from '{backend_name}' (context mode)"
+                    )
+                    _print_response(response)
+                    return response
+            else:
+                response = chat_with_context(messages, current_user=current_user, backend=backend)
+                flask.current_app.logger.info(f"GPT-SAM: Successfully got response from '{backend_name}'")
+                _print_response(response)
+                return response
+
         except Exception as e:
-            flask.current_app.logger.warning(f"GPT-SAM: Tool calling failed ({e}), falling back to context injection")
-            return chat_with_context(messages, current_user=current_user)
-    else:
-        return chat_with_context(messages, current_user=current_user)
+            last_error = e
+            flask.current_app.logger.warning(f"GPT-SAM: Backend '{backend_name}' failed: {e}")
+
+            # Log that we're moving to next backend
+            if backend_idx < len(backends) - 1:
+                flask.current_app.logger.info(
+                    f"GPT-SAM: Failing over to next backend"
+                )
+
+    # All backends failed
+    flask.current_app.logger.error(f"GPT-SAM: All backends failed. Last error: {last_error}")
+    error_response = {
+        'content': f"I apologize, but I'm having trouble connecting to my AI systems right now. Please try again in a moment. (Error: {last_error})",
+        'reasoning': None
+    }
+    _print_response(error_response)
+    return error_response

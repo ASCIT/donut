@@ -68,8 +68,11 @@ def chat():
     }
 
     try:
-        response = helpers.chat(messages, current_user=current_user)
-        return jsonify({'response': response})
+        result = helpers.chat(messages, current_user=current_user)
+        return jsonify({
+            'response': result.get('content', ''),
+            'reasoning': result.get('reasoning')
+        })
     except FileNotFoundError as e:
         flask.current_app.logger.error(f'GPT-SAM config error: {e}')
         return jsonify({'error': 'GPT-SAM is not configured. Please contact an administrator.'}), 500

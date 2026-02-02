@@ -91,6 +91,7 @@ export default function App() {
 
       // Simulate streaming by revealing text progressively
       const fullText = data.response
+      const reasoning = data.reasoning  // Preserve reasoning for multi-turn
       let currentIndex = 0
       const chunkSize = 4
 
@@ -99,7 +100,12 @@ export default function App() {
         if (currentIndex >= fullText.length) {
           clearInterval(streamInterval)
           setStreamingContent('')
-          setMessages([...newMessages, { role: 'assistant', content: fullText }])
+          // Include reasoning in message for multi-turn context
+          const assistantMessage = { role: 'assistant', content: fullText }
+          if (reasoning) {
+            assistantMessage.reasoning = reasoning
+          }
+          setMessages([...newMessages, assistantMessage])
           setIsLoading(false)
         } else {
           setStreamingContent(fullText.substring(0, currentIndex))
