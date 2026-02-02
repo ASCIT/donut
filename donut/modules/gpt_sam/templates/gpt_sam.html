@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block page %}
+<div id="gpt-sam-root">
+    <!-- React app mounts here -->
+    <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading GPT-SAM...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('gpt_sam.static', filename='gpt-sam.css') }}">
+<script type="module" src="{{ url_for('gpt_sam.static', filename='gpt-sam.js') }}"></script>
+
+<style>
+    /* Override default layout padding for full-screen chat */
+    html, body {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .container.theme-showcase,
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #gpt-sam-root {
+        background: #fff;
+        position: fixed;
+        top: 51px; /* Height of navbar */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: auto !important;
+    }
+
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 400px;
+        color: #6e6e80;
+    }
+
+    .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e5e5e5;
+        border-top-color: #0d0d0d;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

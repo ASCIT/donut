@@ -1,3 +1,30 @@
+<style>
+    .gpt-sam-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff !important;
+        padding: 7px 14px !important;
+        border-radius: 6px;
+        margin: 7px 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    .gpt-sam-btn:hover {
+        background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+        color: #fff !important;
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+        transform: translateY(-1px);
+    }
+    .gpt-sam-icon {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+</style>
 <div id="header">
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -56,6 +83,14 @@
                             <li><a href="https://bigt.caltech.edu">Big T</a></li>
                             <li><a href="https://caltechtotem.github.io/">Totem</a></li>
                         </ul>
+                    {% if has_gpt_sam_access() %}
+                    <li>
+                        <a href="{{ url_for('gpt_sam.gpt_sam') }}" class="gpt-sam-btn">
+                            <svg class="gpt-sam-icon" viewBox="0 0 24 24"><path d="M9.5 2l1.5 4.5L15.5 8l-4.5 1.5L9.5 14l-1.5-4.5L3.5 8l4.5-1.5L9.5 2z"/><path d="M18 12l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/><path d="M5 16l.5 1.5L7 18l-1.5.5L5 20l-.5-1.5L3 18l1.5-.5L5 16z"/></svg>
+                            GPT-SAM
+                        </a>
+                    </li>
+                    {% endif %}
                     {% if 'username' not in session %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>

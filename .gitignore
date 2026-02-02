@@ -75,3 +75,13 @@ donut/modules/uploads/static/*.md
 
 # Google account keys
 calendar*json
+
+# GPT-SAM chatbot config
+donut/modules/gpt_sam/config.json
+
+# GPT-SAM frontend build artifacts
+donut/modules/gpt_sam/static/
+donut/modules/gpt_sam/frontend/node_modules/
+
+.idea
+.vscode

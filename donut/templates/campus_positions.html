@@ -97,6 +97,18 @@
             {{ approved_group_names|tojson|safe }},
             {{ all_positions|tojson|safe }}
         );
+
+        // Handle ?tab= query parameter
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab) {
+                const tabLink = $('.nav-tabs a[href="#' + tab + '"]');
+                if (tabLink.length) {
+                    tabLink.tab('show');
+                }
+            }
+        })();
     </script>
     <style>
         .holder-chip {
