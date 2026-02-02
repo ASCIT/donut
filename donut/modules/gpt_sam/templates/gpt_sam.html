@@ -21,14 +21,44 @@
         height: 100%;
     }
 
+    /* Hide footer on GPT-SAM page */
+    #footer, .footer, footer {
+        display: none !important;
+    }
+
     #gpt-sam-root {
         background: #fff;
         position: fixed;
-        top: 51px; /* Height of navbar */
+        top: 50px; /* Height of navbar */
         left: 0;
         right: 0;
         bottom: 0;
         z-index: 100;
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 50px);
+        height: calc(100dvh - 50px); /* Dynamic viewport height for mobile */
+    }
+
+    /* Ensure chat container fills the space */
+    #gpt-sam-root .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* Messages area should scroll, input should stay fixed at bottom */
+    #gpt-sam-root .messages-viewport {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    /* Input container should not shrink */
+    #gpt-sam-root .input-container {
+        flex-shrink: 0;
     }
 
     .loading-state {
