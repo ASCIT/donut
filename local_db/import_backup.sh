@@ -25,8 +25,12 @@ until docker compose exec -T mariadb mysqladmin ping -h localhost -u root -ppass
     sleep 1
 done
 
-# Create the donut database and import the backup
+# Create the donut database and ascit user, then import the backup
 docker compose exec -T mariadb mysql -u root -ppassword -e "CREATE DATABASE IF NOT EXISTS donut;"
+docker compose exec -T mariadb mysql -u root -ppassword -e "CREATE USER IF NOT EXISTS 'ascit'@'localhost' IDENTIFIED BY 'bAgEl82';"
+docker compose exec -T mariadb mysql -u root -ppassword -e "CREATE USER IF NOT EXISTS 'ascit'@'%' IDENTIFIED BY 'bAgEl82';"
+docker compose exec -T mariadb mysql -u root -ppassword -e "GRANT ALL PRIVILEGES ON donut.* TO 'ascit'@'localhost';"
+docker compose exec -T mariadb mysql -u root -ppassword -e "GRANT ALL PRIVILEGES ON donut.* TO 'ascit'@'%';"
 docker compose exec -T mariadb mysql -u root -ppassword donut < "$BACKUP_FILE"
 
 echo "Import complete"
