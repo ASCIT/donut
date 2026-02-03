@@ -15,7 +15,7 @@ cd `local_db/`
 # copy backup file to local machine (change filename to backup created above)
 rsync -P donut:/backups/donut_backup_2026XXXX_XXXXXX.sql .
 # start local database
-docker compsoe up -d
+docker compose up -d
 # load the backup
 ./import_backup.sh donut_backup_2026XXXX_XXXXXX.sql
 # keep the backup sql file in case the server does down, it is good to have copies of the backups
