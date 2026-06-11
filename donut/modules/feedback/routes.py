@@ -5,7 +5,9 @@ from donut.modules.feedback import helpers
 from donut import auth_utils
 from donut.modules.feedback.permissions import BOD_PERMISSIONS, ARC_PERMISSIONS, DONUT_PERMISSIONS
 from donut.default_permissions import Permissions as default_permissions
-from donut.modules.feedback.groups import Groups
+from donut.modules.feedback.groups import Groups, ideaOffices
+# Groups whose feedback is tracked on the website.
+# 'idea' is absent: IDEA feedback is only emailed to the committee.
 permissions = {
     'bod': BOD_PERMISSIONS,
     'arc': ARC_PERMISSIONS,
@@ -19,13 +21,20 @@ def feedback(group):
         return auth_utils.login_redirect()
     if group not in Groups:
         return flask.abort(404)
+    # IDEA feedback requires a logged-in user
+    if group == 'idea' and not auth_utils.check_login():
+        return auth_utils.login_redirect()
     summary = False
-    if auth_utils.check_login():
+    if group in permissions and auth_utils.check_login():
         perms = auth_utils.get_permissions(flask.session['username'])
         if default_permissions.ADMIN in perms or permissions[group].SUMMARY in perms:
             summary = True
     return flask.render_template(
-        'feedback.html', summary=summary, group=group, msg=Groups[group])
+        'feedback.html',
+        summary=summary,
+        group=group,
+        msg=Groups[group],
+        offices=ideaOffices)
 
 
 # Submit feedback form
@@ -35,10 +44,27 @@ def feedback_submit(group):
         return auth_utils.login_redirect()
     if group not in Groups:
         return flask.abort(404)
+    # IDEA feedback requires a logged-in user
+    if group == 'idea' and not auth_utils.check_login():
+        return auth_utils.login_redirect()
     fields = ['name', 'email', 'subject', 'msg', 'ombuds']
     data = {}
     for field in fields:
         data[field] = flask.request.form.get(field)
+    if group == 'idea':
+        # IDEA feedback is always anonymous and is not tracked on the
+        # website; it is only emailed to the committee
+        if not (data['subject'] and data['msg']):
+            return flask.abort(400)
+        office = flask.request.form.get('office')
+        if office and office not in ideaOffices:
+            return flask.abort(400)
+        msg = data['msg']
+        if office:
+            msg = 'Office: {}\n\n{}'.format(office, msg)
+        helpers.send_to_group(group, {'subject': data['subject'], 'msg': msg})
+        flask.flash('Your feedback has been sent to the IDEA Committee.')
+        return flask.redirect(flask.url_for('feedback.feedback', group=group))
     complaint_id = helpers.register_complaint(group, data)
     flask.flash(
         Markup('Success (you may want to save this link): <a href="' +
@@ -49,7 +75,7 @@ def feedback_submit(group):
 # View a complaint
 @blueprint.route('/feedback/<group>/view/<id>')
 def feedback_view_complaint(group, id):
-    if group not in Groups or not helpers.get_id(group, id):
+    if group not in permissions or not helpers.get_id(group, id):
         return flask.abort(404)
     complaint_id = helpers.get_id(group, id)
     complaint = helpers.get_all_fields(group, complaint_id)
@@ -68,7 +94,7 @@ def feedback_view_complaint(group, id):
 # Add a message to this post
 @blueprint.route('/1/feedback/<group>/add/<id>', methods=['POST'])
 def feedback_add_msg(group, id):
-    if group not in Groups:
+    if group not in permissions:
         return flask.abort(404)
     complaint_id = helpers.get_id(group, id)
     if not complaint_id:
@@ -87,7 +113,7 @@ def feedback_add_msg(group, id):
 # Allow bod members to see a summary
 @blueprint.route('/feedback/<group>/view/summary', methods=['POST', 'GET'])
 def feedback_view_summary(group):
-    if group not in Groups:
+    if group not in permissions:
         return flask.abort(404)
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].SUMMARY):
@@ -111,7 +137,7 @@ def feedback_view_summary(group):
 # Mark a complaint read
 @blueprint.route('/1/feedback/<group>/setResolved/<id>', methods=['POST'])
 def set_resolved(group, id):
-    if group not in Groups:
+    if group not in permissions:
         return flask.abort(404)
     # Authenticate
     if not auth_utils.check_login() or not auth_utils.check_permission(
@@ -127,7 +153,7 @@ def set_resolved(group, id):
 # Add an email to this complaint
 @blueprint.route('/1/feedback/<group>/addEmail/<id>', methods=['POST'])
 def feedback_add_email(group, id):
-    if group not in Groups:
+    if group not in permissions:
         return flask.abort(404)
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].ADD_REMOVE_EMAIL):
@@ -146,7 +172,7 @@ def feedback_add_email(group, id):
 # Remove an email from this complaint
 @blueprint.route('/1/feedback/<group>/removeEmail/<id>', methods=['POST'])
 def feedback_remove_email(group, id):
-    if group not in Groups:
+    if group not in permissions:
         return flask.abort(404)
     if 'username' not in flask.session or not auth_utils.check_permission(
             flask.session['username'], permissions[group].ADD_REMOVE_EMAIL):

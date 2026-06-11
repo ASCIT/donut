@@ -6,7 +6,7 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
 
-      <h1>{% if group == 'arc' %} Course Concerns and ARC {% else %} {{group}} {% endif %} Feedback</h1>
+      <h1>{% if group == 'arc' %} Course Concerns and ARC {% elif group == 'idea' %} IDEA {% else %} {{group}} {% endif %} Feedback</h1>
       {% if group == 'arc' %}
       	<p style="text-align:center;"><img src='/static/images/arcchart.png' style='max-width: 800px; max-height: 800px'/></p>
       {% endif %}
@@ -24,6 +24,7 @@
           <div class="row">
             <form method="POST" action="{{ url_for('feedback.feedback_submit', group=group) }}">
               <table class="table" id="feedback">
+                {% if group != 'idea' %}
                 <tr>
                   <td>
                     <label for="name">Name:</label>
@@ -40,6 +41,22 @@
                     <input type="email" id="email" name="email" class="form-control" />
                   </td>
                 </tr>
+                {% endif %}
+                {% if group == 'idea' %}
+                <tr>
+                  <td>
+                    <label for="office">Office (optional):</label>
+                  </td>
+                  <td>
+                    <select id="office" name="office" class="form-control">
+                      <option value="" selected></option>
+                      {% for office in offices %}
+                      <option value="{{ office }}">{{ office }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                </tr>
+                {% endif %}
                 <tr>
                     <td>
 			    <label class="required" for="subject">Subject{% if group == 'arc' %} (or Course){% endif %}:</label>
