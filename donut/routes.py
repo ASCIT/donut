@@ -18,6 +18,12 @@ def contact():
     return flask.render_template('contact.html', contacts=CONTACTS)
 
 
+@app.route('/surf_reports')
+def surf_reports():
+    # April-fools style prank page (the "SURF Reports" navbar tab)
+    return flask.render_template('surf_reports.html')
+
+
 @app.route('/campus_positions')
 def campus_positions():
     '''Renders the campus positions template. We collect a list of
