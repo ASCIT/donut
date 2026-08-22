@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+  <h1>{{ 'Edit row' if row is not none else 'Insert row into' }} {{ table }}</h1>
+  <p>
+    <a class="btn btn-default btn-sm" href="{{ url_for('db_admin.browse', table=table) }}">&larr; Back to {{ table }}</a>
+  </p>
+
+  <form method="POST"
+        action="{{ url_for('db_admin.update_row', table=table, pk=pk) if row is not none else url_for('db_admin.new_row', table=table) }}"
+        class="form-horizontal" style="max-width: 800px;">
+    {% for col in columns %}
+    <div class="form-group">
+      <label class="col-sm-3 control-label" for="col_{{ col.name }}">
+        {{ col.name }}
+        {% if col.primary_key %}<span class="label label-primary">PK</span>{% endif %}
+        {% if col.nullable %}<small class="text-muted">nullable</small>{% endif %}
+      </label>
+      <div class="col-sm-9">
+        {% set value = row[col.name] if row is not none else col.default %}
+        {% if value is not none %}{% set value = value|string %}{% endif %}
+        {% if col.type.startswith(('text', 'mediumtext', 'longtext')) %}
+        <textarea class="form-control" id="col_{{ col.name }}" name="col_{{ col.name }}"
+                  rows="4">{{ value or '' }}</textarea>
+        {% else %}
+        <input type="text" class="form-control" id="col_{{ col.name }}" name="col_{{ col.name }}"
+               value="{{ value or '' }}">
+        {% endif %}
+        <small class="text-muted">{{ col.type }}{% if col.auto_increment %} auto-increment (leave blank){% endif %}</small>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9">
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -94,6 +94,8 @@ def feedback_view_complaint(group, id):
 # Add a message to this post
 @blueprint.route('/1/feedback/<group>/add/<id>', methods=['POST'])
 def feedback_add_msg(group, id):
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     if group not in permissions:
         return flask.abort(404)
     complaint_id = helpers.get_id(group, id)

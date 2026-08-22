@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+  <h1>
+    {{ table }}
+    {% if read_only %}<span class="label label-warning">read-only</span>{% endif %}
+  </h1>
+  <p>
+    <a class="btn btn-default btn-sm" href="{{ url_for('db_admin.index') }}">&larr; All tables</a>
+    {% if not read_only %}
+    <a class="btn btn-success btn-sm" href="{{ url_for('db_admin.new_row', table=table) }}">Insert row</a>
+    {% endif %}
+  </p>
+
+  <form method="GET" action="{{ url_for('db_admin.browse', table=table) }}" class="form-inline" style="margin-bottom: 1em;">
+    <div class="form-group">
+      <input type="text" class="form-control" name="q" placeholder="Search all columns" value="{{ query }}">
+    </div>
+    <button type="submit" class="btn btn-default btn-sm">Search</button>
+    {% if query %}
+    <a class="btn btn-link btn-sm" href="{{ url_for('db_admin.browse', table=table) }}">Clear</a>
+    {% endif %}
+  </form>
+
+  <p>{{ total }} row{{ 's' if total != 1 else '' }} (page {{ page }} of {{ pages }})</p>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-condensed table-hover">
+      <thead>
+        <tr>
+          {% for col in columns %}
+          <th>{{ col.name }}<br><small class="text-muted">{{ col.type }}</small></th>
+          {% endfor %}
+          {% if not read_only %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          {% for col in columns %}
+          <td>{{ row[col.name] }}</td>
+          {% endfor %}
+          {% if not read_only %}
+          <td class="text-nowrap">
+            <a class="btn btn-xs btn-primary" href="{{ url_for('db_admin.edit_row', table=table, pk=row_pk(row)) }}">Edit</a>
+            <form method="POST" style="display: inline;"
+                  action="{{ url_for('db_admin.delete_row', table=table, pk=row_pk(row)) }}"
+                  onsubmit="return confirm('Delete this row? This action will be logged.');">
+              <button type="submit" class="btn btn-xs btn-danger">Delete</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        {% if not rows %}
+        <tr><td colspan="{{ columns|length + 1 }}" class="text-center text-muted">No rows found</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <nav>
+    <ul class="pager">
+      <li class="{{ 'disabled' if page <= 1 else '' }}">
+        <a href="{{ url_for('db_admin.browse', table=table, q=query or none, page=page - 1) if page > 1 else '#' }}">&larr; Previous</a>
+      </li>
+      <li class="{{ 'disabled' if page >= pages else '' }}">
+        <a href="{{ url_for('db_admin.browse', table=table, q=query or none, page=page + 1) if page < pages else '#' }}">Next &rarr;</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+{% endblock %}

@@ -87,10 +87,10 @@ def parse_file(file, courses, sections, instructors, grades_types):
                         'times': times,
                         'locations': locations
                     }
-            except e:
+            except Exception as e:
                 print('Error parsing row:', row, file=sys.stderr)
                 print(e, file=sys.stderr)
-                raise e
+                raise
 
 
 def add_courses(year, term, courses, cursor):

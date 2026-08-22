@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block page %}
+
+<div class="container theme-showcase" role="main">
+  <h1>Audit Log</h1>
+  <p>
+    <a class="btn btn-default btn-sm" href="{{ url_for('db_admin.index') }}">&larr; All tables</a>
+  </p>
+  <p class="text-muted">Most recent {{ entries|length }} changes made through the database explorer.</p>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-condensed">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Table</th>
+          <th>Row PK</th>
+          <th>Old data</th>
+          <th>New data</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry.log_id }}</td>
+          <td class="text-nowrap">{{ entry.request_time }}</td>
+          <td>{{ entry.username or entry.user_id }}</td>
+          <td>
+            {% if entry.action == 'insert' %}
+              {% set label = 'success' %}
+            {% elif entry.action == 'update' %}
+              {% set label = 'warning' %}
+            {% else %}
+              {% set label = 'danger' %}
+            {% endif %}
+            <span class="label label-{{ label }}">{{ entry.action }}</span>
+          </td>
+          <td>{{ entry.table_name }}</td>
+          <td><code>{{ entry.row_pk }}</code></td>
+          <td><code style="word-break: break-all;">{{ entry.old_data or '—' }}</code></td>
+          <td><code style="word-break: break-all;">{{ entry.new_data or '—' }}</code></td>
+        </tr>
+        {% endfor %}
+        {% if not entries %}
+        <tr><td colspan="8" class="text-center text-muted">No changes recorded yet</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

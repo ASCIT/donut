@@ -355,8 +355,10 @@ def is_caltech_user():
     Used to restrict access to directory and marketplace to Caltech.
     """
     ip_match = flask.current_app.config["RESTRICTED_IPS"]
+    # remote_addr can be None in test request contexts
+    remote_addr = flask.request.remote_addr or ''
     return 'username' in flask.session or \
-        re.search(ip_match, flask.request.remote_addr) is not None
+        re.search(ip_match, remote_addr) is not None
 
 
 def is_admin():

@@ -13,6 +13,8 @@ VALID_EXTENSIONS |= set(ext.upper() for ext in VALID_EXTENSIONS)
 @blueprint.route("/1/members/")
 def get_members_list():
     """GET /1/members/"""
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     # Create a dict of the passed in attributes which are filterable
     filterable_attrs = [
         "uid", "last_name", "first_name", "middle_name", "email", "entry_year",
@@ -34,6 +36,8 @@ def get_members_list():
 @blueprint.route("/1/members/<int:user_id>/")
 def get_members(user_id):
     """GET /1/members/<int:user_id>/"""
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     filterable_attrs = [
         "uid", "last_name", "first_name", "middle_name", "email", "entry_year",
         "graduation_year", "zip"
@@ -52,6 +56,8 @@ def get_group_list_of_member(user_id):
     '''GET /1/members/<int:user_id>/groups/
        List all groups that a member is in
     '''
+    if not auth_utils.is_caltech_user():
+        return auth_utils.login_redirect()
     return jsonify(helpers.get_group_list_of_member(user_id))
 
 

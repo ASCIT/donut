@@ -12,7 +12,7 @@ try:
 except ImportError:
     from donut import default_config as config
 from donut import constants
-from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, gpt_sam, newsgroups, rooms, uploads, voting, flights
+from donut.modules import account, auth, marketplace, calendar, core, courses, directory_search, editor, feedback, groups, gpt_sam, newsgroups, rooms, uploads, voting, flights, db_admin
 from donut.modules.gpt_sam.permissions import Permissions as GptSamPermissions
 from donut.default_permissions import Permissions
 from donut.donut_SMTP_handler import DonutSMTPHandler
@@ -38,6 +38,7 @@ app.register_blueprint(voting.blueprint)
 app.register_blueprint(newsgroups.blueprint)
 app.register_blueprint(flights.blueprint)
 app.register_blueprint(gpt_sam.blueprint)
+app.register_blueprint(db_admin.blueprint)
 
 
 def init(environment_name):
@@ -79,22 +80,10 @@ def init(environment_name):
     # Update jinja global functions
     app.jinja_env.globals.update(
         current_year=lambda: datetime.datetime.now().year,
-        has_gpt_sam_access=has_gpt_sam_access)
+        has_gpt_sam_access=has_gpt_sam_access,
+        is_site_admin=is_site_admin)
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
-
-
-def has_gpt_sam_access():
-    """Check if current user has GPT-SAM access (Admin or GPT_SAM permission)"""
-    from donut.auth_utils import get_permissions
-    username = flask.session.get('username')
-    if not username:
-        return False
-    user_permissions = get_permissions(username)
-    return (
-        Permissions.ADMIN in user_permissions or
-        GptSamPermissions.GPT_SAM in user_permissions
-    )
 
     if environment_name == "prod":
         mail_handler = DonutSMTPHandler(
@@ -108,6 +97,25 @@ def has_gpt_sam_access():
             logging.Formatter(
                 '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
         app.logger.addHandler(mail_handler)
+
+
+def is_site_admin():
+    """Check if current user is a Donut admin (for navbar visibility)"""
+    from donut.auth_utils import is_admin
+    return bool(is_admin())
+
+
+def has_gpt_sam_access():
+    """Check if current user has GPT-SAM access (Admin or GPT_SAM permission)"""
+    from donut.auth_utils import get_permissions
+    username = flask.session.get('username')
+    if not username:
+        return False
+    user_permissions = get_permissions(username)
+    return (
+        Permissions.ADMIN in user_permissions or
+        GptSamPermissions.GPT_SAM in user_permissions
+    )
 
 
 # Create database engine object.
