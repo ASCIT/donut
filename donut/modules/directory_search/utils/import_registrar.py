@@ -51,6 +51,7 @@ graduation_years = {
     "Junior": year_start + 2,
     "Sophomore": year_start + 3,
     "Freshman": year_start + 4,
+    "First-Year": year_start + 4,
     "UGrad Exchange": year_start + 1
 }
 
