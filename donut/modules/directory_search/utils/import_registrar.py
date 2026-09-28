@@ -214,7 +214,8 @@ def add_user_to_db(cursor, student, option_ids, house_pos_ids):
 parse_gender = lambda gender: \
     Gender.MALE.value if gender == "M" else \
         Gender.FEMALE.value if gender == "F" else None
-parse_date = lambda date: datetime.strptime(date, "%d-%b-%Y").date()
+parse_date = lambda date: datetime.strptime(date,
+                                              "%d-%b-%Y").date() if date and date.strip() else None
 
 
 def parse_msc(msc):
