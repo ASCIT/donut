@@ -21,8 +21,10 @@ donut/modules/directory_search/utils/update_ug_groups.py
 ```
 As before, check the data in dev, and then run again with `-e prod`.
 
-TODO: other steps
-
+You'll also need to bring in the ID pictures. These should be a folder also provided by the Registrar where each for each student there is a single id image in the format of a .jpg file where the file name is their UID. Typically this is in the shared box folder the previous webmaster shared with you. Then copy the folder over to the production server as a zip (always after testing on your local server) and run:
+```
+donut/modules/directory_search/utils/import_pictures.py
+```
 # Course list
 
 The Registrar (Debi Tuttle) exports the course schedule for each term, as well as periodic updates before add day.
