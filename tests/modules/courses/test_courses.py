@@ -1,6 +1,7 @@
 """
 Tests donut/modules/courses
 """
+import datetime
 import flask
 import json
 import pytest
@@ -17,6 +18,145 @@ def test_planner(client):
 def test_scheduler(client):
     rv = client.get(flask.url_for('courses.scheduler'))
     assert rv.status_code == 200
+
+
+def test_now(client):
+    rv = client.get(flask.url_for('courses.now'))
+    assert rv.status_code == 200
+
+
+def test_now_courses(client):
+    rv = client.get(flask.url_for('courses.now_courses'))
+    assert rv.status_code == 200
+    assert rv.headers.get('Cache-Control') == 'no-store'
+    data = json.loads(rv.data)
+    assert set(data) == {'year', 'term', 'term_label', 'rows'}
+    for row in data['rows']:
+        if row['type'] == 'splitter':
+            assert set(row) == {'type'}
+        else:
+            assert row['type'] == 'course'
+            assert set(row) == {
+                'type', 'number', 'name', 'instructor', 'location', 'time'
+            }
+
+
+def test_campus_events(client):
+    # Fail-soft: 200 with a rows list even if the upstream feeds are down.
+    rv = client.get(flask.url_for('courses.campus_events'))
+    assert rv.status_code == 200
+    assert rv.headers.get('Cache-Control') == 'no-store'
+    data = json.loads(rv.data)
+    assert set(data) == {'rows'}
+    for row in data['rows']:
+        if row['type'] == 'splitter':
+            assert set(row) == {'type'}
+        else:
+            assert row['type'] == 'event'
+            assert set(row) == {'type', 'title', 'url', 'location', 'time'}
+
+
+def test_parse_campus_events():
+    xml = b"""<?xml version="1.0" encoding="utf-8"?>
+    <rss version="2.0"><channel>
+      <item>
+        <title>Machine Assisted Proof</title>
+        <link>https://www.caltech.edu/campus-life-events/calendar/talk</link>
+        <description>Terence Tao, UCLA</description>
+        <pubDate>Fri, 09 Oct 2026 19:00:00 -0700</pubDate>
+        <category>Public Lecture</category>
+      </item>
+      <item>
+        <title>Untimed Event</title>
+        <link>https://example.com/untimed</link>
+      </item>
+    </channel></rss>"""
+    events = helpers.parse_campus_events(xml)
+    assert len(events) == 1
+    event = events[0]
+    assert event['title'] == 'Machine Assisted Proof'
+    assert event['url'] == \
+        'https://www.caltech.edu/campus-life-events/calendar/talk'
+    assert event['location'] == ''
+    assert event['starts'] == datetime.datetime(2026, 10, 9, 19, 0)
+    assert event['ends'] == event['starts'] + datetime.timedelta(hours=2)
+
+
+def test_athletics_game_name():
+    assert helpers.athletics_game_name(
+        "8/29 11:00 AM [W] California Institute of Technology Men's "
+        "Water Polo at Crafton Hills") == "Men's Water Polo at Crafton Hills"
+    assert helpers.athletics_game_name(
+        "9/1 11:00 AM California Institute of Technology Men's Soccer "
+        "vs Park University Gilbert") == \
+        "Men's Soccer vs Park University Gilbert"
+
+
+def test_parse_athletics_events():
+    xml = b"""<?xml version="1.0" encoding="utf-8"?>
+    <rss version="2.0" xmlns:ev="http://purl.org/rss/1.0/modules/event/"
+      xmlns:s="http://sidearmsports.com/schemas/cal_rss/1.0/">
+    <channel>
+      <item>
+        <title>10/3 1:00 PM California Institute of Technology Football vs Pomona-Pitzer</title>
+        <link>https://gocaltech.com/calendar.aspx?game_id=1</link>
+        <ev:location>Pasadena, CA</ev:location>
+        <s:localstartdate>2026-10-03T13:00:00.0000000</s:localstartdate>
+        <s:localenddate>2026-10-03T16:00:00.0000000</s:localenddate>
+      </item>
+      <item>
+        <title>Untimed Game</title>
+        <link>https://gocaltech.com/calendar.aspx?game_id=2</link>
+      </item>
+    </channel></rss>"""
+    events = helpers.parse_athletics_events(xml)
+    assert len(events) == 1
+    event = events[0]
+    assert event['title'] == 'Football vs Pomona-Pitzer'
+    assert event['url'] == 'https://gocaltech.com/calendar.aspx?game_id=1'
+    assert event['location'] == 'Pasadena, CA'
+    assert event['starts'] == datetime.datetime(2026, 10, 3, 13, 0)
+    assert event['ends'] == datetime.datetime(2026, 10, 3, 16, 0)
+
+
+def test_group_event_rows():
+    now = datetime.datetime(2026, 9, 29, 18, 0)
+    events = [
+        {
+            'title': 'Ongoing Talk',
+            'url': 'https://example.com/a',
+            'location': '',
+            'starts': datetime.datetime(2026, 9, 29, 17, 0),
+            'ends': datetime.datetime(2026, 9, 29, 19, 0)
+        },
+        {
+            'title': 'Soon Game',
+            'url': 'https://example.com/b',
+            'location': 'Pasadena, CA',
+            'starts': datetime.datetime(2026, 9, 29, 18, 30),
+            'ends': datetime.datetime(2026, 9, 29, 20, 30)
+        },
+        {
+            'title': 'Later Game',
+            'url': 'https://example.com/c',
+            'location': 'Pasadena, CA',
+            'starts': datetime.datetime(2026, 9, 29, 21, 0),
+            'ends': datetime.datetime(2026, 9, 29, 23, 0)
+        },
+        {
+            'title': 'Yesterday Game',
+            'url': 'https://example.com/d',
+            'location': 'Pasadena, CA',
+            'starts': datetime.datetime(2026, 9, 28, 18, 0),
+            'ends': datetime.datetime(2026, 9, 28, 20, 0)
+        },
+    ]
+    rows = helpers._group_event_rows(events, now)
+    assert [row.get('title', row['type']) for row in rows] == [
+        'Ongoing Talk', 'splitter', 'Soon Game', 'splitter', 'Later Game'
+    ]
+    assert rows[0]['time'] == '5:00 PM'
+    assert rows[0]['location'] == ''
 
 
 def test_planner_courses(client):

@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+{% block page %}
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+    <h1>Caltech Right Now</h1>
+    <p id="now-status" class="text-muted">Loading courses&hellip;</p>
+    <table class="table table-striped" id="now-table">
+      <thead>
+        <tr>
+          <th>Num</th>
+          <th>Course</th>
+          <th>Prof</th>
+          <th>Location</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+  <div class="jumbotron">
+    <h2>Today's Events</h2>
+    <p id="events-status" class="text-muted">Loading events&hellip;</p>
+    <table class="table table-striped" id="events-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Location</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block styles %}
+{{ super() }}
+<style>
+  #now-table .splitter,
+  #events-table .splitter {
+    background: #e59898 !important;
+  }
+</style>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+(function() {
+  'use strict';
+
+  function td(text) {
+    var elem = document.createElement('td');
+    elem.innerText = text;
+    return elem;
+  }
+
+  function tbody() {
+    return document.querySelector('#now-table tbody');
+  }
+
+  function displayCourse(row) {
+    var elem = document.createElement('tr');
+    elem.appendChild(td(row.number));
+    elem.appendChild(td(row.name));
+    elem.appendChild(td(row.instructor));
+    elem.appendChild(td(row.location));
+    elem.appendChild(td(row.time));
+    tbody().appendChild(elem);
+  }
+
+  function displaySplitter() {
+    var splitter = document.createElement('tr');
+    splitter.className = 'splitter';
+    for (var i = 0; i < 5; i++) {
+      splitter.appendChild(td('_'));
+    }
+    tbody().appendChild(splitter);
+  }
+
+  function setStatus(message) {
+    document.getElementById('now-status').textContent = message;
+  }
+
+  // A single lightweight request: the server pre-filters the schedule DB
+  // down to classes in session now plus upcoming ones. No polling, so each
+  // page view costs exactly one small API call.
+  fetch('{{ url_for("courses.now_courses") }}', {cache: 'no-store'})
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error('Request failed with status ' + response.status);
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      var rows = data.rows || [];
+      if (!rows.length) {
+        setStatus('No classes in session right now.');
+        return;
+      }
+      var hasNow = rows.length > 0 && rows[0].type !== 'splitter';
+      rows.forEach(function(row) {
+        if (row.type === 'splitter') {
+          displaySplitter();
+        } else {
+          displayCourse(row);
+        }
+      });
+      setStatus(hasNow ? '' : 'No classes in session right now. Upcoming classes are listed below.');
+    })
+    .catch(function() {
+      setStatus('Failed to load courses from the schedule database.');
+    });
+
+  // One lightweight request for today's campus + athletics events,
+  // grouped like the courses table. Titles link to their event pages.
+  function displayEvent(event) {
+    var elem = document.createElement('tr');
+    var titleCell = document.createElement('td');
+    if (event.url && /^https?:\/\//.test(event.url)) {
+      var link = document.createElement('a');
+      link.href = event.url;
+      link.innerText = event.title;
+      titleCell.appendChild(link);
+    } else {
+      titleCell.innerText = event.title;
+    }
+    elem.appendChild(titleCell);
+    elem.appendChild(td(event.location || ''));
+    elem.appendChild(td(event.time));
+    document.querySelector('#events-table tbody').appendChild(elem);
+  }
+
+  function displayEventSplitter() {
+    var splitter = document.createElement('tr');
+    splitter.className = 'splitter';
+    for (var i = 0; i < 3; i++) {
+      splitter.appendChild(td('_'));
+    }
+    document.querySelector('#events-table tbody').appendChild(splitter);
+  }
+
+  fetch('{{ url_for("courses.campus_events") }}', {cache: 'no-store'})
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error('Request failed with status ' + response.status);
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      var rows = data.rows || [];
+      if (!rows.length) {
+        document.getElementById('events-status').textContent =
+          'No events today.';
+        return;
+      }
+      rows.forEach(function(row) {
+        if (row.type === 'splitter') {
+          displayEventSplitter();
+        } else {
+          displayEvent(row);
+        }
+      });
+      document.getElementById('events-status').textContent = '';
+    })
+    .catch(function() {
+      document.getElementById('events-status').textContent =
+        'Failed to load events.';
+    });
+})();
+</script>
+{% endblock %}

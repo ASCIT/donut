@@ -28,6 +28,53 @@ def scheduler():
         terms=helpers.get_terms())
 
 
+@blueprint.route('/now')
+def now():
+    # Rendered statically with no database access; the client fetches
+    # pre-filtered rows from now_courses() exactly once. This keeps page
+    # views cheap.
+    return flask.render_template('now.html')
+
+
+@blueprint.route('/1/now')
+def now_courses():
+    data = helpers.get_now_rows()
+    if data['year'] is None:
+        response = flask.jsonify({
+            'year': None,
+            'term': None,
+            'term_label': 'No terms available',
+            'rows': []
+        })
+    else:
+        response = flask.jsonify({
+            'year':
+            data['year'],
+            'term':
+            data['term'],
+            'term_label':
+            '{} {}'.format(
+                helpers.TERM_NAMES.get(data['term'], ''), data['year']),
+            'rows':
+            data['rows']
+        })
+    # The filtered result depends on the current time, so it must not be
+    # cached by browsers/CDNs. The underlying schedule query is cached
+    # server-side instead (see helpers.get_cached_scheduler_courses).
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+@blueprint.route('/1/campus_events')
+def campus_events():
+    # Fail-soft: feed outages still return 200 with an empty list. Grouping
+    # depends on the current time, so this response is not browser-cached;
+    # the upstream feeds are cached server-side instead.
+    response = flask.jsonify({'rows': helpers.get_event_rows()})
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
 @blueprint.route('/1/planner/courses')
 def planner_courses():
     return flask.jsonify(helpers.get_year_courses())
