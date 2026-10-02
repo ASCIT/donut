@@ -47,6 +47,10 @@ CONTACTS = {
         'role': 'Director of Conduct and Community Standards',
         'email': 'mmcdinge@caltech.edu'
     }, {
+        'name': 'Therese Bagsit',
+        'role': 'Operations Lead',
+        'email': 'bagsit@caltech.edu'
+    }, {
         'name': 'Sara Loredo',
         'role': 'Office Assistant',
         'email': 'sara@caltech.edu'
