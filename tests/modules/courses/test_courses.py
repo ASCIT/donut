@@ -57,29 +57,47 @@ def test_campus_events(client):
 
 
 def test_parse_campus_events():
-    xml = b"""<?xml version="1.0" encoding="utf-8"?>
-    <rss version="2.0"><channel>
-      <item>
-        <title>Machine Assisted Proof</title>
-        <link>https://www.caltech.edu/campus-life-events/calendar/talk</link>
-        <description>Terence Tao, UCLA</description>
-        <pubDate>Fri, 09 Oct 2026 19:00:00 -0700</pubDate>
-        <category>Public Lecture</category>
-      </item>
-      <item>
-        <title>Untimed Event</title>
-        <link>https://example.com/untimed</link>
-      </item>
-    </channel></rss>"""
-    events = helpers.parse_campus_events(xml)
-    assert len(events) == 1
-    event = events[0]
+    events = helpers.parse_campus_events(b"""BEGIN:VCALENDAR
+X-WR-CALNAME:Caltech events
+BEGIN:VTIMEZONE
+TZID:America/Los_Angeles
+BEGIN:STANDARD
+DTSTART:19701101T020000
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+SUMMARY:Machine Assisted Proof
+URL:https://www.caltech.edu/campus-life-events/calendar/talk
+LOCATION:Baxter Lecture Hall
+DTSTART;TZID=America/Los_Angeles:20261009T190000
+DTEND;TZID=America/Los_Angeles:20261009T200000
+DESCRIPTION:Terence Tao\\, UCLA
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:UTC Stamped Event
+DTSTART:20261009T020000Z
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:No End Time
+DTSTART;TZID=America/Los_Angeles:20261009T160000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:No Start Time
+END:VEVENT
+END:VCALENDAR
+""")
+    assert len(events) == 3
+    event, utc_event, no_end = events
     assert event['title'] == 'Machine Assisted Proof'
     assert event['url'] == \
         'https://www.caltech.edu/campus-life-events/calendar/talk'
-    assert event['location'] == ''
+    assert event['location'] == 'Baxter Lecture Hall'
     assert event['starts'] == datetime.datetime(2026, 10, 9, 19, 0)
-    assert event['ends'] == event['starts'] + datetime.timedelta(hours=2)
+    assert event['ends'] == datetime.datetime(2026, 10, 9, 20, 0)
+    # UTC (Z-suffixed) stamps are converted to server-local wall time,
+    # which is Pacific.
+    assert utc_event['starts'] == datetime.datetime(2026, 10, 8, 19, 0)
+    assert no_end['ends'] == no_end['starts'] + datetime.timedelta(hours=2)
 
 
 def test_athletics_game_name():

@@ -435,15 +435,17 @@ def get_now_rows(now=None):
 # and cached in-process so all page views share one upstream fetch.
 # All times are compared in server-local wall time; the server runs on
 # Pacific time, matching the Pasadena events in these feeds.
+# The iCal feed carries every campus event (seminars included) for the
+# whole year, unlike the RSS feeds, which only list a subset of recent or
+# upcoming events and omit today's in-progress and departmental events.
 CAMPUS_EVENTS_URL = \
-    'https://www.caltech.edu/campus-life-events/calendar/rss?type=public'
+    'https://www.caltech.edu/campus-life-events/calendar/ical'
 ATHLETICS_EVENTS_URL = 'https://gocaltech.com/calendar.ashx/calendar.rss' \
     '?sport_id=0&_=cmulxmhf50001359smxfilrwh'
 _EVENTS_CACHE = {'events': None, 'expires': 0.0}
 _EVENTS_TTL = 1800  # seconds
 _EVENTS_FETCH_TIMEOUT = 10  # seconds
-# The campus feed lists only start times, so assume this duration when
-# deciding whether an event is currently ongoing.
+# Used only when a feed event is missing its end time.
 _CAMPUS_DEFAULT_DURATION = datetime.timedelta(hours=2)
 
 
@@ -470,40 +472,93 @@ def _as_local_naive(value):
     return value.astimezone().replace(tzinfo=None)
 
 
-def parse_campus_events(xml_bytes):
+def _parse_ical_datetime(value):
     """
-    Parses Caltech campus-life RSS items into
-    {'title', 'url', 'location', 'starts', 'ends'} dicts.
-    The feed carries no location or end time, so location is '' and the
-    end is assumed to be _CAMPUS_DEFAULT_DURATION after the start.
+    Parses an iCal DTSTART/DTEND stamp into a naive server-local datetime.
+    Special (VTIMEZONE) anchors are naive already; values ending in Z are
+    UTC, and TZID-qualified values are America/Los_Angeles wall time, which
+    matches the server-local time.
     """
-    import email.utils
-    import xml.etree.ElementTree as ET
-    events = []
-    try:
-        channel = ET.fromstring(xml_bytes).find('channel')
-        items = channel.findall('item') if channel is not None else []
-    except ET.ParseError:
-        return events
-    for item in items:
-        title = (item.findtext('title') or '').strip()
-        if not title:
-            continue
+    value = (value or '').strip()
+    if value.endswith('Z'):
         try:
-            starts = _as_local_naive(
-                email.utils.parsedate_to_datetime(
-                    item.findtext('pubDate') or ''))
-        except (TypeError, ValueError):
+            return _as_local_naive(
+                datetime.datetime.strptime(value, '%Y%m%dT%H%M%SZ').replace(
+                    tzinfo=datetime.timezone.utc))
+        except ValueError:
+            return None
+    for fmt in ('%Y%m%dT%H%M%S', '%Y%m%d'):
+        try:
+            return datetime.datetime.strptime(value, fmt)
+        except ValueError:
             continue
-        if starts is None:
+    return None
+
+
+def _unfold_ical_lines(text):
+    """
+    Splits an iCal payload into lines, undoing the RFC 5545 folding of
+    continuation lines.
+    """
+    unfolded = []
+    for line in text.replace('\r\n', '\n').replace('\r', '\n').split('\n'):
+        if line[:1] in (' ', '\t') and unfolded:
+            unfolded[-1] += line[1:].lstrip()
+        elif line:
+            unfolded.append(line)
+    return unfolded
+
+
+def _ical_prop(line):
+    """
+    Splits an unfolded iCal line into (NAME, PARAMS, VALUE), or None.
+    Only the value is needed, so params are dropped.
+    """
+    if ':' not in line:
+        return None
+    name, value = line.split(':', 1)
+    return name.split(';', 1)[0].upper().strip(), value
+
+
+def parse_campus_events(ical_bytes):
+    """
+    Parses the Caltech events iCal feed into
+    {'title', 'url', 'location', 'starts', 'ends'} dicts.
+    Accepts bytes (or str, as in tests). DTEND defaults to
+    _CAMPUS_DEFAULT_DURATION after the start when absent.
+    """
+    text = ical_bytes.decode('utf-8', 'replace') \
+        if isinstance(ical_bytes, bytes) else ical_bytes
+    events = []
+    props = None
+    for line in _unfold_ical_lines(text):
+        piece = _ical_prop(line)
+        if piece is None:
             continue
-        events.append({
-            'title': title,
-            'url': (item.findtext('link') or '').strip(),
-            'location': '',
-            'starts': starts,
-            'ends': starts + _CAMPUS_DEFAULT_DURATION
-        })
+        name, value = piece
+        if name == 'BEGIN' and value.strip().upper() == 'VEVENT':
+            props = {}
+        elif name == 'END' and value.strip().upper() == 'VEVENT':
+            if props:
+                starts = _parse_ical_datetime(props.get('DTSTART'))
+                title = (props.get('SUMMARY') or '').strip()
+                if starts is not None and title:
+                    ends = _parse_ical_datetime(props.get('DTEND'))
+                    if ends is None:
+                        ends = starts + _CAMPUS_DEFAULT_DURATION
+                    events.append({
+                        'title':
+                        title,
+                        'url': (props.get('URL') or '').strip(),
+                        'location': (props.get('LOCATION') or '').strip(),
+                        'starts':
+                        starts,
+                        'ends':
+                        ends
+                    })
+            props = None
+        elif props is not None and name not in props:
+            props[name] = value
     return events
 
 

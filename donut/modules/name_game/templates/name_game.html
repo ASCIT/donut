@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+{% block page %}
+	<div class='container theme-showcase jumbotron'>
+		<h2>Name Game</h2>
+		<p>
+			Learn the faces of the people on campus. You will be shown a face,
+			and you have to say the name that goes with it.
+		</p>
+		<form action='{{ url_for("name_game.name_game") }}' method='GET'>
+			<div class='form-group'>
+				<label>Game mode</label>
+				{% for mode, mode_name in game_modes.items() %}
+					<div class='radio'>
+						<label>
+							<input type='radio' name='game_mode' value='{{ mode }}' {% if loop.first %}checked{% endif %} />
+							{{ mode_name }}
+						</label>
+					</div>
+				{% endfor %}
+				<p class='help-block'>
+					Multiple choice shows four names to pick from, and the keys
+					1, 2, 3, and 4 select them. Free response takes the name you
+					type, in any capitalization.
+				</p>
+			</div>
+			<div class='form-group'>
+				<label for='min_grad_year'>Class years</label>
+				<div class='row'>
+					<div class='col-md-3'>
+						<input class='form-control' type='number' min='1901' max='2155' id='min_grad_year' name='min_grad_year' value='{{ default_min_year }}' />
+					</div>
+					<div class='col-md-1 text-center'>through</div>
+					<div class='col-md-3'>
+						<input class='form-control' type='number' min='1901' max='2155' id='max_grad_year' name='max_grad_year' value='{{ default_max_year }}' />
+					</div>
+				</div>
+			</div>
+			<div class='form-group'>
+				<label for='house_id'>Houses</label>
+				<select class='form-control' id='house_id' name='house_id' multiple size='6'>
+					<option value='' selected>All houses</option>
+					{% for house in houses %}
+						<option value='{{ house["group_id"] }}'>{{ house["group_name"] }}</option>
+					{% endfor %}
+				</select>
+				<p class='help-block'>Leave this on All houses to play with every house.</p>
+			</div>
+			<div class='form-group'>
+				<label for='major_id'>Majors</label>
+				<select class='form-control' id='major_id' name='major_id' multiple size='6'>
+					<option value='' selected>All majors</option>
+					{% for major in majors %}
+						<option value='{{ major["option_id"] }}'>{{ major["option_name"] }}</option>
+					{% endfor %}
+				</select>
+				<p class='help-block'>Leave this on All majors to play with every major.</p>
+			</div>
+			<div class='form-group'>
+				<label for='num_people'>Number of faces</label>
+				<input class='form-control' type='number' min='1' max='{{ max_people }}' id='num_people' name='num_people' placeholder='All of them' />
+				<p class='help-block'>
+					Pick a random subset of the people who match, or leave this
+					blank to play with all of them.
+				</p>
+			</div>
+			<div class='form-group'>
+				<input class='btn btn-primary' type='submit' value='Start' />
+			</div>
+		</form>
+	</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+{% block page %}
+<div class="container theme-showcase">
+	<div class="jumbotron">
+		<h2>Name Game</h2>
+		<h4>Whose face is this?</h4>
+		{% if game_mode == 'multiple_choice' %}
+		<p class='help-block'>Pick one of the four names, or press 1, 2, 3, or 4.</p>
+		{% else %}
+		<p class='help-block'>Type the name that goes with the face, in any capitalization.</p>
+		{% endif %}
+		<p id="score"></p>
+		<div id="face"></div>
+		<div id="answers"></div>
+		<p id="feedback"></p>
+		<button class="btn btn-primary" id="next" style="display: none;">Next face</button>
+		<div id="results" style="display: none;"></div>
+	</div>
+</div>
+{% endblock %}
+{% block styles %}
+{{ super() }}
+<style>
+	#face img {
+		max-width: 200px;
+		max-height: 250px;
+	}
+	.name-choice {
+		display: flex;
+		align-items: baseline;
+		width: 100%;
+		font-size: 18px;
+		text-align: left;
+	}
+	.name-choice-key {
+		flex-grow: 0;
+		flex-shrink: 0;
+		flex-basis: 1.8em;
+		font-weight: bold;
+	}
+	.name-choice-name {
+		flex-grow: 1;
+		flex-shrink: 1;
+		flex-basis: auto;
+	}
+	.name-answer {
+		max-width: 300px;
+	}
+	.missed-face {
+		height: 60px;
+		margin-right: 12px;
+	}
+</style>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('name_game.static', filename='name_game.js') }}"></script>
+<script>
+	nameGame.play({{ roster|tojson }}, {{ game_mode|tojson }}, {{ url_for('name_game.name_game')|tojson }})
+</script>
+{% endblock %}
